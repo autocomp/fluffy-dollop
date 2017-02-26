@@ -1,0 +1,142 @@
+
+
+QWidget {background:#333; border-radius:5px; color:#fff }
+
+QLabel {font-size:14px; color:#fff; border-radius:5px; }
+
+QLabel#label {font-size:14px; color:#fff; background:#333;}
+
+QGraphicsView {background-image:url(:/img/icon_row.png);  }
+
+QPushButton#icon_head_1, #icon_head_2,#icon_head_3, #icon_head_4,#icon_head_5 {background: black; border-radius:5px; }
+
+QPushButton#icon_head_1:pressed, #icon_head_2:pressed,#icon_head_3:pressed, #icon_head_4:pressed,#icon_head_5:pressed {background: #0a6cad;  }
+
+
+
+QPushButton#pushButton_icon{background-image:url(:/img/button_bg.png); color:#fff; border:1px solid; border-top-color:#aaa; border-left-color:#aaa;  border-right-color:#252525; border-bottom-color:#252525; padding:0; } 
+
+QPushButton#pushButton_icon:pressed  {background-image:url(:/img/button_bg_clicked.png); border:1px solid #fff}
+
+
+
+QLabel#head {font-size:16px; text-transform:uppercase; color:#fff}
+
+Line { background:#8d8d8d;}
+
+QPushButton#pushButton {background-image:url(:/img/button_bg.png); color:#fff; border:1px solid; border-top-color:#aaa; border-left-color:#aaa;  border-right-color:#252525; border-bottom-color:#252525;}
+
+QPushButton#pushButton:pressed {background-image:url(:/img/button_bg_clicked.png); border:1px solid #fff}
+
+QComboBox {background:url(:/img/input_list_bg.png); color:#000; }
+QComboBox::item:selected { color:#fff; }
+
+
+QComboBox::drop-down {background:none; border:none; background:url(:/img/down_arrow.png) left center no-repeat;    }
+
+ QComboBox QAbstractItemView {
+     border: 0px solid darkgray;
+     selection-background-color: #333;
+	 color:#000;
+	padding:5px 3px;
+	
+ }
+
+QSpinBox {background:url(:/img/input_text_bg.png)   left; color:#000;   padding:5px;  border:1px solid;   }
+
+QSpinBox::up-button {background:none; border:none; background:url(:/img/up_arrow.png) left center no-repeat; }
+
+QSpinBox::down-button { background:none; border:none; background:url(:/img/down_arrow.png) left center no-repeat; }
+
+QTreeWidget {border:1px solid #8d8d8d;  color:#fff; selection-background-color:#444;       border-radius:0px; }
+
+QHeaderView::section {
+     background: #333;
+     color: white;
+     padding: 10px 5px;
+     border:1px solid;
+	 border-bottom-color:#8d8d8d;
+	 border-right-color:#8d8d8d; 
+	 border-left-color:done; 
+ 
+ }
+  QTreeView::item {
+   padding: 7px 5px; color:#fff;
+   
+ }
+ 
+QTreeView::item:selected {
+        background: #000;
+		padding: 0;
+		color:#fff;
+ }
+
+
+ QCheckBox { width:18px; heigth:18px; }
+
+
+ QCheckBox::indicator:unchecked {
+     image: url(:/img/check_empty.png);
+ }
+
+ 
+ QCheckBox::indicator:checked {
+     image: url(:/img/check_checked.png);
+ }
+
+QRadioButton  { width:18px; heigth:18px; }
+
+
+QRadioButton::indicator::unchecked {
+       image: url(:/img/radio_empty.png);
+ }
+
+ 
+ QRadioButton::indicator::checked {
+      image: url(:/img/radio_checked.png);
+ }
+
+QMenuBar { background:#000; color:#fff; }
+DateTimeWidget{ background:#000; color:#fff; }
+
+
+CollapsedWidget {font-size:14px; color:#fff; border-radius:5px; background:#333;     }
+DataTimeWidget { background:#333; color:#fff}
+ 
+QWidget::qt_scrollarea_viewport { background:#333; color:#fff; }
+
+
+RowScale{background:#333;}
+
+ 
+
+ScrollPanel QPushButton { background:#333; color:#fff; height:30px;}
+QComboBoxPrivateContainer { background:#fff;}
+
+QComboBoxListView { background:#fff; }
+
+Qwidget#page2DScene { color:#fff; background:#fff;}
+
+QGroupBox {color:#fff; } 
+QGroupBox #gbTable {color:#fff; } 
+
+ 
+  
+CellWidget {color:#fff;  }
+QTableWidget#tableWidget  {color:#fff; }
+
+ QTreeView::indicator:unchecked {
+       border:1px solid;
+	 border-color:#fff;
+
+ } 
+ 
+QPushButton#pbSend {background-image:url(:/img/button_bg.png); color:#fff; border:1px solid; border-top-color:#aaa; border-left-color:#aaa;  border-right-color:#252525; border-bottom-color:#252525;}
+
+QPushButton##pbSend:pressed {background-image:url(:/img/button_bg_clicked.png); border:1px solid #fff}
+
+
+QPushButton#pbPreview {background-image:url(:/img/button_bg.png); color:#fff; border:1px solid; border-top-color:#aaa; border-left-color:#aaa;  border-right-color:#252525; border-bottom-color:#252525;}
+
+QPushButton##pbPreview:pressed {background-image:url(:/img/button_bg_clicked.png); border:1px solid #fff}
+ 

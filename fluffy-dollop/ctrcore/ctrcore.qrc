@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>ctrcore.ts</file>
+        <file>ctrcore.qm</file>
+    </qresource>
+</RCC>

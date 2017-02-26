@@ -1,0 +1,43 @@
+<RCC>
+    <qresource prefix="/">
+        <file>img/260_scale_sector.png</file>
+        <file>img/422_icon_mouse_kontur_sq.png</file>
+        <file>img/icons_31_1.png</file>
+        <file>img/icons_31_1b.png</file>
+        <file>img/icons_31_2.png</file>
+        <file>img/icons_31_2b.png</file>
+        <file>img/icons_31_3.png</file>
+        <file>img/icons_31_4.png</file>
+        <file>img/icons_31_5.png</file>
+        <file>img/icons_31_6.png</file>
+        <file>img/icons_31_7.png</file>
+        <file>img/202_cur_cross.png</file>
+        <file>img/ctrvisual_check.png</file>
+        <file>img/ctrvisual_compas.png</file>
+        <file>img/ctrvisual_arrowleft.png</file>
+        <file>img/ctrvisual_arrowright.png</file>
+        <file>img/ctrvisual_back.png</file>
+        <file>img/ctrvisual_save.png</file>
+        <file>img/ctrvisual_dot.png</file>
+        <file>img/ctrvisual_imgsize.png</file>
+        <file>img/ctrvisual_save.png</file>
+        <file>img/ctrvisual_close_or_delete.png</file>
+        <file>img/007_icons_32_geo.png</file>
+        <file>img/013_icons_32_compas.png</file>
+        <file>img/020_icons_42_zoom_on.png</file>
+        <file>img/021_icons_42_mashtab_on.png</file>
+        <file>img/023_icons_42_minimap_on.png</file>
+        <file>img/001_icons_42_angl_on.png</file>
+        <file>img/002_icons_42_size_on.png</file>
+        <file>img/003_icons_42_select_on.png</file>
+        <file>img/004_icons_42_ft_on.png</file>
+        <file>img/005_icons_42_way_on.png</file>
+        <file>img/select_img.png</file>
+        <file>img/select_obj.png</file>
+        <file>img/072_icons_32_newcords.png</file>
+        <file>img/110_icons_32_ok.png</file>
+        <file>img/flag.png</file>
+        <file>img/flag_green.png</file>
+        <file>img/flag_yel.png</file>
+    </qresource>
+</RCC>

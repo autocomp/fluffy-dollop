@@ -1,0 +1,1875 @@
+12:08:02.CtrCore.INFO.CORE.ctrcore/ctrcore.cpp-89# Logger initialized by:./config/unilog.conf
+12:08:02.CtrCore.INFO.CORE.ctrcore/ctrcore.cpp-93# QDebug logger initialized
+12:08:02.CtrCore.INFO.CORE.ctrcore/ctrconfig.cpp-168# application started with the next parametrs ( total count):1
+12:08:02.CtrCore.INFO.CORE.ctrcore/ctrconfig.cpp-175# unilog-config-path=./config/unilog.conf
+12:08:02.CtrCore.INFO.CORE.ctrcore/ctrconfig.cpp-180# flags set is: 
+12:08:02.CtrCore.INFO.CORE.ctrcore/ctrconfig.cpp-188# application common config path is: /etc/contour_ng application user config path is: /home/sergvas/.contour_ng
+12:08:02.CtrCore.WARNING.CORE.ctrcore/ctrconfig.cpp-200# common config path doesn't exist, need to create: /etc/contour_ng
+12:08:02.CtrCore.DEBUG.CORE.ctrcore/ctrconfig.cpp-265# config file /home/sergvas/.contour_ng/application_settings.xml has read to user section
+12:08:02.CtrCore.DEBUG.CORE.ctrcore/ctrconfig.cpp-265# config file /home/sergvas/.contour_ng/config.xml has read to user section
+12:08:02.CtrCore.DEBUG.CORE.ctrcore/ctrconfig.cpp-265# config file /home/sergvas/.contour_ng/ctrsystem.xml has read to user section
+12:08:02.CtrCore.DEBUG.CORE.ctrcore/ctrconfig.cpp-265# config file /home/sergvas/.contour_ng/imagectrplugin.xml has read to user section
+12:08:02.CtrCore.DEBUG.CORE.ctrcore/ctrconfig.cpp-265# config file /home/sergvas/.contour_ng/initializerdarts.xml has read to user section
+12:08:02.CtrCore.DEBUG.CORE.ctrcore/ctrconfig.cpp-265# config file /home/sergvas/.contour_ng/visualizer_plugins_config.xml has read to user section
+12:08:02.CtrCore.DEBUG.CORE.ctrcore/ctrconfig.cpp-265# config file /home/sergvas/.contour_ng/visualizer_system_settings.xml has read to user section
+12:08:02.CtrCore.WARNING.CORE.ctrcore/ctrconfig.cpp-287# missing config user file:ctrsystemsettingsobjrepr Need to create. Need
+12:08:02.CtrCore.WARNING.CORE.ctrcore/ctrconfig.cpp-279# missing config common file: ctrsystemsettingsobjrepr Need to create. Need
+12:08:02.CtrCore.INFO.CORE.ctrcore/ctrcore.cpp-133# ObjReper config path is: /home/sergvas/.contour_ng/config.xml
+12:08:05.CtrCore.INFO.CORE.ctrcore/ctrcore.cpp-154# Representation server launched
+12:08:05.CtrCore.DEBUG.CORE.ctrcore/ctrcore.cpp-107# Resource manager: using CtrResourceManager (AsyncLoading)
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# loadSession  serializer is not installed 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# *********************GeoSceneDescriptor 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# "<TileMapService version="1.0.0">
+  <Grids>
+    <Grid>
+      <Name>defaultGrid</Name>
+      <SRSCode>EPSG:4326</SRSCode>
+      <SRSProj>+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +over +towgs84=0,0,0</SRSProj>
+      <BoundingBox minx="-180.0" miny="-90.0" maxx="180.0" maxy="90.0"/>
+      <Origin x="-180.0" y="-90.0"/>
+      <TileFormat width="256" height="256"/>
+      <TileSet units-per-pixel="0.703125" order="0"/>
+      <TileSet units-per-pixel="0.3515625" order="1"/>
+      <TileSet units-per-pixel="0.17578125" order="2"/>
+      <TileSet units-per-pixel="0.087890625" order="3"/>
+      <TileSet units-per-pixel="0.0439453125" order="4"/>
+      <TileSet units-per-pixel="0.02197265625" order="5"/>
+      <TileSet units-per-pixel="0.010986328125" order="6"/>
+      <TileSet units-per-pixel="0.0054931640625" order="7"/>
+      <TileSet units-per-pixel="0.00274658203125" order="8"/>
+      <TileSet units-per-pixel="0.00137329101562" order="9"/>
+      <TileSet units-per-pixel="0.000686645507812" order="10"/>
+      <TileSet units-per-pixel="0.000343322753906" order="11"/>
+      <TileSet units-per-pixel="0.000171661376953" order="12"/>
+      <TileSet units-per-pixel="8.58306884766e-05" order="13"/>
+      <TileSet units-per-pixel="4.29153442383e-05" order="14"/>
+      <TileSet units-per-pixel="2.14576721191e-05" order="15"/>
+      <TileSet units-per-pixel="1.07288360596e-05" order="16"/>
+      <TileSet units-per-pixel="5.36441802979e-06" order="17"/>
+      <TileSet units-per-pixel="2.68220901489e-06" order="18"/>
+    </Grid>
+  </Grids>
+</TileMapService>
+" 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# +++ gridName : "defaultGrid" , text3 "defaultGrid" 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# SRSCode : "EPSG:4326" , refText : "4326" , REF : 4326 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# SRSProj : "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +over +towgs84=0,0,0" 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# BoundingBox : -180 -90 180 90 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# Origin : -180 -90 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# TileSize : 256 256 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# +++ baseTileSetOrder : 1 , order : 1 , unitsPerPixel : 0.351562 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# ---> SCENE_IN_TILES : QSize(4, 2) "360" "0.351562" 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# *********************GeoSceneDescriptor is valid 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# 140  ,  140 
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# qrc:/zoomBar.qml:73: ReferenceError: Can't find variable: window
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QStateMachine::removeState: state 0xe62bf0's machine (0x0) is different from this machine (0xfc3d80)
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QStateMachine::removeState: state 0xe62c10's machine (0x0) is different from this machine (0xfc3d80)
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QLayout::addChildLayout: layout "" already has a parent
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMinimumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMaximumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMinimumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMaximumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMinimumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMaximumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMinimumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMaximumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMinimumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMaximumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMinimumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMaximumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMinimumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMaximumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMinimumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMaximumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMinimumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMaximumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMinimumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMaximumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMinimumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMaximumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMinimumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMaximumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMinimumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMaximumSize: (/ZoomBar) Negative sizes (60,-174) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMinimumSize: (/ZoomBar) Negative sizes (60,-224) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMaximumSize: (/ZoomBar) Negative sizes (60,-224) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMinimumSize: (/ZoomBar) Negative sizes (60,-224) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMaximumSize: (/ZoomBar) Negative sizes (60,-224) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMinimumSize: (/ZoomBar) Negative sizes (60,-224) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMaximumSize: (/ZoomBar) Negative sizes (60,-224) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMinimumSize: (/ZoomBar) Negative sizes (60,-224) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMaximumSize: (/ZoomBar) Negative sizes (60,-224) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMinimumSize: (/ZoomBar) Negative sizes (60,-224) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMaximumSize: (/ZoomBar) Negative sizes (60,-224) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMinimumSize: (/ZoomBar) Negative sizes (60,-224) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMaximumSize: (/ZoomBar) Negative sizes (60,-224) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMinimumSize: (/ZoomBar) Negative sizes (60,-224) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QWidget::setMaximumSize: (/ZoomBar) Negative sizes (60,-224) are not possible
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Could not parse stylesheet of widget 0xee4480
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# VectorRender started:
+ SVN Rev:  34029 
+ SVN last changed Rev:  34029 
+ Last Changed Date:  " 2016-02-17 18:46:00 +0300 (Wed, 17 Feb 2016)" 
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect: No such signal GraphicsItemCreator::signalCreateRasterProvider(QString, contur::common::ProviderDelegate**) in render/vectorrender.cpp:69
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect: No such signal VectorRender::signalRemoveRasterProvider(QString) in render/vectorrender.cpp:72
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# VectorRender::VectorRender: Thread ID  140272442059392 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# GraphicsEntityReader::startReading: Thread ID  140271495726848 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# VectorRender::setContext(): DEBUG: Cursor created, id =  1 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# GraphicsEntityReader:: DEBUG: reInit()! 
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect: No such signal visualize_system::Visualizer2d::signal2DCursorCreated(uint32_t) in visualizer2d.cpp:135
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect:  (receiver name: 'lib2Dvisplugin.so')
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect: No such slot visualize_system::Visualizer2d::slotUserViewControlAction(UserAction) in visualizer2d.cpp:137
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect:  (receiver name: 'lib2Dvisplugin.so')
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect: No such signal visualize_system::Visualizer2d::signalObjectSelected(uint64_t) in visualizer2d.cpp:146
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect:  (receiver name: 'lib2Dvisplugin.so')
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect: No such slot visualize_system::Visualizer2d::slotObjectSelectionChanged(uint64_t, bool) in visualizer2d.cpp:147
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect:  (receiver name: 'lib2Dvisplugin.so')
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect: No such signal visualize_system::Visualizer2d::signalAskLoadedContextName() in visualizer2d.cpp:149
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect:  (receiver name: 'lib2Dvisplugin.so')
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect: No such signal visualize_system::Visualizer2d::signalItemChangedFromUser(uint64_t) in visualizer2d.cpp:150
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect:  (receiver name: 'lib2Dvisplugin.so')
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect: No such signal visualize_system::Visualizer2d::signalEditPointSelectedFromMap(qulonglong,uint,uint,uint) in visualizer2d.cpp:151
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect:  (receiver name: 'lib2Dvisplugin.so')
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect: No such signal visualize_system::Visualizer2d::signalObjectAttached(quint64) in visualizer2d.cpp:155
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect:  (receiver name: 'lib2Dvisplugin.so')
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect: No such signal visualize_system::Visualizer2d::signalEditedListUpdated(QList<quint64>*) in visualizer2d.cpp:157
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect:  (receiver name: 'lib2Dvisplugin.so')
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect: No such slot visualize_system::Visualizer2d::slotGetVectorObjectStyleRequest() in visualizer2d.cpp:158
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect:  (receiver name: 'lib2Dvisplugin.so')
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect: No such signal VectorRender::signalCreateRasterProvider(QString, contur::common::ProviderDelegate**) in visualizer2d.cpp:160
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect:  (receiver name: 'lib2Dvisplugin.so')
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect: No such signal VectorRender::signalRemoveRasterProvider(QString) in visualizer2d.cpp:161
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect:  (receiver name: 'lib2Dvisplugin.so')
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect: No such slot visualize_system::Visualizer2d::slotContextOpennedFromTimer() in visualizer2d.cpp:165
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect:  (receiver name: 'lib2Dvisplugin.so')
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# LocalDataProvider::open, url : "http://dozor642/mapproxy/tms/1.0.0/osm_wgs_EPSG4326/%1/%2/%3.png" 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# check url : "/mapproxy/tms/1.0.0/osm_wgs_EPSG4326" , serverHost : "dozor642" , serverPort : 80 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# -----start----- 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# ----- Connecting 20 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# ----- Sending 20 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# ----- Connected 26 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# http.lastResponse().statusCode() : 200 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# ===> BoundingBox : -180 -90 180 90 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# ===> Origin : -180 -90 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# ===> TileFormat width : 256 , height : 256 , extension : "png" 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33#    TileSets : 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33#        order : 0 , unitsPerPixel : 0.703125 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33#        order : 1 , unitsPerPixel : 0.351562 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33#        order : 2 , unitsPerPixel : 0.175781 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33#        order : 3 , unitsPerPixel : 0.0878906 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33#        order : 4 , unitsPerPixel : 0.0439453 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33#        order : 5 , unitsPerPixel : 0.0219727 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33#        order : 6 , unitsPerPixel : 0.0109863 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33#        order : 7 , unitsPerPixel : 0.00549316 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33#        order : 8 , unitsPerPixel : 0.00274658 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33#        order : 9 , unitsPerPixel : 0.00137329 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33#        order : 10 , unitsPerPixel : 0.000686646 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33#        order : 11 , unitsPerPixel : 0.000343323 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33#        order : 12 , unitsPerPixel : 0.000171661 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33#        order : 13 , unitsPerPixel : 8.58307e-05 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33#        order : 14 , unitsPerPixel : 4.29153e-05 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33#        order : 15 , unitsPerPixel : 2.14577e-05 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33#        order : 16 , unitsPerPixel : 1.07288e-05 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33#        order : 17 , unitsPerPixel : 5.36442e-06 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33#        order : 18 , unitsPerPixel : 2.68221e-06 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33#    ----------- 
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# XML read, return TRUE 
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Could not parse stylesheet of widget 0xee4480
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# qrc:/zoomBar.qml:61:9: QML Image: Binding loop detected for property "y"
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# qrc:/zoomBar.qml:61:9: QML Image: Binding loop detected for property "y"
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QLayout: Attempting to add QLayout "" to StretchItem "", which already has a layout
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# CtrResourceManager::loadResources() DEBUG: load time  771 ms, thread  140271770388224 
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Could not parse stylesheet of widget 0x1c8cf40
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect: No such slot ManagerUtils::cleaAltRequests()
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QBrush: Incorrect use of TexturePattern
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QBrush: Incorrect use of TexturePattern
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QObject::connect: Cannot connect (null)::destroyed() to TreeItem::slotDeleteItem()
+12:08:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QObject::connect: Cannot connect (null)::destroyed() to TreeItem::slotDeleteItem()
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# Unknown property heigth
+12:08:05.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# Unknown property heigth
+12:08:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Object::connect: No such slot ObjReprAdapter::slotUpdateVisisbility(uint64_t, uint32_t cursorId) in managervectorobject/objrepradapter.cpp:66
+12:08:06.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# ManagerVectorObjectPlugin:: Started. Rev  32414   2015-11-24 12:02:37 
+12:08:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Could not parse stylesheet of widget 0x20bfa70
+12:08:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QLayout: Attempting to add QLayout "" to QWidget "", which already has a layout
+12:08:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Could not parse stylesheet of widget 0x20bfa70
+12:08:06.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# Unknown property heigth
+12:08:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Could not parse stylesheet of widget 0x20bfa70
+12:08:06.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# Unknown property heigth
+12:08:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QLayout: Attempting to add QLayout "" to QWidget "", which already has a layout
+12:08:06.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# Unknown property heigth
+12:08:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QLayout: Attempting to add QLayout "" to QWidget "", which already has a layout
+12:08:06.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# Unknown property heigth
+12:08:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QLayout: Attempting to add QLayout "" to QWidget "", which already has a layout
+12:08:06.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# Unknown property heigth
+12:08:06.CtrCore.WARNING.CORE.ctrcore/ctrconfig.cpp-279# missing config common file: visualizer_plugins_config Need to create. Need
+12:08:06.CtrCore.WARNING.CORE.ctrcore/ctrconfig.cpp-279# missing config common file: visualizer_plugins_config Need to create. Need
+12:08:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# QLayout: Attempting to add QLayout "" to QWidget "", which already has a layout
+12:08:06.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# Unknown property heigth
+12:08:06.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# Unknown property heigth
+ (Message repeated 21 times)
+12:08:06.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# Unknown property heigth
+12:08:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:07.default.DEBUG.QT.ctrcore/ctrcore.cpp-33# GraphicsEntityReader:: DEBUG: reInit()! 
+12:08:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:08:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:09:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:10:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:11:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:12:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:13:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:14:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:15:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:16:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:17:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:18:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:19:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:20:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:21:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:22:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:23:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:24:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:25:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:26:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:27:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:28:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:29:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:30:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:31:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:32:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:33:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:47.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:48.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:49.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:50.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:51.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:52.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:53.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:54.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:55.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:56.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:57.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:58.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:34:59.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:00.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:01.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:02.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:03.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:04.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:05.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:06.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:07.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:08.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:09.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:10.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:11.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:12.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:13.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:14.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:15.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:16.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:17.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:18.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:19.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:20.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:21.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:22.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:23.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:24.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:25.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:26.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:27.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:28.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:29.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:30.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:31.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:32.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:33.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:34.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:35.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:36.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:37.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:38.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:39.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:40.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:41.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:42.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:43.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:44.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:45.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# checkSerializer  serializer not installed 
+12:35:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# Could not parse stylesheet of widget 0xee4480
+12:35:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# removeWidget  embeddedWidget not with id  2  not found 
+12:35:46.default.WARNING.QT.ctrcore/ctrcore.cpp-36# removeWidget  embeddedWidget not with id  1  not found 
