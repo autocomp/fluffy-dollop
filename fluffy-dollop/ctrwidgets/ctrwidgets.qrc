@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>ctrwidgets.qm</file>
+        <file>ctrwidgets.ts</file>
+    </qresource>
+</RCC>

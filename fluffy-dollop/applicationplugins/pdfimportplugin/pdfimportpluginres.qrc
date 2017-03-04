@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>img/061_icons_32_tools_pdf.png</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,1 @@
+TYPEPLUGIN=visual

@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>ctrvisual.qm</file>
+        <file>ctrvisual.ts</file>
+    </qresource>
+</RCC>

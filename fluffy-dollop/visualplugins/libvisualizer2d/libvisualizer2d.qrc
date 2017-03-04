@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>libvisualizer2d.qm</file>
+        <file>libvisualizer2d.ts</file>
+    </qresource>
+</RCC>

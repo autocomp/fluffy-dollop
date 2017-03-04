@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <Visualizer2D>
+        <activeDataPlugins>
+			<plugin>libimagefiltration.so</plugin>
+			<plugin>libtransparencyproperty.so</plugin>
+			<plugin>libmatching.so</plugin>
+        </activeDataPlugins>
+        <insideStatePlugins>
+        </insideStatePlugins>
+        <measurePlugins>
+        </measurePlugins>
+        <singleActionPlugins>
+        </singleActionPlugins>
+        <widgetPlugins>
+            <plugin>libimagectrl.so</plugin>
+            <plugin>libintelligence.so</plugin>
+			<plugin>libreportdoc.so</plugin>
+			<plugin>liblayerselector.so</plugin>
+			<plugin>libnotification.so</plugin>
+        </widgetPlugins>
+    </Visualizer2D>
+</root>

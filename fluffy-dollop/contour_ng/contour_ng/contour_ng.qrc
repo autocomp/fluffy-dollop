@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/">
+        <file>contour_ng.qm</file>
+        <file>pic/icon_logo.png</file>
+        <file>pic/071_icons_32_exit.png</file>
+        <file>pic/070_icons_32_del.png</file>
+        <file>pic/069_icons_32_close.png</file>
+        <file>pic/068_icons_32_edit.png</file>
+        <file>pic/066_icons_32_create.png</file>
+        <file>pic/067_icons_32_open.png</file>
+        <file>pic/001_icons_32_3d.png</file>
+        <file>qt_ru.qm</file>
+        <file>pic/korplan_tree.png</file>
+    </qresource>
+</RCC>
