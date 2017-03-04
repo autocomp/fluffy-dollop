@@ -4,6 +4,7 @@ CONFIG   += ordered debug
 
 SUBDIRS = \
     dmanager \
+    regionbiz \
     ctrcore \
     ctrrasterrender \
     ctrvisual \

@@ -1,5 +1,5 @@
 #defines
-#ROOT_DIR = $${PWD}/../
+ROOT_DIR = $${PWD}/../
 INSTALL_PATH_BIN       = $${ROOT_DIR}bin
 INSTALL_PATH_LIB       = $${INSTALL_PATH_BIN}/lib
 INSTALL_PATH_PLUGINS   = $${INSTALL_PATH_BIN}/plugins/
