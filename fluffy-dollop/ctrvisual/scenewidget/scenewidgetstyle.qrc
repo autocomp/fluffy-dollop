@@ -1,0 +1,46 @@
+<RCC>
+    <qresource prefix="/">
+        <file>blackStyle.qss</file>
+        <file>img/button_bg.png</file>
+        <file>img/button_bg_clicked.png</file>
+        <file>img/check_checked.png</file>
+        <file>img/check_checked_green.png</file>
+        <file>img/check_empty.png</file>
+        <file>img/down.png</file>
+        <file>img/down_arrow.png</file>
+        <file>img/icon_1.png</file>
+        <file>img/icon_1b.png</file>
+        <file>img/icon_2.png</file>
+        <file>img/icon_3.png</file>
+        <file>img/icon_4.png</file>
+        <file>img/icon_5.png</file>
+        <file>img/icon_button_large_1.png</file>
+        <file>img/icon_button_large_2.png</file>
+        <file>img/icon_edit.png</file>
+        <file>img/icon_edit2.png</file>
+        <file>img/icon_indicator_yellow.png</file>
+        <file>img/icon_row.png</file>
+        <file>img/input_list_bg.png</file>
+        <file>img/input_text_bg.png</file>
+        <file>img/left.png</file>
+        <file>img/radio_checked.png</file>
+        <file>img/radio_checked_green.png</file>
+        <file>img/radio_empty.png</file>
+        <file>img/right.png</file>
+        <file>img/up.png</file>
+        <file>img/up_arrow.png</file>
+        <file>img/upArrow_white.png</file>
+        <file>img/downArrow_white.png</file>
+        <file>img/210_close_window_white.png</file>
+        <file>img/212_expand_window_white.png</file>
+        <file>img/213_pin-unpin_window_white.png</file>
+        <file>img/262_step_back_white.png</file>
+        <file>img/263_step_forth_white.png</file>
+        <file>img/303_pin_unpin_window(pinned)_white.png</file>
+        <file>img/447_key_close_white.png</file>
+        <file>img/447_key_open_white.png</file>
+        <file>img/080_icons_32_arrowdown.png</file>
+        <file>img/081_icons_32_arrowup.png</file>
+        <file>img/045_icons_32_garbg.png</file>
+    </qresource>
+</RCC>
