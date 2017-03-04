@@ -2,6 +2,8 @@
 
 #include <regionbiz/rb_manager.h>
 
+#include "test_reciver.h"
+
 int main()
 {
     using namespace regionbiz;
@@ -89,4 +91,10 @@ int main()
             }
         }
     }
+
+    //! Selection test
+    TestReciver recv;
+    mngr->subscribeOnSelect( &recv, SLOT(onSelection(uint64_t,uint64_t)) );
+    mngr->selectArea( 4 );
+    mngr->selectArea( 5 );
 }

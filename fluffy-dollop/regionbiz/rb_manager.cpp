@@ -132,6 +132,22 @@ std::vector<RoomPtr> RegionBizManager::getRoomsByParent(uint64_t parent_id)
     return getBaseLocationsByParent< RoomPtr >( parent_id, _rooms );
 }
 
+uint64_t RegionBizManager::getSelectedArea()
+{
+    return _select_manager._selected_area_id;
+}
+
+void RegionBizManager::selectArea(uint64_t id)
+{
+    _select_manager.selectNewArea( id );
+}
+
+void RegionBizManager::subscribeOnSelect(QObject *obj, const char *slot, bool queue)
+{
+    QObject::connect( &_select_manager, SIGNAL( selectBaseArea(uint64_t,uint64_t) ),
+                      obj, slot, ( queue ? Qt::QueuedConnection : Qt::DirectConnection ));
+}
+
 RegionBizManager::RegionBizManager()
 {
     std::atexit( onExit );
