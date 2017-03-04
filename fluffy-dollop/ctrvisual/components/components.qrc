@@ -1,7 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>img/082_icons_32_downlist.png</file>
-        <file alias="vcpMenuIcon">img/093_icons_32_set.png</file>
-        <file>img/082_icons_32_uplist.png</file>
-    </qresource>
-</RCC>

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<root>
-    <GridName>gridwgs</GridName>
-    <TmsXMLSource>http://korplan1:8080/mapproxy/tms/1.0.0/</TmsXMLSource>
-    <baseTmsLayer_Url>http://tile.stamen.com/terrain/%1/%2/%3.png</baseTmsLayer_Url>
-    <maxStackSize_elements>100</maxStackSize_elements>
-</root>
