@@ -12,8 +12,7 @@
 
 using namespace regionbiz;
 
-WorkState::WorkState(const QString &xmlFilePath)
-    : _xmlFilePath(xmlFilePath)
+WorkState::WorkState()
 {
 }
 

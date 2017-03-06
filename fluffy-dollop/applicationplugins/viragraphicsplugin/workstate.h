@@ -11,7 +11,7 @@ class WorkState : public ScrollBaseState
     Q_OBJECT
 
 public:
-    WorkState(const QString& xmlFilePath);
+    WorkState();
     ~WorkState();
     virtual QString stateName() {return QString("WorkState");}
     virtual void statePushedToStack() {}
@@ -28,7 +28,6 @@ protected slots:
     void slotSelectionItemsChanged(uint64_t,uint64_t);
 
 private:
-    QString _xmlFilePath;
     QMap<qulonglong, AreaGraphicsItem*> _items;
     QList<LocationItem *> _locationItems;
 

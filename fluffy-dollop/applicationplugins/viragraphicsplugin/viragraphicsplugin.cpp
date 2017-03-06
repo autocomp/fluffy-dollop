@@ -38,21 +38,9 @@ void ViraGraphicsPlugin::init(uint visualizerId, quint64 visualizerWindowId)
 }
 void ViraGraphicsPlugin::launchWorkState()
 {
-    QString xmlFilePath;
-    QVariant xmlFilePath_Var = CtrConfig::getValueByName(QString("application_settings.launchXml_Path"));
-    if(xmlFilePath_Var.isValid())
-        xmlFilePath = xmlFilePath_Var.toString();
-
-    if(QFile::exists(xmlFilePath))
-    {
-        _workState = QSharedPointer<WorkState>(new WorkState(xmlFilePath));
-        connect(_workState.data(), SIGNAL(showFacility(qulonglong)), this, SLOT(showFacility(qulonglong)));
-        visualize_system::VisualizerManager::instance()->getStateInterface(getVisualizerId())->setVisualizerState(_workState);
-    }
-    else
-    {
-        QMessageBox::critical(0, "Ahtung", "You must set launchXml_Path to application_settings.xml !");
-    }
+    _workState = QSharedPointer<WorkState>(new WorkState());
+    connect(_workState.data(), SIGNAL(showFacility(qulonglong)), this, SLOT(showFacility(qulonglong)));
+    visualize_system::VisualizerManager::instance()->getStateInterface(getVisualizerId())->setVisualizerState(_workState);
 }
 
 void ViraGraphicsPlugin::showFacility(qulonglong id)
