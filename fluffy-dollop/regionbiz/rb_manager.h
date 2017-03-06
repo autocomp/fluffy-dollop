@@ -20,11 +20,11 @@ public:
 
     // init
     static RegionBizManagerPtr instance();
-    bool init( std::string& config_path );
+    bool init( QString& config_path );
 
     // getters
-    BaseAreaPtr getBaseLoation( uint64_t id );
-    BaseAreaPtr getBaseLoation( uint64_t id, BaseArea::AreaType type );
+    BaseAreaPtr getBaseArea( uint64_t id );
+    BaseAreaPtr getBaseArea( uint64_t id, BaseArea::AreaType type );
 
     // typed getters
     std::vector< RegionPtr > getRegions();
@@ -40,12 +40,16 @@ public:
     void subscribeOnSelect(QObject* obj,
                             const char *slot,
                             bool queue = false );
+    void centerOnArea( uint64_t id );
+    void subscribeCenterOn( QObject* obj,
+                            const char *slot,
+                            bool queue = false );
 
 private:
     RegionBizManager();
 
     static void onExit();
-    QVariantMap loadJsonConfig( std::string &file_path );
+    QVariantMap loadJsonConfig( QString &file_path );
     void loadDataByTranslator();
     void clearCurrentData();
 

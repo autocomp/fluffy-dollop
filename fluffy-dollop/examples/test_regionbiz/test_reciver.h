@@ -14,6 +14,11 @@ public Q_SLOTS:
         std::cout << "Selection!!! prev: " << prev_id
                   << ", new: " << new_id << std::endl;
     }
+
+    void onCenterOn( uint64_t id )
+    {
+        std::cout << "Center on!!! id: " << id << std::endl;
+    }
 };
 
 #endif // TEST_RECIVER_H

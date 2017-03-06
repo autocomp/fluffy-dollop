@@ -14,3 +14,8 @@ void SelectionManager::selectNewArea( uint64_t new_id )
 
     Q_EMIT selectBaseArea( prev_id, new_id );
 }
+
+void SelectionManager::centerOnNewArea( uint64_t id )
+{
+    Q_EMIT centerOnNewArea( id );
+}

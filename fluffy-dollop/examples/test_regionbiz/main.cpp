@@ -1,4 +1,4 @@
-#include <iostream>
+#include <QDebug>
 
 #include <regionbiz/rb_manager.h>
 
@@ -13,7 +13,7 @@ int main()
 
     //! init
     auto mngr = RegionBizManager::instance();
-    std::string str = "./config.json";
+    QString str = "./config/regionbiz.json";
     mngr->init( str );
 
     //! load regons
@@ -21,9 +21,9 @@ int main()
     //! get first region
     RegionPtr reg = regions.front();
     //! print region info
-    std::cout << "Region info: " << reg->getDescription() << std::endl;
-    for( Coord coord: reg->getCoords() )
-        std::cout << "  Point reg: " << coord.x << "x" << coord.y << std::endl;
+    qDebug() << "Region info: " << reg->getDescription();
+    for( QPointF coord: reg->getCoords() )
+        qDebug() << "  Point reg: " << coord.x() << "x" << coord.y();
 
     //! get child locations (without facilitys)
     std::vector< BaseAreaPtr > locations = reg->getChilds( Region::RCF_LOCATIONS );
@@ -33,15 +33,15 @@ int main()
     for( BaseAreaPtr ptr: locations )
     {
         LocationPtr loc = BaseArea::convert< Location >( ptr );
-        std::cout << " New location: " << loc->getAddress() << ", " << loc->getDescription()
-                  << " (" << loc->getPlanPath() << ")" << std::endl;
+        qDebug() << " New location: " << loc->getAddress() << ", " << loc->getDescription()
+                  << " (" << loc->getPlanPath() << ")";
 
         PlanKeeper::PlanParams params = loc->getPlanParams();
-        std::cout << "  Params of plan: " << params.scale_h << "x" << params.scale_w
-                  << ", " << params.rotate << ", " << params.x << "x" << params.y << std::endl;
+        qDebug() << "  Params of plan: " << params.scale_h << "x" << params.scale_w
+                  << ", " << params.rotate << ", " << params.x << "x" << params.y;
 
-        for( Coord coord: loc->getCoords() )
-            std::cout << "   Location Point: " << coord.x << "x" << coord.y << std::endl;
+        for( QPointF coord: loc->getCoords() )
+            qDebug() << "   Location Point: " << coord.x() << "x" << coord.y();
     }
 
     //! get child facilitys (with chllds of all child locations)
@@ -58,11 +58,11 @@ int main()
     for( BaseAreaPtr fac_ptr: facilitys )
     {
         FacilityPtr fac = BaseArea::convert< Facility >( fac_ptr );
-        std::cout << " New Facility: " << fac->getDescription() << ", " << fac->getAddress() << ", "
-                  << fac->getCadastralNumber() << std::endl;
+        qDebug() << " New Facility: " << fac->getDescription() << ", " << fac->getAddress() << ", "
+                  << fac->getCadastralNumber();
 
-        for( Coord coord: fac->getCoords() )
-            std::cout << "  Facility Point: " << coord.x << "x" << coord.y << std::endl;
+        for( QPointF coord: fac->getCoords() )
+            qDebug() << "  Facility Point: " << coord.x() << "x" << coord.y();
     }
 
     //! process floors
@@ -76,8 +76,8 @@ int main()
         for( FloorPtr flo: floors )
         {
             //! print info
-            std::cout << "  Floor info: " << flo->getNumber() << ": " << flo->getName() << ", "
-                      << ( flo->getCoords().size() ? "have coords" : "don't have coords" )<< std::endl;
+            qDebug() << "  Floor info: " << flo->getNumber() << ": " << flo->getName() << ", "
+                      << ( flo->getCoords().length() ? "have coords" : "don't have coords" );
 
             //! process rooms
             BaseAreaPtrs rooms = flo->getChilds( Floor::FCF_ALL_ROOMS );
@@ -86,8 +86,8 @@ int main()
                 RoomPtr room = BaseArea::convert< Room >( room_ptr );
 
                 //! print info
-                std::cout << "    Room: " << room->getName() << ", "
-                          << ( room->getCoords().size() ? "have coords" : "don't have coords" )<< std::endl;
+                qDebug() << "    Room: " << room->getName() << ", "
+                          << ( room->getCoords().length() ? "have coords" : "don't have coords" );
             }
         }
     }
@@ -97,4 +97,7 @@ int main()
     mngr->subscribeOnSelect( &recv, SLOT(onSelection(uint64_t,uint64_t)) );
     mngr->selectArea( 4 );
     mngr->selectArea( 5 );
+
+    mngr->subscribeCenterOn( &recv, SLOT(onCenterOn(uint64_t)) );
+    mngr->centerOnArea( 6 );
 }
