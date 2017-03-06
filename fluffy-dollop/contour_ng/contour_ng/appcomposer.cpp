@@ -54,6 +54,8 @@
 #include <ctrcore/bus/common_message_notifier.h>
 #include <ctrcore/bus/bustags.h>
 
+#include <regionbiz/rb_manager.h>
+
 AppComposer::AppComposer(QObject *parent) : QObject(parent)
 {
     m_openScenarioWId = 0;
@@ -93,7 +95,7 @@ AppComposer::~AppComposer()
 
 void AppComposer::init()
 {
-    m_applicationName = tr("This application name is contour-ng");
+    m_applicationName = QString::fromUtf8("V-Ира");
 
     /* создаем главное окно приложения*/
 
@@ -121,7 +123,7 @@ void AppComposer::init()
         mainHeadStr.tooltip = m_applicationName;
         mainHeadStr.windowTitle = m_applicationName;
         mainHeadStr.hasWhatButton = true;
-        mainHeadStr.headerPixmap = QString("://pic/icon_logo.png");
+        mainHeadStr.headerPixmap = QString(":/img/Star_of_David.png");
         mainStr.header = mainHeadStr;
         mainWindowId = ewApp()->createMainWindow(mainStr);        // Создали окно
     }
@@ -131,6 +133,18 @@ void AppComposer::init()
     connect(ewApp(), SIGNAL(signalSavedWidgetLoaded(QString,QVariantMap,ew::EmbeddedWidgetType,QWidget*)),
             this, SLOT(slotSavedWidgetLoaded(QString,QVariantMap,ew::EmbeddedWidgetType,QWidget*)));
 
+
+    //
+
+    QVariant regionBizInitJson_Path = CtrConfig::getValueByName(QString("application_settings.regionBizInitJson_Path"));
+    if(regionBizInitJson_Path.isValid())
+    {
+        auto mngr = regionbiz::RegionBizManager::instance();
+        std::string str = regionBizInitJson_Path.toString().toStdString() + "config.json";
+        mngr->init(str);
+    }
+    else
+        CtrConfig::setValueByName(QString("application_settings.regionBizInitJson_Path"), QVariant());
 
     // загрузка доступных ресурсов
     //------------------------------------
@@ -158,10 +172,10 @@ void AppComposer::init()
     uint visualizerId = visualize_system::VisualizerManager::instance()->addVisualizer(visualize_system::Visualizer2D);
     if(visualizerId != 0)
     {
-        QVariant baseTmsLayer_Url = CtrConfig::getValueByName(QString("application_settings.baseTmsLayer_Url"));
-        if(baseTmsLayer_Url.isValid())
+        QVariant baseTmsLayer_Url1 = CtrConfig::getValueByName(QString("application_settings.baseTmsLayer1_Url"));
+        if(baseTmsLayer_Url1.isValid())
         {
-            QUrl url(baseTmsLayer_Url.toString());
+            QUrl url(baseTmsLayer_Url1.toString());
             QSharedPointer<AbstractDataProvider>dp = data_system::DataProviderFactory::instance()->createProvider(url, QString("tms"));
             if(dp)
             {
@@ -177,7 +191,31 @@ void AppComposer::init()
         }
         else
         {
-            CtrConfig::setValueByName(QString("application_settings.baseTmsLayer_Url"), QVariant());
+            CtrConfig::setValueByName(QString("application_settings.baseTmsLayer1_Url"), QVariant());
+        }
+
+        QVariant baseTmsLayer_Url2 = CtrConfig::getValueByName(QString("application_settings.baseTmsLayer2_Url"));
+        if(baseTmsLayer_Url2.isValid())
+        {
+            QUrl url(baseTmsLayer_Url2.toString());
+            QSharedPointer<AbstractDataProvider>dp = data_system::DataProviderFactory::instance()->createProvider(url, QString("tms"));
+            if(dp)
+            {
+                dp->open(url);
+                visualize_system::DataInterface * dataInterface = visualize_system::VisualizerManager::instance()->getDataInterface(visualizerId);
+                if(dataInterface)
+                {
+                    QList<uint> providers;
+                    providers.append(dp->getProviderId());
+                    dataInterface->addBaseProviders(providers);
+                }
+
+                dataInterface->setProviderViewProperty(dp->getProviderId(), "visibility", false);
+            }
+        }
+        else
+        {
+            CtrConfig::setValueByName(QString("application_settings.baseTmsLayer2_Url"), QVariant());
         }
 
 //!       тест работы провайдера изображений
