@@ -55,3 +55,4 @@ include ($${ROOT_DIR}/pri/install.pri)
 RESOURCES += \
     visual/visualresources.qrc \
     ctrcore.qrc
+

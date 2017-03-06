@@ -96,6 +96,16 @@ QWidget* ViewInterface::widget()
     return _abstractVisualizer.widget();
 }
 
+QStackedWidget *ViewInterface::stackedWidget()
+{
+    return _abstractVisualizer.stackedWidget();
+}
+
+void ViewInterface::addWidgetToSplitter(QWidget * wdg)
+{
+    _abstractVisualizer.addWidgetToSplitter(wdg);
+}
+
 QWidget* ViewInterface::minimapWidget()
 {
     return _abstractVisualizer.minimapWidget();

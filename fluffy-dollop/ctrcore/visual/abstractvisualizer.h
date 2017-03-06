@@ -10,7 +10,7 @@
 #include <QPixmap>
 #include <QToolButton>
 #include <QtPlugin>
-
+#include <QStackedWidget>
 #include <ctrcore/plugin/ctrplugin.h>
 
 #include <ctrcore/provider/rasterdataprovider.h>
@@ -80,6 +80,8 @@ public:
     virtual sw::AbstractSceneWidget* getAbstractSceneWidget() = 0;
 
     virtual QWidget* widget() = 0;
+    virtual QStackedWidget* stackedWidget() = 0;
+    virtual void addWidgetToSplitter(QWidget*) = 0;
     virtual QWidget* minimapWidget() = 0;
     virtual QPixmap snapShort() = 0;
 

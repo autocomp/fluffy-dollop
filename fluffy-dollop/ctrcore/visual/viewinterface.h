@@ -36,6 +36,8 @@ public:
     quint64 getVisualizerWindowId();
 
     QWidget* widget();
+    QStackedWidget* stackedWidget();
+    void addWidgetToSplitter(QWidget*);
     QWidget* minimapWidget();
     QPixmap snapShort();
     sw::AbstractSceneWidget* getAbstractSceneWidget();

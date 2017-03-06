@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>img/015_icons_32_arrowright.png</file>
+        <file>img/Star_of_David.png</file>
     </qresource>
 </RCC>
