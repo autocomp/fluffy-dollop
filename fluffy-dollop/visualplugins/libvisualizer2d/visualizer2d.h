@@ -14,7 +14,9 @@
 
 #include <QDebug>
 #include <QtPlugin>
-
+#include <QStackedWidget>
+#include <QSplitter>
+#include <QVBoxLayout>
 #include <ctrcore/provider/rasterdataprovider.h>
 
 
@@ -72,6 +74,8 @@ public:
     virtual sw::AbstractSceneWidget* getAbstractSceneWidget();
 
     virtual QWidget* widget();
+    virtual QStackedWidget* stackedWidget();
+    virtual void addWidgetToSplitter(QWidget*);
     virtual QWidget* minimapWidget();
     virtual QPixmap snapShort();
 
@@ -109,6 +113,9 @@ private:
 //    VectorRender *m_pVectorRender;
     QPointF m_centerScenePos;
     VisualizerControlPanel *vcp = nullptr;
+    QStackedWidget * m_stackedWidget;
+    QSplitter * m_splitter;
+    QVBoxLayout *  m_LeftSplitterLayout;
 
     QString getDefaultXml();
     void getTmsXmlData(const QByteArray& byteArray, QList<TmsXmlData>& tmsDataList);

@@ -228,6 +228,14 @@ void Visualizer2d::init(uint visualizerId)
         vcp->show();
     }
 
+    m_splitter = new QSplitter;
+    QWidget * leftWidget = new QWidget(m_splitter);
+    m_splitter->addWidget(leftWidget);
+    m_LeftSplitterLayout = new QVBoxLayout(leftWidget);
+
+    m_stackedWidget = new QStackedWidget;
+    m_stackedWidget->addWidget(m_scene2dWidget);
+    m_splitter->addWidget(m_stackedWidget);
 }
 
 void Visualizer2d::slotCenterViewOn()
@@ -409,67 +417,67 @@ void Visualizer2d::createPlugins()
     vcp->addSeparator();
 
    ///MEASURE PLUGINS
-    CtrAppVisualizerPlugin* plugin = m_scene2dWidget->getMeasurePlugin();
-    QAction *pDefAct;
-    plugin->init(getVisualizerId(), getVisualizerWindowId());
+//    CtrAppVisualizerPlugin* plugin = m_scene2dWidget->getMeasurePlugin();
+//    QAction *pDefAct;
+//    plugin->init(getVisualizerId(), getVisualizerWindowId());
 
-    QList<ctrplugin::InitPluginData> initPlgDta = plugin->getInitPluginData();
-    for(ctrplugin::InitPluginData currentPluginData: initPlgDta)
-    {
-        QPair<ctrplugin::InitPluginData, CtrAppVisualizerPlugin*> struct_plugin;
+//    QList<ctrplugin::InitPluginData> initPlgDta = plugin->getInitPluginData();
+//    for(ctrplugin::InitPluginData currentPluginData: initPlgDta)
+//    {
+//        QPair<ctrplugin::InitPluginData, CtrAppVisualizerPlugin*> struct_plugin;
 
-        pDefAct = vcp->addItem(currentPluginData.buttonName, currentPluginData.translateButtonName, currentPluginData.iconForButtonOn, currentPluginData.tooltip, currentPluginData.isCheckable);
-        pDefAct->setProperty("buttonName", currentPluginData.buttonName);
-        pDefAct->setProperty("pluginType", "measurePlugins");
+//        pDefAct = vcp->addItem(currentPluginData.buttonName, currentPluginData.translateButtonName, currentPluginData.iconForButtonOn, currentPluginData.tooltip, currentPluginData.isCheckable);
+//        pDefAct->setProperty("buttonName", currentPluginData.buttonName);
+//        pDefAct->setProperty("pluginType", "measurePlugins");
 
-        struct_plugin.first = currentPluginData;
-        struct_plugin.second = plugin;
+//        struct_plugin.first = currentPluginData;
+//        struct_plugin.second = plugin;
 
-        connect(pDefAct, SIGNAL(triggered(bool)), this, SLOT(slotPluginActivated(bool)));
-        connect(plugin, SIGNAL(setChecked(QString,bool)), this, SLOT(slotPluginChecked(QString,bool)));
-        connect(plugin, SIGNAL(setEnabled(QString,bool)), vcp, SLOT(setPluginButtonEnabled(QString,bool)));
+//        connect(pDefAct, SIGNAL(triggered(bool)), this, SLOT(slotPluginActivated(bool)));
+//        connect(plugin, SIGNAL(setChecked(QString,bool)), this, SLOT(slotPluginChecked(QString,bool)));
+//        connect(plugin, SIGNAL(setEnabled(QString,bool)), vcp, SLOT(setPluginButtonEnabled(QString,bool)));
 
-        m_ActionsToPlugins.insert(pDefAct, struct_plugin);
-    }
+//        m_ActionsToPlugins.insert(pDefAct, struct_plugin);
+//    }
 
-    vcp->addSeparator();
+//    vcp->addSeparator();
 
     loadPluginCategory("widgetPlugins");
 
     ///WIDGET PLUGINS
-    QList<QAction*> menuActions;
+//    QList<QAction*> menuActions;
 
-    plugin = m_scene2dWidget->getControlsWidgetsPlugin();
-    plugin->init(getVisualizerId(), getVisualizerWindowId());
+//    plugin = m_scene2dWidget->getControlsWidgetsPlugin();
+//    plugin->init(getVisualizerId(), getVisualizerWindowId());
 
-    initPlgDta = plugin->getInitPluginData();
+//    initPlgDta = plugin->getInitPluginData();
 
-    for(ctrplugin::InitPluginData currentPluginData: initPlgDta)
-    {
-        QPair<ctrplugin::InitPluginData, CtrAppVisualizerPlugin*> struct_plugin;
-        ///pDefAct = vcp->addItem(currentPluginData.translateButtonName, currentPluginData.iconForButtonOn, currentPluginData.tooltip, currentPluginData.isCheckable);
-        QAction *pAct = new QAction(0);
+//    for(ctrplugin::InitPluginData currentPluginData: initPlgDta)
+//    {
+//        QPair<ctrplugin::InitPluginData, CtrAppVisualizerPlugin*> struct_plugin;
+//        ///pDefAct = vcp->addItem(currentPluginData.translateButtonName, currentPluginData.iconForButtonOn, currentPluginData.tooltip, currentPluginData.isCheckable);
+//        QAction *pAct = new QAction(0);
 
-        pAct->setProperty("buttonName", currentPluginData.buttonName);
-        pAct->setProperty("pluginType", "fakeWidgetPlugins");
-        pAct->setIcon(currentPluginData.iconForButtonOn);
-        pAct->setText(currentPluginData.translateButtonName);
-        pAct->setToolTip(currentPluginData.tooltip);
-        pAct->setCheckable(currentPluginData.isCheckable);
+//        pAct->setProperty("buttonName", currentPluginData.buttonName);
+//        pAct->setProperty("pluginType", "fakeWidgetPlugins");
+//        pAct->setIcon(currentPluginData.iconForButtonOn);
+//        pAct->setText(currentPluginData.translateButtonName);
+//        pAct->setToolTip(currentPluginData.tooltip);
+//        pAct->setCheckable(currentPluginData.isCheckable);
 
-        connect(pAct, SIGNAL(triggered(bool)), this, SLOT(slotPluginActivated(bool)));
-        connect(plugin, SIGNAL(setChecked(QString,bool)), this, SLOT(slotPluginChecked(QString,bool)));
-        connect(plugin, SIGNAL(setEnabled(QString,bool)), vcp, SLOT(setPluginButtonEnabled(QString,bool)));
-        menuActions.append(pAct);
+//        connect(pAct, SIGNAL(triggered(bool)), this, SLOT(slotPluginActivated(bool)));
+//        connect(plugin, SIGNAL(setChecked(QString,bool)), this, SLOT(slotPluginChecked(QString,bool)));
+//        connect(plugin, SIGNAL(setEnabled(QString,bool)), vcp, SLOT(setPluginButtonEnabled(QString,bool)));
+//        menuActions.append(pAct);
 
-        struct_plugin.first = currentPluginData;
-        struct_plugin.second = plugin;
+//        struct_plugin.first = currentPluginData;
+//        struct_plugin.second = plugin;
 
-        m_ActionsToPlugins.insert(pAct, struct_plugin);
+//        m_ActionsToPlugins.insert(pAct, struct_plugin);
 
 
-    }
-    vcp->addMenuItem( menuActions, tr("Widgets"), vcp->getMenuIcon(), tr("Widgets"));
+//    }
+//    vcp->addMenuItem( menuActions, tr("Widgets"), vcp->getMenuIcon(), tr("Widgets"));
 
     readSettings();
 }
@@ -715,9 +723,19 @@ sw::AbstractSceneWidget *Visualizer2d::getAbstractSceneWidget()
     return m_scene2dWidget;
 }
 
+void Visualizer2d::addWidgetToSplitter(QWidget * wdg)
+{
+    m_LeftSplitterLayout->addWidget(wdg);
+}
+
 QWidget* Visualizer2d::widget()
 {
-    return m_scene2dWidget;
+    return m_splitter; //m_stackedWidget; // m_scene2dWidget;
+}
+
+QStackedWidget *Visualizer2d::stackedWidget()
+{
+    return m_stackedWidget;
 }
 
 QWidget* Visualizer2d::minimapWidget()
@@ -779,25 +797,6 @@ QString Visualizer2d::getDefaultXml()
     str.append("      <TileSet units-per-pixel=\"1.19432856696\" order=\"17\" />"); str.append('\n');
     str.append("      <TileSet units-per-pixel=\"0.597164283478\" order=\"18\" />"); str.append('\n');
     str.append("      <TileSet units-per-pixel=\"0.298582141739\" order=\"19\" />"); str.append('\n');
-//    str.append("      <TileSet units-per-pixel=\"78271.516964\" order=\"0\" />"); str.append('\n');
-//    str.append("      <TileSet units-per-pixel=\"39135.758482\" order=\"1\" />"); str.append('\n');
-//    str.append("      <TileSet units-per-pixel=\"19567.879241\" order=\"2\" />"); str.append('\n');
-//    str.append("      <TileSet units-per-pixel=\"9783.9396205\" order=\"3\" />"); str.append('\n');
-//    str.append("      <TileSet units-per-pixel=\"4891.96981025\" order=\"4\" />"); str.append('\n');
-//    str.append("      <TileSet units-per-pixel=\"2445.98490513\" order=\"5\" />"); str.append('\n');
-//    str.append("      <TileSet units-per-pixel=\"1222.99245256\" order=\"6\" />"); str.append('\n');
-//    str.append("      <TileSet units-per-pixel=\"611.496226281\" order=\"7\" />"); str.append('\n');
-//    str.append("      <TileSet units-per-pixel=\"305.748113141\" order=\"8\" />"); str.append('\n');
-//    str.append("      <TileSet units-per-pixel=\"152.87405657\" order=\"9\" />"); str.append('\n');
-//    str.append("      <TileSet units-per-pixel=\"76.4370282852\" order=\"10\" />"); str.append('\n');
-//    str.append("      <TileSet units-per-pixel=\"38.2185141426\" order=\"11\" />"); str.append('\n');
-//    str.append("      <TileSet units-per-pixel=\"19.1092570713\" order=\"12\" />"); str.append('\n');
-//    str.append("      <TileSet units-per-pixel=\"9.55462853565\" order=\"13\" />"); str.append('\n');
-//    str.append("      <TileSet units-per-pixel=\"4.77731426782\" order=\"14\" />"); str.append('\n');
-//    str.append("      <TileSet units-per-pixel=\"2.38865713391\" order=\"15\" />"); str.append('\n');
-//    str.append("      <TileSet units-per-pixel=\"1.19432856696\" order=\"16\" />"); str.append('\n');
-//    str.append("      <TileSet units-per-pixel=\"0.597164283478\" order=\"17\" />"); str.append('\n');
-//    str.append("      <TileSet units-per-pixel=\"0.298582141739\" order=\"18\" />"); str.append('\n');
     str.append("    </Grid>"); str.append('\n');
     str.append("    <Grid>"); str.append('\n');
     str.append("      <Name>gridwgs</Name>"); str.append('\n');
@@ -889,8 +888,6 @@ void Visualizer2d::getTmsXmlData(const QByteArray& byteArray, QList<TmsXmlData> 
     }
 }
 
-//Q_EXPORT_PLUGIN2(2Dvisplugin, AbstractVisualizer2dInterface)
-//Q_PLUGIN_METADATA(IID "ru.vega.contour.CtrPluginIface.AbstractVisualizer2dInterface" FILE "myplugin.json")
 
 
 
