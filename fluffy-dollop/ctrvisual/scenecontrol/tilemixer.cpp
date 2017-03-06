@@ -34,8 +34,6 @@
 #include <QMenu>
 #include <QCursor>
 
-#include <cmath>
-
 //using namespace dpf::geo;
 //using namespace dpf::io;
 using namespace visualize_system;

@@ -64,6 +64,8 @@ public:
     bool showContextRasterMenu();
     bool showContextObjectMenu();
 
+    void setPrefferZoomForSceneRect(QRectF sceneRect);
+
     void setActiveForScene(bool on_off);
 
 protected:
@@ -88,6 +90,7 @@ signals:
     void signalConvertSceneToEpsg(int epsgCode, QPointF & pos, bool & success);
     void signalSetZlevel(int);
     void signalSetActiveForScene(bool);
+    void signalSetPrefferZoomForSceneRect(QRectF sceneRect);
 
 protected:
     QGraphicsScene * _scene;

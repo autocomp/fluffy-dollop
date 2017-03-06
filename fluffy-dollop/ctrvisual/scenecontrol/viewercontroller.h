@@ -337,6 +337,8 @@ public slots:
      * @param pm - pixmap for cursor
      */
     void slotChangeEntityMode(quint32 cursorId, bool isEditMode, QPixmap pm);
+    void setPrefferZoomForSceneRect(QRectF rect);
+
 protected slots:
     void slotWaitReleaseMouseTimeout();
     void slot_sceneCenterOn(QPointF);

@@ -19,8 +19,8 @@ Scene2DWidget::Scene2DWidget(QWidget *parent) :
     //m_bookmark->setBookmarkWidgetType(Bookmark::BWT_2D);
     reInit();
 
-    m_visualizer_control_fake_plugin = new VisualizerWidgetsFakePlugin(this);
-    m_measurenemt_fake_plugin = new MeasureFakePlugin(this);
+//    m_visualizer_control_fake_plugin = new VisualizerWidgetsFakePlugin(this);
+//    m_measurenemt_fake_plugin = new MeasureFakePlugin(this);
 
 }
 

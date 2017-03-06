@@ -1,9 +1,8 @@
 #include "rematchingstate.h"
 #include <QDebug>
 #include <QMessageBox>
-#include <QGraphicsLineItem>
-#include <QPen>
-#include <cmath>
+#include<QGraphicsLineItem>
+#include<QPen>
 
 using namespace visualize_system;
 

@@ -1,5 +1,4 @@
 #include "stateobject.h"
-#include <cmath>
 #include <QDebug>
 
 using namespace visualize_system;
@@ -124,6 +123,11 @@ bool StateObject::showContextRasterMenu()
 bool StateObject::showContextObjectMenu()
 {
     return _showContextObjectMenu;
+}
+
+void StateObject::setPrefferZoomForSceneRect(QRectF sceneRect)
+{
+    emit signalSetPrefferZoomForSceneRect(sceneRect);
 }
 
 void StateObject::setActiveForScene(bool on_off)

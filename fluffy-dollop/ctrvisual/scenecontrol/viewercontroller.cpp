@@ -391,62 +391,65 @@ void ViewerController::setPrefferZoomForGeoRect(QRectF rect)
     rect = scenePol.boundingRect();
 
     if(rect.width() > 0 && rect.height() > 0)
+        setPrefferZoomForSceneRect(rect);
+}
+
+void ViewerController::setPrefferZoomForSceneRect(QRectF rect)
+{
+    QRectF viewRect = getViewportRect();
+    int z_level = 1;
+
+    qreal prefferZoomForWidth = qAbs( (rect.width() / viewRect.width() ) );
+    qreal prefferZoomForHeight = qAbs( (rect.height() / viewRect.height()) );
+
+    qreal zoom = 1;
+    z_level = m_zoom;
+
+    //        qDebug() << "ViewerController::getPrefferZoomForSceneRect IF, prefferZoomForWidth" << prefferZoomForWidth << "prefferZoomForHeight" << prefferZoomForHeight << "z_level" << z_level;
+
+    if(prefferZoomForHeight < prefferZoomForWidth)
     {
-        QRectF viewRect = getViewportRect();
-        int z_level = 1;
-
-        qreal prefferZoomForWidth = qAbs( (rect.width() / viewRect.width() ) );
-        qreal prefferZoomForHeight = qAbs( (rect.height() / viewRect.height()) );
-
-        qreal zoom = 1;
-        z_level = m_zoom;
-
-        //        qDebug() << "ViewerController::getPrefferZoomForSceneRect IF, prefferZoomForWidth" << prefferZoomForWidth << "prefferZoomForHeight" << prefferZoomForHeight << "z_level" << z_level;
-
-        if(prefferZoomForHeight < prefferZoomForWidth)
-        {
-            zoom = prefferZoomForWidth;
-        }
-        else
-        {
-            zoom = prefferZoomForHeight;
-        }
-
-        // теперь ищем Z уровень
-
-        if(zoom > 1/*1.4*/ )
-        {
-            while( zoom > 1/*1.4*/  )
-            {
-                z_level--;
-                zoom = zoom/2;
-            }
-        }
-        else
-        {
-            if(zoom < 1/*0.7*/ )
-                while( zoom < 1/*0.7*/  )
-                {
-                    z_level++;
-                    zoom = zoom*2;
-                }
-
-            z_level--;
-        }
-
-        if(z_level > (int)m_sceneControlle->zoomMax())
-        {
-            z_level = (int)m_sceneControlle->zoomMax();
-        }
-
-        if(z_level < (int)m_sceneControlle->zoomMin())
-        {
-            z_level = (int)m_sceneControlle->zoomMin();
-        }
-
-        changeZoom(z_level);
-        centerOn(rect.center());
+        zoom = prefferZoomForWidth;
     }
+    else
+    {
+        zoom = prefferZoomForHeight;
+    }
+
+    // теперь ищем Z уровень
+
+    if(zoom > 1/*1.4*/ )
+    {
+        while( zoom > 1/*1.4*/  )
+        {
+            z_level--;
+            zoom = zoom/2;
+        }
+    }
+    else
+    {
+        if(zoom < 1/*0.7*/ )
+            while( zoom < 1/*0.7*/  )
+            {
+                z_level++;
+                zoom = zoom*2;
+            }
+
+        z_level--;
+    }
+
+    if(z_level > (int)m_sceneControlle->zoomMax())
+    {
+        z_level = (int)m_sceneControlle->zoomMax();
+    }
+
+    if(z_level < (int)m_sceneControlle->zoomMin())
+    {
+        z_level = (int)m_sceneControlle->zoomMin();
+    }
+
+    changeZoom(z_level);
+    centerOn(rect.center());
 }
 
 
@@ -3357,6 +3360,8 @@ void ViewerController::switchViewerStateMode(ViewerState mode, bool onOff, QVari
                     connect(stateObject.data(), SIGNAL(signalConvertSceneToEpsg(int,QPointF&,bool&)), m_sceneControlle, SLOT(convertSceneToEpsg(int,QPointF&,bool&)));
                     connect(stateObject.data(), SIGNAL(signalSetZlevel(int)), this, SLOT(slotChangeZoom(int)));
                     connect(stateObject.data(), SIGNAL(signalSetActiveForScene(bool)), m_sceneControlle, SLOT(slotSetActiveForScene(bool)));
+                    connect(stateObject.data(), SIGNAL(signalSetPrefferZoomForSceneRect(QRectF)), this, SLOT(setPrefferZoomForSceneRect(QRectF)));
+
 
                     //                    MeasureStateObject* measureStateObject = dynamic_cast<MeasureStateObject*>(stateObject);
                     //                    if(measureStateObject)
@@ -4641,6 +4646,7 @@ void ViewerController::slotStateObjectHandlerEventsOff()
         disconnect(stateObject, SIGNAL(signalConvertEpsgToScene(int,QPointF&,bool&)), m_sceneControlle, SLOT(convertEpsgToScene(int,QPointF&,bool&)));
         disconnect(stateObject, SIGNAL(signalConvertSceneToEpsg(int,QPointF&,bool&)), m_sceneControlle, SLOT(convertSceneToEpsg(int,QPointF&,bool&)));
         disconnect(stateObject, SIGNAL(signalSetZlevel(int)), this, SLOT(slotChangeZoom(int)));
+        disconnect(stateObject, SIGNAL(signalSetPrefferZoomForSceneRect(QRectF)), this, SLOT(setPrefferZoomForSceneRect(QRectF)));
         qDebug() << "slotStateObjectHandlerEventsOff --- 444";
 
         if(m_stateObject.isNull() == false)
@@ -4672,8 +4678,6 @@ void ViewerController::slotChangeEntityMode(quint32 cursorId,bool isEditMode,QPi
         setEditMode(isEditMode,pm);
     }
 }
-
-
 
 
 

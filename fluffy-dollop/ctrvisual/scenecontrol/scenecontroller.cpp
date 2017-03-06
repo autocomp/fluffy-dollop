@@ -54,7 +54,7 @@ SceneController::SceneController(uint visualizerId, const SceneDescriptor &scene
 //        QCoreApplication::installTranslator(trans2);
 
 //    connect(&m_altReloadTimer, SIGNAL(timeout()), this, SLOT(slotAltReload()));
-    m_TileSceneAsinc.setAsincMode(false); //! ScenesHolder::instance()->asincLoadingOnGeoMap()) - НЕОБХОДИМО БРАТЬ ПАРАМЕТР ИЗ ВНЕ !!!
+    m_TileSceneAsinc.setAsincMode(true); //! ScenesHolder::instance()->asincLoadingOnGeoMap()) - НЕОБХОДИМО БРАТЬ ПАРАМЕТР ИЗ ВНЕ !!!
 
     if( ! m_isGeo)
         m_Scene.setMouseMoveEnabled(true);
@@ -1161,6 +1161,7 @@ void SceneController::slotSetActiveForScene(bool on_off)
 {
     m_Scene.setSceneActive(on_off);
 }
+
 
 
 
