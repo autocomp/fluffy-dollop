@@ -1,4 +1,6 @@
 #include "localdataprovider.h"
+#include "tmsdataprovider.h"
+#include "localtmsadapter.h"
 #include "tileloaderpool.h"
 #include "math.h"
 #include <QSettings>
@@ -6,6 +8,7 @@
 #include <QApplication>
 #include <QDomDocument>
 #include <QFile>
+#include <QDebug>
 
 using namespace data_system;
 
@@ -15,9 +18,21 @@ LocalDataProvider::LocalDataProvider()
 {
 }
 
-bool LocalDataProvider::open(const QUrl& url, WorkMode /*mode*/)
+bool LocalDataProvider::open(const QUrl& _url, WorkMode /*mode*/)
 {
-    _localTmsAdapter = new LocalTmsAdapter(url);
+    qDebug() << "LocalDataProvider::open, url.host :" << _url.host();
+
+    QUrl url = _url;
+    if(url.host() == QString("mt1.google.com"))
+    {
+        url = QString("http://mt1.google.com/vt/v=ap.106&hl=en&x=%2&y=%3&zoom=%1&lyrs=s");
+        _localTmsAdapter = new GoogleAdapter(url);
+    }
+    else
+    {
+        url = QString("http://") + url.host() + QString("/%1/%2/%3.png");
+        _localTmsAdapter = new LocalTmsAdapter(url);
+    }
 
     m_providerURL = url;
 

@@ -1,16 +1,14 @@
-#include "localtmsadapter.h"
+#include "googleadapter.h"
 #include <QDebug>
 
-LocalTmsAdapter::LocalTmsAdapter(const QUrl &url)
+GoogleAdapter::GoogleAdapter(const QUrl &url)
     : TmsBaseAdapter(url)
 {
+    setMaxZoomLevel(17);
 }
 
-QUrl LocalTmsAdapter::query(int x, int y, int z) const
+QUrl GoogleAdapter::query(int x, int y, int z) const
 {
-    //! вообще сдесь должна быть проверка по оригину, если снизу - инвертируем Y, если слева - инвертируем X !!!
-    //! по дефолту оригин слево внизу.
-
 //    int _x(x), _y(y), _z(z);
 
 //    z += zLevelShift();
@@ -21,7 +19,10 @@ QUrl LocalTmsAdapter::query(int x, int y, int z) const
 
     //qDebug() << "LocalTmsAdapter, IN : X :" << _x << ", Y :" << _y << ", Z :" << _z << ", OUT X :" << x << ", Y :" << y << ", Z :" << z;
 
-// http://mt1.google.com/vt/v=ap.106&hl=en&x=0&y=0&zoom=17&lyrs=s
+    if(z > 17)
+        z = 0;
+    else
+        z = 17-z;
 
     int a[3] = {z, x, y};
     QString queryString = serverPath();
@@ -37,18 +38,3 @@ QUrl LocalTmsAdapter::query(int x, int y, int z) const
 
     return url;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

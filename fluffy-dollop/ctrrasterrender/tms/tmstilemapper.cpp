@@ -2,7 +2,6 @@
 #include <ctrcore/provider/timagecache.h>
 #include <ctrrasterrender/tms/tmsdataprovider.h>
 #include <ctrrasterrender/tms/tileloaderpool.h>
-#include <cmath>
 
 using namespace visualize_system;
 

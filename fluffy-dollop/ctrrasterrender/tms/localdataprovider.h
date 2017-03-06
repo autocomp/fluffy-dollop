@@ -2,7 +2,8 @@
 #define LOCALDATAPROVIDER_H
 
 #include "tmsdataprovider.h"
-#include "localtmsadapter.h"
+#include "tmsbaseadapter.h"
+#include "googleadapter.h"
 
 /**
  *  Класс унаследованный от абстрактного тмс-провайдера,
@@ -53,7 +54,7 @@ protected:
     virtual QUrl query(int x, int y, int z) const;
 
 private:
-    LocalTmsAdapter * _localTmsAdapter;
+    TmsBaseAdapter * _localTmsAdapter;
 };
 
 }
