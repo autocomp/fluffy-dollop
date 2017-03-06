@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>img/061_icons_32_tools_pdf.png</file>
+        <file>img/mark_on_map.png</file>
+        <file>img/018_icons_32_back.png</file>
+        <file>img/119_icons_32_gl.png</file>
+    </qresource>
+</RCC>

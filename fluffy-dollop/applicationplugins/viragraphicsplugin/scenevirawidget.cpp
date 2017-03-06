@@ -1,30 +1,31 @@
-#include "scenepdfimportwidget.h"
+#include "scenevirawidget.h"
 
-ScenePdfImportWidget::ScenePdfImportWidget(QWidget *parent)
+SceneViraWidget::SceneViraWidget(QWidget *parent)
     : Scene2DWidget(parent)
 {
-    getKompasWidget()->hide();
-    getRowScale()->hide();
-    getMinimapContainerWidget()->hide();
-    getCoordBar()->hide();
-    getZoomBar()->hide();
+//    getKompasWidget()->hide();
+//    getRowScale()->hide();
+//    getMinimapContainerWidget()->hide();
+//    getCoordBar()->hide();
+//    getZoomBar()->hide();
 
-    vcp = new visualize_system::PdfImporterPanel(this);
+    vcp = new visualize_system::ViraPanel(this);
     connect(vcp, SIGNAL(changeMode(int)), this, SIGNAL(changeMode(int)));
+    connect(vcp, SIGNAL(switchOnMap()), this, SIGNAL(switchOnMap()));
     //addToolbarWidget(vcp);
 
-    connect(getZoomBar(), SIGNAL(zoomChanged(int)), this, SIGNAL(changeZoom(int)));
+//    connect(getZoomBar(), SIGNAL(zoomChanged(int)), this, SIGNAL(changeZoom(int)));
     connect(this, SIGNAL(newSize(int,int)), this, SLOT(sceneWidgetSizeChanged(int,int)));
 
     vcp->movePanel(width(), height());
 }
 
-ScenePdfImportWidget::~ScenePdfImportWidget()
+SceneViraWidget::~SceneViraWidget()
 {
     delete vcp;
 }
 
-void ScenePdfImportWidget::addButtonToButtonPanel(QToolButton *pBtn)
+void SceneViraWidget::addButtonToButtonPanel(QToolButton *pBtn)
 {
     QAction *pAction = vcp->addItem(pBtn->text(), pBtn->text(), pBtn->icon(), pBtn->toolTip(), pBtn->isCheckable());
     if(pBtn->isCheckable())
@@ -33,17 +34,17 @@ void ScenePdfImportWidget::addButtonToButtonPanel(QToolButton *pBtn)
         connect(pAction, SIGNAL(triggered()), pBtn, SIGNAL(clicked()));
 }
 
-void ScenePdfImportWidget::createModeButtonGroup()
+void SceneViraWidget::createModeButtonGroup()
 {
     vcp->createModeButtonGroup();
 }
 
-void ScenePdfImportWidget::slotChangeMode(int mode)
+void SceneViraWidget::slotChangeMode(int mode)
 {
     vcp->setMode(mode);
 }
 
-void ScenePdfImportWidget::readSettings()
+void SceneViraWidget::readSettings()
 {
     vcp->readSettings();
 //    getOpenMenuButton()->setHeight(vcp->getItemSize().height() + 4);
@@ -54,7 +55,7 @@ void ScenePdfImportWidget::readSettings()
     //    slotUpdateChildsGeometry();
 }
 
-void ScenePdfImportWidget::sceneWidgetSizeChanged(int newW, int newH)
+void SceneViraWidget::sceneWidgetSizeChanged(int newW, int newH)
 {
     if(vcp)
         vcp->movePanel(newW - 16, newH - 16);/// -16 - Учёт толщены скроллбаров на сценвиджете

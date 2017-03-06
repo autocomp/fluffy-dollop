@@ -1,21 +1,21 @@
-#ifndef SCENEPDFIMPORTWIDGET_H
-#define SCENEPDFIMPORTWIDGET_H
+#ifndef SCENEVIRAWIDGET_H
+#define SCENEVIRAWIDGET_H
 
 #include <ctrvisual/scenecontrol/scene2dwidget.h>
 #include <ctrvisual/components/visualizercontrolpanel.h>
-#include "pdfimporterpanel.h"
+#include "virapanel.h"
 
 using namespace sw;
 
-class ScenePdfImportWidget : public Scene2DWidget
+class SceneViraWidget : public Scene2DWidget
 {
     Q_OBJECT
 public:
-    explicit ScenePdfImportWidget(QWidget *parent = 0);
-    ~ScenePdfImportWidget();
+    explicit SceneViraWidget(QWidget *parent = 0);
+    ~SceneViraWidget();
     void addButtonToButtonPanel(QToolButton *pBtn);
     void createModeButtonGroup();
-    visualize_system::PdfImporterPanel *vcp = nullptr;
+    visualize_system::ViraPanel *vcp = nullptr;
 
 public slots:
     void slotChangeMode(int mode);
@@ -25,7 +25,8 @@ public slots:
 signals:
     void changeZoom(int z);
     void changeMode(int);
+    void switchOnMap();
     
 };
 
-#endif // SCENEPDFIMPORTWIDGET_H
+#endif // SceneViraWidget_H

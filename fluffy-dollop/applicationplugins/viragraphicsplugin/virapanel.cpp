@@ -1,23 +1,23 @@
-#include "pdfimporterpanel.h"
+#include "virapanel.h"
 //#include "sceneview.h"
 #include <QDebug>
 #include <ctrcore/ctrcore/ctrconfig.h>
 
 using namespace visualize_system;
 
-PdfImporterPanel::PdfImporterPanel(QWidget *parent)
+ViraPanel::ViraPanel(QWidget *parent)
     : VisualizerControlPanel(parent)
     , _menu(0)
     , _modeMenu(0)
 {
 }
 
-void PdfImporterPanel::init(uint visualizerId, quint64 visualizerWindowId, QWidget * sceneWidgetPanel)
+void ViraPanel::init(uint visualizerId, quint64 visualizerWindowId, QWidget * sceneWidgetPanel)
 {
     //VisualizerControlPanel::init(visualizerId, visualizerWindowId, sceneWidgetPanel);
 }
 
-void PdfImporterPanel::createModeButtonGroup()
+void ViraPanel::createModeButtonGroup()
 {
 //    _menu = new QMenu(this);
 //    connect(_menu, SIGNAL(triggered(QAction*)), this, SLOT(slotModeChanged(QAction*)));
@@ -34,6 +34,9 @@ void PdfImporterPanel::createModeButtonGroup()
 //    act = _menu->addAction(QIcon(":/img/052_icons_32_tools_poligon.png"), QString::fromUtf8("Режим нанесения полигона"));
 //    act->setProperty("Mode", (int)SceneView::CREATE_POLYGON);
 
+    QAction * act = addItem("Switch on map", "", QIcon(":/img/018_icons_32_back.png"), "Switch on map", false);
+    connect(act, SIGNAL(triggered()), this, SIGNAL(switchOnMap()));
+
 //    ToolButtonItem *pActionItem = new ToolButtonItem(QIcon(":/img/048_icons_32_tools_mouse.png"), QString::fromUtf8("Режим выделения слоев"), QString::fromUtf8("Режим выделения слоев"), true, ptb);
 //    _modeMenu =
 //    _modeMenu->setIcon(QIcon(":/img/048_icons_32_tools_mouse.png"));
@@ -42,6 +45,12 @@ void PdfImporterPanel::createModeButtonGroup()
 //    ptb->addAction(pActionItem);
 
 //    QList<QAction*> lActions;
+
+//    QAction * act = new QAction(0);
+//    act->setIcon(QIcon(":/img/048_icons_32_tools_mouse.png"));
+//    act->setText(QString::fromUtf8("Switch on map"));
+//    connect(act, SIGNAL(triggered()), this, SIGNAL(switchOnMap()));
+//    lActions.append(act);
 
 //    QAction * act = new QAction(0);
 //    act->setIcon(QIcon(":/img/048_icons_32_tools_mouse.png"));
@@ -78,7 +87,7 @@ void PdfImporterPanel::createModeButtonGroup()
 //    connect(act, SIGNAL(triggered()), this, SLOT(slotModeChanged()));
 //    lActions.append(act);
 
-//    act = new QAction(0);
+//    QAction * act = new QAction(0);
 //    act->setIcon(QIcon(":/img/052_icons_32_tools_poligon.png"));
 //    act->setText(QString::fromUtf8("Режим нанесения полигона"));
 //    act->setProperty("Mode", (int)SceneView::CREATE_POLYGON);
@@ -88,7 +97,7 @@ void PdfImporterPanel::createModeButtonGroup()
 //    _modeMenu = addMenuItem(lActions, QString::fromUtf8("Режим выделения слоев"), QIcon(":/img/048_icons_32_tools_mouse.png"), QString::fromUtf8("Режим выделения слоев"));
 }
 
-void PdfImporterPanel::setMode(int mode)
+void ViraPanel::setMode(int mode)
 {
     if(_menu)
     {
@@ -104,7 +113,7 @@ void PdfImporterPanel::setMode(int mode)
     }
 }
 
-void PdfImporterPanel::slotModeChanged()
+void ViraPanel::slotModeChanged()
 {
     QAction * act = dynamic_cast<QAction *>(sender());
     if(act)
@@ -116,7 +125,7 @@ void PdfImporterPanel::slotModeChanged()
     }
 }
 
-void PdfImporterPanel::readSettings()
+void ViraPanel::readSettings()
 {
     QString key = "report_doc_panel.menuSettings.buttonSize";
     QString sizeString;

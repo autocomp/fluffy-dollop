@@ -1,5 +1,5 @@
-#ifndef PDFIMPORTERPANEL_H
-#define PDFIMPORTERPANEL_H
+#ifndef VIRAPANEL_H
+#define VIRAPANEL_H
 
 #include <ctrvisual/components/visualizercontrolpanel.h>
 
@@ -15,11 +15,11 @@
 namespace visualize_system
 {
 
-class PdfImporterPanel : public VisualizerControlPanel
+class ViraPanel : public VisualizerControlPanel
 {
     Q_OBJECT
 public:
-    explicit PdfImporterPanel(QWidget *parent = 0);
+    explicit ViraPanel(QWidget *parent = 0);
     void init(uint visualizerId, quint64 visualizerWindowId, QWidget * sceneWidgetPanel);
     void createModeButtonGroup();
     void setMode(int mode);
@@ -30,6 +30,7 @@ public slots:
 
 signals:
     void changeMode(int);
+    void switchOnMap();
 
 private:
     QAction * _modeMenu;
