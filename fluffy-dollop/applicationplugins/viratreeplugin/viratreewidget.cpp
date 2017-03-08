@@ -8,6 +8,7 @@ using namespace regionbiz;
 ViraTreeWidget::ViraTreeWidget(QWidget *parent)
     : QTreeWidget(parent)
 {
+    setExpandsOnDoubleClick(false);
     setSelectionMode(QAbstractItemView::SingleSelection);
     setColumnCount(1);
     headerItem()->setText(0, QString::fromUtf8("Имя"));
@@ -115,6 +116,7 @@ void ViraTreeWidget::slotItemDoubleClicked(QTreeWidgetItem * item, int)
     if(item)
     {
         const qulonglong id(item->data(0, ID).toULongLong());
+        RegionBizManager::instance()->centerOn(id);
         qDebug() << "slotItemDoubleClicked, ID :" << id;
     }
 }
