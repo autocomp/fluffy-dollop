@@ -27,6 +27,16 @@ void WorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom
     ScrollBaseState::init(scene, view, zoom, scale, frameCoef, visualizerId);
     setActiveForScene(true);
 
+    AreaInitData regionInitData;
+    regionInitData.zValue = 100;
+    regionInitData.penNormal.setColor(Qt::green);
+    regionInitData.penNormal.setCosmetic(true);
+    regionInitData.penNormal.setWidth(2);
+    regionInitData.penHoverl = regionInitData.penNormal;
+    regionInitData.penHoverl.setWidth(3);
+    regionInitData.brushNormal.setStyle(Qt::NoBrush);
+    regionInitData.brushHoverl.setStyle(Qt::NoBrush);
+
     AreaInitData locationInitData;
     locationInitData.zValue = 1000;
     locationInitData.penNormal.setColor(Qt::red);
@@ -56,10 +66,19 @@ void WorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom
 
     auto mngr = RegionBizManager::instance();
     mngr->subscribeOnSelect(this, SLOT(slotSelectionItemsChanged(uint64_t,uint64_t)));
+    mngr->subscribeOnCenterOn(this, SLOT(slotCenterOn(uint64_t)));
+
     std::vector<RegionPtr> regions = mngr->getRegions();
     for( RegionPtr regionPtr: regions )
     {
-
+        QPolygonF scenePolygon;
+        for(Coord coord : regionPtr->getCoords())
+            scenePolygon.append(QPointF(coord.x, coord.y));
+        AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(scenePolygon);
+        regionInitData.id = regionPtr->getId();
+        areaGraphicsItem->init(regionInitData);
+        _scene->addItem(areaGraphicsItem);
+        _items.insert(regionPtr->getId(), areaGraphicsItem);
 
         std::vector<BaseAreaPtr> locations = regionPtr->getChilds( Region::RCF_LOCATIONS );
         for( BaseAreaPtr ptr: locations )
@@ -200,9 +219,94 @@ void WorkState::slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_id)
     }
     if(curr_id > 0)
     {
-        auto it = _items.find(curr_id);
+        BaseAreaPtr ptr = RegionBizManager::instance()->getBaseLoation(curr_id);
+        if( ! ptr)
+            return;
+
+        uint64_t facilityId(0);
+        switch(ptr->getType())
+        {
+        case BaseArea::AT_REGION :
+        case BaseArea::AT_LOCATION :
+        {
+            auto it = _items.find(curr_id);
+            if(it != _items.end())
+            {
+                emit switchOnMap();
+                it.value()->setItemselected(true);
+            }
+        }return;
+
+        case BaseArea::AT_FACILITY :
+        {
+            facilityId = curr_id;
+        }break;
+
+        case BaseArea::AT_FLOOR :
+        case BaseArea::AT_ROOMS_GROUP :
+        case BaseArea::AT_ROOM :
+        {
+            BaseAreaPtr parentPtr = ptr->getParent();
+            while(parentPtr)
+            {
+                if(parentPtr->getType() == BaseArea::AT_FACILITY)
+                {
+                    facilityId = parentPtr->getId();
+                    break;
+                }
+                parentPtr = parentPtr->getParent();
+            }
+        }break;
+        }
+
+        if(facilityId > 0)
+        {
+            emit showFacility(facilityId);
+
+            auto it = _items.find(facilityId);
+            if(it != _items.end())
+                it.value()->setItemselected(true);
+        }
+    }
+}
+
+void WorkState::slotCenterOn(uint64_t id)
+{
+    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseLoation(id);
+    if( ! ptr)
+        return;
+
+    auto it = _items.find(id);
+    switch(ptr->getType())
+    {
+    case BaseArea::AT_REGION :
+    case BaseArea::AT_LOCATION :
+    {
         if(it != _items.end())
-            it.value()->setItemselected(true);
+        {
+            QPolygonF pol = it.value()->polygon();
+            setPrefferZoomForSceneRect(pol.boundingRect());
+        }
+    }break;
+
+    case BaseArea::AT_FACILITY :
+    {
+        if(it != _items.end())
+        {
+            QPolygonF pol = it.value()->polygon();
+            _view->centerOn(pol.boundingRect().center());
+        }
+    }break;
+
+    case BaseArea::AT_FLOOR :
+    {
+    }break;
+
+    case BaseArea::AT_ROOMS_GROUP :
+    case BaseArea::AT_ROOM :
+    {
+        emit centerEditorOn(id);
+    }break;
     }
 }
 
@@ -233,6 +337,11 @@ void WorkState::slotSetItemselect(qulonglong id, bool on_off)
 
 }
 
+bool WorkState::mousePressEvent(QMouseEvent* e, QPointF scenePos)
+{
+    // qDebug() << "mousePressEvent :" << QString::number(scenePos.x(), 'f', 8) << QString::number(scenePos.y(), 'f', 8);
+    return ScrollBaseState::mousePressEvent(e, scenePos);
+}
 
 //!    for second images :
 //    _scaleX = 0.00000382951662997968;

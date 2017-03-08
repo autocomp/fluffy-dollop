@@ -19,13 +19,12 @@ public:
     virtual void init(uint visualizerId, quint64 visualizerWindowId);
 
 private slots:
-    void slotEditorClosed();
     void launchWorkState();
     void showFacility(qulonglong id);
     void switchOnMap();
+    void switchOnEditor();
 
 private:
-    void startEditor();
     bool _showFirstBaseCover = true;
 
     ViraEditorForm * _pdfEditorForm;

@@ -22,11 +22,18 @@ ViraEditorView::ViraEditorView()
 
 ViraEditorView::~ViraEditorView()
 {
-    // reset();
+    // reinit();
 }
 
-void ViraEditorView::reset(qulonglong floorId) //const QString &path)
+void ViraEditorView::reinit(qulonglong floorId)
 {
+    foreach(GraphicsPixmapItem * item, _owerViews)
+        delete item;
+    _owerViews.clear();
+
+    foreach(AreaGraphicsItem * item, _rooms.values())
+        delete item;
+    _rooms.clear();
 
     /*
     if(path.isEmpty() == false)
@@ -108,7 +115,7 @@ void ViraEditorView::setFloor(qulonglong floorId)
 
 
     /*
-    reset();
+    reinit();
     if(pageNumber < 0)
         return;
 
@@ -202,11 +209,11 @@ void ViraEditorView::wheelEvent(QWheelEvent *e)
 
 void ViraEditorView::mouseMoveEvent(QMouseEvent* e)
 {
-    if(_currentLine)
-    {
-        QPointF scenePos = mapToScene(e->pos());
-        _currentLine->setLine(QLineF(_currentLine->line().p1(), scenePos));
-    }
+//    if(_currentLine)
+//    {
+//        QPointF scenePos = mapToScene(e->pos());
+//        _currentLine->setLine(QLineF(_currentLine->line().p1(), scenePos));
+//    }
     QGraphicsView::mouseMoveEvent(e);
 }
 
@@ -216,19 +223,19 @@ void ViraEditorView::mousePressEvent(QMouseEvent *e)
     {
         if(e->modifiers() & Qt::ControlModifier)
         {
-            QPointF scenePos = mapToScene(e->pos());
-            if(_currentLine)
-            {
-                _lines.append(_currentLine);
-            }
-            _currentLine = new QGraphicsLineItem();
-            scene()->addItem(_currentLine);
-            _currentLine->setZValue(1000);
-            QPen pen(Qt::red);
-            pen.setCosmetic(true);
-            pen.setWidth(1);
-            _currentLine->setPen(pen);
-            _currentLine->setLine(QLineF(scenePos, scenePos));
+//            QPointF scenePos = mapToScene(e->pos());
+//            if(_currentLine)
+//            {
+//                _lines.append(_currentLine);
+//            }
+//            _currentLine = new QGraphicsLineItem();
+//            scene()->addItem(_currentLine);
+//            _currentLine->setZValue(1000);
+//            QPen pen(Qt::red);
+//            pen.setCosmetic(true);
+//            pen.setWidth(1);
+//            _currentLine->setPen(pen);
+//            _currentLine->setLine(QLineF(scenePos, scenePos));
         }
         else
         {
@@ -259,22 +266,22 @@ void ViraEditorView::keyPressEvent(QKeyEvent *event)
 {
     if(event->key() == Qt::Key_Escape || event->key() == Qt::Key_Space)
     {
-        if(event->key() == Qt::Key_Space)
-        {
-            qDebug() << "----------";
-            foreach(QGraphicsLineItem * item, _lines)
-            {
-                QLineF line = item->line();
-                qDebug() << line.p1().toPoint() << line.p2().toPoint();
-            }
-            qDebug() << "----------";
-        }
+//        if(event->key() == Qt::Key_Space)
+//        {
+//            qDebug() << "----------";
+//            foreach(QGraphicsLineItem * item, _lines)
+//            {
+//                QLineF line = item->line();
+//                qDebug() << line.p1().toPoint() << line.p2().toPoint();
+//            }
+//            qDebug() << "----------";
+//        }
 
-        delete _currentLine;
-        _currentLine = 0;
-        foreach(QGraphicsLineItem * item, _lines)
-            delete item;
-        _lines.clear();
+//        delete _currentLine;
+//        _currentLine = 0;
+//        foreach(QGraphicsLineItem * item, _lines)
+//            delete item;
+//        _lines.clear();
     }
     QGraphicsView::keyPressEvent(event);
 }
@@ -284,7 +291,14 @@ void ViraEditorView::zoomReset()
     resetTransform();
     _scale = 1;
     _zoom = 1;
-//    syncItems();
+    //    syncItems();
+}
+
+void ViraEditorView::centerEditorOn(qulonglong id)
+{
+    auto it = _rooms.find(id);
+    if(it != _rooms.end())
+        centerOn(it.value());
 }
 
 void ViraEditorView::zoomIn()

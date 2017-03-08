@@ -17,10 +17,13 @@ class ViraEditorForm : public QWidget
     Q_OBJECT
     
 public:
-    explicit ViraEditorForm(qulonglong facilityId, QWidget *parent = 0);
+    explicit ViraEditorForm(QWidget *parent = 0);
     ~ViraEditorForm();
     void reinit(qulonglong facilityId);
     void setParentWindowId(qulonglong parentWindowId);
+
+private slots:
+    void centerEditorOn(qulonglong id);
 
 signals:
     void switchOnMap();

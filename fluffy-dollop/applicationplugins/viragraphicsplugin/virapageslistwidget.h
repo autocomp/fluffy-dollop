@@ -8,7 +8,7 @@ class ViraPagesListWidget : public QListWidget
 {
     Q_OBJECT
 public:
-    ViraPagesListWidget(qulonglong facilityId);
+    ViraPagesListWidget();
     void reinit(qulonglong facilityId);
 
 signals:

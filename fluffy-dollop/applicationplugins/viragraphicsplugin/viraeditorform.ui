@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>264</width>
-    <height>305</height>
+    <width>379</width>
+    <height>267</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_4">
+  <layout class="QVBoxLayout" name="verticalLayout_3">
    <property name="spacing">
     <number>3</number>
    </property>
@@ -30,41 +30,15 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QSplitter" name="horSplitter">
+    <widget class="QSplitter" name="splitter">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Vertical</enum>
      </property>
-     <property name="opaqueResize">
-      <bool>true</bool>
-     </property>
-     <property name="childrenCollapsible">
-      <bool>true</bool>
-     </property>
-     <widget class="QSplitter" name="vertSplitter">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <widget class="QWidget" name="verticalLayoutWidget_3">
-       <layout class="QVBoxLayout" name="leftTopLayout">
-        <property name="spacing">
-         <number>3</number>
-        </property>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="verticalLayoutWidget_2">
-       <layout class="QVBoxLayout" name="leftBottomLayout">
-        <property name="spacing">
-         <number>3</number>
-        </property>
-       </layout>
-      </widget>
+     <widget class="QWidget" name="verticalLayoutWidget_2">
+      <layout class="QVBoxLayout" name="topLayout"/>
      </widget>
      <widget class="QWidget" name="verticalLayoutWidget">
-      <layout class="QVBoxLayout" name="rightlLayout">
-       <property name="spacing">
-        <number>3</number>
-       </property>
-      </layout>
+      <layout class="QVBoxLayout" name="downLayout"/>
      </widget>
     </widget>
    </item>

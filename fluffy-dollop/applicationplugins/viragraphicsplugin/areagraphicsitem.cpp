@@ -22,21 +22,21 @@ void AreaGraphicsItem::init(const AreaInitData& areaInitData)
 
 void AreaGraphicsItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
-    if(_areaInitData.sendDoubleClick)
-    {
-        if(polygon().containsPoint(event->pos(), Qt::OddEvenFill))
-        {
-            event->accept();
-            emit dubleClickOnItem(_areaInitData.id);
-            qDebug() << "mouseDoubleClickEvent:" << toolTip();
-        }
-        else
-        {
-            event->ignore();
-            QGraphicsPolygonItem::mouseDoubleClickEvent(event);
-        }
-    }
-    else
+//    if(_areaInitData.sendDoubleClick)
+//    {
+//        if(polygon().containsPoint(event->pos(), Qt::OddEvenFill))
+//        {
+//            event->accept();
+//            emit dubleClickOnItem(_areaInitData.id);
+//            qDebug() << "mouseDoubleClickEvent:" << toolTip();
+//        }
+//        else
+//        {
+//            event->ignore();
+//            QGraphicsPolygonItem::mouseDoubleClickEvent(event);
+//        }
+//    }
+//    else
         QGraphicsPolygonItem::mouseDoubleClickEvent(event);
 }
 

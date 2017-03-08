@@ -15,7 +15,7 @@
 
 using namespace regionbiz;
 
-ViraEditorForm::ViraEditorForm(qulonglong facilityId, QWidget *parent) :
+ViraEditorForm::ViraEditorForm(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ViraEditorForm)
 {
@@ -24,45 +24,103 @@ ViraEditorForm::ViraEditorForm(qulonglong facilityId, QWidget *parent) :
     _sceneViraWidget->createModeButtonGroup();
     connect(_sceneViraWidget, SIGNAL(switchOnMap()), this, SIGNAL(switchOnMap()));
 
-    ui->rightlLayout->addWidget(_sceneViraWidget);
+    ui->topLayout->addWidget(_sceneViraWidget);
 
-    // reinit(facilityId);
-
-    _viraPagesListWidget = new ViraPagesListWidget(facilityId);
+    _viraPagesListWidget = new ViraPagesListWidget;
     connect(_viraPagesListWidget, SIGNAL(setFloor(qulonglong)), this, SLOT(slotSetFloor(qulonglong)));
-    ui->leftTopLayout->addWidget(_viraPagesListWidget);
+    ui->downLayout->addWidget(_viraPagesListWidget);
 
     _scene.setBackgroundBrush(QBrush(Qt::black));
     _view = new ViraEditorView();
     _view->setScene(&_scene);
     _sceneViraWidget->setMainViewWidget(_view);
+}
 
+ViraEditorForm::~ViraEditorForm()
+{
+    delete _sceneViraWidget;
+    delete _viraPagesListWidget;
+    delete ui;
+}
+
+void ViraEditorForm::reinit(qulonglong facilityId)
+{
     /*
+    QString destPath;
+    QVariant regionBizInitJson_Path = CtrConfig::getValueByName(QString("application_settings.regionBizInitJson_Path"));
+    if(regionBizInitJson_Path.isValid())
+         destPath = regionBizInitJson_Path.toString();
 
-    QFileInfo fi(xmlFilePath);
-    if(fi.isFile())
+    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseLoation(facilityId);
+    FacilityPtr facilityPtr = BaseArea::convert< Facility >(ptr);
+    if(facilityPtr)
     {
-        _futureWatcher = new QFutureWatcher<void>;
-        connect(_futureWatcher, SIGNAL(finished()), this, SLOT(finishRun()));
-        _runFinished = false;
-        destPath = getSavePath();
-        _futureWatcher->setFuture(QtConcurrent::run( std::bind(&ViraEditorForm::run, this, xmlFilePath, destPath) ) );
-        WaitDialogUnlimited waitDialogUnlimited;
-        while(_runFinished == false)
-            qApp->processEvents();
-    }
-    else
-    {
-        destPath = xmlFilePath;
-        QDir dir(destPath);
-        QFileInfoList fileInfoList = dir.entryInfoList(QDir::Dirs);
-        for(int i(0); i<fileInfoList.size(); ++i)
+        FloorPtrs floors = facilityPtr->getChilds();
+        for( FloorPtr floorPtr: floors )
         {
-            QString name = destPath + QDir::separator() + QString::number(i) + QDir::separator() + QString("0.tiff");
-            if(QFile::exists(name))
+            BaseAreaPtrs rooms = floorPtr->getChilds( Floor::FCF_ALL_ROOMS );
+            for( BaseAreaPtr room_ptr: rooms )
             {
-                QImage img;
-                img.load(name);
+                RoomPtr room = BaseArea::convert< Room >( room_ptr );
+                if(room)
+                {
+                }
+            }
+        }
+    }
+    */
+
+    _viraPagesListWidget->reinit(facilityId);
+    _view->reinit(facilityId);
+}
+
+void ViraEditorForm::setParentWindowId(qulonglong parentWindowId)
+{
+    _parentWindowId = parentWindowId;
+}
+
+void ViraEditorForm::centerEditorOn(qulonglong id)
+{
+    _view->centerEditorOn(id);
+}
+
+void ViraEditorForm::slotSetFloor(qulonglong floorId)
+{
+    _view->setFloor(floorId);
+}
+
+
+
+
+
+
+
+/*
+
+QFileInfo fi(xmlFilePath);
+if(fi.isFile())
+{
+    _futureWatcher = new QFutureWatcher<void>;
+    connect(_futureWatcher, SIGNAL(finished()), this, SLOT(finishRun()));
+    _runFinished = false;
+    destPath = getSavePath();
+    _futureWatcher->setFuture(QtConcurrent::run( std::bind(&ViraEditorForm::run, this, xmlFilePath, destPath) ) );
+    WaitDialogUnlimited waitDialogUnlimited;
+    while(_runFinished == false)
+        qApp->processEvents();
+}
+else
+{
+    destPath = xmlFilePath;
+    QDir dir(destPath);
+    QFileInfoList fileInfoList = dir.entryInfoList(QDir::Dirs);
+    for(int i(0); i<fileInfoList.size(); ++i)
+    {
+        QString name = destPath + QDir::separator() + QString::number(i) + QDir::separator() + QString("0.tiff");
+        if(QFile::exists(name))
+        {
+            QImage img;
+            img.load(name);
 
 //                QImage img2 = img3.scaled(img3.width()/2, img3.height()/2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 //                QString name2 = destPath + QDir::separator() + QString::number(i) + QDir::separator() + QString("2.tiff");
@@ -76,93 +134,19 @@ ViraEditorForm::ViraEditorForm(qulonglong facilityId, QWidget *parent) :
 //                QString name0 = destPath + QDir::separator() + QString::number(i) + QDir::separator() + QString("0.tiff");
 //                img0.save(name0, "TIFF");
 
-                _images.append(img);
-            }
+            _images.append(img);
         }
     }
-
-    _scene.setBackgroundBrush(QBrush(Qt::black));
-    _view = new PdfEditorView(destPath);
-    _view->setScene(&_scene);
-    _sceneViraWidget->setMainViewWidget(_view);
-
-    for(int i(0); i < _images.size(); ++i)
-        _viraPagesListWidget->addImage(i, _images.at(i));
-    */
 }
 
-ViraEditorForm::~ViraEditorForm()
-{
-    delete _sceneViraWidget;
-    delete _viraPagesListWidget;
-    delete ui;
-}
+_scene.setBackgroundBrush(QBrush(Qt::black));
+_view = new PdfEditorView(destPath);
+_view->setScene(&_scene);
+_sceneViraWidget->setMainViewWidget(_view);
 
-void ViraEditorForm::reinit(qulonglong facilityId)
-{
-    QString destPath;
-    QVariant regionBizInitJson_Path = CtrConfig::getValueByName(QString("application_settings.regionBizInitJson_Path"));
-    if(regionBizInitJson_Path.isValid())
-         destPath = regionBizInitJson_Path.toString();
-
-    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseLoation(facilityId);
-    FacilityPtr facilityPtr = BaseArea::convert< Facility >(ptr);
-    if(facilityPtr)
-    {
-        FloorPtrs floors = facilityPtr->getChilds();
-        for( FloorPtr floorPtr: floors )
-        {
-
-//            QTreeWidgetItem * floorItem = new QTreeWidgetItem(facilityItem);
-//            floorItem->setText(0, QString::fromStdString(floorPtr->getName()));
-//            const qulonglong id(floorPtr->getId());
-//            floorItem->setText(1, QString::number(id));
-//            floorItem->setData(0, ID, id);
-//            _items.insert(id, floorItem);
-
-//                        floorItem->setText(2, QString::fromStdString(floorPtr->getPlanPath()));
-//                        QPixmap pm("/home/sergey/contour_ng/0.tiff");
-//                        floorItem->setIcon(0, QIcon(pm));
-
-            BaseAreaPtrs rooms = floorPtr->getChilds( Floor::FCF_ALL_ROOMS );
-            for( BaseAreaPtr room_ptr: rooms )
-            {
-                RoomPtr room = BaseArea::convert< Room >( room_ptr );
-                if(room)
-                {
-//                    QTreeWidgetItem * roomItem = new QTreeWidgetItem(floorItem);
-//                    roomItem->setText(0, QString::fromStdString(room->getName()));
-//                    const qulonglong id(room->getId());
-//                    roomItem->setText(1, QString::number(id));
-//                    roomItem->setData(0, ID, id);
-//                    _items.insert(id, roomItem);
-                }
-            }
-        }
-    }
-
-
-
-    // ewApp()->setWidgetTitle(_parentWindowId, _facility.name);
-    // QString destPath = QFileInfo(xmlFilePath).canonicalPath();
-
-    _viraPagesListWidget->reinit(facilityId);
-    _view->reset(facilityId);
-}
-
-void ViraEditorForm::setParentWindowId(qulonglong parentWindowId)
-{
-    _parentWindowId = parentWindowId;
-    // ewApp()->setWidgetTitle(parentWindowId, _facility.name);
-}
-
-void ViraEditorForm::slotSetFloor(qulonglong floorId)
-{
-//    if(pageNumber >= 0 && pageNumber < _images.size())
-//    {
-        _view->setFloor(floorId);
-//    }
-}
+for(int i(0); i < _images.size(); ++i)
+    _viraPagesListWidget->addImage(i, _images.at(i));
+*/
 
 //void ViraEditorForm::run(QString pdfFilePath, QString savePath)
 //{

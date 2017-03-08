@@ -1,26 +1,24 @@
 #include "virapageslistwidget.h"
-#include<QResizeEvent>
-#include<QDir>
+#include <QResizeEvent>
+#include <QDir>
 #include <ctrcore/ctrcore/ctrconfig.h>
 #include <regionbiz/rb_manager.h>
 
 using namespace regionbiz;
 
-ViraPagesListWidget::ViraPagesListWidget(qulonglong facilityId)
+ViraPagesListWidget::ViraPagesListWidget()
     : _coef(1)
 {
     setViewMode(QListView::IconMode);
-    setFlow(QListView::TopToBottom);
+    setFlow(QListView::LeftToRight);
     setWrapping(false);
-    //setIconSize(QSize(200,100));
+    setIconSize(QSize(200,100));
 
     setSelectionMode(QAbstractItemView::SingleSelection);
     setDragDropMode(QAbstractItemView::DragOnly);
     setDragEnabled(true);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-
-    reinit(facilityId);
 
     connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(slotSelectionChanged()));
     auto mngr = RegionBizManager::instance();
@@ -31,6 +29,10 @@ void ViraPagesListWidget::reinit(qulonglong facilityId)
 {
     _items.clear();
     clear();
+
+    if(facilityId == 0)
+        return;
+
     QString destPath;
     QVariant regionBizInitJson_Path = CtrConfig::getValueByName(QString("application_settings.regionBizInitJson_Path"));
     if(regionBizInitJson_Path.isValid())
@@ -51,12 +53,16 @@ void ViraPagesListWidget::reinit(qulonglong facilityId)
             _items.insert((qulonglong)floorPtr->getId(), item);
         }
     }
+
+    int H = height();
+    _iconSize = QSize(H/_coef - 25, H - 25);
+    setIconSize(_iconSize);
 }
 
 void ViraPagesListWidget::resizeEvent(QResizeEvent * e)
 {
-    int W = e->size().width();
-    _iconSize = QSize(W-2, (W * _coef)-2);
+    int H = e->size().height();
+    _iconSize = QSize(H/_coef - 25, H - 25);
     setIconSize(_iconSize);
     QListWidget::resizeEvent(e);
 }
@@ -67,8 +73,9 @@ void ViraPagesListWidget::slotSelectionChanged()
     {
         _block = true;
         QListWidgetItem * item = selectedItems().first();
-        RegionBizManager::instance()->selectArea(item->data(Qt::UserRole).toULongLong());
-        emit setFloor(item->data(Qt::UserRole).toULongLong());
+        qulonglong id = item->data(Qt::UserRole).toULongLong();
+        RegionBizManager::instance()->selectArea(id);
+        emit setFloor(id);
         _block = false;
     }
 }

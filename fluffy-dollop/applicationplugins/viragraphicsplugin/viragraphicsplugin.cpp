@@ -40,54 +40,35 @@ void ViraGraphicsPlugin::launchWorkState()
 {
     _workState = QSharedPointer<WorkState>(new WorkState());
     connect(_workState.data(), SIGNAL(showFacility(qulonglong)), this, SLOT(showFacility(qulonglong)));
+    connect(_workState.data(), SIGNAL(switchOnMap()), this, SLOT(switchOnMap()));
+    connect(_workState.data(), SIGNAL(switchOnEditor()), this, SLOT(switchOnEditor()));
     visualize_system::VisualizerManager::instance()->getStateInterface(getVisualizerId())->setVisualizerState(_workState);
+
+    _pdfEditorForm = new ViraEditorForm;
+    connect(_pdfEditorForm, SIGNAL(switchOnMap()), this, SLOT(switchOnMap()));
+    connect(_workState.data(), SIGNAL(centerEditorOn(qulonglong)), _pdfEditorForm, SLOT(centerEditorOn(qulonglong)));
+
+    int visualizerIndex = _stackedWidget->currentIndex();
+    _stackedWidget->setProperty("visualizerIndex", visualizerIndex);
+    int pdfEditorFormIndex = _stackedWidget->addWidget(_pdfEditorForm);
+    _stackedWidget->setProperty("pdfEditorFormIndex", pdfEditorFormIndex);
+    _stackedWidget->setCurrentIndex(visualizerIndex);
 }
 
 void ViraGraphicsPlugin::showFacility(qulonglong id)
 {
-    if(_pdfEditorForm)
-    {
-        _pdfEditorForm->reinit(id); //xmlFilePath);
-        _stackedWidget->setCurrentIndex(_stackedWidget->property("pdfEditorFormIndex").toInt());
-    }
-    else
-    {
-        _pdfEditorForm = new ViraEditorForm(id);//xmlFilePath);
-        connect(_pdfEditorForm, SIGNAL(switchOnMap()), this, SLOT(switchOnMap()));
-
-        int visualizerIndex = _stackedWidget->currentIndex();
-        _stackedWidget->setProperty("visualizerIndex", visualizerIndex);
-        int pdfEditorFormIndex = _stackedWidget->addWidget(_pdfEditorForm);
-        _stackedWidget->setProperty("pdfEditorFormIndex", pdfEditorFormIndex);
-        _stackedWidget->setCurrentIndex(pdfEditorFormIndex);
-
-//        _iface = new EmbIFaceNotifier(_pdfEditorForm);
-//        QString tag = QString("ViraGraphicsPluginForm");
-//        quint64 widgetId = ewApp()->restoreWindow(tag, _iface);
-//        if(0 == widgetId)
-//        {
-//            ew::EmbeddedWindowStruct struc;
-//            ew::EmbeddedHeaderStruct headStr;
-//            headStr.hasCloseButton = true;
-//            headStr.hasMinMaxButton = true;
-//            headStr.hasCollapseButton = true;
-//            headStr.headerPixmap = ":/img/061_icons_32_tools_pdf.png";
-//            headStr.windowTitle = QString::fromUtf8("Импорт PDF-файла");
-//            struc.header = headStr;
-//            struc.iface = _iface;
-//            struc.widgetTag = tag;
-//            struc.minSize = QSize(300,300);
-//            ewApp()->createWindow(struc);
-//        }
-//        connect(_iface, SIGNAL(signalClosed()), this, SLOT(slotEditorClosed()));
-//        _pdfEditorForm->setParentWindowId(_iface->id());
-    }
-    //ewApp()->setVisible(_iface->id(), true);
+    _pdfEditorForm->reinit(id);
+    _stackedWidget->setCurrentIndex(_stackedWidget->property("pdfEditorFormIndex").toInt());
 }
 
 void ViraGraphicsPlugin::switchOnMap()
 {
     _stackedWidget->setCurrentIndex(_stackedWidget->property("visualizerIndex").toInt());
+}
+
+void ViraGraphicsPlugin::switchOnEditor()
+{
+    _stackedWidget->setCurrentIndex(_stackedWidget->property("pdfEditorFormIndex").toInt());
 }
 
 QList<InitPluginData> ViraGraphicsPlugin::getInitPluginData()
@@ -118,92 +99,12 @@ void ViraGraphicsPlugin::checked(const QString &buttonName, bool on_off)
             dataInterface->setProviderViewProperty(providers.at(0), "visibility", ! _showFirstBaseCover);
             dataInterface->setProviderViewProperty(providers.at(1), "visibility", _showFirstBaseCover);
         }
-
-//        dataInterface->removeProviders(providers);
-
-//        QVariant baseTmsLayer_Url = CtrConfig::getValueByName(_showFirstBaseCover ? QString("application_settings.baseTmsLayer2_Url") : QString("application_settings.baseTmsLayer1_Url"));
-//        if(baseTmsLayer_Url.isValid())
-//        {
-//            QUrl url(baseTmsLayer_Url.toString());
-//            QSharedPointer<data_system::AbstractDataProvider>dp = data_system::DataProviderFactory::instance()->createProvider(url, QString("tms"));
-//            if(dp)
-//            {
-//                dp->open(url);
-//                dataInterface->addBaseProviders(QList<uint>() << dp->getProviderId());
-//            }
-//        }
         _showFirstBaseCover = ! _showFirstBaseCover;
-
-//        _isChecked = on_off;
-//        if(on_off)
-//        {
-//            startEditor();
-//        }
-//        else
-//        {
-//            ewApp()->setVisible(_iface->id(), false);
-//            if(_pdfEditorForm)
-//            {
-//                delete _pdfEditorForm;
-//                _pdfEditorForm = 0;
-//            }
-//            if(_iface)
-//            {
-//                delete _iface;
-//                _iface = 0;
-//            }
-//        }
     }
 }
 
-void ViraGraphicsPlugin::startEditor()
-{
-//    visualize_system::ViewInterface * inter = visualize_system::VisualizerManager::instance()->getViewInterface(getVisualizerId());
-//    QString path = QFileDialog::getOpenFileName(inter ? inter->getAbstractSceneWidget() : 0,
-//                                                QString::fromUtf8("Выберите PDF-файл для импорта"),
-//                                                QString(""),
-//                                                QString("facility.xml"));
-//    if(path.isEmpty())
-//    {
-//        emit setChecked(QString("ViraGraphicsPlugin"), false);
-//    }
-//    else
-//    {
-//        if( ! _pdfEditorForm)
-//        {
-//            _pdfEditorForm = new PdfEditorForm(path);
-//            _iface = new EmbIFaceNotifier(_pdfEditorForm);
-//            QString tag = QString("ViraGraphicsPluginForm");
-//            quint64 widgetId = ewApp()->restoreWindow(tag, _iface);
-//            if(0 == widgetId)
-//            {
-//                ew::EmbeddedWindowStruct struc;
-//                ew::EmbeddedHeaderStruct headStr;
-//                headStr.hasCloseButton = true;
-//                headStr.hasMinMaxButton = true;
-//                headStr.hasCollapseButton = true;
-//                headStr.headerPixmap = ":/img/061_icons_32_tools_pdf.png";
-//                headStr.windowTitle = QString::fromUtf8("Импорт PDF-файла");
-//                struc.header = headStr;
-//                struc.iface = _iface;
-//                struc.widgetTag = tag;
-//                struc.minSize = QSize(300,300);
-//                ewApp()->createWindow(struc);
-//            }
-//            connect(_iface, SIGNAL(signalClosed()), this, SLOT(slotEditorClosed()));
-//            _pdfEditorForm->setParentWindowId(_iface->id());
-//        }
-//        ewApp()->setVisible(_iface->id(), true);
-//    }
-}
-
-void ViraGraphicsPlugin::slotEditorClosed()
-{
-//    emit setChecked(QString("ViraGraphicsPlugin"), false);
-}
 
 
-//Q_EXPORT_PLUGIN2(ViraGraphicsPlugin, ViraGraphicsPluginInterface)
 
 
 

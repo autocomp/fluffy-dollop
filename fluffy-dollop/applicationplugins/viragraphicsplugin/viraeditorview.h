@@ -30,7 +30,8 @@ class ViraEditorView : public QGraphicsView
 public:
     explicit ViraEditorView(); // const pdf_editor::Facility& facility, const QString& path);
     ~ViraEditorView();
-    void reset(qulonglong floorId); //const QString &path = QString());
+    void reinit(qulonglong floorId); //const QString &path = QString());
+    void centerEditorOn(qulonglong id);
 
 signals:
     
@@ -59,8 +60,8 @@ private:
     QList<GraphicsPixmapItem *> _owerViews;
     QMap<qulonglong, AreaGraphicsItem *> _rooms;
 
-    QList<QGraphicsLineItem *> _lines;
-    QGraphicsLineItem * _currentLine = nullptr;
+//    QList<QGraphicsLineItem *> _lines;
+//    QGraphicsLineItem * _currentLine = nullptr;
 };
 
 #endif // PDFEDITORVIEW_H
