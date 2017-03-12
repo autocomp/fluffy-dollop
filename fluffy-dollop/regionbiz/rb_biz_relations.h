@@ -4,6 +4,7 @@
 #include <memory>
 #include <QDateTime>
 #include <QString>
+#include <vector>
 
 namespace regionbiz {
 
