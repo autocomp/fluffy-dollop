@@ -13,7 +13,7 @@ int main()
 
     //! init
     auto mngr = RegionBizManager::instance();
-    QString str = "./config/regionbiz.json";
+    QString str = "~/.contour_ng/regionbiz_sqlite.json";
     mngr->init( str );
 
     //! load regons
@@ -98,6 +98,6 @@ int main()
     mngr->selectArea( 4 );
     mngr->selectArea( 5 );
 
-    mngr->subscribeCenterOn( &recv, SLOT(onCenterOn(uint64_t)) );
+    mngr->subscribeOnCenterOn( &recv, SLOT(onCenterOn(uint64_t)) );
     mngr->centerOnArea( 6 );
 }

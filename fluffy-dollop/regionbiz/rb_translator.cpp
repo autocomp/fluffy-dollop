@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "rb_translator_sqlite.h"
+#include "rb_translator_sql.h"
 
 using namespace regionbiz;
 
@@ -141,6 +141,12 @@ BaseTranslatorPtr BaseTranslatorFabric::getTranslatorByType(std::string &type)
     {
         auto sqlite_trans = BaseTranslatorPtr( new SqliteTranslator() );
         return sqlite_trans;
+    }
+
+    if( "psql" == type )
+    {
+        auto psql_trans = BaseTranslatorPtr( new PsqlTranslator() );
+        return psql_trans;
     }
 
     return nullptr;

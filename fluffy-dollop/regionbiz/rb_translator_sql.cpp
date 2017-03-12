@@ -1,4 +1,4 @@
-#include "rb_translator_sqlite.h"
+#include "rb_translator_sql.h"
 
 #include <iostream>
 #include <QSqlQuery>
@@ -6,35 +6,17 @@
 
 using namespace regionbiz;
 
-void SqliteTranslator::loadFunctions()
+void SqlTranslator::loadFunctions()
 {
-    _load_regions = std::bind( &SqliteTranslator::loadRegions, this );
-    _load_locations = std::bind( &SqliteTranslator::loadLocations, this );
-    _load_facilitys = std::bind( &SqliteTranslator::loadFacilitys, this );
-    _load_floors = std::bind( &SqliteTranslator::loadFloors, this );
-    _load_rooms_groups = std::bind( &SqliteTranslator::loadRoomsGroups, this );
-    _load_rooms = std::bind( &SqliteTranslator::loadRooms, this );
+    _load_regions = std::bind( &SqlTranslator::loadRegions, this );
+    _load_locations = std::bind( &SqlTranslator::loadLocations, this );
+    _load_facilitys = std::bind( &SqlTranslator::loadFacilitys, this );
+    _load_floors = std::bind( &SqlTranslator::loadFloors, this );
+    _load_rooms_groups = std::bind( &SqlTranslator::loadRoomsGroups, this );
+    _load_rooms = std::bind( &SqlTranslator::loadRooms, this );
 }
 
-bool SqliteTranslator::initBySettings( QVariantMap settings )
-{
-    QSqlDatabase db = QSqlDatabase::addDatabase( "QSQLITE" );
-    QString path = settings["file_path"].toString();
-    db.setDatabaseName( path );
-
-    if (db.open())
-    {
-        std::cout << "Database: connection ok" << std::endl;
-        return true;
-    }
-    else
-    {
-        std::cerr << "Error: connection with database fail" << std::endl;
-        return false;
-    }
-}
-
-std::vector< RegionPtr > SqliteTranslator::loadRegions()
+std::vector< RegionPtr > SqlTranslator::loadRegions()
 {
     std::vector< RegionPtr > regions;
 
@@ -60,7 +42,7 @@ std::vector< RegionPtr > SqliteTranslator::loadRegions()
     return regions;
 }
 
-std::vector<LocationPtr> SqliteTranslator::loadLocations()
+std::vector<LocationPtr> SqlTranslator::loadLocations()
 {
     std::vector< LocationPtr > locations;
 
@@ -90,7 +72,7 @@ std::vector<LocationPtr> SqliteTranslator::loadLocations()
     return locations;
 }
 
-std::vector<FacilityPtr> SqliteTranslator::loadFacilitys()
+std::vector<FacilityPtr> SqlTranslator::loadFacilitys()
 {
     std::vector< FacilityPtr > facilitys;
 
@@ -121,7 +103,7 @@ std::vector<FacilityPtr> SqliteTranslator::loadFacilitys()
     return facilitys;
 }
 
-std::vector<FloorPtr> SqliteTranslator::loadFloors()
+std::vector<FloorPtr> SqlTranslator::loadFloors()
 {
     std::vector< FloorPtr > floors;
 
@@ -151,7 +133,7 @@ std::vector<FloorPtr> SqliteTranslator::loadFloors()
     return floors;
 }
 
-std::vector<RoomsGroupPtr> SqliteTranslator::loadRoomsGroups()
+std::vector<RoomsGroupPtr> SqlTranslator::loadRoomsGroups()
 {
     std::vector< RoomsGroupPtr > rooms_groups;
 
@@ -181,7 +163,7 @@ std::vector<RoomsGroupPtr> SqliteTranslator::loadRoomsGroups()
     return rooms_groups;
 }
 
-std::vector<RoomPtr> SqliteTranslator::loadRooms()
+std::vector<RoomPtr> SqlTranslator::loadRooms()
 {
     std::vector< RoomPtr > rooms;
 
@@ -211,7 +193,7 @@ std::vector<RoomPtr> SqliteTranslator::loadRooms()
 
 //------------------------------------------------------
 
-std::vector<PropertyPtr> SqliteTranslator::loadPropertys()
+std::vector<PropertyPtr> SqlTranslator::loadPropertys()
 {
     std::vector<PropertyPtr> propertys;
 
@@ -238,7 +220,7 @@ std::vector<PropertyPtr> SqliteTranslator::loadPropertys()
     return propertys;
 }
 
-std::vector<RentPtr> SqliteTranslator::loadRents()
+std::vector<RentPtr> SqlTranslator::loadRents()
 {
     std::vector<RentPtr> rents;
 
@@ -271,7 +253,7 @@ std::vector<RentPtr> SqliteTranslator::loadRents()
 //------------------------------------------------------
 
 template<typename LocTypePtr>
-bool SqliteTranslator::loadCoordinate( std::vector< LocTypePtr > &vector,
+bool SqlTranslator::loadCoordinate( std::vector< LocTypePtr > &vector,
                                        QString name )
 {
     std::map< uint64_t, QPolygonF > coords;
@@ -301,7 +283,7 @@ bool SqliteTranslator::loadCoordinate( std::vector< LocTypePtr > &vector,
     return res;
 }
 
-bool SqliteTranslator::loadPlans( BaseAreaPtr area )
+bool SqlTranslator::loadPlans( BaseAreaPtr area )
 {
     std::shared_ptr< PlanKeeper > keeper = BaseArea::convert< PlanKeeper >( area );
     if( keeper )
@@ -337,14 +319,57 @@ bool SqliteTranslator::loadPlans( BaseAreaPtr area )
     return false;
 }
 
-bool SqliteTranslator::loadDocuments( BaseBizRelationPtr /*relation*/ )
+bool SqlTranslator::loadDocuments( BaseBizRelationPtr /*relation*/ )
 {
     // TODO load documents
     return true;
 }
 
-bool SqliteTranslator::loadPayments(RentPtr /*rent*/)
+bool SqlTranslator::loadPayments(RentPtr /*rent*/)
 {
     // TODO load payments
     return true;
+}
+
+bool SqliteTranslator::initBySettings(QVariantMap settings)
+{
+    QSqlDatabase db = QSqlDatabase::addDatabase( "QSQLITE" );
+    QString path = settings["file_path"].toString();
+    db.setDatabaseName( path );
+
+    if (db.open())
+    {
+        std::cout << "Database: connection ok" << std::endl;
+        return true;
+    }
+    else
+    {
+        std::cerr << "Error: connection with database fail" << std::endl;
+        return false;
+    }
+}
+
+bool PsqlTranslator::initBySettings(QVariantMap settings)
+{
+    QSqlDatabase db = QSqlDatabase::addDatabase( "QPSQL" );
+    QString host = settings["host"].toString();
+    QString db_name = settings["db_name"].toString();
+    QString user = settings["user"].toString();
+    QString pass = settings["pass"].toString();
+
+    db.setHostName( host );
+    db.setDatabaseName( db_name );
+    db.setUserName( user );
+    db.setPassword( pass );
+
+    if (db.open())
+    {
+        std::cout << "Database: connection ok" << std::endl;
+        return true;
+    }
+    else
+    {
+        std::cerr << "Error: connection with database fail: " << std::endl;
+        return false;
+    }
 }

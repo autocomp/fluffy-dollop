@@ -8,6 +8,7 @@
 #include <QJsonDocument>
 #include <QVariant>
 #include <QDebug>
+#include <QDir>
 
 #define FIND_IF( cont, func ) std::find_if( cont.begin(), cont.end(), func );
 
@@ -247,7 +248,7 @@ void RegionBizManager::centerOnArea(uint64_t id)
     _select_manager.centerOnBaseArea( id );
 }
 
-void RegionBizManager::subscribeCenterOn(QObject *obj, const char *slot, bool queue)
+void RegionBizManager::subscribeOnCenterOn(QObject *obj, const char *slot, bool queue)
 {
     QObject::connect( &_select_manager, SIGNAL( centerOnBaseArea( uint64_t )),
                       obj, slot, ( queue ? Qt::QueuedConnection : Qt::DirectConnection ));
@@ -266,8 +267,13 @@ void RegionBizManager::onExit()
 
 QVariantMap RegionBizManager::loadJsonConfig( QString& file_path )
 {
-    QString file_in;
+    // replace '~' in config
+    if( file_path.startsWith ( "~/" ))
+        file_path.replace (0, 1, QDir::homePath());
 
+
+    // open
+    QString file_in;
     QFile file( file_path );
     if( file.open( QFile::ReadOnly | QFile::Text ))
     {
@@ -280,13 +286,14 @@ QVariantMap RegionBizManager::loadJsonConfig( QString& file_path )
                   << file_path.toUtf8().data() << std::endl;
     }
 
+    // parce json
     QJsonParseError err;
     QJsonDocument json_doc = QJsonDocument::fromJson( file_in.toUtf8(), &err );
     if( err.error != QJsonParseError::NoError )
         std::cerr << err.errorString().toStdString();
 
+    // return result
     QVariantMap settings = json_doc.toVariant().toMap();
-
     return settings;
 }
 

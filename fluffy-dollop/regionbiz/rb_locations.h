@@ -55,7 +55,7 @@ public:
 //    std::shared_ptr< Type > convert()
 //    {
 //        auto mngr = RegionBizManager::instance();
-//        BaseLocationPtr ptr = mngr->getBaseLoation( _id, getType() );
+//        BaseLocationPtr ptr = mngr->getBaseArea( _id, getType() );
 //        return std::dynamic_pointer_cast< Type >( ptr );
 //    }
 

@@ -51,7 +51,7 @@ void ViraEditorForm::reinit(qulonglong facilityId)
     if(regionBizInitJson_Path.isValid())
          destPath = regionBizInitJson_Path.toString();
 
-    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseLoation(facilityId);
+    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(facilityId);
     FacilityPtr facilityPtr = BaseArea::convert< Facility >(ptr);
     if(facilityPtr)
     {

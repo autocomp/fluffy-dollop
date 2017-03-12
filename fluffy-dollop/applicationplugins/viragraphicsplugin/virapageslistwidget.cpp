@@ -38,17 +38,17 @@ void ViraPagesListWidget::reinit(qulonglong facilityId)
     if(regionBizInitJson_Path.isValid())
          destPath = regionBizInitJson_Path.toString();
 
-    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseLoation(facilityId, BaseArea::AT_FACILITY);
+    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(facilityId, BaseArea::AT_FACILITY);
     FacilityPtr facilityPtr = BaseArea::convert< Facility >(ptr);
     if(facilityPtr)
     {
         FloorPtrs floors = facilityPtr->getChilds();
         for( FloorPtr floorPtr: floors )
         {
-            QString pixmapPath = destPath + QString::fromStdString(floorPtr->getPlanPath());
+            QString pixmapPath = destPath + floorPtr->getPlanPath();
             QPixmap pm(pixmapPath);
             _coef = (double)pm.height() / (double)pm.width();
-            QListWidgetItem * item = new QListWidgetItem(QIcon(pm), QString::fromStdString(floorPtr->getName()), this);
+            QListWidgetItem * item = new QListWidgetItem(QIcon(pm), floorPtr->getName(), this);
             item->setData(Qt::UserRole, (qulonglong)floorPtr->getId());
             _items.insert((qulonglong)floorPtr->getId(), item);
         }
@@ -102,7 +102,7 @@ void ViraPagesListWidget::slotSelectionItemsChanged(uint64_t prev_id, uint64_t c
         }
         else
         {
-            BaseAreaPtr ptr = RegionBizManager::instance()->getBaseLoation(curr_id, BaseArea::AT_ROOM);
+            BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(curr_id, BaseArea::AT_ROOM);
             RoomPtr roomPtr = BaseArea::convert< Room >(ptr);
             if(roomPtr)
             {

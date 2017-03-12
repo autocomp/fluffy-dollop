@@ -82,11 +82,11 @@ void ViraEditorView::setFloor(qulonglong floorId)
     if(regionBizInitJson_Path.isValid())
          destPath = regionBizInitJson_Path.toString();
 
-    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseLoation(floorId, BaseArea::AT_FLOOR);
+    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(floorId, BaseArea::AT_FLOOR);
     FloorPtr floorPtr = BaseArea::convert< Floor >(ptr);
     if(floorPtr)
     {
-        QString pixmapPath = destPath + QString::fromStdString(floorPtr->getPlanPath());
+        QString pixmapPath = destPath + floorPtr->getPlanPath();
         QPixmap pm(pixmapPath);
         GraphicsPixmapItem* item = new GraphicsPixmapItem(pm);
         scene()->addItem(item);
@@ -99,9 +99,7 @@ void ViraEditorView::setFloor(qulonglong floorId)
             RoomPtr room = BaseArea::convert< Room >( room_ptr );
             if(room)
             {
-                QPolygonF scenePolygon;
-                for(Coord coord : room->getCoords())
-                    scenePolygon.append(QPointF(coord.x, coord.y));
+                QPolygonF scenePolygon = room->getCoords();
                 AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(scenePolygon);
                 areaGraphicsItem->setAcceptHoverEvents(true);
                 roomInitData.id = room->getId();

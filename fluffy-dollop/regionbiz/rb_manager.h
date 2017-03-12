@@ -42,13 +42,13 @@ public:
     // selection managment
     uint64_t getSelectedArea();
     void selectArea( uint64_t id );
-    void subscribeOnSelect(QObject* obj,
+    void subscribeOnSelect( QObject* obj,
                             const char *slot,
                             bool queue = false );
     void centerOnArea( uint64_t id );
-    void subscribeCenterOn( QObject* obj,
-                            const char *slot,
-                            bool queue = false );
+    void subscribeOnCenterOn( QObject* obj,
+                              const char *slot,
+                              bool queue = false );
 
 private:
     RegionBizManager();

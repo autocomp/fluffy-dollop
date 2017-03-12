@@ -26,7 +26,7 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
     for( RegionPtr regionPtr: regions )
     {
         QTreeWidgetItem * regionItem = new QTreeWidgetItem(this);
-        regionItem->setText(0, QString::fromStdString(regionPtr->getDescription()));
+        regionItem->setText(0, regionPtr->getDescription());
         const qulonglong id(regionPtr->getId());
         regionItem->setText(1, QString::number(id));
         regionItem->setData(0, ID, id);
@@ -39,7 +39,7 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
             if(locationPtr)
             {
                 QTreeWidgetItem * locationItem = new QTreeWidgetItem(regionItem);
-                locationItem->setText(0, QString::fromStdString(locationPtr->getDescription()));
+                locationItem->setText(0, locationPtr->getDescription());
                 const qulonglong id(locationPtr->getId());
                 locationItem->setText(1, QString::number(id));
                 locationItem->setData(0, ID, id);
@@ -51,7 +51,7 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
                 for( FacilityPtr facilityPtr: facilities )
                 {
                     QTreeWidgetItem * facilityItem = new QTreeWidgetItem(locationItem);
-                    facilityItem->setText(0, QString::fromStdString(facilityPtr->getDescription()));
+                    facilityItem->setText(0, facilityPtr->getDescription());
                     const qulonglong id(facilityPtr->getId());
                     facilityItem->setText(1, QString::number(id));
                     facilityItem->setData(0, ID, id);
@@ -61,7 +61,7 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
                     for( FloorPtr floorPtr: floors )
                     {
                         QTreeWidgetItem * floorItem = new QTreeWidgetItem(facilityItem);
-                        floorItem->setText(0, QString::fromStdString(floorPtr->getName()));
+                        floorItem->setText(0, floorPtr->getName());
                         const qulonglong id(floorPtr->getId());
                         floorItem->setText(1, QString::number(id));
                         floorItem->setData(0, ID, id);
@@ -78,13 +78,13 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
                             if(room)
                             {
                                 QTreeWidgetItem * roomItem = new QTreeWidgetItem(floorItem);
-                                roomItem->setText(0, QString::fromStdString(room->getName()));
+                                roomItem->setText(0, room->getName());
                                 const qulonglong id(room->getId());
                                 roomItem->setText(1, QString::number(id));
                                 roomItem->setData(0, ID, id);
                                 _items.insert(id, roomItem);
 
-                                roomItem->setText(2, QString::fromStdString(room->getPlanPath()));
+                                roomItem->setText(2, room->getPlanPath());
                             }
                         }
                         floorItem->setExpanded(true);
@@ -116,7 +116,7 @@ void ViraTreeWidget::slotItemDoubleClicked(QTreeWidgetItem * item, int)
     if(item)
     {
         const qulonglong id(item->data(0, ID).toULongLong());
-        RegionBizManager::instance()->centerOn(id);
+        RegionBizManager::instance()->centerOnArea(id);
         qDebug() << "slotItemDoubleClicked, ID :" << id;
     }
 }

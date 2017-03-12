@@ -140,7 +140,7 @@ void AppComposer::init()
     if(regionBizInitJson_Path.isValid())
     {
         auto mngr = regionbiz::RegionBizManager::instance();
-        std::string str = regionBizInitJson_Path.toString().toStdString() + "config.json";
+        QString str = regionBizInitJson_Path.toString();
         mngr->init(str);
     }
     else

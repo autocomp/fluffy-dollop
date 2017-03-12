@@ -5,11 +5,11 @@
 
 namespace regionbiz {
 
-class SqliteTranslator: public BaseTranslator
+class SqlTranslator: public BaseTranslator
 {
 private:
     void loadFunctions() override;
-    bool initBySettings(QVariantMap settings) override;
+    virtual bool initBySettings(QVariantMap settings) = 0;
 
     // read locations
     // TODO write template method
@@ -30,6 +30,20 @@ private:
     bool loadPlans( BaseAreaPtr area );
     bool loadDocuments( BaseBizRelationPtr relation );
     bool loadPayments( RentPtr rent );
+};
+
+//------------------------------------------------------------
+
+class SqliteTranslator: public SqlTranslator
+{
+    bool initBySettings( QVariantMap settings ) override;
+};
+
+//------------------------------------------------------------
+
+class PsqlTranslator: public SqlTranslator
+{
+    bool initBySettings( QVariantMap settings ) override;
 };
 
 }

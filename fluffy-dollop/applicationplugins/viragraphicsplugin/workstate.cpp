@@ -71,9 +71,7 @@ void WorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom
     std::vector<RegionPtr> regions = mngr->getRegions();
     for( RegionPtr regionPtr: regions )
     {
-        QPolygonF scenePolygon;
-        for(Coord coord : regionPtr->getCoords())
-            scenePolygon.append(QPointF(coord.x, coord.y));
+        QPolygonF scenePolygon = regionPtr->getCoords();
         AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(scenePolygon);
         regionInitData.id = regionPtr->getId();
         areaGraphicsItem->init(regionInitData);
@@ -87,9 +85,7 @@ void WorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom
             if(locationPtr)
             {
                 //qDebug() << "locationPtr :" << QString::fromStdString(locationPtr->getDescription());
-                QPolygonF scenePolygon;
-                for(Coord coord : locationPtr->getCoords())
-                    scenePolygon.append(QPointF(coord.x, coord.y));
+                QPolygonF scenePolygon = locationPtr->getCoords();
                 AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(scenePolygon);
                 locationInitData.id = locationPtr->getId();
                 areaGraphicsItem->init(locationInitData);
@@ -105,9 +101,7 @@ void WorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom
                 std::vector< FacilityPtr > facilities = locationPtr->getChilds();
                 for( FacilityPtr facilityPtr: facilities )
                 {
-                    QPolygonF scenePolygon;
-                    for(Coord coord : facilityPtr->getCoords())
-                        scenePolygon.append(QPointF(coord.x, coord.y));
+                    QPolygonF scenePolygon = facilityPtr->getCoords();
                     AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(scenePolygon);
                     connect(areaGraphicsItem, SIGNAL(dubleClickOnItem(qulonglong)), this, SLOT(slotDubleClickOnFacility(qulonglong)));
                     facInitData.id = facilityPtr->getId();
@@ -219,7 +213,7 @@ void WorkState::slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_id)
     }
     if(curr_id > 0)
     {
-        BaseAreaPtr ptr = RegionBizManager::instance()->getBaseLoation(curr_id);
+        BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(curr_id);
         if( ! ptr)
             return;
 
@@ -272,7 +266,7 @@ void WorkState::slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_id)
 
 void WorkState::slotCenterOn(uint64_t id)
 {
-    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseLoation(id);
+    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(id);
     if( ! ptr)
         return;
 
