@@ -95,7 +95,7 @@ AppComposer::~AppComposer()
 
 void AppComposer::init()
 {
-    m_applicationName = QString::fromUtf8("V-Ира");
+    m_applicationName = QString::fromUtf8("Vira");
 
     /* создаем главное окно приложения*/
 
@@ -123,7 +123,7 @@ void AppComposer::init()
         mainHeadStr.tooltip = m_applicationName;
         mainHeadStr.windowTitle = m_applicationName;
         mainHeadStr.hasWhatButton = true;
-        mainHeadStr.headerPixmap = QString(":/img/Star_of_David.png");
+        //mainHeadStr.headerPixmap = QString(":/img/Star_of_David.png");
         mainStr.header = mainHeadStr;
         mainWindowId = ewApp()->createMainWindow(mainStr);        // Создали окно
     }
@@ -140,7 +140,7 @@ void AppComposer::init()
     if(regionBizInitJson_Path.isValid())
     {
         auto mngr = regionbiz::RegionBizManager::instance();
-        QString str = regionBizInitJson_Path.toString();
+        QString str = regionBizInitJson_Path.toString() + "config.json";
         mngr->init(str);
     }
     else
