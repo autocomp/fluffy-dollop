@@ -22,6 +22,7 @@ public:
     static RegionBizManagerPtr instance();
     bool init( QString& config_path );
 
+    // locations
     // getters
     BaseAreaPtr getBaseArea( uint64_t id );
     BaseAreaPtr getBaseArea( uint64_t id, BaseArea::AreaType type );
@@ -33,6 +34,10 @@ public:
     std::vector< FloorPtr > getFloorsByParent( uint64_t parent_id );
     std::vector< RoomsGroupPtr > getRoomsGroupsByParent( uint64_t parent_id );
     std::vector< RoomPtr > getRoomsByParent( uint64_t parent_id );
+
+    // biz relstions
+    BaseBizRelationPtrs getBizRelationByArea( uint64_t id );
+    BaseBizRelationPtrs getBizRelationByArea( uint64_t id, BaseBizRelation::RelationType type );
 
     // selection managment
     uint64_t getSelectedArea();
@@ -60,13 +65,17 @@ private:
     static RegionBizManagerPtr _regionbiz_mngr;
     BaseTranslatorPtr _translator = nullptr;
 
-    // datas
+    // data locations
     std::vector< RegionPtr > _regions;
     std::vector< LocationPtr > _locations;
     std::vector< FacilityPtr > _facilitys;
     std::vector< FloorPtr > _floors;
     std::vector< RoomsGroupPtr > _rooms_groups;
     std::vector< RoomPtr > _rooms;
+
+    // data relations
+    std::vector< PropertyPtr > _propertys;
+    std::vector< RentPtr > _rents;
 
     // selection
     SelectionManager _select_manager;

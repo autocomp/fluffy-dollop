@@ -109,9 +109,30 @@ std::vector<RoomPtr> BaseTranslator::loadRooms()
         return std::vector<RoomPtr>();
 }
 
+std::vector<PropertyPtr> BaseTranslator::loadPropertys()
+{
+    if( _load_propertys )
+        return _load_propertys();
+    else
+        return std::vector<PropertyPtr>();
+}
+
+std::vector<RentPtr> BaseTranslator::loadRents()
+{
+    if( _load_rents )
+        return _load_rents();
+    else
+        return std::vector<RentPtr>();
+}
+
 void BaseTranslator::setParentForBaseLocation( BaseAreaPtr loc, uint64_t parent_id )
 {
     loc->setParent( parent_id );
+}
+
+void BaseTranslator::setAreaForBaseRalation(BaseBizRelationPtr relation, uint64_t id)
+{
+    relation->setAreaId( id );
 }
 
 BaseTranslatorPtr BaseTranslatorFabric::getTranslatorByType(std::string &type)

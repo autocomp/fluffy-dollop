@@ -209,6 +209,67 @@ std::vector<RoomPtr> SqliteTranslator::loadRooms()
     return rooms;
 }
 
+//------------------------------------------------------
+
+std::vector<PropertyPtr> SqliteTranslator::loadPropertys()
+{
+    std::vector<PropertyPtr> propertys;
+
+    QSqlDatabase db = QSqlDatabase::database();
+    QString select = "SELECT id, area_id, register_date, encumbrances FROM propertys";
+    QSqlQuery query( db );
+    bool res = query.exec( select );
+    if( res )
+        for( query.first(); query.isValid(); query.next() )
+        {
+            uint64_t id = query.value( 0 ).toLongLong();
+            uint64_t area_id = query.value( 1 ).toLongLong();
+            QDate date_register = query.value( 2 ).toDate();
+
+            PropertyPtr prop = PropertyPtr( new Property( id ));
+            setAreaForBaseRalation( prop, area_id );
+            prop->setDateOfRegistration( date_register );
+
+            loadDocuments( prop );
+
+            propertys.push_back( prop );
+        }
+
+    return propertys;
+}
+
+std::vector<RentPtr> SqliteTranslator::loadRents()
+{
+    std::vector<RentPtr> rents;
+
+    QSqlDatabase db = QSqlDatabase::database();
+    QString select = "SELECT id, area_id, start_date, finish_date FROM rents";
+    QSqlQuery query( db );
+    bool res = query.exec( select );
+    if( res )
+        for( query.first(); query.isValid(); query.next() )
+        {
+            uint64_t id = query.value( 0 ).toLongLong();
+            uint64_t area_id = query.value( 1 ).toLongLong();
+            QDate date_start = query.value( 2 ).toDate();
+            QDate date_finish = query.value( 2 ).toDate();
+
+            RentPtr rent = RentPtr( new Rent( id ));
+            setAreaForBaseRalation( rent, area_id );
+            rent->setDateOfStart( date_start );
+            rent->setDateOfFinish( date_finish );
+
+            loadDocuments( rent );
+            loadPayments( rent );
+
+            rents.push_back( rent );
+        }
+
+    return rents;
+}
+
+//------------------------------------------------------
+
 template<typename LocTypePtr>
 bool SqliteTranslator::loadCoordinate( std::vector< LocTypePtr > &vector,
                                        QString name )
@@ -274,4 +335,16 @@ bool SqliteTranslator::loadPlans( BaseAreaPtr area )
     }
 
     return false;
+}
+
+bool SqliteTranslator::loadDocuments( BaseBizRelationPtr /*relation*/ )
+{
+    // TODO load documents
+    return true;
+}
+
+bool SqliteTranslator::loadPayments(RentPtr /*rent*/)
+{
+    // TODO load payments
+    return true;
 }

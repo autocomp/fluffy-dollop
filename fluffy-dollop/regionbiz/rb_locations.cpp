@@ -53,6 +53,50 @@ void BaseArea::setParent(uint64_t id)
     _parent_id = id;
 }
 
+BizRelationKepper::BizRelationKepper(uint64_t id):
+    BaseArea( id )
+{}
+
+BaseBizRelationPtrs BizRelationKepper::getBizRelations()
+{
+    auto mngr = RegionBizManager::instance();
+    BaseBizRelationPtrs relations = mngr->getBizRelationByArea( _id );
+
+    return relations;
+}
+
+PropertyPtrs BizRelationKepper::getPropertys()
+{
+    auto mngr = RegionBizManager::instance();
+    BaseBizRelationPtrs relations = mngr->getBizRelationByArea( _id,
+                                                                BaseBizRelation::RT_PROPERTY );
+
+    PropertyPtrs propertys;
+    for( BaseBizRelationPtr rel: relations )
+    {
+        PropertyPtr prop = BaseBizRelation::convert< Property >( rel );
+        if( prop )
+            propertys.push_back( prop );
+    }
+    return propertys;
+}
+
+RentPtrs BizRelationKepper::getRents()
+{
+    auto mngr = RegionBizManager::instance();
+    BaseBizRelationPtrs relations = mngr->getBizRelationByArea( _id,
+                                                                BaseBizRelation::RT_RENT );
+
+    RentPtrs rents;
+    for( BaseBizRelationPtr rel: relations )
+    {
+        RentPtr rent = BaseBizRelation::convert< Rent >( rel );
+        if( rent )
+            rents.push_back( rent );
+    }
+    return rents;
+}
+
 Region::Region(uint64_t id):
     BaseArea( id )
 {}
@@ -175,7 +219,7 @@ PlanParams PlanKeeper::getPlanParams()
 }
 
 Facility::Facility(uint64_t id):
-    BaseArea( id )
+    BizRelationKepper( id )
 {}
 
 BaseArea::AreaType Facility::getType()
@@ -222,7 +266,7 @@ std::vector<FloorPtr> Facility::getChilds()
 }
 
 Floor::Floor(uint64_t id):
-    BaseArea( id )
+    BizRelationKepper( id )
 {}
 
 BaseArea::AreaType Floor::getType()
@@ -287,7 +331,7 @@ BaseAreaPtrs Floor::getChilds(Floor::FloorChildFilter filter)
 }
 
 RoomsGroup::RoomsGroup(uint64_t id):
-    BaseArea( id )
+    BizRelationKepper( id )
 {}
 
 BaseArea::AreaType RoomsGroup::getType()
@@ -324,7 +368,7 @@ std::vector< RoomPtr > RoomsGroup::getChilds()
 }
 
 Room::Room(uint64_t id):
-    BaseArea( id )
+    BizRelationKepper( id )
 {}
 
 BaseArea::AreaType Room::getType()

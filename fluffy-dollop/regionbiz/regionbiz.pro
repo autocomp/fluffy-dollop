@@ -16,11 +16,11 @@ SOURCES  += \
     rb_translator.cpp \
     rb_translator_sqlite.cpp \
     rb_selection_manager.cpp \
-    rb_biz_relation.cpp
+    rb_biz_relations.cpp
 HEADERS  += \
     rb_manager.h \
     rb_locations.h \
     rb_translator.h \
     rb_translator_sqlite.h \
     rb_selection_manager.h \
-    rb_biz_relation.h
+    rb_biz_relations.h

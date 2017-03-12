@@ -8,6 +8,7 @@
 #include <QPolygon>
 
 //#include "rb_manager.h"
+#include "rb_biz_relations.h"
 
 namespace regionbiz {
 
@@ -64,6 +65,7 @@ protected:
     uint64_t _parent_id = 0;
 
 private:
+    // private, becouse we need protect it
     void setParent( uint64_t id );
 };
 
@@ -96,6 +98,18 @@ public:
 private:
     QString _plan_path = "";
     PlanParams _params;
+};
+
+//----------------------------------------------
+
+class BizRelationKepper: public BaseArea
+{
+public:
+    BizRelationKepper( uint64_t id );
+
+    BaseBizRelationPtrs getBizRelations();
+    PropertyPtrs getPropertys();
+    RentPtrs getRents();
 };
 
 //----------------------------------------------
@@ -161,7 +175,7 @@ typedef std::vector< LocationPtr > LocationPtrs;
 class Floor;
 typedef std::shared_ptr< Floor > FloorPtr;
 
-class Facility: public BaseArea
+class Facility: public BizRelationKepper
 {
 public:
     Facility( uint64_t id );
@@ -188,7 +202,7 @@ typedef std::vector< FacilityPtr > FacilityPtrs;
 
 //----------------------------------------------
 
-class Floor: public BaseArea, public PlanKeeper
+class Floor: public BizRelationKepper, public PlanKeeper
 {
 public:
     enum FloorChildFilter
@@ -224,7 +238,7 @@ typedef std::vector< FloorPtr > FloorPtrs;
 class Room;
 typedef std::shared_ptr< Room > RoomPtr;
 
-class RoomsGroup: public BaseArea, public PlanKeeper
+class RoomsGroup: public BizRelationKepper, public PlanKeeper
 {
 public:
     RoomsGroup( uint64_t id );
@@ -249,7 +263,7 @@ typedef std::vector< RoomsGroupPtr > RoomsGroupPtrs;
 
 //-------------------------------------------------
 
-class Room: public BaseArea, public PlanKeeper
+class Room: public BizRelationKepper, public PlanKeeper
 {
 public:
     Room( uint64_t id );

@@ -43,16 +43,23 @@ bool RegionBizManager::init(QString &config_path)
             {
                 std::cerr << "Error with Translator:\n" << error_text << std::endl;
                 _translator = nullptr;
+
+                return false;
             }
         }
         else
+        {
             std::cerr << "Region Biz Translator don't created" << std::endl;
+            return false;
+        }
     }
+
+    return true;
 }
 
 BaseAreaPtr RegionBizManager::getBaseArea( uint64_t id )
 {
-    BaseAreaPtr loc;
+    BaseAreaPtr loc = nullptr;
 
     loc = getBaseArea( id, BaseArea::AT_REGION );
     if( loc )
@@ -75,8 +82,7 @@ BaseAreaPtr RegionBizManager::getBaseArea( uint64_t id )
         return loc;
 
     loc = getBaseArea( id, BaseArea::AT_ROOM );
-    if( loc )
-        return loc;
+    return loc;
 }
 
 BaseAreaPtr RegionBizManager::getBaseArea( uint64_t id,
@@ -177,6 +183,47 @@ std::vector<RoomsGroupPtr> RegionBizManager::getRoomsGroupsByParent(uint64_t par
 std::vector<RoomPtr> RegionBizManager::getRoomsByParent(uint64_t parent_id)
 {
     return getBaseLocationsByParent< RoomPtr >( parent_id, _rooms );
+}
+
+BaseBizRelationPtrs RegionBizManager::getBizRelationByArea(uint64_t id)
+{
+    BaseBizRelationPtrs relations = getBizRelationByArea( id, BaseBizRelation::RT_PROPERTY );
+
+    BaseBizRelationPtrs relations_rent = getBizRelationByArea( id, BaseBizRelation::RT_RENT );
+    for( BaseBizRelationPtr rent: relations_rent )
+        relations.push_back( rent );
+
+    return relations;
+}
+
+BaseBizRelationPtrs RegionBizManager::getBizRelationByArea( uint64_t id,
+                                                            BaseBizRelation::RelationType type)
+{
+    BaseBizRelationPtrs relations;
+
+    switch( type )
+    {
+    case BaseBizRelation::RT_PROPERTY:
+    {
+        for( PropertyPtr prop: _propertys )
+            if( id == prop->getAreaId() )
+                relations.push_back( prop );
+
+        break;
+    }
+
+    case BaseBizRelation::RT_RENT:
+    {
+        for( RentPtr rent: _rents )
+            if( id == rent->getAreaId() )
+                relations.push_back( rent );
+
+        break;
+    }
+
+    }
+
+    return relations;
 }
 
 uint64_t RegionBizManager::getSelectedArea()
@@ -296,6 +343,24 @@ void RegionBizManager::loadDataByTranslator()
     {
         // TODO check id and parent id
         _rooms.push_back( room );
+    }
+
+    //--------------------------------
+
+    // propertys
+    auto prop_vec = _translator->loadPropertys();
+    for( PropertyPtr prop: prop_vec )
+    {
+        // TODO check area id
+        _propertys.push_back( prop );
+    }
+
+    // rents
+    auto rent_vec = _translator->loadRents();
+    for( RentPtr rent: rent_vec )
+    {
+        // TODO check area id
+        _rents.push_back( rent );
     }
 }
 
