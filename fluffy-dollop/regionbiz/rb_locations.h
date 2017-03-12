@@ -4,22 +4,13 @@
 #include <memory>
 #include <vector>
 #include <QFile>
+#include <QPointF>
+#include <QPolygon>
 
 //#include "rb_manager.h"
+#include "rb_biz_relations.h"
 
 namespace regionbiz {
-
-class Coord
-{
-public:
-    Coord( double x_, double y_ ):
-        x( x_ ), y( y_ )
-    {}
-
-    double x = 0;
-    double y = 0;
-};
-typedef std::vector< Coord > Coords;
 
 class BaseArea;
 typedef std::shared_ptr< BaseArea > BaseAreaPtr;
@@ -27,7 +18,6 @@ typedef std::vector< BaseAreaPtr > BaseAreaPtrs;
 
 //class RegionBizManager;
 
-// TODO rename to area
 class BaseArea
 {
     friend class BaseTranslator;
@@ -46,8 +36,8 @@ public:
     BaseArea( uint64_t id );
     virtual ~BaseArea(){}
 
-    Coords getCoords();
-    void setCoords( Coords coord );
+    QPolygonF getCoords();
+    void setCoords(QPolygonF coord );
     uint64_t getId();
     uint64_t getParentId();
     BaseAreaPtr getParent( AreaType parent_type );
@@ -70,11 +60,12 @@ public:
 //    }
 
 protected:
-    Coords _coords;
+    QPolygonF _coords;
     uint64_t _id = 0;
     uint64_t _parent_id = 0;
 
 private:
+    // private, becouse we need protect it
     void setParent( uint64_t id );
 };
 
@@ -96,18 +87,29 @@ public:
     PlanKeeper(){}
     virtual ~PlanKeeper(){}
 
-    std::string getPlanPath();
-    void setPlanPath( std::string path );
+    QString getPlanPath();
+    void setPlanPath( QString path );
     QFilePtr getPlanFile();
     PlanParams getPlanParams();
     void setPlanParams( PlanParams params );
 
     // TODO file db
-    // TODO file attributes
 
 private:
-    std::string _plan_path = "";
+    QString _plan_path = "";
     PlanParams _params;
+};
+
+//----------------------------------------------
+
+class BizRelationKepper: public BaseArea
+{
+public:
+    BizRelationKepper( uint64_t id );
+
+    BaseBizRelationPtrs getBizRelations();
+    PropertyPtrs getPropertys();
+    RentPtrs getRents();
 };
 
 //----------------------------------------------
@@ -128,14 +130,14 @@ public:
     AreaType getType() override;
 
     // params
-    std::string getDescription();
-    void setDesription( std::string descr );
+    QString getDescription();
+    void setDesription( QString descr );
 
     // getters
     std::vector< BaseAreaPtr > getChilds( RegionChildFilter filter = RCF_ALL );
 
 private:
-    std::string _description = "";
+    QString _description = "";
 };
 typedef std::shared_ptr< Region > RegionPtr;
 typedef std::vector< RegionPtr > RegionPtrs;
@@ -153,17 +155,17 @@ public:
     AreaType getType() override;
 
     // params
-    std::string getDescription();
-    void setDesription( std::string descr );
-    std::string getAddress();
-    void setAddress( std::string address );
+    QString getDescription();
+    void setDesription( QString descr );
+    QString getAddress();
+    void setAddress( QString address );
 
     // getters
     std::vector< FacilityPtr > getChilds();
 
 private:
-    std::string _description = "";
-    std::string _address = "";
+    QString _description = "";
+    QString _address = "";
 };
 typedef std::shared_ptr< Location > LocationPtr;
 typedef std::vector< LocationPtr > LocationPtrs;
@@ -173,7 +175,7 @@ typedef std::vector< LocationPtr > LocationPtrs;
 class Floor;
 typedef std::shared_ptr< Floor > FloorPtr;
 
-class Facility: public BaseArea
+class Facility: public BizRelationKepper
 {
 public:
     Facility( uint64_t id );
@@ -181,26 +183,26 @@ public:
     AreaType getType() override;
 
     // params
-    std::string getDescription();
-    void setDesription( std::string descr );
-    std::string getAddress();
-    void setAddress( std::string address );
-    std::string getCadastralNumber();
-    void setCadastralNumber( std::string number );
+    QString getDescription();
+    void setDesription( QString descr );
+    QString getAddress();
+    void setAddress( QString address );
+    QString getCadastralNumber();
+    void setCadastralNumber( QString number );
 
     // getters
     std::vector< FloorPtr > getChilds();
 
 private:
-    std::string _description = "";
-    std::string _address = "";
-    std::string _cadastral_number = "";
+    QString _description = "";
+    QString _address = "";
+    QString _cadastral_number = "";
 };
 typedef std::vector< FacilityPtr > FacilityPtrs;
 
 //----------------------------------------------
 
-class Floor: public BaseArea, public PlanKeeper
+class Floor: public BizRelationKepper, public PlanKeeper
 {
 public:
     enum FloorChildFilter
@@ -216,8 +218,8 @@ public:
     AreaType getType() override;
 
     // params
-    std::string getName();
-    void setName( std::string name );
+    QString getName();
+    void setName( QString name );
     uint16_t getNumber();
     void setNumber( uint16_t number );
 
@@ -225,7 +227,7 @@ public:
     BaseAreaPtrs getChilds( FloorChildFilter filter = FCF_ALL );
 
 private:
-    std::string _name = "";
+    QString _name = "";
     int16_t _number = 0;
 
 };
@@ -236,7 +238,7 @@ typedef std::vector< FloorPtr > FloorPtrs;
 class Room;
 typedef std::shared_ptr< Room > RoomPtr;
 
-class RoomsGroup: public BaseArea, public PlanKeeper
+class RoomsGroup: public BizRelationKepper, public PlanKeeper
 {
 public:
     RoomsGroup( uint64_t id );
@@ -244,24 +246,24 @@ public:
     AreaType getType() override;
 
     // params
-    std::string getAddress();
-    void setAddress( std::string address );
-    std::string getCadastralNumber();
-    void setCadastralNumber( std::string number );
+    QString getAddress();
+    void setAddress( QString address );
+    QString getCadastralNumber();
+    void setCadastralNumber( QString number );
 
     // getters
     std::vector< RoomPtr > getChilds();
 
 private:
-    std::string _address = "";
-    std::string _cadastral_number = "";
+    QString _address = "";
+    QString _cadastral_number = "";
 };
 typedef std::shared_ptr< RoomsGroup > RoomsGroupPtr;
 typedef std::vector< RoomsGroupPtr > RoomsGroupPtrs;
 
 //-------------------------------------------------
 
-class Room: public BaseArea, public PlanKeeper
+class Room: public BizRelationKepper, public PlanKeeper
 {
 public:
     Room( uint64_t id );
@@ -269,11 +271,11 @@ public:
     AreaType getType() override;
 
     // params
-    std::string getName();
-    void setName( std::string name );
+    QString getName();
+    void setName( QString name );
 
 private:
-    std::string _name = "";
+    QString _name = "";
 };
 typedef std::vector< RoomPtr > RoomPtrs;
 

@@ -1,8 +1,8 @@
-include( ../pri/common.pri )
+include( ../../pri/common.pri )
+ROOT_DIR = ../..
 
 # lib
-QT       -= gui
-QT       += sql
+QT       += sql gui
 TEMPLATE = app
 
 # target

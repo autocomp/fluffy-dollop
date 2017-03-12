@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <QSqlQuery>
+#include <QPolygonF>
 
 using namespace regionbiz;
 
@@ -45,7 +46,7 @@ std::vector< RegionPtr > SqliteTranslator::loadRegions()
         for( query.first(); query.isValid(); query.next() )
         {
             uint64_t id = query.value( 0 ).toLongLong();
-            std::string descr = query.value( 1 ).toString().toUtf8().data();
+            QString descr = query.value( 1 ).toString();
 
             RegionPtr reg = RegionPtr( new Region( id ));
             reg->setDesription( descr );
@@ -72,8 +73,8 @@ std::vector<LocationPtr> SqliteTranslator::loadLocations()
         {
             uint64_t id = query.value( 0 ).toLongLong();
             uint64_t parent_id = query.value( 1 ).toLongLong();
-            std::string descr = query.value( 2 ).toString().toUtf8().data();
-            std::string addr = query.value( 3 ).toString().toUtf8().data();
+            QString descr = query.value( 2 ).toString();
+            QString addr = query.value( 3 ).toString();
 
             LocationPtr loc = LocationPtr( new Location( id ));
             setParentForBaseLocation( loc, parent_id );
@@ -102,9 +103,9 @@ std::vector<FacilityPtr> SqliteTranslator::loadFacilitys()
         {
             uint64_t id = query.value( 0 ).toLongLong();
             uint64_t parent_id = query.value( 1 ).toLongLong();
-            std::string descr = query.value( 2 ).toString().toUtf8().data();
-            std::string addr = query.value( 3 ).toString().toUtf8().data();
-            std::string cad_number = query.value( 4 ).toString().toUtf8().data();
+            QString descr = query.value( 2 ).toString();
+            QString addr = query.value( 3 ).toString();
+            QString cad_number = query.value( 4 ).toString();
 
             FacilityPtr fac = FacilityPtr( new Facility( id ));
             setParentForBaseLocation( fac, parent_id );
@@ -134,7 +135,7 @@ std::vector<FloorPtr> SqliteTranslator::loadFloors()
             uint64_t id = query.value( 0 ).toLongLong();
             uint64_t parent_id = query.value( 1 ).toLongLong();
             uint16_t number = query.value( 2 ).toInt();
-            std::string name = query.value( 3 ).toString().toUtf8().data();
+            QString name = query.value( 3 ).toString();
 
             FloorPtr flo = FloorPtr( new Floor( id ));
             setParentForBaseLocation( flo, parent_id );
@@ -163,8 +164,8 @@ std::vector<RoomsGroupPtr> SqliteTranslator::loadRoomsGroups()
         {
             uint64_t id = query.value( 0 ).toLongLong();
             uint64_t parent_id = query.value( 1 ).toLongLong();
-            std::string addr = query.value( 2 ).toString().toUtf8().data();
-            std::string cad_number = query.value( 3 ).toString().toUtf8().data();
+            QString addr = query.value( 2 ).toString();
+            QString cad_number = query.value( 3 ).toString();
 
             RoomsGroupPtr rg = RoomsGroupPtr( new RoomsGroup( id ));
             setParentForBaseLocation( rg, parent_id );
@@ -193,7 +194,7 @@ std::vector<RoomPtr> SqliteTranslator::loadRooms()
         {
             uint64_t id = query.value( 0 ).toLongLong();
             uint64_t parent_id = query.value( 1 ).toLongLong();
-            std::string name = query.value( 2 ).toString().toUtf8().data();
+            QString name = query.value( 2 ).toString();
 
             RoomPtr roo = RoomPtr( new Room( id ));
             setParentForBaseLocation( roo, parent_id );
@@ -208,11 +209,72 @@ std::vector<RoomPtr> SqliteTranslator::loadRooms()
     return rooms;
 }
 
+//------------------------------------------------------
+
+std::vector<PropertyPtr> SqliteTranslator::loadPropertys()
+{
+    std::vector<PropertyPtr> propertys;
+
+    QSqlDatabase db = QSqlDatabase::database();
+    QString select = "SELECT id, area_id, register_date, encumbrances FROM propertys";
+    QSqlQuery query( db );
+    bool res = query.exec( select );
+    if( res )
+        for( query.first(); query.isValid(); query.next() )
+        {
+            uint64_t id = query.value( 0 ).toLongLong();
+            uint64_t area_id = query.value( 1 ).toLongLong();
+            QDate date_register = query.value( 2 ).toDate();
+
+            PropertyPtr prop = PropertyPtr( new Property( id ));
+            setAreaForBaseRalation( prop, area_id );
+            prop->setDateOfRegistration( date_register );
+
+            loadDocuments( prop );
+
+            propertys.push_back( prop );
+        }
+
+    return propertys;
+}
+
+std::vector<RentPtr> SqliteTranslator::loadRents()
+{
+    std::vector<RentPtr> rents;
+
+    QSqlDatabase db = QSqlDatabase::database();
+    QString select = "SELECT id, area_id, start_date, finish_date FROM rents";
+    QSqlQuery query( db );
+    bool res = query.exec( select );
+    if( res )
+        for( query.first(); query.isValid(); query.next() )
+        {
+            uint64_t id = query.value( 0 ).toLongLong();
+            uint64_t area_id = query.value( 1 ).toLongLong();
+            QDate date_start = query.value( 2 ).toDate();
+            QDate date_finish = query.value( 2 ).toDate();
+
+            RentPtr rent = RentPtr( new Rent( id ));
+            setAreaForBaseRalation( rent, area_id );
+            rent->setDateOfStart( date_start );
+            rent->setDateOfFinish( date_finish );
+
+            loadDocuments( rent );
+            loadPayments( rent );
+
+            rents.push_back( rent );
+        }
+
+    return rents;
+}
+
+//------------------------------------------------------
+
 template<typename LocTypePtr>
 bool SqliteTranslator::loadCoordinate( std::vector< LocTypePtr > &vector,
                                        QString name )
 {
-    std::map< uint64_t, Coords > coords;
+    std::map< uint64_t, QPolygonF > coords;
 
     QSqlDatabase db = QSqlDatabase::database();
     QSqlQuery query( db );
@@ -227,7 +289,7 @@ bool SqliteTranslator::loadCoordinate( std::vector< LocTypePtr > &vector,
             double x = query.value( 1 ).toDouble();
             double y = query.value( 2 ).toDouble();
 
-            coords[ id ].push_back( Coord( x, y ));
+            coords[ id ].push_back( QPointF( x, y ));
         }
 
         for( LocTypePtr loc: vector )
@@ -253,7 +315,7 @@ bool SqliteTranslator::loadPlans( BaseAreaPtr area )
         {
             for( query.first(); query.isValid(); query.next() )
             {
-                std::string path = query.value( 1 ).toString().toUtf8().data();
+                QString path = query.value( 1 ).toString();
 
                 PlanKeeper::PlanParams params;
                 params.scale_w = query.value( 2 ).toDouble();
@@ -273,4 +335,16 @@ bool SqliteTranslator::loadPlans( BaseAreaPtr area )
     }
 
     return false;
+}
+
+bool SqliteTranslator::loadDocuments( BaseBizRelationPtr /*relation*/ )
+{
+    // TODO load documents
+    return true;
+}
+
+bool SqliteTranslator::loadPayments(RentPtr /*rent*/)
+{
+    // TODO load payments
+    return true;
 }

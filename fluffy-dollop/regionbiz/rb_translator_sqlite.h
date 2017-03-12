@@ -11,6 +11,7 @@ private:
     void loadFunctions() override;
     bool initBySettings(QVariantMap settings) override;
 
+    // read locations
     // TODO write template method
     std::vector< RegionPtr > loadRegions();
     std::vector< LocationPtr > loadLocations();
@@ -19,9 +20,16 @@ private:
     std::vector< RoomsGroupPtr > loadRoomsGroups();
     std::vector< RoomPtr > loadRooms();
 
+    // read relations
+    std::vector< PropertyPtr > loadPropertys();
+    std::vector< RentPtr > loadRents();
+
+    // support functions
     template< typename LocTypePtr >
     bool loadCoordinate( std::vector< LocTypePtr >& vector, QString name );
     bool loadPlans( BaseAreaPtr area );
+    bool loadDocuments( BaseBizRelationPtr relation );
+    bool loadPayments( RentPtr rent );
 };
 
 }

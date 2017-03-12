@@ -16,10 +16,12 @@ class SelectionManager: public QObject
 Q_SIGNALS:
     void selectBaseArea( uint64_t old_id,
                          uint64_t new_id );
+    void centerOnBaseArea( uint64_t id );
 
 private:
     SelectionManager();
     void selectNewArea( uint64_t new_id );
+    void centerOnNewArea(uint64_t id );
 
     uint64_t _selected_area_id = 0;
 };

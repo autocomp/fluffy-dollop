@@ -20,11 +20,12 @@ public:
 
     // init
     static RegionBizManagerPtr instance();
-    bool init( std::string& config_path );
+    bool init( QString& config_path );
 
+    // locations
     // getters
-    BaseAreaPtr getBaseLoation( uint64_t id );
-    BaseAreaPtr getBaseLoation( uint64_t id, BaseArea::AreaType type );
+    BaseAreaPtr getBaseArea( uint64_t id );
+    BaseAreaPtr getBaseArea( uint64_t id, BaseArea::AreaType type );
 
     // typed getters
     std::vector< RegionPtr > getRegions();
@@ -34,10 +35,18 @@ public:
     std::vector< RoomsGroupPtr > getRoomsGroupsByParent( uint64_t parent_id );
     std::vector< RoomPtr > getRoomsByParent( uint64_t parent_id );
 
+    // biz relstions
+    BaseBizRelationPtrs getBizRelationByArea( uint64_t id );
+    BaseBizRelationPtrs getBizRelationByArea( uint64_t id, BaseBizRelation::RelationType type );
+
     // selection managment
     uint64_t getSelectedArea();
     void selectArea( uint64_t id );
     void subscribeOnSelect(QObject* obj,
+                            const char *slot,
+                            bool queue = false );
+    void centerOnArea( uint64_t id );
+    void subscribeCenterOn( QObject* obj,
                             const char *slot,
                             bool queue = false );
 
@@ -45,7 +54,7 @@ private:
     RegionBizManager();
 
     static void onExit();
-    QVariantMap loadJsonConfig( std::string &file_path );
+    QVariantMap loadJsonConfig( QString &file_path );
     void loadDataByTranslator();
     void clearCurrentData();
 
@@ -56,13 +65,17 @@ private:
     static RegionBizManagerPtr _regionbiz_mngr;
     BaseTranslatorPtr _translator = nullptr;
 
-    // datas
+    // data locations
     std::vector< RegionPtr > _regions;
     std::vector< LocationPtr > _locations;
     std::vector< FacilityPtr > _facilitys;
     std::vector< FloorPtr > _floors;
     std::vector< RoomsGroupPtr > _rooms_groups;
     std::vector< RoomPtr > _rooms;
+
+    // data relations
+    std::vector< PropertyPtr > _propertys;
+    std::vector< RentPtr > _rents;
 
     // selection
     SelectionManager _select_manager;

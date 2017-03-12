@@ -12,12 +12,12 @@ BaseArea::BaseArea(uint64_t id):
     _id( id )
 {}
 
-Coords BaseArea::getCoords()
+QPolygonF BaseArea::getCoords()
 {
     return _coords;
 }
 
-void BaseArea::setCoords(Coords coord)
+void BaseArea::setCoords(QPolygonF coord)
 {
     _coords = coord;
 }
@@ -35,7 +35,7 @@ uint64_t BaseArea::getParentId()
 BaseAreaPtr BaseArea::getParent(AreaType parent_type)
 {
     auto mngr = RegionBizManager::instance();
-    BaseAreaPtr parent = mngr->getBaseLoation( _parent_id, parent_type );
+    BaseAreaPtr parent = mngr->getBaseArea( _parent_id, parent_type );
 
     return parent;
 }
@@ -43,7 +43,7 @@ BaseAreaPtr BaseArea::getParent(AreaType parent_type)
 BaseAreaPtr BaseArea::getParent()
 {
     auto mngr = RegionBizManager::instance();
-    BaseAreaPtr parent = mngr->getBaseLoation( _parent_id );
+    BaseAreaPtr parent = mngr->getBaseArea( _parent_id );
 
     return parent;
 }
@@ -51,6 +51,50 @@ BaseAreaPtr BaseArea::getParent()
 void BaseArea::setParent(uint64_t id)
 {
     _parent_id = id;
+}
+
+BizRelationKepper::BizRelationKepper(uint64_t id):
+    BaseArea( id )
+{}
+
+BaseBizRelationPtrs BizRelationKepper::getBizRelations()
+{
+    auto mngr = RegionBizManager::instance();
+    BaseBizRelationPtrs relations = mngr->getBizRelationByArea( _id );
+
+    return relations;
+}
+
+PropertyPtrs BizRelationKepper::getPropertys()
+{
+    auto mngr = RegionBizManager::instance();
+    BaseBizRelationPtrs relations = mngr->getBizRelationByArea( _id,
+                                                                BaseBizRelation::RT_PROPERTY );
+
+    PropertyPtrs propertys;
+    for( BaseBizRelationPtr rel: relations )
+    {
+        PropertyPtr prop = BaseBizRelation::convert< Property >( rel );
+        if( prop )
+            propertys.push_back( prop );
+    }
+    return propertys;
+}
+
+RentPtrs BizRelationKepper::getRents()
+{
+    auto mngr = RegionBizManager::instance();
+    BaseBizRelationPtrs relations = mngr->getBizRelationByArea( _id,
+                                                                BaseBizRelation::RT_RENT );
+
+    RentPtrs rents;
+    for( BaseBizRelationPtr rel: relations )
+    {
+        RentPtr rent = BaseBizRelation::convert< Rent >( rel );
+        if( rent )
+            rents.push_back( rent );
+    }
+    return rents;
 }
 
 Region::Region(uint64_t id):
@@ -62,12 +106,12 @@ LocationType Region::getType()
     return AT_REGION;
 }
 
-std::string Region::getDescription()
+QString Region::getDescription()
 {
     return _description;
 }
 
-void Region::setDesription(std::string descr)
+void Region::setDesription(QString descr)
 {
     _description = descr;
 }
@@ -117,22 +161,22 @@ BaseArea::AreaType Location::getType()
     return AT_LOCATION;
 }
 
-std::string Location::getDescription()
+QString Location::getDescription()
 {
     return _description;
 }
 
-void Location::setDesription(std::string descr)
+void Location::setDesription(QString descr)
 {
     _description = descr;
 }
 
-std::string Location::getAddress()
+QString Location::getAddress()
 {
     return _address;
 }
 
-void Location::setAddress(std::string address)
+void Location::setAddress(QString address)
 {
     _address = address;
 }
@@ -145,19 +189,19 @@ std::vector<FacilityPtr> Location::getChilds()
     return facilitys;
 }
 
-std::string PlanKeeper::getPlanPath()
+QString PlanKeeper::getPlanPath()
 {
     return _plan_path;
 }
 
-void PlanKeeper::setPlanPath(std::string path)
+void PlanKeeper::setPlanPath(QString path)
 {
     _plan_path = path;
 }
 
 QFilePtr PlanKeeper::getPlanFile()
 {
-    QFile* file = new QFile( QString::fromUtf8( _plan_path.c_str() ));
+    QFile* file = new QFile( _plan_path );
     if( file->exists() )
         return QFilePtr( file );
     else
@@ -175,7 +219,7 @@ PlanParams PlanKeeper::getPlanParams()
 }
 
 Facility::Facility(uint64_t id):
-    BaseArea( id )
+    BizRelationKepper( id )
 {}
 
 BaseArea::AreaType Facility::getType()
@@ -183,32 +227,32 @@ BaseArea::AreaType Facility::getType()
     return AT_FACILITY;
 }
 
-std::string Facility::getDescription()
+QString Facility::getDescription()
 {
     return _description;
 }
 
-void Facility::setDesription(std::string descr)
+void Facility::setDesription(QString descr)
 {
     _description = descr;
 }
 
-std::string Facility::getAddress()
+QString Facility::getAddress()
 {
     return _address;
 }
 
-void Facility::setAddress(std::string address)
+void Facility::setAddress(QString address)
 {
     _address = address;
 }
 
-std::string Facility::getCadastralNumber()
+QString Facility::getCadastralNumber()
 {
     return _cadastral_number;
 }
 
-void Facility::setCadastralNumber(std::string number)
+void Facility::setCadastralNumber(QString number)
 {
     _cadastral_number = number;
 }
@@ -222,7 +266,7 @@ std::vector<FloorPtr> Facility::getChilds()
 }
 
 Floor::Floor(uint64_t id):
-    BaseArea( id )
+    BizRelationKepper( id )
 {}
 
 BaseArea::AreaType Floor::getType()
@@ -230,12 +274,12 @@ BaseArea::AreaType Floor::getType()
     return AT_FLOOR;
 }
 
-std::string Floor::getName()
+QString Floor::getName()
 {
     return _name;
 }
 
-void Floor::setName(std::string name)
+void Floor::setName(QString name)
 {
     _name = name;
 }
@@ -287,7 +331,7 @@ BaseAreaPtrs Floor::getChilds(Floor::FloorChildFilter filter)
 }
 
 RoomsGroup::RoomsGroup(uint64_t id):
-    BaseArea( id )
+    BizRelationKepper( id )
 {}
 
 BaseArea::AreaType RoomsGroup::getType()
@@ -295,22 +339,22 @@ BaseArea::AreaType RoomsGroup::getType()
     return AT_ROOMS_GROUP;
 }
 
-std::string RoomsGroup::getAddress()
+QString RoomsGroup::getAddress()
 {
     return _address;
 }
 
-void RoomsGroup::setAddress(std::string address)
+void RoomsGroup::setAddress(QString address)
 {
     _address = address;
 }
 
-std::string RoomsGroup::getCadastralNumber()
+QString RoomsGroup::getCadastralNumber()
 {
     return _cadastral_number;
 }
 
-void RoomsGroup::setCadastralNumber(std::string number)
+void RoomsGroup::setCadastralNumber(QString number)
 {
     _cadastral_number = number;
 }
@@ -324,7 +368,7 @@ std::vector< RoomPtr > RoomsGroup::getChilds()
 }
 
 Room::Room(uint64_t id):
-    BaseArea( id )
+    BizRelationKepper( id )
 {}
 
 BaseArea::AreaType Room::getType()
@@ -332,12 +376,12 @@ BaseArea::AreaType Room::getType()
     return AT_ROOM;
 }
 
-std::string Room::getName()
+QString Room::getName()
 {
     return _name;
 }
 
-void Room::setName(std::string name)
+void Room::setName(QString name)
 {
     _name = name;
 }

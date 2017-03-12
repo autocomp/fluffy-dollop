@@ -21,7 +21,7 @@ RegionBizManagerPtr RegionBizManager::instance()
     return instance_ptr;
 }
 
-bool RegionBizManager::init(std::string& config_path)
+bool RegionBizManager::init(QString &config_path)
 {
     QVariantMap settings = loadJsonConfig( config_path );
     if( settings.contains( "translator" ))
@@ -43,23 +43,49 @@ bool RegionBizManager::init(std::string& config_path)
             {
                 std::cerr << "Error with Translator:\n" << error_text << std::endl;
                 _translator = nullptr;
+
+                return false;
             }
         }
         else
+        {
             std::cerr << "Region Biz Translator don't created" << std::endl;
+            return false;
+        }
     }
+
+    return true;
 }
 
-BaseAreaPtr RegionBizManager::getBaseLoation( uint64_t id )
+BaseAreaPtr RegionBizManager::getBaseArea( uint64_t id )
 {
-    BaseAreaPtr loc;
+    BaseAreaPtr loc = nullptr;
 
-    loc = getBaseLoation( id, BaseArea::AT_REGION );
+    loc = getBaseArea( id, BaseArea::AT_REGION );
     if( loc )
         return loc;
+
+    loc = getBaseArea( id, BaseArea::AT_LOCATION );
+    if( loc )
+        return loc;
+
+    loc = getBaseArea( id, BaseArea::AT_FACILITY );
+    if( loc )
+        return loc;
+
+    loc = getBaseArea( id, BaseArea::AT_FLOOR );
+    if( loc )
+        return loc;
+
+    loc = getBaseArea( id, BaseArea::AT_ROOMS_GROUP );
+    if( loc )
+        return loc;
+
+    loc = getBaseArea( id, BaseArea::AT_ROOM );
+    return loc;
 }
 
-BaseAreaPtr RegionBizManager::getBaseLoation( uint64_t id,
+BaseAreaPtr RegionBizManager::getBaseArea( uint64_t id,
                                                   BaseArea::AreaType type )
 {
     BaseAreaPtr loc;
@@ -90,6 +116,33 @@ BaseAreaPtr RegionBizManager::getBaseLoation( uint64_t id,
     {
         auto iter = FIND_IF( _facilitys, check_id );
         if( iter != _facilitys.end() )
+            loc = *iter;
+
+        break;
+    }
+
+    case BaseArea::AT_FLOOR:
+    {
+        auto iter = FIND_IF( _floors, check_id );
+        if( iter != _floors.end() )
+            loc = *iter;
+
+        break;
+    }
+
+    case BaseArea::AT_ROOMS_GROUP:
+    {
+        auto iter = FIND_IF( _rooms_groups, check_id );
+        if( iter != _rooms_groups.end() )
+            loc = *iter;
+
+        break;
+    }
+
+    case BaseArea::AT_ROOM:
+    {
+        auto iter = FIND_IF( _rooms, check_id );
+        if( iter != _rooms.end() )
             loc = *iter;
 
         break;
@@ -132,6 +185,47 @@ std::vector<RoomPtr> RegionBizManager::getRoomsByParent(uint64_t parent_id)
     return getBaseLocationsByParent< RoomPtr >( parent_id, _rooms );
 }
 
+BaseBizRelationPtrs RegionBizManager::getBizRelationByArea(uint64_t id)
+{
+    BaseBizRelationPtrs relations = getBizRelationByArea( id, BaseBizRelation::RT_PROPERTY );
+
+    BaseBizRelationPtrs relations_rent = getBizRelationByArea( id, BaseBizRelation::RT_RENT );
+    for( BaseBizRelationPtr rent: relations_rent )
+        relations.push_back( rent );
+
+    return relations;
+}
+
+BaseBizRelationPtrs RegionBizManager::getBizRelationByArea( uint64_t id,
+                                                            BaseBizRelation::RelationType type)
+{
+    BaseBizRelationPtrs relations;
+
+    switch( type )
+    {
+    case BaseBizRelation::RT_PROPERTY:
+    {
+        for( PropertyPtr prop: _propertys )
+            if( id == prop->getAreaId() )
+                relations.push_back( prop );
+
+        break;
+    }
+
+    case BaseBizRelation::RT_RENT:
+    {
+        for( RentPtr rent: _rents )
+            if( id == rent->getAreaId() )
+                relations.push_back( rent );
+
+        break;
+    }
+
+    }
+
+    return relations;
+}
+
 uint64_t RegionBizManager::getSelectedArea()
 {
     return _select_manager._selected_area_id;
@@ -148,6 +242,17 @@ void RegionBizManager::subscribeOnSelect(QObject *obj, const char *slot, bool qu
                       obj, slot, ( queue ? Qt::QueuedConnection : Qt::DirectConnection ));
 }
 
+void RegionBizManager::centerOnArea(uint64_t id)
+{
+    _select_manager.centerOnBaseArea( id );
+}
+
+void RegionBizManager::subscribeCenterOn(QObject *obj, const char *slot, bool queue)
+{
+    QObject::connect( &_select_manager, SIGNAL( centerOnBaseArea( uint64_t )),
+                      obj, slot, ( queue ? Qt::QueuedConnection : Qt::DirectConnection ));
+}
+
 RegionBizManager::RegionBizManager()
 {
     std::atexit( onExit );
@@ -159,11 +264,11 @@ void RegionBizManager::onExit()
     RegionBizManager::instance()->clearCurrentData();
 }
 
-QVariantMap RegionBizManager::loadJsonConfig( std::string& file_path )
+QVariantMap RegionBizManager::loadJsonConfig( QString& file_path )
 {
     QString file_in;
 
-    QFile file( file_path.c_str() );
+    QFile file( file_path );
     if( file.open( QFile::ReadOnly | QFile::Text ))
     {
         file_in = file.readAll();
@@ -172,7 +277,7 @@ QVariantMap RegionBizManager::loadJsonConfig( std::string& file_path )
     else
     {
         std::cerr << "Region Biz can't open config file: "
-                  << file_path << std::endl;
+                  << file_path.toUtf8().data() << std::endl;
     }
 
     QJsonParseError err;
@@ -238,6 +343,24 @@ void RegionBizManager::loadDataByTranslator()
     {
         // TODO check id and parent id
         _rooms.push_back( room );
+    }
+
+    //--------------------------------
+
+    // propertys
+    auto prop_vec = _translator->loadPropertys();
+    for( PropertyPtr prop: prop_vec )
+    {
+        // TODO check area id
+        _propertys.push_back( prop );
+    }
+
+    // rents
+    auto rent_vec = _translator->loadRents();
+    for( RentPtr rent: rent_vec )
+    {
+        // TODO check area id
+        _rents.push_back( rent );
     }
 }
 
