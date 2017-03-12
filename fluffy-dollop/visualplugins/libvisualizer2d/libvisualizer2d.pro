@@ -24,10 +24,10 @@ LIBS += -L$${ROOT_DIR}bin/lib \
 #        -lctrvectorrender
 
 SOURCES += \
-    *.cpp
+    *.cpp \
 
 HEADERS += \
-    *.h
+    *.h \
 
 DISTFILES += visualizer2d.json
 
@@ -35,3 +35,6 @@ DISTFILES += visualizer2d.json
 
 RESOURCES += \
     libvisualizer2d.qrc
+
+FORMS += \
+    viravisualizer2dform.ui

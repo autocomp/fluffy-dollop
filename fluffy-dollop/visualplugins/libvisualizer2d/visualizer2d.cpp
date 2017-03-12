@@ -1,4 +1,5 @@
 #include "visualizer2d.h"
+#include "viravisualizer2dform.h"
 #include <ctrcore/visual/viewinterface.h>
 #include <ctrcore/visual/datainterface.h>
 #include <ctrcore/visual/vectordatainterface.h>
@@ -228,22 +229,15 @@ void Visualizer2d::init(uint visualizerId)
         vcp->show();
     }
 
-    m_splitter = new QSplitter;
-    QWidget * leftWidget = new QWidget(m_splitter);
-    m_splitter->addWidget(leftWidget);
-    m_LeftSplitterLayout = new QVBoxLayout(leftWidget);
-
-    m_stackedWidget = new QStackedWidget;
-    m_stackedWidget->addWidget(m_scene2dWidget);
-    m_splitter->addWidget(m_stackedWidget);
+    m_ViraVisualizer2dForm = new ViraVisualizer2dForm;
+    int widgetId = m_ViraVisualizer2dForm->getStackedWidget()->addWidget(m_scene2dWidget);
+    m_ViraVisualizer2dForm->getStackedWidget()->setCurrentIndex(widgetId);
 }
 
 void Visualizer2d::slotCenterViewOn()
 {
     m_viewerController->centerOn(m_centerScenePos);
 }
-
-
 
 void Visualizer2d::loadPluginCategory(QString pluginType)
 {
@@ -723,19 +717,26 @@ sw::AbstractSceneWidget *Visualizer2d::getAbstractSceneWidget()
     return m_scene2dWidget;
 }
 
-void Visualizer2d::addWidgetToSplitter(QWidget * wdg)
+bool Visualizer2d::addWidgetToSplitterLeftArea(QWidget * wdg)
 {
-    m_LeftSplitterLayout->addWidget(wdg);
+    m_ViraVisualizer2dForm->addWidgetToSplitterLeftArea(wdg);
+    return true;
+}
+
+bool Visualizer2d::addWidgetToStatusBar(QWidget * wdg)
+{
+    m_ViraVisualizer2dForm->addWidgetToStatusBar(wdg);
+    return true;
 }
 
 QWidget* Visualizer2d::widget()
 {
-    return m_splitter; //m_stackedWidget; // m_scene2dWidget;
+    return m_ViraVisualizer2dForm; // m_scene2dWidget;
 }
 
 QStackedWidget *Visualizer2d::stackedWidget()
 {
-    return m_stackedWidget;
+    return m_ViraVisualizer2dForm->getStackedWidget();
 }
 
 QWidget* Visualizer2d::minimapWidget()

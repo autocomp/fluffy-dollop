@@ -19,6 +19,7 @@
 #include <QVBoxLayout>
 #include <ctrcore/provider/rasterdataprovider.h>
 
+class ViraVisualizer2dForm;
 
 namespace visualize_system
 {
@@ -75,7 +76,8 @@ public:
 
     virtual QWidget* widget();
     virtual QStackedWidget* stackedWidget();
-    virtual void addWidgetToSplitter(QWidget*);
+    virtual bool addWidgetToSplitterLeftArea(QWidget * wdg);
+    virtual bool addWidgetToStatusBar(QWidget * wdg);
     virtual QWidget* minimapWidget();
     virtual QPixmap snapShort();
 
@@ -113,9 +115,7 @@ private:
 //    VectorRender *m_pVectorRender;
     QPointF m_centerScenePos;
     VisualizerControlPanel *vcp = nullptr;
-    QStackedWidget * m_stackedWidget;
-    QSplitter * m_splitter;
-    QVBoxLayout *  m_LeftSplitterLayout;
+    ViraVisualizer2dForm * m_ViraVisualizer2dForm = nullptr;
 
     QString getDefaultXml();
     void getTmsXmlData(const QByteArray& byteArray, QList<TmsXmlData>& tmsDataList);
