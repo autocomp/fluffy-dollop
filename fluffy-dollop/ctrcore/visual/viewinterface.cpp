@@ -101,9 +101,14 @@ QStackedWidget *ViewInterface::stackedWidget()
     return _abstractVisualizer.stackedWidget();
 }
 
-void ViewInterface::addWidgetToSplitter(QWidget * wdg)
+bool ViewInterface::addWidgetToSplitterLeftArea(QWidget * wdg)
 {
-    _abstractVisualizer.addWidgetToSplitter(wdg);
+    return _abstractVisualizer.addWidgetToSplitterLeftArea(wdg);
+}
+
+bool ViewInterface::addWidgetToStatusBar(QWidget * wdg)
+{
+    return _abstractVisualizer.addWidgetToStatusBar(wdg);
 }
 
 QWidget* ViewInterface::minimapWidget()

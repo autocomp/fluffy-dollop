@@ -37,7 +37,8 @@ public:
 
     QWidget* widget();
     QStackedWidget* stackedWidget();
-    void addWidgetToSplitter(QWidget*);
+    bool addWidgetToSplitterLeftArea(QWidget * wdg);
+    bool addWidgetToStatusBar(QWidget * wdg);
     QWidget* minimapWidget();
     QPixmap snapShort();
     sw::AbstractSceneWidget* getAbstractSceneWidget();

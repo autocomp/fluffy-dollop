@@ -81,9 +81,10 @@ public:
 
     virtual QWidget* widget() = 0;
     virtual QStackedWidget* stackedWidget() = 0;
-    virtual void addWidgetToSplitter(QWidget*) = 0;
     virtual QWidget* minimapWidget() = 0;
     virtual QPixmap snapShort() = 0;
+    virtual bool addWidgetToSplitterLeftArea(QWidget * wdg) {return false;}
+    virtual bool addWidgetToStatusBar(QWidget * wdg) {return false;}
 
     virtual uint getVisualizerId() = 0;
     virtual visualize_system::VisualizerType getVisualizerType() = 0;
