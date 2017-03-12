@@ -46,7 +46,7 @@ void ViraGraphicsPlugin::launchWorkState()
 
     _pdfEditorForm = new ViraEditorForm;
     connect(_pdfEditorForm, SIGNAL(switchOnMap()), this, SLOT(switchOnMap()));
-    connect(_workState.data(), SIGNAL(centerEditorOn(qulonglong)), _pdfEditorForm, SLOT(centerEditorOn(qulonglong)));
+    //connect(_workState.data(), SIGNAL(centerEditorOn(qulonglong)), _pdfEditorForm, SLOT(centerEditorOn(qulonglong)));
 
     int visualizerIndex = _stackedWidget->currentIndex();
     _stackedWidget->setProperty("visualizerIndex", visualizerIndex);
@@ -57,7 +57,6 @@ void ViraGraphicsPlugin::launchWorkState()
 
 void ViraGraphicsPlugin::showFacility(qulonglong id)
 {
-    _pdfEditorForm->reinit(id);
     _stackedWidget->setCurrentIndex(_stackedWidget->property("pdfEditorFormIndex").toInt());
 }
 

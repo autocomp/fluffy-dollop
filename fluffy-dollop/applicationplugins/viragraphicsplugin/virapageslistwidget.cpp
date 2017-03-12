@@ -21,8 +21,6 @@ ViraPagesListWidget::ViraPagesListWidget()
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
     connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(slotSelectionChanged()));
-    auto mngr = RegionBizManager::instance();
-    mngr->subscribeOnSelect(this, SLOT(slotSelectionItemsChanged(uint64_t,uint64_t)));
 }
 
 void ViraPagesListWidget::reinit(qulonglong facilityId)
@@ -54,9 +52,9 @@ void ViraPagesListWidget::reinit(qulonglong facilityId)
         }
     }
 
-    int H = height();
-    _iconSize = QSize(H/_coef - 25, H - 25);
-    setIconSize(_iconSize);
+//    int H = height();
+//    _iconSize = QSize(H/_coef - 100, H - 100);
+//    setIconSize(_iconSize);
 }
 
 void ViraPagesListWidget::resizeEvent(QResizeEvent * e)
@@ -80,7 +78,7 @@ void ViraPagesListWidget::slotSelectionChanged()
     }
 }
 
-void ViraPagesListWidget::slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_id)
+void ViraPagesListWidget::selectionItemsChanged(uint64_t prev_id, uint64_t curr_id)
 {
     if(_block)
         return;

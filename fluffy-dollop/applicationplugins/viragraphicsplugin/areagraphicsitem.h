@@ -30,7 +30,6 @@ public:
     void setItemselected(bool on_off);
 
 signals:
-    void dubleClickOnItem(qulonglong id);
     void itemIsHover(qulonglong id, bool on_off);
 
 protected:

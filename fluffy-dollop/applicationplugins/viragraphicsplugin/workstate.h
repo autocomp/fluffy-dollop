@@ -26,8 +26,10 @@ signals:
     void switchOnEditor();
     void centerEditorOn(qulonglong id);
 
+protected:
+    void centerViewOn(QPointF pos);
+
 protected slots:
-    void slotDubleClickOnFacility(qulonglong id);
     void slotSetItemselect(qulonglong id, bool on_off);
     void slotSelectionItemsChanged(uint64_t,uint64_t);
     void slotCenterOn(uint64_t);
@@ -37,6 +39,7 @@ private:
     QList<LocationItem *> _locationItems;
 
     QMap<qulonglong, QString> _itemId_facilityFolder;
+    qulonglong _prevSelectedFacilityId = 0;
 };
 
 

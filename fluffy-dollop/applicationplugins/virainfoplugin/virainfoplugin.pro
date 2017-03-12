@@ -1,4 +1,4 @@
-TARGET=viratree
+TARGET=virainfo
 
 include(../typeplugin.pri)
 ROOT_DIR=../../
@@ -20,15 +20,20 @@ LIBS += -L$${INSTALL_PATH_LIB} \
         -lregionbiz \
 
 HEADERS += \
-    viratreeplugin.h \
-    viratreewidget.h \
+    virainfoplugin.h \
+    virainfowidget.h \
+    virastatusbar.h
 
 SOURCES += \
-    viratreeplugin.cpp \
-    viratreewidget.cpp \
+    virainfoplugin.cpp \
+    virainfowidget.cpp \
+    virastatusbar.cpp
 
 RESOURCES += \
-    viratreepluginres.qrc
+    virainfopluginres.qrc
+
+FORMS += \
+    virastatusbar.ui
 
 
 

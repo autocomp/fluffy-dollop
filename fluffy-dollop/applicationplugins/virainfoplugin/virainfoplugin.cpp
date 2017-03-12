@@ -1,5 +1,5 @@
-#include "viratreeplugin.h"
-#include "viratreewidget.h"
+#include "virainfoplugin.h"
+#include "virastatusbar.h"
 #include <libembeddedwidgets/embeddedstruct.h>
 #include <libembeddedwidgets/embeddedapp.h>
 #include <ctrcore/ctrcore/ctrconfig.h>
@@ -18,34 +18,34 @@
 #include <QDebug>
 
 
-ViraTreePlugin::ViraTreePlugin()
+ViraInfoPlugin::ViraInfoPlugin()
 {
 }
 
-ViraTreePlugin::~ViraTreePlugin()
+ViraInfoPlugin::~ViraInfoPlugin()
 {
 }
 
-void ViraTreePlugin::init(uint visualizerId, quint64 visualizerWindowId)
+void ViraInfoPlugin::init(uint visualizerId, quint64 visualizerWindowId)
 {
     CtrAppVisualizerPlugin::init(visualizerId, visualizerWindowId);
 
     visualize_system::ViewInterface * viewInterface = visualize_system::VisualizerManager::instance()->getViewInterface(visualizerId);
-    _viraTreeWidget = new ViraTreeWidget();
-    viewInterface->addWidgetToSplitterLeftArea(_viraTreeWidget);
+    _viraStatusBar = new ViraStatusBar(visualizerWindowId);
+    viewInterface->addWidgetToStatusBar(_viraStatusBar);
 }
 
-QList<InitPluginData> ViraTreePlugin::getInitPluginData()
+QList<InitPluginData> ViraInfoPlugin::getInitPluginData()
 {
     return QList<InitPluginData>();
 }
 
-bool ViraTreePlugin::isChecked(const QString&)
+bool ViraInfoPlugin::isChecked(const QString&)
 {
     return false;
 }
 
-void ViraTreePlugin::checked(const QString &/*buttonName*/, bool /*on_off*/)
+void ViraInfoPlugin::checked(const QString &/*buttonName*/, bool /*on_off*/)
 {
 }
 

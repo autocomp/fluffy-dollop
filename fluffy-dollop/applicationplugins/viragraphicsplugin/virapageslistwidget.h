@@ -10,6 +10,7 @@ class ViraPagesListWidget : public QListWidget
 public:
     ViraPagesListWidget();
     void reinit(qulonglong facilityId);
+    void selectionItemsChanged(uint64_t,uint64_t);
 
 signals:
     void setFloor(qulonglong floorId);
@@ -19,7 +20,6 @@ protected:
 
 private slots:
     void slotSelectionChanged();
-    void slotSelectionItemsChanged(uint64_t,uint64_t);
 
 private:
     QSize _iconSize;

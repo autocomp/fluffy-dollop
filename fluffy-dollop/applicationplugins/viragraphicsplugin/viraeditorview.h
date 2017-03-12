@@ -30,8 +30,9 @@ class ViraEditorView : public QGraphicsView
 public:
     explicit ViraEditorView(); // const pdf_editor::Facility& facility, const QString& path);
     ~ViraEditorView();
-    void reinit(qulonglong floorId); //const QString &path = QString());
+    void reinit(qulonglong facilityId); //const QString &path = QString());
     void centerEditorOn(qulonglong id);
+    void selectionItemsChanged(uint64_t prev_id, uint64_t curr_id);
 
 signals:
     
@@ -40,7 +41,6 @@ public slots:
     void zoomIn();
     void zoomOut();
     void zoomReset();
-    void slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_id);
 
 protected:
     virtual void wheelEvent(QWheelEvent* e);

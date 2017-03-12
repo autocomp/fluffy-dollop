@@ -22,21 +22,20 @@ void AreaGraphicsItem::init(const AreaInitData& areaInitData)
 
 void AreaGraphicsItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
-//    if(_areaInitData.sendDoubleClick)
-//    {
-//        if(polygon().containsPoint(event->pos(), Qt::OddEvenFill))
-//        {
-//            event->accept();
-//            emit dubleClickOnItem(_areaInitData.id);
-//            qDebug() << "mouseDoubleClickEvent:" << toolTip();
-//        }
-//        else
-//        {
-//            event->ignore();
-//            QGraphicsPolygonItem::mouseDoubleClickEvent(event);
-//        }
-//    }
-//    else
+    if(_areaInitData.sendDoubleClick)
+    {
+        if(polygon().containsPoint(event->pos(), Qt::OddEvenFill))
+        {
+            event->accept();
+            regionbiz::RegionBizManager::instance()->centerOnArea(_areaInitData.id);
+        }
+        else
+        {
+            event->ignore();
+            QGraphicsPolygonItem::mouseDoubleClickEvent(event);
+        }
+    }
+    else
         QGraphicsPolygonItem::mouseDoubleClickEvent(event);
 }
 
@@ -57,7 +56,7 @@ void AreaGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
         QPen pen2(Qt::yellow, 2, Qt::DotLine);
         pen2.setCosmetic(true);
         painter->setPen(pen2);
-        painter->drawPolygon(polygon()); // drawConvexPolygon
+        painter->drawPolygon(polygon());
     }
     else
         QGraphicsPolygonItem::paint(painter, option, widget);
@@ -83,13 +82,7 @@ void AreaGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
     if(_areaInitData.isSelectableFromMap)
     {
         if(polygon().containsPoint(event->pos(), Qt::OddEvenFill))
-        {
-            if( ! _isSelected)
-            {
-                regionbiz::RegionBizManager::instance()->selectArea(_areaInitData.id);
-                qDebug() << "slotItemSelectionChanged, ID :" << _areaInitData.id;
-            }
-        }
+            regionbiz::RegionBizManager::instance()->selectArea(_areaInitData.id);
         else
             QGraphicsPolygonItem::mousePressEvent(event);
     }

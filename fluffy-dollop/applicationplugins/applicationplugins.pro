@@ -4,6 +4,7 @@ CONFIG += ordered
 SUBDIRS = \
     viragraphicsplugin \
     viratreeplugin \
+    virainfoplugin \
 #    pdfimportplugin \
 #    inputlocationplugin \
 #    imagectrlplugin \

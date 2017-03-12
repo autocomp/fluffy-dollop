@@ -15,9 +15,6 @@ ViraEditorView::ViraEditorView()
     setMouseTracking(true);
     setDragMode(QGraphicsView::NoDrag);
     setCursor(QCursor(Qt::ArrowCursor));
-
-    auto mngr = RegionBizManager::instance();
-    mngr->subscribeOnSelect(this, SLOT(slotSelectionItemsChanged(uint64_t,uint64_t)));
 }
 
 ViraEditorView::~ViraEditorView()
@@ -25,7 +22,7 @@ ViraEditorView::~ViraEditorView()
     // reinit();
 }
 
-void ViraEditorView::reinit(qulonglong floorId)
+void ViraEditorView::reinit(qulonglong facilityId)
 {
     foreach(GraphicsPixmapItem * item, _owerViews)
         delete item;
@@ -34,6 +31,27 @@ void ViraEditorView::reinit(qulonglong floorId)
     foreach(AreaGraphicsItem * item, _rooms.values())
         delete item;
     _rooms.clear();
+
+    // find first floor
+    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(facilityId, BaseArea::AT_FACILITY);
+    FacilityPtr facilityPtr = BaseArea::convert< Facility >(ptr);
+    if(facilityPtr)
+    {
+        FloorPtrs floors = facilityPtr->getChilds();
+        for( FloorPtr floorPtr: floors )
+        {
+            setFloor(floorPtr->getId());
+            break;
+        }
+    }
+
+//    qulonglong curr_id = RegionBizManager::instance()->getSelectedArea();
+//    if(curr_id > 0)
+//    {
+//        auto it = _rooms.find(curr_id);
+//        if(it != _rooms.end())
+//            it.value()->setItemselected(true);
+//    }
 
     /*
     if(path.isEmpty() == false)
@@ -99,8 +117,7 @@ void ViraEditorView::setFloor(qulonglong floorId)
             RoomPtr room = BaseArea::convert< Room >( room_ptr );
             if(room)
             {
-                QPolygonF scenePolygon = room->getCoords();
-                AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(scenePolygon);
+                AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(room->getCoords());
                 areaGraphicsItem->setAcceptHoverEvents(true);
                 roomInitData.id = room->getId();
                 areaGraphicsItem->init(roomInitData);
@@ -158,7 +175,7 @@ void ViraEditorView::setFloor(qulonglong floorId)
     */
 }
 
-void ViraEditorView::slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_id)
+void ViraEditorView::selectionItemsChanged(uint64_t prev_id, uint64_t curr_id)
 {
     if(prev_id > 0)
     {

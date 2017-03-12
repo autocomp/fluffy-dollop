@@ -34,6 +34,9 @@ ViraEditorForm::ViraEditorForm(QWidget *parent) :
     _view = new ViraEditorView();
     _view->setScene(&_scene);
     _sceneViraWidget->setMainViewWidget(_view);
+
+    auto mngr = RegionBizManager::instance();
+    mngr->subscribeOnSelect(this, SLOT(slotSelectionItemsChanged(uint64_t,uint64_t)));
 }
 
 ViraEditorForm::~ViraEditorForm()
@@ -43,35 +46,53 @@ ViraEditorForm::~ViraEditorForm()
     delete ui;
 }
 
-void ViraEditorForm::reinit(qulonglong facilityId)
+void ViraEditorForm::slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_id)
 {
-    /*
-    QString destPath;
-    QVariant regionBizInitJson_Path = CtrConfig::getValueByName(QString("application_settings.regionBizInitJson_Path"));
-    if(regionBizInitJson_Path.isValid())
-         destPath = regionBizInitJson_Path.toString();
-
-    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(facilityId);
-    FacilityPtr facilityPtr = BaseArea::convert< Facility >(ptr);
-    if(facilityPtr)
+    if(curr_id > 0)
     {
-        FloorPtrs floors = facilityPtr->getChilds();
-        for( FloorPtr floorPtr: floors )
-        {
-            BaseAreaPtrs rooms = floorPtr->getChilds( Floor::FCF_ALL_ROOMS );
-            for( BaseAreaPtr room_ptr: rooms )
-            {
-                RoomPtr room = BaseArea::convert< Room >( room_ptr );
-                if(room)
-                {
-                }
-            }
-        }
-    }
-    */
+        BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(curr_id);
+        if( ! ptr)
+            return;
 
-    _viraPagesListWidget->reinit(facilityId);
-    _view->reinit(facilityId);
+        uint64_t facilityId(0);
+        switch(ptr->getType())
+        {
+        case BaseArea::AT_REGION :
+        case BaseArea::AT_LOCATION :
+            return;
+
+        case BaseArea::AT_FACILITY :
+        {
+            facilityId = curr_id;
+        }break;
+
+        case BaseArea::AT_FLOOR :
+        case BaseArea::AT_ROOMS_GROUP :
+        case BaseArea::AT_ROOM :
+        {
+            BaseAreaPtr parentPtr = ptr->getParent();
+            while(parentPtr)
+            {
+                if(parentPtr->getType() == BaseArea::AT_FACILITY)
+                {
+                    facilityId = parentPtr->getId();
+                    break;
+                }
+                parentPtr = parentPtr->getParent();
+            }
+        }break;
+        }
+
+        if(facilityId > 0)
+            if(_currFacilityId != facilityId)
+            {
+                _currFacilityId = facilityId;
+                _viraPagesListWidget->reinit(facilityId);
+                _view->reinit(facilityId);
+            }
+    }
+    _viraPagesListWidget->selectionItemsChanged(prev_id, curr_id);
+    _view->selectionItemsChanged(prev_id, curr_id);
 }
 
 void ViraEditorForm::setParentWindowId(qulonglong parentWindowId)

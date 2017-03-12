@@ -45,7 +45,7 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
                 locationItem->setData(0, ID, id);
                 _items.insert(id, locationItem);
 
-//                locationItem->setText(2, QString::fromStdString(locationPtr->getPlanPath()));
+//                locationItem->setText(2, locationPtr->getPlanPath());
 
                 std::vector< FacilityPtr > facilities = locationPtr->getChilds();
                 for( FacilityPtr facilityPtr: facilities )
@@ -67,7 +67,7 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
                         floorItem->setData(0, ID, id);
                         _items.insert(id, floorItem);
 
-//                        floorItem->setText(2, QString::fromStdString(floorPtr->getPlanPath()));
+//                        floorItem->setText(2, floorPtr->getPlanPath());
 //                        QPixmap pm("/home/sergey/contour_ng/0.tiff");
 //                        floorItem->setIcon(0, QIcon(pm));
 
