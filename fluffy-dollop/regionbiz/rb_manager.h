@@ -46,9 +46,9 @@ public:
                             const char *slot,
                             bool queue = false );
     void centerOnArea( uint64_t id );
-    void subscribeOnCenterOn( QObject* obj,
-                              const char *slot,
-                              bool queue = false );
+    void subscribeCenterOn( QObject* obj,
+                            const char *slot,
+                            bool queue = false );
 
 private:
     RegionBizManager();

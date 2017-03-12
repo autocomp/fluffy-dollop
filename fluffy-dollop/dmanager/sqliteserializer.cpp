@@ -340,7 +340,7 @@ bool SQLiteSerializer::initDatabase(QString dbDirPath, bool *isFirstRun)
     {
         qDebug () << "SQLiteSerializer::initDatabase: Avaliable drivers: " <<  QSqlDatabase::drivers();
 
-        _db = QSqlDatabase::addDatabase("QSQLITE");
+        _db = QSqlDatabase::addDatabase("QSQLITE", "EMBEDED");
         _db.setDatabaseName(fullFileName);
 
         if(!_db.open())

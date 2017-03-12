@@ -20,7 +20,7 @@ std::vector< RegionPtr > SqlTranslator::loadRegions()
 {
     std::vector< RegionPtr > regions;
 
-    QSqlDatabase db = QSqlDatabase::database();
+    QSqlDatabase db = QSqlDatabase::database( DB_NAME );
     QString select = "SELECT id, description FROM regions";
     QSqlQuery query( db );
     bool res = query.exec( select );
@@ -46,7 +46,7 @@ std::vector<LocationPtr> SqlTranslator::loadLocations()
 {
     std::vector< LocationPtr > locations;
 
-    QSqlDatabase db = QSqlDatabase::database();
+    QSqlDatabase db = QSqlDatabase::database( DB_NAME );
     QString select = "SELECT id, parent, description, address FROM locations";
     QSqlQuery query( db );
     bool res = query.exec( select );
@@ -76,7 +76,7 @@ std::vector<FacilityPtr> SqlTranslator::loadFacilitys()
 {
     std::vector< FacilityPtr > facilitys;
 
-    QSqlDatabase db = QSqlDatabase::database();
+    QSqlDatabase db = QSqlDatabase::database( DB_NAME );
     QString select = "SELECT id, parent, description, address, cad_number FROM facilitys";
     QSqlQuery query( db );
     bool res = query.exec( select );
@@ -107,7 +107,7 @@ std::vector<FloorPtr> SqlTranslator::loadFloors()
 {
     std::vector< FloorPtr > floors;
 
-    QSqlDatabase db = QSqlDatabase::database();
+    QSqlDatabase db = QSqlDatabase::database( DB_NAME );
     QString select = "SELECT id, parent, number, name FROM floors;";
     QSqlQuery query( db );
     bool res = query.exec( select );
@@ -137,7 +137,7 @@ std::vector<RoomsGroupPtr> SqlTranslator::loadRoomsGroups()
 {
     std::vector< RoomsGroupPtr > rooms_groups;
 
-    QSqlDatabase db = QSqlDatabase::database();
+    QSqlDatabase db = QSqlDatabase::database( DB_NAME );
     QString select = "SELECT id, parent, address, cad_number FROM rooms_groups";
     QSqlQuery query( db );
     bool res = query.exec( select );
@@ -167,7 +167,7 @@ std::vector<RoomPtr> SqlTranslator::loadRooms()
 {
     std::vector< RoomPtr > rooms;
 
-    QSqlDatabase db = QSqlDatabase::database();
+    QSqlDatabase db = QSqlDatabase::database( DB_NAME );
     QString select = "SELECT id, parent, name FROM rooms;";
     QSqlQuery query( db );
     bool res = query.exec( select );
@@ -197,7 +197,7 @@ std::vector<PropertyPtr> SqlTranslator::loadPropertys()
 {
     std::vector<PropertyPtr> propertys;
 
-    QSqlDatabase db = QSqlDatabase::database();
+    QSqlDatabase db = QSqlDatabase::database( DB_NAME );
     QString select = "SELECT id, area_id, register_date, encumbrances FROM propertys";
     QSqlQuery query( db );
     bool res = query.exec( select );
@@ -224,7 +224,7 @@ std::vector<RentPtr> SqlTranslator::loadRents()
 {
     std::vector<RentPtr> rents;
 
-    QSqlDatabase db = QSqlDatabase::database();
+    QSqlDatabase db = QSqlDatabase::database( DB_NAME );
     QString select = "SELECT id, area_id, start_date, finish_date FROM rents";
     QSqlQuery query( db );
     bool res = query.exec( select );
@@ -258,7 +258,7 @@ bool SqlTranslator::loadCoordinate( std::vector< LocTypePtr > &vector,
 {
     std::map< uint64_t, QPolygonF > coords;
 
-    QSqlDatabase db = QSqlDatabase::database();
+    QSqlDatabase db = QSqlDatabase::database( DB_NAME );
     QSqlQuery query( db );
     QString select_coords = "SELECT c.id, c.x, c.y, c.number FROM " + name + " as n JOIN coords as c "
                             "ON n.id = c.id ORDER by c.id, c.number";
@@ -288,7 +288,7 @@ bool SqlTranslator::loadPlans( BaseAreaPtr area )
     std::shared_ptr< PlanKeeper > keeper = BaseArea::convert< PlanKeeper >( area );
     if( keeper )
     {
-        QSqlDatabase db = QSqlDatabase::database();
+        QSqlDatabase db = QSqlDatabase::database( DB_NAME );
         QSqlQuery query( db );
         QString select_plans = "SELECT parent, path, scale_w, scale_h, angle, x, y FROM plans "
                                "WHERE parent = " + QString::number( area->getId() );
@@ -333,7 +333,7 @@ bool SqlTranslator::loadPayments(RentPtr /*rent*/)
 
 bool SqliteTranslator::initBySettings(QVariantMap settings)
 {
-    QSqlDatabase db = QSqlDatabase::addDatabase( "QSQLITE" );
+    QSqlDatabase db = QSqlDatabase::addDatabase( "QSQLITE", DB_NAME );
     QString path = settings["file_path"].toString();
     db.setDatabaseName( path );
 
@@ -351,7 +351,7 @@ bool SqliteTranslator::initBySettings(QVariantMap settings)
 
 bool PsqlTranslator::initBySettings(QVariantMap settings)
 {
-    QSqlDatabase db = QSqlDatabase::addDatabase( "QPSQL" );
+    QSqlDatabase db = QSqlDatabase::addDatabase( "QPSQL", DB_NAME );
     QString host = settings["host"].toString();
     QString db_name = settings["db_name"].toString();
     QString user = settings["user"].toString();

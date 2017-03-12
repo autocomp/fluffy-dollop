@@ -248,7 +248,7 @@ void RegionBizManager::centerOnArea(uint64_t id)
     _select_manager.centerOnBaseArea( id );
 }
 
-void RegionBizManager::subscribeOnCenterOn(QObject *obj, const char *slot, bool queue)
+void RegionBizManager::subscribeCenterOn(QObject *obj, const char *slot, bool queue)
 {
     QObject::connect( &_select_manager, SIGNAL( centerOnBaseArea( uint64_t )),
                       obj, slot, ( queue ? Qt::QueuedConnection : Qt::DirectConnection ));

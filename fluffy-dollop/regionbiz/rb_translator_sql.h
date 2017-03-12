@@ -3,6 +3,8 @@
 
 #include "rb_translator.h"
 
+#define DB_NAME "RegionBiz DB"
+
 namespace regionbiz {
 
 class SqlTranslator: public BaseTranslator
