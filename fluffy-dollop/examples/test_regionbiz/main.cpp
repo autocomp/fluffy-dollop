@@ -8,6 +8,7 @@ int main()
 {
     using namespace regionbiz;
 
+    // test destructor
     Location* loc = new Location(1);
     delete loc;
 
@@ -98,6 +99,20 @@ int main()
     mngr->selectArea( 4 );
     mngr->selectArea( 5 );
 
-    mngr->subscribeOnCenterOn( &recv, SLOT(onCenterOn(uint64_t)) );
+    mngr->subscribeCenterOn( &recv, SLOT(onCenterOn(uint64_t)) );
     mngr->centerOnArea( 6 );
+
+    // test of metadate
+    auto area = mngr->getBaseArea( 13 );
+    auto metadata = area->getMetadataMap();
+    qDebug() << "Meta:" << metadata.size();
+    for( auto data_pair: metadata )
+    {
+        BaseMetadataPtr data = data_pair.second;
+
+        qDebug() << "  Data:" << data->getName() << "-" << data->getValueAsString();
+        DoubleMetadataPtr double_data = BaseMetadata::convert< DoubleMetadata >( data );
+        if( double_data )
+            qDebug() << "  Real val:" << double_data->getValue();
+    }
 }
