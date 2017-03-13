@@ -227,6 +227,23 @@ BaseBizRelationPtrs RegionBizManager::getBizRelationByArea( uint64_t id,
     return relations;
 }
 
+BaseMetadataPtr RegionBizManager::getAreaMetadata(uint64_t id, QString name)
+{
+    if( _metadata.find( id ) != _metadata.end() )
+        if( _metadata[id].find( name ) != _metadata[id].end() )
+            return _metadata[id][name];
+
+    return nullptr;
+}
+
+MetadataByName RegionBizManager::getAreaMetadataMap(uint64_t id)
+{
+    if( _metadata.find( id ) != _metadata.end() )
+            return _metadata[id];
+
+    return MetadataByName();
+}
+
 uint64_t RegionBizManager::getSelectedArea()
 {
     return _select_manager._selected_area_id;
@@ -368,6 +385,16 @@ void RegionBizManager::loadDataByTranslator()
     {
         // TODO check area id
         _rents.push_back( rent );
+    }
+
+    //---------------------------------
+    auto metadata_vec = _translator->loadMetadata();
+    for( BaseMetadataPtr data: metadata_vec )
+    {
+        // TODO check id
+
+        // add by parent_id / name of metadata
+        _metadata[ data->getParentId() ][ data->getName() ] = data;
     }
 }
 

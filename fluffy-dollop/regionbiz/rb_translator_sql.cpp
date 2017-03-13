@@ -8,19 +8,27 @@ using namespace regionbiz;
 
 void SqlTranslator::loadFunctions()
 {
+    // locations
     _load_regions = std::bind( &SqlTranslator::loadRegions, this );
     _load_locations = std::bind( &SqlTranslator::loadLocations, this );
     _load_facilitys = std::bind( &SqlTranslator::loadFacilitys, this );
     _load_floors = std::bind( &SqlTranslator::loadFloors, this );
     _load_rooms_groups = std::bind( &SqlTranslator::loadRoomsGroups, this );
     _load_rooms = std::bind( &SqlTranslator::loadRooms, this );
+
+    // relations
+    _load_propertys = std::bind( &SqlTranslator::loadPropertys, this );
+    _load_rents = std::bind( &SqlTranslator::loadRents, this );
+
+    // metadata
+    _load_metadata = std::bind( &SqlTranslator::loadMetadata, this );
 }
 
 std::vector< RegionPtr > SqlTranslator::loadRegions()
 {
     std::vector< RegionPtr > regions;
 
-    QSqlDatabase db = QSqlDatabase::database( DB_NAME );
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
     QString select = "SELECT id, description FROM regions";
     QSqlQuery query( db );
     bool res = query.exec( select );
@@ -46,7 +54,7 @@ std::vector<LocationPtr> SqlTranslator::loadLocations()
 {
     std::vector< LocationPtr > locations;
 
-    QSqlDatabase db = QSqlDatabase::database( DB_NAME );
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
     QString select = "SELECT id, parent, description, address FROM locations";
     QSqlQuery query( db );
     bool res = query.exec( select );
@@ -76,7 +84,7 @@ std::vector<FacilityPtr> SqlTranslator::loadFacilitys()
 {
     std::vector< FacilityPtr > facilitys;
 
-    QSqlDatabase db = QSqlDatabase::database( DB_NAME );
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
     QString select = "SELECT id, parent, description, address, cad_number FROM facilitys";
     QSqlQuery query( db );
     bool res = query.exec( select );
@@ -107,7 +115,7 @@ std::vector<FloorPtr> SqlTranslator::loadFloors()
 {
     std::vector< FloorPtr > floors;
 
-    QSqlDatabase db = QSqlDatabase::database( DB_NAME );
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
     QString select = "SELECT id, parent, number, name FROM floors;";
     QSqlQuery query( db );
     bool res = query.exec( select );
@@ -137,7 +145,7 @@ std::vector<RoomsGroupPtr> SqlTranslator::loadRoomsGroups()
 {
     std::vector< RoomsGroupPtr > rooms_groups;
 
-    QSqlDatabase db = QSqlDatabase::database( DB_NAME );
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
     QString select = "SELECT id, parent, address, cad_number FROM rooms_groups";
     QSqlQuery query( db );
     bool res = query.exec( select );
@@ -167,7 +175,7 @@ std::vector<RoomPtr> SqlTranslator::loadRooms()
 {
     std::vector< RoomPtr > rooms;
 
-    QSqlDatabase db = QSqlDatabase::database( DB_NAME );
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
     QString select = "SELECT id, parent, name FROM rooms;";
     QSqlQuery query( db );
     bool res = query.exec( select );
@@ -197,7 +205,7 @@ std::vector<PropertyPtr> SqlTranslator::loadPropertys()
 {
     std::vector<PropertyPtr> propertys;
 
-    QSqlDatabase db = QSqlDatabase::database( DB_NAME );
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
     QString select = "SELECT id, area_id, register_date, encumbrances FROM propertys";
     QSqlQuery query( db );
     bool res = query.exec( select );
@@ -224,7 +232,7 @@ std::vector<RentPtr> SqlTranslator::loadRents()
 {
     std::vector<RentPtr> rents;
 
-    QSqlDatabase db = QSqlDatabase::database( DB_NAME );
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
     QString select = "SELECT id, area_id, start_date, finish_date FROM rents";
     QSqlQuery query( db );
     bool res = query.exec( select );
@@ -250,6 +258,32 @@ std::vector<RentPtr> SqlTranslator::loadRents()
     return rents;
 }
 
+BaseMetadataPtrs SqlTranslator::loadMetadata()
+{
+    BaseMetadataPtrs metadata;
+
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    QString select = "SELECT area_id, type, name, value FROM metadate_areas";
+    QSqlQuery query( db );
+    bool res = query.exec( select );
+    if( res )
+        for( query.first(); query.isValid(); query.next() )
+        {
+            uint64_t area_id = query.value( 0 ).toLongLong();
+            QString type = query.value( 1 ).toString();
+            QString name = query.value( 2 ).toString();
+            QString value_str = query.value( 3 ).toString();
+
+            BaseMetadataPtr data = MetadataFabric::createMetadata( type, area_id );
+            data->setValueByString( value_str );
+            data->setName( name );
+
+            metadata.push_back( data );
+        }
+
+    return metadata;
+}
+
 //------------------------------------------------------
 
 template<typename LocTypePtr>
@@ -258,7 +292,7 @@ bool SqlTranslator::loadCoordinate( std::vector< LocTypePtr > &vector,
 {
     std::map< uint64_t, QPolygonF > coords;
 
-    QSqlDatabase db = QSqlDatabase::database( DB_NAME );
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
     QSqlQuery query( db );
     QString select_coords = "SELECT c.id, c.x, c.y, c.number FROM " + name + " as n JOIN coords as c "
                             "ON n.id = c.id ORDER by c.id, c.number";
@@ -288,7 +322,7 @@ bool SqlTranslator::loadPlans( BaseAreaPtr area )
     std::shared_ptr< PlanKeeper > keeper = BaseArea::convert< PlanKeeper >( area );
     if( keeper )
     {
-        QSqlDatabase db = QSqlDatabase::database( DB_NAME );
+        QSqlDatabase db = QSqlDatabase::database( getBaseName() );
         QSqlQuery query( db );
         QString select_plans = "SELECT parent, path, scale_w, scale_h, angle, x, y FROM plans "
                                "WHERE parent = " + QString::number( area->getId() );
@@ -333,7 +367,7 @@ bool SqlTranslator::loadPayments(RentPtr /*rent*/)
 
 bool SqliteTranslator::initBySettings(QVariantMap settings)
 {
-    QSqlDatabase db = QSqlDatabase::addDatabase( "QSQLITE", DB_NAME );
+    QSqlDatabase db = QSqlDatabase::addDatabase( "QSQLITE", getBaseName() );
     QString path = settings["file_path"].toString();
     db.setDatabaseName( path );
 
@@ -349,9 +383,14 @@ bool SqliteTranslator::initBySettings(QVariantMap settings)
     }
 }
 
+QString SqliteTranslator::getBaseName()
+{
+    return "REGION_BIZ_SQLITE";
+}
+
 bool PsqlTranslator::initBySettings(QVariantMap settings)
 {
-    QSqlDatabase db = QSqlDatabase::addDatabase( "QPSQL", DB_NAME );
+    QSqlDatabase db = QSqlDatabase::addDatabase( "QPSQL", getBaseName() );
     QString host = settings["host"].toString();
     QString db_name = settings["db_name"].toString();
     QString user = settings["user"].toString();
@@ -372,4 +411,9 @@ bool PsqlTranslator::initBySettings(QVariantMap settings)
         std::cerr << "Error: connection with database fail: " << std::endl;
         return false;
     }
+}
+
+QString PsqlTranslator::getBaseName()
+{
+    return "REGION_BIZ_PSQL";
 }

@@ -7,6 +7,7 @@
 #include "rb_locations.h"
 #include "rb_translator.h"
 #include "rb_selection_manager.h"
+#include "rb_metadata.h"
 
 namespace regionbiz {
 
@@ -38,6 +39,10 @@ public:
     // biz relstions
     BaseBizRelationPtrs getBizRelationByArea( uint64_t id );
     BaseBizRelationPtrs getBizRelationByArea( uint64_t id, BaseBizRelation::RelationType type );
+
+    // metadata
+    BaseMetadataPtr getAreaMetadata( uint64_t id, QString name );
+    MetadataByName getAreaMetadataMap( uint64_t id );
 
     // selection managment
     uint64_t getSelectedArea();
@@ -76,6 +81,9 @@ private:
     // data relations
     std::vector< PropertyPtr > _propertys;
     std::vector< RentPtr > _rents;
+
+    // metadata
+    MetadataById _metadata;
 
     // selection
     SelectionManager _select_manager;

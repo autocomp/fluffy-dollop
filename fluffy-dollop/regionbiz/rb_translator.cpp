@@ -51,6 +51,11 @@ bool BaseTranslator::checkTranslator(std::string &err)
         return false;
     }
 
+    // TODO add checkers
+    // relations
+
+    // metadata
+
     return true;
 }
 
@@ -123,6 +128,14 @@ std::vector<RentPtr> BaseTranslator::loadRents()
         return _load_rents();
     else
         return std::vector<RentPtr>();
+}
+
+BaseMetadataPtrs BaseTranslator::loadMetadata()
+{
+    if( _load_metadata )
+        return _load_metadata();
+    else
+        return BaseMetadataPtrs();
 }
 
 void BaseTranslator::setParentForBaseLocation( BaseAreaPtr loc, uint64_t parent_id )

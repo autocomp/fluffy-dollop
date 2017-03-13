@@ -3,8 +3,6 @@
 
 #include "rb_translator.h"
 
-#define DB_NAME "RegionBiz DB"
-
 namespace regionbiz {
 
 class SqlTranslator: public BaseTranslator
@@ -12,6 +10,7 @@ class SqlTranslator: public BaseTranslator
 private:
     void loadFunctions() override;
     virtual bool initBySettings(QVariantMap settings) = 0;
+    virtual QString getBaseName() = 0;
 
     // read locations
     // TODO write template method
@@ -26,6 +25,9 @@ private:
     std::vector< PropertyPtr > loadPropertys();
     std::vector< RentPtr > loadRents();
 
+    // metadata
+    BaseMetadataPtrs loadMetadata();
+
     // support functions
     template< typename LocTypePtr >
     bool loadCoordinate( std::vector< LocTypePtr >& vector, QString name );
@@ -39,6 +41,7 @@ private:
 class SqliteTranslator: public SqlTranslator
 {
     bool initBySettings( QVariantMap settings ) override;
+    QString getBaseName() override;
 };
 
 //------------------------------------------------------------
@@ -46,6 +49,7 @@ class SqliteTranslator: public SqlTranslator
 class PsqlTranslator: public SqlTranslator
 {
     bool initBySettings( QVariantMap settings ) override;
+    QString getBaseName() override;
 };
 
 }

@@ -9,6 +9,7 @@
 
 //#include "rb_manager.h"
 #include "rb_biz_relations.h"
+#include "rb_metadata.h"
 
 namespace regionbiz {
 
@@ -43,6 +44,9 @@ public:
     BaseAreaPtr getParent( AreaType parent_type );
     BaseAreaPtr getParent();
     virtual AreaType getType() = 0;
+
+    BaseMetadataPtr getMetadata( QString name );
+    MetadataByName getMetadataMap();
 
     template< typename Type >
     static std::shared_ptr< Type > convert( BaseAreaPtr base )

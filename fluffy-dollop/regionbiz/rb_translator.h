@@ -9,6 +9,7 @@
 
 #include "rb_locations.h"
 #include "rb_biz_relations.h"
+#include "rb_metadata.h"
 
 namespace regionbiz {
 
@@ -31,6 +32,9 @@ public:
     std::vector< PropertyPtr > loadPropertys();
     std::vector< RentPtr > loadRents();
 
+    // metadata
+    BaseMetadataPtrs loadMetadata();
+
 protected:
     virtual void loadFunctions() = 0;
     virtual bool initBySettings( QVariantMap settings ) = 0;
@@ -48,6 +52,9 @@ protected:
     // relations
     std::function< std::vector< PropertyPtr >( void ) > _load_propertys;
     std::function< std::vector< RentPtr >( void ) > _load_rents;
+
+    // metadata
+    std::function< std::vector< BaseMetadataPtr >( void ) > _load_metadata;
 };
 typedef std::shared_ptr< BaseTranslator > BaseTranslatorPtr;
 
