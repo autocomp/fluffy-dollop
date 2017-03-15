@@ -201,7 +201,7 @@ bool RegionBizManager::commitArea( BaseAreaPtr area )
 bool RegionBizManager::commitArea( uint64_t id )
 {
     BaseAreaPtr area = getBaseArea( id );
-    commitArea( area );
+    return commitArea( area );
 }
 
 BaseBizRelationPtrs RegionBizManager::getBizRelationByArea(uint64_t id)
