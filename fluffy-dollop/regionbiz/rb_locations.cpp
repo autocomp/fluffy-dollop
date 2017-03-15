@@ -9,7 +9,7 @@ typedef Region::RegionChildFilter RegionChildFilter;
 typedef PlanKeeper::PlanParams PlanParams;
 
 BaseArea::BaseArea(uint64_t id):
-    _id( id )
+    BaseEntity( id )
 {}
 
 QPolygonF BaseArea::getCoords()
@@ -20,11 +20,6 @@ QPolygonF BaseArea::getCoords()
 void BaseArea::setCoords(QPolygonF coord)
 {
     _coords = coord;
-}
-
-uint64_t BaseArea::getId()
-{
-    return _id;
 }
 
 uint64_t BaseArea::getParentId()
@@ -62,6 +57,14 @@ MetadataByName BaseArea::getMetadataMap()
     MetadataByName data = mngr->getAreaMetadataMap( _id );
 
     return data;
+}
+
+bool BaseArea::commit()
+{
+    auto mngr = RegionBizManager::instance();
+    bool comm_res =  mngr->commitArea( _id );
+
+    return comm_res;
 }
 
 void BaseArea::setParent(uint64_t id)

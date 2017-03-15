@@ -28,6 +28,9 @@ public:
     std::vector< RoomsGroupPtr > loadRoomsGroups();
     std::vector< RoomPtr > loadRooms();
 
+    // commit locations
+    bool commitArea(BaseAreaPtr area);
+
     // relations
     std::vector< PropertyPtr > loadPropertys();
     std::vector< RentPtr > loadRents();
@@ -48,6 +51,9 @@ protected:
     std::function< std::vector< FloorPtr >( void ) > _load_floors;
     std::function< std::vector< RoomsGroupPtr >( void ) > _load_rooms_groups;
     std::function< std::vector< RoomPtr >( void ) > _load_rooms;
+
+    // commit locations
+    std::function< bool( BaseAreaPtr ) > _commit_area;
 
     // relations
     std::function< std::vector< PropertyPtr >( void ) > _load_propertys;

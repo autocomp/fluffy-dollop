@@ -56,6 +56,8 @@ bool BaseTranslator::checkTranslator(std::string &err)
 
     // metadata
 
+    // commit
+
     return true;
 }
 
@@ -112,6 +114,14 @@ std::vector<RoomPtr> BaseTranslator::loadRooms()
         return _load_rooms();
     else
         return std::vector<RoomPtr>();
+}
+
+bool BaseTranslator::commitArea( BaseAreaPtr area )
+{
+    if( _commit_area )
+        return _commit_area( area );
+    else
+        return false;
 }
 
 std::vector<PropertyPtr> BaseTranslator::loadPropertys()

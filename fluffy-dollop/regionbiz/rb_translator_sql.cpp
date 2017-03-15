@@ -2,7 +2,9 @@
 
 #include <iostream>
 #include <QSqlQuery>
+#include <QSqlError>
 #include <QPolygonF>
+#include <QDebug>
 
 using namespace regionbiz;
 
@@ -15,6 +17,9 @@ void SqlTranslator::loadFunctions()
     _load_floors = std::bind( &SqlTranslator::loadFloors, this );
     _load_rooms_groups = std::bind( &SqlTranslator::loadRoomsGroups, this );
     _load_rooms = std::bind( &SqlTranslator::loadRooms, this );
+
+    // commit locations
+    _commit_area = std::bind( &SqlTranslator::commitArea, this, std::placeholders::_1 );
 
     // relations
     _load_propertys = std::bind( &SqlTranslator::loadPropertys, this );
@@ -38,7 +43,7 @@ std::vector< RegionPtr > SqlTranslator::loadRegions()
             uint64_t id = query.value( 0 ).toLongLong();
             QString descr = query.value( 1 ).toString();
 
-            RegionPtr reg = RegionPtr( new Region( id ));
+            RegionPtr reg = BaseEntity::createWithId< Region >( id );
             reg->setDesription( descr );
             setParentForBaseLocation( reg, 0 );
 
@@ -66,7 +71,7 @@ std::vector<LocationPtr> SqlTranslator::loadLocations()
             QString descr = query.value( 2 ).toString();
             QString addr = query.value( 3 ).toString();
 
-            LocationPtr loc = LocationPtr( new Location( id ));
+            LocationPtr loc = BaseEntity::createWithId< Location >( id );
             setParentForBaseLocation( loc, parent_id );
             loc->setDesription( descr );
             loc->setAddress( addr );
@@ -97,7 +102,7 @@ std::vector<FacilityPtr> SqlTranslator::loadFacilitys()
             QString addr = query.value( 3 ).toString();
             QString cad_number = query.value( 4 ).toString();
 
-            FacilityPtr fac = FacilityPtr( new Facility( id ));
+            FacilityPtr fac = BaseEntity::createWithId< Facility >( id );
             setParentForBaseLocation( fac, parent_id );
             fac->setDesription( descr );
             fac->setAddress( addr );
@@ -127,7 +132,7 @@ std::vector<FloorPtr> SqlTranslator::loadFloors()
             uint16_t number = query.value( 2 ).toInt();
             QString name = query.value( 3 ).toString();
 
-            FloorPtr flo = FloorPtr( new Floor( id ));
+            FloorPtr flo = BaseEntity::createWithId< Floor >( id );
             setParentForBaseLocation( flo, parent_id );
             flo->setName( name );
             flo->setNumber( number );
@@ -157,7 +162,7 @@ std::vector<RoomsGroupPtr> SqlTranslator::loadRoomsGroups()
             QString addr = query.value( 2 ).toString();
             QString cad_number = query.value( 3 ).toString();
 
-            RoomsGroupPtr rg = RoomsGroupPtr( new RoomsGroup( id ));
+            RoomsGroupPtr rg = BaseEntity::createWithId< RoomsGroup >( id );
             setParentForBaseLocation( rg, parent_id );
             rg->setAddress( addr );
             rg->setCadastralNumber( cad_number );
@@ -186,7 +191,7 @@ std::vector<RoomPtr> SqlTranslator::loadRooms()
             uint64_t parent_id = query.value( 1 ).toLongLong();
             QString name = query.value( 2 ).toString();
 
-            RoomPtr roo = RoomPtr( new Room( id ));
+            RoomPtr roo = BaseEntity::createWithId< Room >( id );
             setParentForBaseLocation( roo, parent_id );
             roo->setName( name );
             loadPlans( roo );
@@ -197,6 +202,61 @@ std::vector<RoomPtr> SqlTranslator::loadRooms()
     loadCoordinate< RoomPtr >( rooms, "rooms" );
 
     return rooms;
+}
+
+bool SqlTranslator::commitArea( BaseAreaPtr area )
+{
+    // FIXME all area types
+    if( BaseArea::AT_ROOM != area->getType() )
+        return false;
+
+    // check exist
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    QString select = "SELECT id, parent, name FROM rooms "
+                     "WHERE id = " + QString::number( area->getId() );
+    QSqlQuery query( db );
+    query.exec( select );
+
+    QString insert_update;
+
+    // lock base
+    db.transaction();
+
+    // room
+    if( query.first() )
+    {
+        // update
+        insert_update = "UPDATE rooms SET id = ?, parent = ?, name = ? "
+                        "WHERE id = " + QString::number( area->getId() );
+    }
+    else
+    {
+        // insert
+        insert_update = "INSERT INTO rooms (id, parent, name) VALUES (?, ?, ?);";
+    }
+
+    query.prepare( insert_update );
+    query.addBindValue( (qulonglong) area->getId() );
+    query.addBindValue( (qulonglong) area->getParentId() );
+    query.addBindValue( BaseArea::convert< Room >( area )->getName() );
+    if( !query.exec() )
+    {
+        db.rollback();
+        return false;
+    }
+
+    // coordinates
+    if( !commitCoordinates( area ))
+    {
+        db.rollback();
+        return false;
+    }
+
+    // TODO commit metadate
+
+    // unlock base
+    db.commit();
+    return true;
 }
 
 //------------------------------------------------------
@@ -216,6 +276,7 @@ std::vector<PropertyPtr> SqlTranslator::loadPropertys()
             uint64_t area_id = query.value( 1 ).toLongLong();
             QDate date_register = query.value( 2 ).toDate();
 
+            // TODO create by base entity
             PropertyPtr prop = PropertyPtr( new Property( id ));
             setAreaForBaseRalation( prop, area_id );
             prop->setDateOfRegistration( date_register );
@@ -244,6 +305,7 @@ std::vector<RentPtr> SqlTranslator::loadRents()
             QDate date_start = query.value( 2 ).toDate();
             QDate date_finish = query.value( 2 ).toDate();
 
+            // TODO create by base entity
             RentPtr rent = RentPtr( new Rent( id ));
             setAreaForBaseRalation( rent, area_id );
             rent->setDateOfStart( date_start );
@@ -282,6 +344,39 @@ BaseMetadataPtrs SqlTranslator::loadMetadata()
         }
 
     return metadata;
+}
+
+bool SqlTranslator::commitCoordinates(BaseAreaPtr area)
+{
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    QSqlQuery query( db );
+    QString delete_coords = "DELETE FROM coords "
+                            "WHERE id = " + QString::number( area->getId() );
+    if( !query.exec( delete_coords ))
+    {
+        qDebug() << db.lastError();
+        db.rollback();
+        return false;
+    }
+    QString insert_coords = "INSERT INTO coords ( id, x, y, number ) VALUES (?, ?, ?, ?)";
+    query.prepare( insert_coords );
+    // prepare data
+    QVariantList ids, xs, ys, numbers;
+    uint num = 0;
+    for( QPointF pnt: area->getCoords() )
+    {
+        ids.push_back( (qulonglong) area->getId() );
+        xs.push_back( pnt.x() );
+        ys.push_back( pnt.y() );
+        numbers.push_back( num++ );
+    }
+    // bind data
+    query.addBindValue( ids );
+    query.addBindValue( xs );
+    query.addBindValue( ys );
+    query.addBindValue( numbers );
+
+    return query.execBatch();
 }
 
 //------------------------------------------------------
@@ -408,7 +503,8 @@ bool PsqlTranslator::initBySettings(QVariantMap settings)
     }
     else
     {
-        std::cerr << "Error: connection with database fail: " << std::endl;
+        std::cerr << "Error: connection with database fail: "
+                  << db.lastError().text().toUtf8().data() << std::endl;
         return false;
     }
 }

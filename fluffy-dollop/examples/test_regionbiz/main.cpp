@@ -15,6 +15,7 @@ int main()
     //! init
     auto mngr = RegionBizManager::instance();
     QString str = "~/.contour_ng/regionbiz_sqlite.json";
+    //QString str = "~/.contour_ng/regionbiz_psql.json";
     mngr->init( str );
 
     //! load regons
@@ -102,7 +103,7 @@ int main()
     mngr->subscribeCenterOn( &recv, SLOT(onCenterOn(uint64_t)) );
     mngr->centerOnArea( 6 );
 
-    // test of metadate
+    //! test of metadate
     auto area = mngr->getBaseArea( 13 );
     auto metadata = area->getMetadataMap();
     qDebug() << "Meta:" << metadata.size();
@@ -115,4 +116,18 @@ int main()
         if( double_data )
             qDebug() << "  Real val:" << double_data->getValue();
     }
+    qDebug() << " Data square:" << area->getMetadata( "square" )->getValueAsString();
+
+    //! test of entitys
+    qDebug() << "Max id =" << BaseEntity::getMaxId();
+    // create room
+    auto room = mngr->addArea< Room >( 13 );
+    qDebug() << "Max id after =" << BaseEntity::getMaxId();
+    // change room
+    room->setCoords(( QPolygonF() << QPointF( 1, 1 ) << QPointF( 1, 100 )
+                      << QPointF( 100, 100 ) << QPointF( 100, 1 )));
+    BaseArea::convert< Room >( room )->setName( QString::fromUtf8( "Тестовое имя" ));
+    // commit room (change base)
+    //qDebug() << "Commit:" << room->commit();
+    //qDebug() << "Commit again:" << room->commit();
 }

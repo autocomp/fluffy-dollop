@@ -60,34 +60,14 @@ bool RegionBizManager::init(QString &config_path)
 
 BaseAreaPtr RegionBizManager::getBaseArea( uint64_t id )
 {
-    BaseAreaPtr loc = nullptr;
-
-    loc = getBaseArea( id, BaseArea::AT_REGION );
-    if( loc )
-        return loc;
-
-    loc = getBaseArea( id, BaseArea::AT_LOCATION );
-    if( loc )
-        return loc;
-
-    loc = getBaseArea( id, BaseArea::AT_FACILITY );
-    if( loc )
-        return loc;
-
-    loc = getBaseArea( id, BaseArea::AT_FLOOR );
-    if( loc )
-        return loc;
-
-    loc = getBaseArea( id, BaseArea::AT_ROOMS_GROUP );
-    if( loc )
-        return loc;
-
-    loc = getBaseArea( id, BaseArea::AT_ROOM );
+    auto entity = BaseEntity::getEntity( id );
+    // TODO thin about static and dynamic cast
+    BaseAreaPtr loc = std::static_pointer_cast< BaseArea >( entity );
     return loc;
 }
 
 BaseAreaPtr RegionBizManager::getBaseArea( uint64_t id,
-                                                  BaseArea::AreaType type )
+                                           BaseArea::AreaType type )
 {
     BaseAreaPtr loc;
 
@@ -184,6 +164,44 @@ std::vector<RoomsGroupPtr> RegionBizManager::getRoomsGroupsByParent(uint64_t par
 std::vector<RoomPtr> RegionBizManager::getRoomsByParent(uint64_t parent_id)
 {
     return getBaseLocationsByParent< RoomPtr >( parent_id, _rooms );
+}
+
+BaseAreaPtr RegionBizManager::addArea( BaseArea::AreaType type,
+                                       uint64_t parent_id )
+{
+    switch ( type ) {
+    case BaseArea::AT_REGION:
+        addArea< Region >( parent_id );
+        break;
+    case BaseArea::AT_LOCATION:
+        addArea< Location >( parent_id );
+        break;
+    case BaseArea::AT_FACILITY:
+        addArea< Facility >( parent_id );
+        break;
+    case BaseArea::AT_FLOOR:
+        addArea< Floor >( parent_id );
+        break;
+    case BaseArea::AT_ROOMS_GROUP:
+        addArea< RoomsGroup >( parent_id );
+        break;
+    case BaseArea::AT_ROOM:
+        addArea< Room >( parent_id );
+        break;
+    default:
+        break;
+    }
+}
+
+bool RegionBizManager::commitArea( BaseAreaPtr area )
+{
+    return _translator->commitArea( area );
+}
+
+bool RegionBizManager::commitArea( uint64_t id )
+{
+    BaseAreaPtr area = getBaseArea( id );
+    commitArea( area );
 }
 
 BaseBizRelationPtrs RegionBizManager::getBizRelationByArea(uint64_t id)
@@ -406,6 +424,32 @@ void RegionBizManager::clearCurrentData()
     _floors.clear();
     _rooms_groups.clear();
     _rooms.clear();
+}
+
+void RegionBizManager::appendArea( BaseAreaPtr area )
+{
+    switch ( area->getType() ) {
+    case BaseArea::AT_REGION:
+        _regions.push_back( BaseArea::convert< Region >( area ));
+        break;
+    case BaseArea::AT_LOCATION:
+        _locations.push_back( BaseArea::convert< Location >( area ));
+        break;
+    case BaseArea::AT_FACILITY:
+        _facilitys.push_back( BaseArea::convert< Facility >( area ));
+        break;
+    case BaseArea::AT_FLOOR:
+        _floors.push_back( BaseArea::convert< Floor >( area ));
+        break;
+    case BaseArea::AT_ROOMS_GROUP:
+        _rooms_groups.push_back( BaseArea::convert< RoomsGroup >( area ));
+        break;
+    case BaseArea::AT_ROOM:
+        _rooms.push_back( BaseArea::convert< Room >( area ));
+        break;
+    default:
+        break;
+    }
 }
 
 template<typename LocTypePtr>

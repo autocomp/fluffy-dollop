@@ -36,6 +36,26 @@ public:
     std::vector< RoomsGroupPtr > getRoomsGroupsByParent( uint64_t parent_id );
     std::vector< RoomPtr > getRoomsByParent( uint64_t parent_id );
 
+    // add
+    BaseAreaPtr addArea( BaseArea::AreaType type,
+                         uint64_t parent_id );
+    template< typename Type >
+    BaseAreaPtr addArea( uint64_t parent_id )
+    {
+        // TODO check parent type
+        BaseAreaPtr area = BaseEntity::createWithId< Type >( BaseEntity::getMaxId() + 1 );
+        if( area )
+        {
+            area->setParent( parent_id );
+            appendArea( area );
+        }
+        return area;
+    }
+
+    // commit
+    bool commitArea( BaseAreaPtr area );
+    bool commitArea( uint64_t id );
+
     // biz relstions
     BaseBizRelationPtrs getBizRelationByArea( uint64_t id );
     BaseBizRelationPtrs getBizRelationByArea( uint64_t id, BaseBizRelation::RelationType type );
@@ -62,6 +82,7 @@ private:
     QVariantMap loadJsonConfig( QString &file_path );
     void loadDataByTranslator();
     void clearCurrentData();
+    void appendArea( BaseAreaPtr area );
 
     template< typename LocTypePtr >
     std::vector< LocTypePtr > getBaseLocationsByParent( uint64_t parent_id,

@@ -10,6 +10,7 @@
 //#include "rb_manager.h"
 #include "rb_biz_relations.h"
 #include "rb_metadata.h"
+#include "rb_base_entity.h"
 
 namespace regionbiz {
 
@@ -17,11 +18,12 @@ class BaseArea;
 typedef std::shared_ptr< BaseArea > BaseAreaPtr;
 typedef std::vector< BaseAreaPtr > BaseAreaPtrs;
 
-//class RegionBizManager;
+class RegionBizManager;
 
-class BaseArea
+class BaseArea: public BaseEntity
 {
     friend class BaseTranslator;
+    friend class RegionBizManager;
 
 public:
     enum AreaType
@@ -39,7 +41,6 @@ public:
 
     QPolygonF getCoords();
     void setCoords(QPolygonF coord );
-    uint64_t getId();
     uint64_t getParentId();
     BaseAreaPtr getParent( AreaType parent_type );
     BaseAreaPtr getParent();
@@ -48,6 +49,8 @@ public:
     BaseMetadataPtr getMetadata( QString name );
     MetadataByName getMetadataMap();
 
+    bool commit();
+
     template< typename Type >
     static std::shared_ptr< Type > convert( BaseAreaPtr base )
     {
@@ -55,21 +58,20 @@ public:
     }
 
     // TODO think how to read
-//    template< typename Type >
-//    std::shared_ptr< Type > convert()
-//    {
-//        auto mngr = RegionBizManager::instance();
-//        BaseLocationPtr ptr = mngr->getBaseArea( _id, getType() );
-//        return std::dynamic_pointer_cast< Type >( ptr );
-//    }
+    // template< typename Type >
+    // std::shared_ptr< Type > convert()
+    // {
+    //     auto mngr = RegionBizManager::instance();
+    //     BaseAreaPtr ptr = mngr->getBaseArea( _id, getType() );
+    //     return std::dynamic_pointer_cast< Type >( ptr );
+    // }
 
 protected:
     QPolygonF _coords;
-    uint64_t _id = 0;
     uint64_t _parent_id = 0;
 
 private:
-    // private, becouse we need protect it
+    // private, because we need protect it
     void setParent( uint64_t id );
 };
 
