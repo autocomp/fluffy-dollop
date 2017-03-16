@@ -52,6 +52,10 @@ public:
         return area;
     }
 
+    // delete
+    bool deleteArea( BaseAreaPtr area );
+    bool deleteArea( uint64_t id );
+
     // commit
     bool commitArea( BaseAreaPtr area );
     bool commitArea( uint64_t id );
@@ -61,8 +65,14 @@ public:
     BaseBizRelationPtrs getBizRelationByArea( uint64_t id, BaseBizRelation::RelationType type );
 
     // metadata
-    BaseMetadataPtr getAreaMetadata( uint64_t id, QString name );
-    MetadataByName getAreaMetadataMap( uint64_t id );
+    bool isMetadataPresent( uint64_t id, QString name );
+    QVariant getMetadataValue( uint64_t id, QString name );
+    BaseMetadataPtr getMetadata( uint64_t id, QString name );
+    MetadataByName getMetadataMap( uint64_t id );
+    bool setMetadataValue(uint64_t id, QString name , QVariant val);
+    bool  addMetadata( uint64_t id, QString type,
+                      QString name, QVariant val = QVariant() );
+    bool addMetadata( BaseMetadataPtr data );
 
     // selection managment
     uint64_t getSelectedArea();
@@ -83,6 +93,7 @@ private:
     void loadDataByTranslator();
     void clearCurrentData();
     void appendArea( BaseAreaPtr area );
+    void removeArea( BaseAreaPtr area );
 
     template< typename LocTypePtr >
     std::vector< LocTypePtr > getBaseLocationsByParent( uint64_t parent_id,

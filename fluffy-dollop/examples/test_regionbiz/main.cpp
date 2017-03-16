@@ -105,6 +105,17 @@ int main()
 
     //! test of metadate
     auto area = mngr->getBaseArea( 13 );
+    // create some metadata
+    area->addMetadata( "double", "area", 25 );
+    BaseMetadataPtr data_type = MetadataFabric::createMetadata( "string", area->getId() );
+    data_type->setName( "type" );
+    data_type->setValueByVariant( "undefined" );
+    area->addMetadata( data_type );
+    // check present
+    qDebug() << "Present \"type\":" << area->isMetadataPresent( "type" );
+    // change val
+    area->setMetadataValue( "type", "rent" );
+    // get all meadata
     auto metadata = area->getMetadataMap();
     qDebug() << "Meta:" << metadata.size();
     for( auto data_pair: metadata )
@@ -112,11 +123,11 @@ int main()
         BaseMetadataPtr data = data_pair.second;
 
         qDebug() << "  Data:" << data->getName() << "-" << data->getValueAsString();
-        DoubleMetadataPtr double_data = BaseMetadata::convert< DoubleMetadata >( data );
-        if( double_data )
-            qDebug() << "  Real val:" << double_data->getValue();
+        qDebug() << "  Variant val:" << data->getValueAsVariant();
     }
     qDebug() << " Data square:" << area->getMetadata( "square" )->getValueAsString();
+    // commit metadate (change base)
+    area->commit();
 
     //! test of entitys
     qDebug() << "Max id =" << BaseEntity::getMaxId();
@@ -128,6 +139,11 @@ int main()
                       << QPointF( 100, 100 ) << QPointF( 100, 1 )));
     BaseArea::convert< Room >( room )->setName( QString::fromUtf8( "Тестовое имя" ));
     // commit room (change base)
-    //qDebug() << "Commit:" << room->commit();
-    //qDebug() << "Commit again:" << room->commit();
+    qDebug() << "Commit:" << room->commit();
+
+    //! check delete
+    room->addMetadata( "double", "some", 10 );
+    qDebug() << "Commit again:" << room->commit();
+    qDebug() << "Delete area:" << mngr->deleteArea( room );
+    qDebug() << "Max id after del =" << BaseEntity::getMaxId();
 }

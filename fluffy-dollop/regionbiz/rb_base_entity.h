@@ -4,14 +4,18 @@
 #include <map>
 #include <memory>
 #include <iostream>
+#include "rb_metadata.h"
 
 namespace regionbiz {
 
 class BaseEntity;
 typedef std::shared_ptr< BaseEntity > BaseEntityPtr;
 
+class RegionBizManager;
+
 class BaseEntity
 {
+    friend class RegionBizManager;
 public:
     // main
     BaseEntity( uint64_t id );
@@ -21,6 +25,15 @@ public:
     static bool isEntityExist( uint64_t id );
     static uint64_t getMaxId();
     static BaseEntityPtr getEntity( uint64_t id );
+
+    // metadata
+    bool isMetadataPresent( QString name );
+    QVariant getMetadataValue( QString name );
+    BaseMetadataPtr getMetadata( QString name );
+    MetadataByName getMetadataMap();
+    bool setMetadataValue( QString name , QVariant val );
+    bool addMetadata( QString type, QString name, QVariant val = QVariant() );
+    bool addMetadata( BaseMetadataPtr data );
 
     // create new entity
     template< typename Type >
@@ -34,6 +47,9 @@ public:
     }
 
 protected:
+    static bool deleteEntity( BaseEntityPtr ent );
+    static bool deleteEntity( uint64_t id );
+
     uint64_t _id = 0;
 
 private:

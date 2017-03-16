@@ -43,22 +43,6 @@ BaseAreaPtr BaseArea::getParent()
     return parent;
 }
 
-BaseMetadataPtr BaseArea::getMetadata(QString name)
-{
-    auto mngr = RegionBizManager::instance();
-    BaseMetadataPtr data = mngr->getAreaMetadata( _id, name );
-
-    return data;
-}
-
-MetadataByName BaseArea::getMetadataMap()
-{
-    auto mngr = RegionBizManager::instance();
-    MetadataByName data = mngr->getAreaMetadataMap( _id );
-
-    return data;
-}
-
 bool BaseArea::commit()
 {
     auto mngr = RegionBizManager::instance();

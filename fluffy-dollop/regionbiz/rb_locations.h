@@ -9,7 +9,6 @@
 
 //#include "rb_manager.h"
 #include "rb_biz_relations.h"
-#include "rb_metadata.h"
 #include "rb_base_entity.h"
 
 namespace regionbiz {
@@ -45,9 +44,6 @@ public:
     BaseAreaPtr getParent( AreaType parent_type );
     BaseAreaPtr getParent();
     virtual AreaType getType() = 0;
-
-    BaseMetadataPtr getMetadata( QString name );
-    MetadataByName getMetadataMap();
 
     bool commit();
 

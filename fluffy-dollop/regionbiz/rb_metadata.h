@@ -4,6 +4,7 @@
 #include <memory>
 #include <map>
 #include <QString>
+#include <QVariant>
 
 namespace regionbiz {
 
@@ -16,21 +17,16 @@ typedef std::map< uint64_t, MetadataByName > MetadataById;
 class BaseMetadata
 {
 public:
-    enum MetadataParentType
-    {
-        MPT_AREA,
-        MPT_RELATION
-    };
-
     BaseMetadata( uint64_t parent_id );
 
     // type
     virtual QString getType() = 0;
-    virtual MetadataParentType parentType() = 0;
 
     // value
     virtual QString getValueAsString() = 0;
     virtual void setValueByString( QString val ) = 0;
+    virtual QVariant getValueAsVariant() = 0;
+    virtual void setValueByVariant( QVariant val ) = 0;
 
     // getters
     uint64_t getParentId();
@@ -59,11 +55,12 @@ public:
 
     // type
     QString getType() override;
-    MetadataParentType parentType() override;
 
     // value
     QString getValueAsString() override;
     void setValueByString( QString val ) override;
+    QVariant getValueAsVariant() override;
+    void setValueByVariant( QVariant val );
     double getValue();
     void setValue( double val );
 
@@ -72,6 +69,30 @@ private:
 };
 typedef std::shared_ptr< DoubleMetadata > DoubleMetadataPtr;
 typedef std::vector< DoubleMetadataPtr > DoubleMetadataPtrs;
+
+//-------------------------------------------------
+
+class StringMetadata: public BaseMetadata
+{
+public:
+    StringMetadata( uint64_t parent_id );
+
+    // type
+    QString getType() override;
+
+    // value
+    QString getValueAsString() override;
+    void setValueByString( QString val ) override;
+    QVariant getValueAsVariant() override;
+    void setValueByVariant( QVariant val );
+    QString getValue();
+    void setValue(QString val );
+
+private:
+    QString _value;
+};
+typedef std::shared_ptr< StringMetadata > StringMetadataPtr;
+typedef std::vector< StringMetadataPtr > StringMetadataPtrs;
 
 //--------------------------------------------------
 

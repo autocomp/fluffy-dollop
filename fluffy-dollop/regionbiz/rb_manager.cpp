@@ -72,7 +72,7 @@ BaseAreaPtr RegionBizManager::getBaseArea( uint64_t id,
     BaseAreaPtr loc;
 
     std::function< bool( BaseAreaPtr ) > check_id =
-            [ id ]( BaseAreaPtr bl ){ return id == bl->getId(); };
+            [ id ]( BaseAreaPtr al ){ return id == al->getId(); };
 
     switch (type) {
     case BaseArea::AT_REGION:
@@ -193,6 +193,26 @@ BaseAreaPtr RegionBizManager::addArea( BaseArea::AreaType type,
     }
 }
 
+bool RegionBizManager::deleteArea(BaseAreaPtr area)
+{
+    bool del = _translator->deleteArea( area );
+    if( del )
+    {
+        // TODO delete ralations
+        _metadata.erase( area->getId() );
+        BaseEntity::deleteEntity( area );
+        removeArea( area );
+    }
+
+    return del;
+}
+
+bool RegionBizManager::deleteArea(uint64_t id)
+{
+    BaseAreaPtr area = getBaseArea( id );
+    return deleteArea( area );
+}
+
 bool RegionBizManager::commitArea( BaseAreaPtr area )
 {
     return _translator->commitArea( area );
@@ -245,21 +265,68 @@ BaseBizRelationPtrs RegionBizManager::getBizRelationByArea( uint64_t id,
     return relations;
 }
 
-BaseMetadataPtr RegionBizManager::getAreaMetadata(uint64_t id, QString name)
+BaseMetadataPtr RegionBizManager::getMetadata( uint64_t id, QString name )
 {
-    if( _metadata.find( id ) != _metadata.end() )
-        if( _metadata[id].find( name ) != _metadata[id].end() )
-            return _metadata[id][name];
+    if( isMetadataPresent( id, name ))
+        return _metadata[id][name];
 
     return nullptr;
 }
 
-MetadataByName RegionBizManager::getAreaMetadataMap(uint64_t id)
+QVariant RegionBizManager::getMetadataValue(uint64_t id, QString name)
+{
+    QVariant val = getMetadata( id, name )->getValueAsVariant();
+    return val;
+}
+
+MetadataByName RegionBizManager::getMetadataMap(uint64_t id)
 {
     if( _metadata.find( id ) != _metadata.end() )
             return _metadata[id];
 
     return MetadataByName();
+}
+
+bool RegionBizManager::isMetadataPresent( uint64_t id, QString name )
+{
+    bool present = ( _metadata.find( id ) != _metadata.end() ) &&
+            ( _metadata[id].find( name ) != _metadata[id].end() );
+
+    return present;
+}
+
+bool RegionBizManager::setMetadataValue( uint64_t id, QString name, QVariant val )
+{
+    if( isMetadataPresent( id, name ))
+    {
+        BaseMetadataPtr data = _metadata[id][name];
+        data->setValueByVariant( val );
+        return true;
+    }
+
+    return false;
+}
+
+bool RegionBizManager::addMetadata( uint64_t id, QString type,
+                                    QString name, QVariant val )
+{
+    BaseMetadataPtr data = MetadataFabric::createMetadata( type, id );
+    data->setName( name );
+    data->setValueByVariant( val );
+
+    return addMetadata( data );
+}
+
+bool RegionBizManager::addMetadata( BaseMetadataPtr data )
+{
+    if( !isMetadataPresent( data->getParentId(), data->getName() ))
+    {
+       _metadata[data->getParentId()][data->getName()] = data;
+
+       return true;
+    }
+
+    return false;
 }
 
 uint64_t RegionBizManager::getSelectedArea()
@@ -447,6 +514,59 @@ void RegionBizManager::appendArea( BaseAreaPtr area )
     case BaseArea::AT_ROOM:
         _rooms.push_back( BaseArea::convert< Room >( area ));
         break;
+    default:
+        break;
+    }
+}
+
+void RegionBizManager::removeArea(BaseAreaPtr area)
+{
+    std::function< bool( BaseAreaPtr ) > check_id =
+            [ area ]( BaseAreaPtr ba ){ return area->getId() == ba->getId(); };
+
+    switch ( area->getType() ) {
+    case BaseArea::AT_REGION:
+    {
+        auto iter = FIND_IF( _regions, check_id );
+        if( iter != _regions.end() )
+            _regions.erase( iter );
+        break;
+    }
+    case BaseArea::AT_LOCATION:
+    {
+        auto iter = FIND_IF( _locations, check_id );
+        if( iter != _locations.end() )
+            _locations.erase( iter );
+        break;
+    }
+    case BaseArea::AT_FACILITY:
+    {
+        auto iter = FIND_IF( _facilitys, check_id );
+        if( iter != _facilitys.end() )
+            _facilitys.erase( iter );
+        break;
+    }
+    case BaseArea::AT_FLOOR:
+    {
+        auto iter = FIND_IF( _floors, check_id );
+        if( iter != _floors.end() )
+            _floors.erase( iter );
+        break;
+    }
+    case BaseArea::AT_ROOMS_GROUP:
+    {
+        auto iter = FIND_IF( _rooms_groups, check_id );
+        if( iter != _rooms_groups.end() )
+            _rooms_groups.erase( iter );
+        break;
+    }
+    case BaseArea::AT_ROOM:
+    {
+        auto iter = FIND_IF( _rooms, check_id );
+        if( iter != _rooms.end() )
+            _rooms.erase( iter );
+        break;
+    }
     default:
         break;
     }

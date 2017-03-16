@@ -18,6 +18,9 @@ void SqlTranslator::loadFunctions()
     _load_rooms_groups = std::bind( &SqlTranslator::loadRoomsGroups, this );
     _load_rooms = std::bind( &SqlTranslator::loadRooms, this );
 
+    // delete locations
+    _delete_area = std::bind( &SqlTranslator::deleteArea, this, std::placeholders::_1 );
+
     // commit locations
     _commit_area = std::bind( &SqlTranslator::commitArea, this, std::placeholders::_1 );
 
@@ -204,6 +207,70 @@ std::vector<RoomPtr> SqlTranslator::loadRooms()
     return rooms;
 }
 
+bool SqlTranslator::deleteArea(BaseAreaPtr area)
+{
+    // find a type
+    QString type = "";
+    switch ( area->getType() ) {
+    case BaseArea::AT_REGION:
+        type = "regions";
+        break;
+    case BaseArea::AT_LOCATION:
+        type = "locations";
+        break;
+    case BaseArea::AT_FACILITY:
+        type = "facilitys";
+        break;
+    case BaseArea::AT_FLOOR:
+        type = "floors";
+        break;
+    case BaseArea::AT_ROOMS_GROUP:
+        type = "rooms_groups";
+        break;
+    case BaseArea::AT_ROOM:
+        type = "rooms";
+        break;
+    }
+    if( type.isEmpty() )
+        return false;
+
+    // lock database
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    db.transaction();
+    QSqlQuery query( db );
+
+    // delete all data
+    QString delete_metadata = "DELETE FROM metadate "
+                              "WHERE entity_id = " + QString::number( area->getId() );
+    if( !query.exec( delete_metadata ))
+    {
+        db.rollback();
+        return false;
+    }
+
+    QString delete_coords = "DELETE FROM coords "
+                            "WHERE id = " + QString::number( area->getId() );
+    if( !query.exec( delete_coords ))
+    {
+        db.rollback();
+        return false;
+    }
+
+    QString delete_area = "DELETE FROM " + type +
+                          " WHERE id = " + QString::number( area->getId() );
+    if( !query.exec( delete_area ))
+    {
+        db.rollback();
+        return false;
+    }
+
+    // TODO delete relations
+
+    // unlock
+    db.commit();
+    return true;
+}
+
 bool SqlTranslator::commitArea( BaseAreaPtr area )
 {
     // FIXME all area types
@@ -252,7 +319,12 @@ bool SqlTranslator::commitArea( BaseAreaPtr area )
         return false;
     }
 
-    // TODO commit metadate
+    // commit metadate
+    if( !commitMetadate( area ))
+    {
+        db.rollback();
+        return false;
+    }
 
     // unlock base
     db.commit();
@@ -325,7 +397,7 @@ BaseMetadataPtrs SqlTranslator::loadMetadata()
     BaseMetadataPtrs metadata;
 
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
-    QString select = "SELECT area_id, type, name, value FROM metadate_areas";
+    QString select = "SELECT entity_id, type, name, value FROM metadate";
     QSqlQuery query( db );
     bool res = query.exec( select );
     if( res )
@@ -353,11 +425,8 @@ bool SqlTranslator::commitCoordinates(BaseAreaPtr area)
     QString delete_coords = "DELETE FROM coords "
                             "WHERE id = " + QString::number( area->getId() );
     if( !query.exec( delete_coords ))
-    {
-        qDebug() << db.lastError();
-        db.rollback();
         return false;
-    }
+
     QString insert_coords = "INSERT INTO coords ( id, x, y, number ) VALUES (?, ?, ?, ?)";
     query.prepare( insert_coords );
     // prepare data
@@ -375,6 +444,38 @@ bool SqlTranslator::commitCoordinates(BaseAreaPtr area)
     query.addBindValue( xs );
     query.addBindValue( ys );
     query.addBindValue( numbers );
+
+    return query.execBatch();
+}
+
+bool SqlTranslator::commitMetadate(BaseAreaPtr area)
+{
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    QSqlQuery query( db );
+    QString delete_coords = "DELETE FROM metadate "
+                            "WHERE entity_id = " + QString::number( area->getId() );
+    if( !query.exec( delete_coords ))
+        return false;
+
+    QString insert_coords = "INSERT INTO metadate ( entity_id, type, name, value ) "
+                            "VALUES ( ?, ?, ?, ? );";
+    query.prepare( insert_coords );
+    // prepare data
+    QVariantList ids, types, names, values;
+    for( auto data_pair: area->getMetadataMap() )
+    {
+        BaseMetadataPtr data = data_pair.second;
+
+        ids.push_back( (qulonglong) area->getId() );
+        types.push_back( data->getType() );
+        names.push_back( data->getName() );
+        values.push_back( data->getValueAsString() );
+    }
+    // bind data
+    query.addBindValue( ids );
+    query.addBindValue( types );
+    query.addBindValue( names );
+    query.addBindValue( values );
 
     return query.execBatch();
 }

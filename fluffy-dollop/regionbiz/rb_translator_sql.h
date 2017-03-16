@@ -21,6 +21,9 @@ private:
     std::vector< RoomsGroupPtr > loadRoomsGroups();
     std::vector< RoomPtr > loadRooms();
 
+    // delete locations
+    bool deleteArea( BaseAreaPtr area );
+
     // commit locations
     bool commitArea( BaseAreaPtr area );
 
@@ -35,6 +38,7 @@ private:
     template< typename LocTypePtr >
     bool loadCoordinate( std::vector< LocTypePtr >& vector, QString name );
     bool commitCoordinates( BaseAreaPtr area );
+    bool commitMetadate(BaseAreaPtr area );
     bool loadPlans( BaseAreaPtr area );
     bool loadDocuments( BaseBizRelationPtr relation );
     bool loadPayments( RentPtr rent );

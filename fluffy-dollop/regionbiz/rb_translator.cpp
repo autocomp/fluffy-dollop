@@ -124,6 +124,14 @@ bool BaseTranslator::commitArea( BaseAreaPtr area )
         return false;
 }
 
+bool BaseTranslator::deleteArea(BaseAreaPtr area)
+{
+    if( _delete_area )
+        return _delete_area( area );
+    else
+        return false;
+}
+
 std::vector<PropertyPtr> BaseTranslator::loadPropertys()
 {
     if( _load_propertys )

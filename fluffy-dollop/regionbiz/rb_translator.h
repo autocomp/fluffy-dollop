@@ -31,6 +31,9 @@ public:
     // commit locations
     bool commitArea(BaseAreaPtr area);
 
+    // delete locations
+    bool deleteArea(BaseAreaPtr area);
+
     // relations
     std::vector< PropertyPtr > loadPropertys();
     std::vector< RentPtr > loadRents();
@@ -51,6 +54,9 @@ protected:
     std::function< std::vector< FloorPtr >( void ) > _load_floors;
     std::function< std::vector< RoomsGroupPtr >( void ) > _load_rooms_groups;
     std::function< std::vector< RoomPtr >( void ) > _load_rooms;
+
+    // delete location
+    std::function< bool( BaseAreaPtr ) > _delete_area;
 
     // commit locations
     std::function< bool( BaseAreaPtr ) > _commit_area;
