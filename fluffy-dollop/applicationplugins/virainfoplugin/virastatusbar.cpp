@@ -52,10 +52,10 @@ void ViraStatusBar::slotObjectSelectionChanged(uint64_t prev_id, uint64_t curr_i
     BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(curr_id);
     if(ptr)
     {
-        ui->number->setText(QString("DB ID : ") + QString::number(ptr->getId()) );
-        ui->square->setText("2323");
-        ui->status->setText("Free");
-        ui->owner->setText("Ivanoff");
+        ui->number->setText(QString("ID : ") + QString::number(ptr->getId()) );
+//        ui->square->setText("2323");
+//        ui->status->setText("Free");
+//        ui->owner->setText("Ivanoff");
     }
     else
         reset();
@@ -64,9 +64,9 @@ void ViraStatusBar::slotObjectSelectionChanged(uint64_t prev_id, uint64_t curr_i
 void ViraStatusBar::reset()
 {
     ui->number->clear();
-    ui->square->clear();
-    ui->status->clear();
-    ui->owner->clear();
+//    ui->square->clear();
+//    ui->status->clear();
+//    ui->owner->clear();
 }
 
 void ViraStatusBar::slotShowMoreInfo(bool on_off)

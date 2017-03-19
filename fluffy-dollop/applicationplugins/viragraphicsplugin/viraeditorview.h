@@ -9,8 +9,6 @@
 #include "types.h"
 #include "roomgraphicstem.h"
 
-class AreaGraphicsItem;
-
 class GraphicsPixmapItem : public QGraphicsPixmapItem
 {
 public:
@@ -28,9 +26,9 @@ class ViraEditorView : public QGraphicsView
 {
     Q_OBJECT
 public:
-    explicit ViraEditorView(); // const pdf_editor::Facility& facility, const QString& path);
+    explicit ViraEditorView();
     ~ViraEditorView();
-    void reinit(qulonglong facilityId); //const QString &path = QString());
+    void reinit(qulonglong facilityId);
     void centerEditorOn(qulonglong id);
     void selectionItemsChanged(uint64_t prev_id, uint64_t curr_id);
 
@@ -57,11 +55,12 @@ private:
     int _zoomMax = 1;
     double _scale = 1;
     bool _recalcZoom = true;
+    uint64_t _currFloor_id = 0;
     QList<GraphicsPixmapItem *> _owerViews;
-    QMap<qulonglong, AreaGraphicsItem *> _rooms;
+    QMap<qulonglong, QGraphicsItem *> _itemsOnFloor;
 
-//    QList<QGraphicsLineItem *> _lines;
-//    QGraphicsLineItem * _currentLine = nullptr;
+    QList<QGraphicsLineItem *> _lines;
+    QGraphicsLineItem * _currentLine = nullptr;
 };
 
 #endif // PDFEDITORVIEW_H

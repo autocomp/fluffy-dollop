@@ -14,6 +14,25 @@ using namespace regionbiz;
 
 WorkState::WorkState()
 {
+//    QString name = "/home/sergey/contour_ng/1/11.tiff";
+//    QPixmap pm(name);
+//    if(pm.isNull() == false)
+//    {
+//        pm = pm.scaled(pm.width()/2., pm.height()/2., Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+//        bool saved = pm.save("/home/sergey/contour_ng/10/11.tiff");
+//    }
+
+//    QDir dir("/home/sergey/contour_ng/2/");
+//    foreach(QFileInfo fi, dir.entryInfoList())
+//    {
+//        QString name = fi.absoluteFilePath();
+//        QPixmap pm(name);
+//        if(pm.isNull() == false)
+//        {
+//            pm = pm.scaled(pm.width()/2., pm.height()/2., Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+//            bool saved = pm.save("/home/sergey/contour_ng/10/" + fi.fileName());
+//        }
+//    }
 }
 
 WorkState::~WorkState()
