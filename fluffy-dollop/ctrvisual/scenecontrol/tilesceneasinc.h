@@ -5,6 +5,7 @@
 #include <QFutureWatcher>
 #include <QTime>
 #include <QImage>
+#include <QPainter>
 
 namespace visualize_system {
 

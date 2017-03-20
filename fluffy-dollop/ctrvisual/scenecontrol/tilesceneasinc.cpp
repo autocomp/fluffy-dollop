@@ -78,7 +78,10 @@ bool TileSceneAsinc::startRender(QSize sizeImage, const QRectF &sceneRect, int z
     //qDebug() << "TileSceneAsinc::startRender, sizeImage :" << sizeImage << ", sceneRect :" << sceneRect << ", zLevel :" << zLevel;
 
     if(_asincMode)
-        _futureWatcher.setFuture(QtConcurrent::run(std::bind(&TileSceneAsinc::run, this)));
+    {
+        // FIXME do it in one thread
+        _futureWatcher.setFuture(QtConcurrent::run(this, &TileSceneAsinc::run));
+    }
     else
         sendImage(run());
 
@@ -92,6 +95,7 @@ QImage* TileSceneAsinc::run()
 
     QPainter painter(image);
     QRectF imageRect(0, 0, _sizeImage.width(), _sizeImage.height() );
+    // FIXME kill timer warning here
     _scene.render(&painter, imageRect, _sceneRect);
     if(painter.end() == false)
         qDebug() << "&&& TileSceneAsinc::run(), painter.end() == false !!!";
