@@ -1,6 +1,6 @@
 {
     "translator":{
         "type":"sqlite",
-        "file_path":"base.sql"
+        "file_path":"./base.sql"
     }
 }

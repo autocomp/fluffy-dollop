@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <GridName>gridwgs</GridName>
-    <TmsXMLSource>http://korplan1:8080/mapproxy/tms/1.0.0/</TmsXMLSource>
-    <baseTmsLayer_Url>http://tile.stamen.com/terrain/%1/%2/%3.png</baseTmsLayer_Url>
+    <GridName>gridmerc</GridName>
+    <baseTmsLayer1_Url>http://tile.openstreetmap.org</baseTmsLayer1_Url>
+    <baseTmsLayer2_Url>http://mt1.google.com</baseTmsLayer2_Url>
+    <infoPhotosPath>./photos</infoPhotosPath>
     <maxStackSize_elements>100</maxStackSize_elements>
+    <regionBizFilesPath>./data/</regionBizFilesPath>
+    <regionBizInitJson_Path>~/.contour_ng/regionbiz.json</regionBizInitJson_Path>
 </root>
