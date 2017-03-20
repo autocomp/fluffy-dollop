@@ -140,7 +140,7 @@ void AppComposer::init()
     if(regionBizInitJson_Path.isValid())
     {
         auto mngr = regionbiz::RegionBizManager::instance();
-        QString str = regionBizInitJson_Path.toString() + "config.json";
+        QString str = regionBizInitJson_Path.toString();
         mngr->init(str);
     }
     else
