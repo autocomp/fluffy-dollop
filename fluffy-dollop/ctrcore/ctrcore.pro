@@ -25,6 +25,7 @@ SOURCES +=     \
     ctrcore/*.cpp \
     bus/*.cpp \
     undoactions/*.cpp \
+    tempinputdata/*.cpp \
 
 HEADERS += \
     provider/*.h \
@@ -33,6 +34,7 @@ HEADERS += \
     ctrcore/*.h \
     bus/*.h \
     undoactions/*.h \
+    tempinputdata/*.h
 
 #TRANSLATIONS += ctrcore.ts
 
