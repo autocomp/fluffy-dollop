@@ -118,6 +118,7 @@ void ViraEditorView::setFloor(qulonglong floorId)
         }
     }
 
+    /*
     if(floorPtr->getId() == 29)
     {
         {
@@ -135,6 +136,7 @@ void ViraEditorView::setFloor(qulonglong floorId)
             _itemsOnFloor.insert(10001, _markGraphicsItem);
         }
     }
+    */
 
     /*
     reinit();

@@ -42,9 +42,24 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QLabel" name="number">
+    <widget class="QPushButton" name="moreInfo">
+     <property name="minimumSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
      <property name="text">
-      <string>ID : 0</string>
+      <string>+</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
@@ -65,9 +80,9 @@
     </spacer>
    </item>
    <item>
-    <widget class="QLabel" name="square">
+    <widget class="QLabel" name="tl1">
      <property name="text">
-      <string>Площадь : 23м</string>
+      <string/>
      </property>
     </widget>
    </item>
@@ -88,9 +103,9 @@
     </spacer>
    </item>
    <item>
-    <widget class="QLabel" name="status">
+    <widget class="QLabel" name="tl2">
      <property name="text">
-      <string>Статус : в аренде</string>
+      <string/>
      </property>
     </widget>
    </item>
@@ -111,9 +126,9 @@
     </spacer>
    </item>
    <item>
-    <widget class="QLabel" name="owner">
+    <widget class="QLabel" name="tl3">
      <property name="text">
-      <string>Арендатор : Арутюнян Х.У.</string>
+      <string/>
      </property>
     </widget>
    </item>
@@ -134,24 +149,9 @@
     </spacer>
    </item>
    <item>
-    <widget class="QPushButton" name="moreInfo">
-     <property name="minimumSize">
-      <size>
-       <width>32</width>
-       <height>32</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>32</width>
-       <height>32</height>
-      </size>
-     </property>
+    <widget class="QLabel" name="tl4">
      <property name="text">
-      <string>+</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
+      <string/>
      </property>
     </widget>
    </item>

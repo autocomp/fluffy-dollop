@@ -23,6 +23,7 @@ public:
 
 private slots:
     void slotSelectionItemsChanged(uint64_t,uint64_t);
+    void slotCenterOn(uint64_t id);
     void centerEditorOn(qulonglong id);
 
 signals:

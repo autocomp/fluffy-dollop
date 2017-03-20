@@ -2,6 +2,8 @@
 #include <QGraphicsSceneHoverEvent>
 #include <QPainter>
 #include <QDebug>
+#include <QGraphicsScene>
+#include <QGraphicsView>
 #include <regionbiz/rb_manager.h>
 
 AreaGraphicsItem::AreaGraphicsItem(const QPolygonF &polygon)
@@ -75,6 +77,17 @@ void AreaGraphicsItem::setItemselected(bool on_off)
     pen.setCosmetic(true);
     setPen(_isSelected ? pen : _areaInitData.penNormal);
     setBrush(_areaInitData.brushNormal);
+
+    if(on_off)
+    {
+        foreach(QGraphicsView * view, scene()->views())
+        {
+            QRectF viewportSceneRect(view->mapToScene(view->contentsRect().topLeft()), view->mapToScene(view->contentsRect().bottomRight()));
+            QPolygonF pol = ( polygon().intersected( QPolygonF(viewportSceneRect) ) );
+            if(pol == QPolygonF())
+                view->centerOn(this);
+        }
+    }
 }
 
 void AreaGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)

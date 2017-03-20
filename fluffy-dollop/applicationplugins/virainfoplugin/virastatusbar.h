@@ -25,6 +25,7 @@ protected:
     void reset();
 
     Ui::ViraStatusBar *ui;
+    quint64 _parentWidgetId;
     EmbIFaceNotifier* _iface = nullptr;
 };
 

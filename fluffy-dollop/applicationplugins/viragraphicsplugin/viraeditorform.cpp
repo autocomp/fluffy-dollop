@@ -36,6 +36,7 @@ ViraEditorForm::ViraEditorForm(QWidget *parent) :
     _sceneViraWidget->setMainViewWidget(_view);
 
     auto mngr = RegionBizManager::instance();
+    mngr->subscribeCenterOn(this, SLOT(slotCenterOn(uint64_t)));
     mngr->subscribeOnSelect(this, SLOT(slotSelectionItemsChanged(uint64_t,uint64_t)));
 }
 
@@ -93,6 +94,18 @@ void ViraEditorForm::slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_i
     }
     _viraPagesListWidget->selectionItemsChanged(prev_id, curr_id);
     _view->selectionItemsChanged(prev_id, curr_id);
+}
+
+void ViraEditorForm::slotCenterOn(uint64_t id)
+{
+    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(id);
+    if( ! ptr)
+        return;
+
+    if(ptr->getType() == BaseArea::AT_ROOM)
+    {
+        _view->centerEditorOn(id);
+    }
 }
 
 void ViraEditorForm::setParentWindowId(qulonglong parentWindowId)

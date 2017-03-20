@@ -15,6 +15,7 @@ protected slots:
     void slotItemSelectionChanged();
     void slotItemDoubleClicked(QTreeWidgetItem*,int);
     void slotObjectSelectionChanged(uint64_t prev_id, uint64_t curr_id);
+    void slotHeaderSectionClicked(int index);
 
 protected:
     const int ID = Qt::UserRole + 1;
