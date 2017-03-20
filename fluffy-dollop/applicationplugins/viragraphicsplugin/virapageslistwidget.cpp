@@ -32,7 +32,8 @@ void ViraPagesListWidget::reinit(qulonglong facilityId)
         return;
 
     QString destPath;
-    QVariant regionBizInitJson_Path = CtrConfig::getValueByName(QString("application_settings.regionBizInitJson_Path"));
+    QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath",
+                                                                "./data/", true);
     if(regionBizInitJson_Path.isValid())
          destPath = regionBizInitJson_Path.toString();
 
