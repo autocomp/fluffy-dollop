@@ -27,6 +27,7 @@ public:
     // getters
     BaseAreaPtr getBaseArea( uint64_t id );
     BaseAreaPtr getBaseArea( uint64_t id, BaseArea::AreaType type );
+    BaseAreaPtrs getAreaChildsByParent( uint64_t id );
 
     // typed getters
     std::vector< RegionPtr > getRegions();
@@ -120,8 +121,6 @@ private:
     // selection
     SelectionManager _select_manager;
 };
-
-#include "rb_manager_implement.h"
 
 }
 

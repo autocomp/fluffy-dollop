@@ -31,6 +31,8 @@ BaseEntityPtr BaseEntity::getEntity(uint64_t id)
 {
     if( isEntityExist( id ))
         return getEntitys()[id];
+
+    return nullptr;
 }
 
 std::map< uint64_t, BaseEntityPtr >& BaseEntity::getEntitys()

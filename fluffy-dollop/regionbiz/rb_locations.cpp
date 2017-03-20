@@ -43,6 +43,14 @@ BaseAreaPtr BaseArea::getParent()
     return parent;
 }
 
+BaseAreaPtrs BaseArea::getChilds()
+{
+    auto mngr = RegionBizManager::instance();
+    auto childs = mngr->getAreaChildsByParent( _id );
+
+    return childs;
+}
+
 bool BaseArea::commit()
 {
     auto mngr = RegionBizManager::instance();

@@ -1,3 +1,4 @@
+ROOT_DIR=../
 include( ../pri/common.pri )
 
 # lib

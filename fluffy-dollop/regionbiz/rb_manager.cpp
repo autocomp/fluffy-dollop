@@ -136,6 +136,26 @@ BaseAreaPtr RegionBizManager::getBaseArea( uint64_t id,
     return loc;
 }
 
+BaseAreaPtrs RegionBizManager::getAreaChildsByParent( uint64_t id )
+{
+    BaseAreaPtrs childs;
+    for( auto pair: BaseEntity::getEntitys() )
+    {
+        BaseEntityPtr ent_ch = pair.second;
+        if( !ent_ch )
+            continue;
+
+        BaseAreaPtr area_ch = std::static_pointer_cast< BaseArea >( ent_ch );
+        if( !area_ch )
+            continue;
+
+        if( id == area_ch->getParentId() )
+            childs.push_back( area_ch );
+    }
+
+    return childs;
+}
+
 std::vector<RegionPtr> RegionBizManager::getRegions()
 {
     return _regions;
@@ -171,25 +191,19 @@ BaseAreaPtr RegionBizManager::addArea( BaseArea::AreaType type,
 {
     switch ( type ) {
     case BaseArea::AT_REGION:
-        addArea< Region >( parent_id );
-        break;
+        return addArea< Region >( parent_id );
     case BaseArea::AT_LOCATION:
-        addArea< Location >( parent_id );
-        break;
+        return addArea< Location >( parent_id );
     case BaseArea::AT_FACILITY:
-        addArea< Facility >( parent_id );
-        break;
+        return addArea< Facility >( parent_id );
     case BaseArea::AT_FLOOR:
-        addArea< Floor >( parent_id );
-        break;
+        return addArea< Floor >( parent_id );
     case BaseArea::AT_ROOMS_GROUP:
-        addArea< RoomsGroup >( parent_id );
-        break;
+        return addArea< RoomsGroup >( parent_id );
     case BaseArea::AT_ROOM:
-        addArea< Room >( parent_id );
-        break;
+        return addArea< Room >( parent_id );
     default:
-        break;
+        return nullptr;
     }
 }
 
@@ -215,6 +229,10 @@ bool RegionBizManager::deleteArea(uint64_t id)
 
 bool RegionBizManager::commitArea( BaseAreaPtr area )
 {
+    // if we try to commit area outside system
+    if( !getBaseArea( area->getId() ))
+        return false;
+
     return _translator->commitArea( area );
 }
 

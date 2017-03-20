@@ -43,6 +43,7 @@ public:
     uint64_t getParentId();
     BaseAreaPtr getParent( AreaType parent_type );
     BaseAreaPtr getParent();
+    BaseAreaPtrs getChilds();
     virtual AreaType getType() = 0;
 
     bool commit();
