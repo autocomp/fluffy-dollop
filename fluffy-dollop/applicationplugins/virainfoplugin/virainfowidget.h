@@ -1,17 +1,27 @@
 #ifndef VIRAINFOWIDGET_H
 #define VIRAINFOWIDGET_H
 
-#include <QObject>
+#include <QWidget>
 
-class ViraInfoWidget : public QObject
+namespace Ui {
+class ViraInfoWidget;
+}
+
+class ViraInfoWidget : public QWidget
 {
     Q_OBJECT
+
 public:
-    explicit ViraInfoWidget(QObject *parent = 0);
+    explicit ViraInfoWidget(QWidget *parent = 0);
+    ~ViraInfoWidget();
 
-signals:
+protected:
+    void showEvent( QShowEvent* ev );
 
-public slots:
+private:
+    void appendPhotos();
+
+    Ui::ViraInfoWidget *ui;
 };
 
 #endif // VIRAINFOWIDGET_H

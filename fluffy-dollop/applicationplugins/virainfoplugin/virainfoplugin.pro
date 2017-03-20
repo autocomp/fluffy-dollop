@@ -2,6 +2,7 @@ TARGET=virainfo
 
 include(../typeplugin.pri)
 ROOT_DIR=../../
+include(../../pri/common.pri)
 
 include($${ROOT_DIR}pri/plugins.pri)
 
@@ -22,18 +23,21 @@ LIBS += -L$${INSTALL_PATH_LIB} \
 HEADERS += \
     virainfoplugin.h \
     virainfowidget.h \
-    virastatusbar.h
+    virastatusbar.h \
+    test_data_getter.h
 
 SOURCES += \
     virainfoplugin.cpp \
     virainfowidget.cpp \
-    virastatusbar.cpp
+    virastatusbar.cpp \
+    test_data_getter.cpp
 
 RESOURCES += \
     virainfopluginres.qrc
 
 FORMS += \
-    virastatusbar.ui
+    virastatusbar.ui \
+    virainfowidget.ui
 
 
 
