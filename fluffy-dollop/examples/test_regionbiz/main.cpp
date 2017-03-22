@@ -14,7 +14,7 @@ int main()
 
     //! init
     auto mngr = RegionBizManager::instance();
-    QString str = "~/.contour_ng/regionbiz_sqlite.json";
+    QString str = "~/.contour_ng/regionbiz_psql.json";
     //QString str = "~/.contour_ng/regionbiz_psql.json";
     mngr->init( str );
 
@@ -146,4 +146,35 @@ int main()
     qDebug() << "Commit again:" << room->commit();
     qDebug() << "Delete area:" << mngr->deleteArea( room );
     qDebug() << "Max id after del =" << BaseEntity::getMaxId();
+
+    //! check marks
+    auto room_ptr = mngr->addArea< Room >( 13 );
+    RoomPtr room_for_marks = BaseArea::convert< Room >( room_ptr );
+    // add mark
+    qDebug() << "Add mark:" << room_for_marks->addMark( QPointF( 30, 10 ));
+    MarkPtrs marks = room_for_marks->getMarks();
+    if( marks.size() )
+    {
+        // add metadata
+        MarkPtr mark = marks.at( 0 );
+        qDebug() << "Add metadate to mark"
+                 << mark->addMetadata( "string", "check", "Test" );
+        // commit-delete
+        qDebug() << "  Commit mark" << mark->commit();
+        qDebug() << "  Delete mark" << mngr->deleteMark( mark );
+    }
+    // check again
+    marks = room_for_marks->getMarks();
+    qDebug() << "We have" << marks.size() << "marks after commit-delete";
+    // check other variant
+    qDebug() << "Add mark again:" << room_for_marks->addMark( QPointF( 50, 20 ));
+    qDebug() << "Add mark again:" << room_for_marks->addMark( QPointF( 31, 20 ));
+    marks = room_for_marks->getMarks();
+    qDebug() << "We have" << marks.size() << "marks again";
+    qDebug() << "  Commit room's marks:" << room_for_marks->commitMarks();
+    qDebug() << "  Delete room's marks:" << room_for_marks->deleteMarks();
+    marks = room_for_marks->getMarks();
+    qDebug() << "We have" << marks.size() << "marks again after commit-delete";
+    // clear
+    mngr->deleteArea( room_ptr );
 }

@@ -1,5 +1,6 @@
-include( ../../pri/common.pri )
-ROOT_DIR = ../..
+ROOT_DIR = $${PWD}/../../
+message( $${ROOT_DIR} )
+include( $${ROOT_DIR}/pri/common.pri )
 
 # lib
 QT       += sql gui
