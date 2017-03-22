@@ -1,5 +1,6 @@
 #include "stateobject.h"
 #include <QDebug>
+#include <math.h>
 
 using namespace visualize_system;
 

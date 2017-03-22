@@ -3,6 +3,8 @@
 #include <QMessageBox>
 #include<QGraphicsLineItem>
 #include<QPen>
+#include <math.h>
+
 
 using namespace visualize_system;
 

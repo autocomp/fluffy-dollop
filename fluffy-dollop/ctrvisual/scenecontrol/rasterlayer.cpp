@@ -5,7 +5,7 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <ctrcore/provider/dataproviderfactory.h>
-//#include <objrepr/reprServer.h>
+#include <math.h>
 
 using namespace visualize_system;
 

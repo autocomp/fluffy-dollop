@@ -20,6 +20,7 @@
 #include <ctrcore/bus/common_message_notifier.h>
 #include <ctrcore/bus/bustags.h>
 #include <ctrrasterrender/tms/tilemapperfactory.h>
+#include <math.h>
 
 #include <QPainter>
 #include <QImage>

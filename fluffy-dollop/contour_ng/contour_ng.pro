@@ -3,5 +3,6 @@ CONFIG += ordered
 
 
 SUBDIRS = \
-    contour_ng
+    contour_ng \
+    excelExmpl
 
