@@ -7,9 +7,14 @@ using namespace regionbiz;
 
 class RegionBizManager;
 
+uint64_t BaseEntity::_max_id = 0;
+
 BaseEntity::BaseEntity(uint64_t id):
     _id( id )
-{}
+{
+    if( id > _max_id )
+        _max_id = id;
+}
 
 uint64_t BaseEntity::getId()
 {
@@ -18,13 +23,7 @@ uint64_t BaseEntity::getId()
 
 uint64_t BaseEntity::getMaxId()
 {
-    // if map is empty
-    if( !getEntitys().size() )
-        return 0;
-
-    // key of last element - max id
-    uint64_t max = getEntitys().rbegin()->first;
-    return max;
+    return _max_id;
 }
 
 BaseEntityPtr BaseEntity::getEntity(uint64_t id)

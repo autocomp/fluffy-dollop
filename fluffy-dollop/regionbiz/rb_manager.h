@@ -8,6 +8,7 @@
 #include "rb_translator.h"
 #include "rb_selection_manager.h"
 #include "rb_metadata.h"
+#include "rb_marks.h"
 
 namespace regionbiz {
 
@@ -75,6 +76,16 @@ public:
                       QString name, QVariant val = QVariant() );
     bool addMetadata( BaseMetadataPtr data );
 
+    // marks
+    MarkPtr getMark( uint64_t id );
+    MarkPtrs getMarksByParent( uint64_t id );
+    MarkPtrs getMarksByParent( MarksHolderPtr parent );
+    bool addMark( uint64_t parent_id, QPointF center = QPointF() );
+    bool commitMark( uint64_t id );
+    bool commitMark( MarkPtr mark );
+    bool deleteMark( uint64_t id );
+    bool deleteMark( MarkPtr mark );
+
     // selection managment
     uint64_t getSelectedArea();
     void selectArea( uint64_t id );
@@ -92,9 +103,10 @@ private:
     static void onExit();
     QVariantMap loadJsonConfig( QString &file_path );
     void loadDataByTranslator();
-    void clearCurrentData();
+    void clearCurrentData(bool clear_entitys = true );
     void appendArea( BaseAreaPtr area );
     void removeArea( BaseAreaPtr area );
+    void removeMark( MarkPtr mark );
 
     template< typename LocTypePtr >
     std::vector< LocTypePtr > getBaseLocationsByParent( uint64_t parent_id,
@@ -117,6 +129,9 @@ private:
 
     // metadata
     MetadataById _metadata;
+
+    // marks
+    MarkPtrs _marks;
 
     // selection
     SelectionManager _select_manager;

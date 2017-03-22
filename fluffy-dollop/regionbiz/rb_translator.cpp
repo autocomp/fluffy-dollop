@@ -58,6 +58,8 @@ bool BaseTranslator::checkTranslator(std::string &err)
 
     // commit
 
+    // marks
+
     return true;
 }
 
@@ -154,6 +156,30 @@ BaseMetadataPtrs BaseTranslator::loadMetadata()
         return _load_metadata();
     else
         return BaseMetadataPtrs();
+}
+
+MarkPtrs BaseTranslator::loadMarks()
+{
+    if( _load_marks )
+        return _load_marks();
+    else
+        return MarkPtrs();
+}
+
+bool BaseTranslator::commitMark( MarkPtr mark )
+{
+    if( _commit_mark )
+        return _commit_mark( mark );
+    else
+        return false;
+}
+
+bool BaseTranslator::deleteMark( MarkPtr mark )
+{
+    if( _delete_mark )
+        return _delete_mark( mark );
+    else
+        return false;
 }
 
 void BaseTranslator::setParentForBaseLocation( BaseAreaPtr loc, uint64_t parent_id )

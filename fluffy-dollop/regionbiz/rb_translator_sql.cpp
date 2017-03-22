@@ -30,6 +30,8 @@ void SqlTranslator::loadFunctions()
 
     // metadata
     _load_metadata = std::bind( &SqlTranslator::loadMetadata, this );
+    _commit_mark = std::bind( &SqlTranslator::commitMark, this, std::placeholders::_1 );
+    _delete_mark = std::bind( &SqlTranslator::deleteMark, this, std::placeholders::_1 );
 }
 
 std::vector< RegionPtr > SqlTranslator::loadRegions()
@@ -418,6 +420,107 @@ BaseMetadataPtrs SqlTranslator::loadMetadata()
     return metadata;
 }
 
+MarkPtrs SqlTranslator::loadMarks()
+{
+    MarkPtrs marks;
+
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    QString select = "SELECT id, x, y, parent_id FROM marks";
+    QSqlQuery query( db );
+    bool res = query.exec( select );
+    if( res )
+        for( query.first(); query.isValid(); query.next() )
+        {
+            uint64_t id = query.value( 0 ).toLongLong();
+            double x = query.value( 1 ).toDouble();
+            double y = query.value( 2 ).toDouble();
+            uint64_t parent_id = query.value( 3 ).toLongLong();
+
+            MarkPtr mark = BaseEntity::createWithId< Mark >( id );
+            mark->setCenter( QPointF( x, y ));
+            mark->setParentId( parent_id );
+
+            marks.push_back( mark );
+        }
+
+    return marks;
+}
+
+bool SqlTranslator::commitMark( MarkPtr mark )
+{
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    // lock base
+    db.transaction();
+
+    // update mark
+    QString delete_mark = "DELETE FROM marks "
+                          "WHERE id = " + QString::number( mark->getId() );
+    QSqlQuery query( db );
+    bool res = query.exec( delete_mark );
+    if( !res )
+    {
+        db.rollback();
+        return false;
+    }
+
+    QString insert_update = "INSERT INTO marks( id, x, y, parent_id ) VALUES (?, ?, ?, ?)";
+    query.prepare( insert_update );
+    query.addBindValue( (qulonglong) mark->getId() );
+    query.addBindValue( mark->getCenter().x() );
+    query.addBindValue( mark->getCenter().y() );
+    query.addBindValue( (qulonglong) mark->getParentId() );
+
+    res = query.exec();
+    if( !res )
+    {
+        db.rollback();
+        return false;
+    }
+
+    // commit metadate
+    if( !commitMetadate( mark ))
+    {
+        db.rollback();
+        return false;
+    }
+
+    // unlock base
+    db.commit();
+    return true;
+}
+
+bool SqlTranslator::deleteMark( MarkPtr mark )
+{
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    // lock base
+    db.transaction();
+
+    // update mark
+    QString delete_mark = "DELETE FROM marks "
+                          "WHERE id = " + QString::number( mark->getId() );
+    QSqlQuery query( db );
+    bool res = query.exec( delete_mark );
+    if( !res )
+    {
+        db.rollback();
+        return false;
+    }
+
+    // metadate
+    QString delete_coords = "DELETE FROM metadate "
+                            "WHERE entity_id = " + QString::number( mark->getId() );
+    res = query.exec( delete_coords );
+    if( !res )
+    {
+        db.rollback();
+        return false;
+    }
+
+    // unlock base
+    db.commit();
+    return true;
+}
+
 bool SqlTranslator::commitCoordinates(BaseAreaPtr area)
 {
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
@@ -448,7 +551,7 @@ bool SqlTranslator::commitCoordinates(BaseAreaPtr area)
     return query.execBatch();
 }
 
-bool SqlTranslator::commitMetadate(BaseAreaPtr area)
+bool SqlTranslator::commitMetadate(BaseEntityPtr area)
 {
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
     QSqlQuery query( db );

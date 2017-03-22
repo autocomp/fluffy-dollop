@@ -10,6 +10,7 @@
 //#include "rb_manager.h"
 #include "rb_biz_relations.h"
 #include "rb_base_entity.h"
+#include "rb_marks.h"
 
 namespace regionbiz {
 
@@ -117,6 +118,27 @@ public:
 
 //----------------------------------------------
 
+class MarksHolder
+{
+public:
+    MarksHolder( uint64_t id );
+
+    uint64_t getHolderId();
+    MarkPtrs getMarks();
+
+    bool addMark( QPointF center );
+    bool commitMarks();
+    bool deleteMarks();
+
+private:
+    bool checkHolderId();
+
+    uint64_t _holder_id;
+};
+typedef std::shared_ptr< MarksHolder > MarksHolderPtr;
+
+//----------------------------------------------
+
 class Region: public BaseArea
 {
 public:
@@ -150,7 +172,7 @@ typedef std::vector< RegionPtr > RegionPtrs;
 class Facility;
 typedef std::shared_ptr< Facility > FacilityPtr;
 
-class Location: public BaseArea, public PlanKeeper
+class Location: public BaseArea, public PlanKeeper, public MarksHolder
 {
 public:
     Location( uint64_t id );
@@ -205,7 +227,7 @@ typedef std::vector< FacilityPtr > FacilityPtrs;
 
 //----------------------------------------------
 
-class Floor: public BizRelationKepper, public PlanKeeper
+class Floor: public BizRelationKepper, public PlanKeeper, public MarksHolder
 {
 public:
     enum FloorChildFilter
@@ -266,7 +288,7 @@ typedef std::vector< RoomsGroupPtr > RoomsGroupPtrs;
 
 //-------------------------------------------------
 
-class Room: public BizRelationKepper, public PlanKeeper
+class Room: public BizRelationKepper, public PlanKeeper, public MarksHolder
 {
 public:
     Room( uint64_t id );

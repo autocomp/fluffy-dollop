@@ -108,6 +108,86 @@ RentPtrs BizRelationKepper::getRents()
     return rents;
 }
 
+MarksHolder::MarksHolder(uint64_t id):
+    _holder_id( id )
+{}
+
+uint64_t MarksHolder::getHolderId()
+{
+    return _holder_id;
+}
+
+MarkPtrs MarksHolder::getMarks()
+{
+    MarkPtrs marks;
+
+    if( checkHolderId() )
+    {
+        auto mngr = RegionBizManager::instance();
+        marks = mngr->getMarksByParent( _holder_id );
+    }
+
+    return marks;
+}
+
+bool MarksHolder::addMark(QPointF center)
+{
+    if( checkHolderId() )
+    {
+        auto mngr = RegionBizManager::instance();
+        return mngr->addMark( _holder_id, center );
+    }
+
+    return false;
+}
+
+bool MarksHolder::commitMarks()
+{
+    if( checkHolderId() )
+    {
+        auto mngr = RegionBizManager::instance();
+        MarkPtrs marks = mngr->getMarksByParent( _holder_id );
+        bool comm = true;
+        for( MarkPtr mark: marks )
+            comm = comm && mark->commit();
+
+        return comm;
+    }
+
+    return false;
+}
+
+bool MarksHolder::deleteMarks()
+{
+    if( checkHolderId() )
+    {
+        auto mngr = RegionBizManager::instance();
+        MarkPtrs marks = mngr->getMarksByParent( _holder_id );
+        bool del = true;
+        for( MarkPtr mark: marks )
+            del = del && mngr->deleteMark( mark );
+
+        return del;
+    }
+
+    return false;
+}
+
+bool MarksHolder::checkHolderId()
+{
+    // TODO think about cast fron BaseEntity
+    auto mngr = RegionBizManager::instance();
+    BaseAreaPtr area = mngr->getBaseArea( _holder_id );
+    if( area )
+    {
+        MarksHolderPtr holder = BaseArea::convert< MarksHolder >( area );
+        if( holder )
+            return true;
+    }
+
+    return false;
+}
+
 Region::Region(uint64_t id):
     BaseArea( id )
 {}
@@ -164,7 +244,8 @@ std::vector<BaseAreaPtr> Region::getChilds(RegionChildFilter filter )
 }
 
 Location::Location(uint64_t id):
-   BaseArea( id )
+   BaseArea( id ),
+   MarksHolder( id )
 {}
 
 BaseArea::AreaType Location::getType()
@@ -277,7 +358,8 @@ std::vector<FloorPtr> Facility::getChilds()
 }
 
 Floor::Floor(uint64_t id):
-    BizRelationKepper( id )
+    BizRelationKepper( id ),
+    MarksHolder( id )
 {}
 
 BaseArea::AreaType Floor::getType()
@@ -379,7 +461,8 @@ std::vector< RoomPtr > RoomsGroup::getChilds()
 }
 
 Room::Room(uint64_t id):
-    BizRelationKepper( id )
+    BizRelationKepper( id ),
+    MarksHolder( id )
 {}
 
 BaseArea::AreaType Room::getType()
@@ -396,3 +479,4 @@ void Room::setName(QString name)
 {
     _name = name;
 }
+

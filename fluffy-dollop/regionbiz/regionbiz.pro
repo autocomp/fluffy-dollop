@@ -19,7 +19,8 @@ SOURCES  += \
     rb_biz_relations.cpp \
     rb_translator_sql.cpp \
     rb_metadata.cpp \
-    rb_base_entity.cpp
+    rb_base_entity.cpp \
+    rb_marks.cpp
 HEADERS  += \
     rb_manager.h \
     rb_locations.h \
@@ -28,4 +29,5 @@ HEADERS  += \
     rb_biz_relations.h \
     rb_translator_sql.h \
     rb_metadata.h \
-    rb_base_entity.h
+    rb_base_entity.h \
+    rb_marks.h

@@ -34,11 +34,16 @@ private:
     // metadata
     BaseMetadataPtrs loadMetadata();
 
+    // marks
+    MarkPtrs loadMarks();
+    bool commitMark(MarkPtr mark);
+    bool deleteMark(MarkPtr mark);
+
     // support functions
     template< typename LocTypePtr >
     bool loadCoordinate( std::vector< LocTypePtr >& vector, QString name );
     bool commitCoordinates( BaseAreaPtr area );
-    bool commitMetadate(BaseAreaPtr area );
+    bool commitMetadate(BaseEntityPtr area );
     bool loadPlans( BaseAreaPtr area );
     bool loadDocuments( BaseBizRelationPtr relation );
     bool loadPayments( RentPtr rent );

@@ -347,6 +347,86 @@ bool RegionBizManager::addMetadata( BaseMetadataPtr data )
     return false;
 }
 
+MarkPtr RegionBizManager::getMark( uint64_t id )
+{
+    auto entity = BaseEntity::getEntity( id );
+    // TODO thin about static and dynamic cast
+    MarkPtr mark = std::static_pointer_cast< Mark >( entity );
+    return mark;
+}
+
+MarkPtrs RegionBizManager::getMarksByParent( uint64_t id )
+{
+    std::function< bool( MarkPtr ) > check_id =
+            [ id ]( MarkPtr mark ){ return id == mark->getParentId(); };
+
+    MarkPtrs marks;
+    for( MarkPtr mark: _marks )
+    {
+        if( check_id( mark ))
+            marks.push_back( mark );
+    }
+
+    return marks;
+}
+
+MarkPtrs RegionBizManager::getMarksByParent(MarksHolderPtr parent)
+{
+    return getMarksByParent( parent->getHolderId() );
+}
+
+bool RegionBizManager::addMark( uint64_t parent_id,
+                                QPointF center )
+{
+    // TODO check parent type
+
+    MarkPtr mark = BaseEntity::createWithId< Mark >( BaseEntity::getMaxId() + 1 );
+    if( mark )
+    {
+        _marks.push_back( mark );
+        mark->setCenter( center );
+        mark->setParentId( parent_id );
+
+        return true;
+    }
+    else
+        return false;
+}
+
+bool RegionBizManager::commitMark(uint64_t id)
+{
+    MarkPtr mark = getMark( id );
+    bool comm = commitMark( mark );
+
+    return comm;
+}
+
+bool RegionBizManager::commitMark(MarkPtr mark)
+{
+    bool comm = _translator->commitMark( mark );
+    return comm;
+}
+
+bool RegionBizManager::deleteMark(uint64_t id)
+{
+    MarkPtr mark = getMark( id );
+    bool del = deleteMark( mark );
+
+    return del;
+}
+
+bool RegionBizManager::deleteMark(MarkPtr mark)
+{
+    bool del = _translator->deleteMark( mark );
+    if( del )
+    {
+        _metadata.erase( mark->getId() );
+        BaseEntity::deleteEntity( mark );
+        removeMark( mark );
+    }
+    return del;
+}
+
 uint64_t RegionBizManager::getSelectedArea()
 {
     return _select_manager._selected_area_id;
@@ -382,7 +462,8 @@ RegionBizManager::RegionBizManager()
 void RegionBizManager::onExit()
 {
     std::cerr << "Region Biz Manager stopped" << std::endl;
-    RegionBizManager::instance()->clearCurrentData();
+    bool clear_entitys( false );
+    RegionBizManager::instance()->clearCurrentData( clear_entitys );
 }
 
 QVariantMap RegionBizManager::loadJsonConfig( QString& file_path )
@@ -491,6 +572,8 @@ void RegionBizManager::loadDataByTranslator()
     }
 
     //---------------------------------
+
+    // metadate
     auto metadata_vec = _translator->loadMetadata();
     for( BaseMetadataPtr data: metadata_vec )
     {
@@ -499,16 +582,34 @@ void RegionBizManager::loadDataByTranslator()
         // add by parent_id / name of metadata
         _metadata[ data->getParentId() ][ data->getName() ] = data;
     }
+
+    //-------------------------------------
+
+    auto marks_vec = _translator->loadMarks();
+    for( MarkPtr mark: marks_vec )
+    {
+        // TODO check parent id
+        _marks.push_back( mark );
+    }
 }
 
-void RegionBizManager::clearCurrentData()
+void RegionBizManager::clearCurrentData( bool clear_entitys )
 {
+    // areas
     _regions.clear();
     _locations.clear();
     _facilitys.clear();
     _floors.clear();
     _rooms_groups.clear();
     _rooms.clear();
+
+    //data
+    _metadata.clear();
+    _marks.clear();
+
+    // entitys
+    if( clear_entitys )
+        BaseEntity::getEntitys().clear();
 }
 
 void RegionBizManager::appendArea( BaseAreaPtr area )
@@ -588,6 +689,16 @@ void RegionBizManager::removeArea(BaseAreaPtr area)
     default:
         break;
     }
+}
+
+void RegionBizManager::removeMark( MarkPtr mark )
+{
+    std::function< bool( MarkPtr ) > check_id =
+            [ mark ]( MarkPtr m ){ return mark->getId() == m->getId(); };
+
+    auto iter = FIND_IF( _marks, check_id );
+    if( iter != _marks.end() )
+        _marks.erase( iter );
 }
 
 template<typename LocTypePtr>

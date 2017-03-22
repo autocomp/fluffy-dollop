@@ -10,6 +10,7 @@
 #include "rb_locations.h"
 #include "rb_biz_relations.h"
 #include "rb_metadata.h"
+#include "rb_marks.h"
 
 namespace regionbiz {
 
@@ -41,6 +42,11 @@ public:
     // metadata
     BaseMetadataPtrs loadMetadata();
 
+    // marks
+    MarkPtrs loadMarks();
+    bool commitMark( MarkPtr mark );
+    bool deleteMark( MarkPtr mark );
+
 protected:
     virtual void loadFunctions() = 0;
     virtual bool initBySettings( QVariantMap settings ) = 0;
@@ -67,6 +73,12 @@ protected:
 
     // metadata
     std::function< std::vector< BaseMetadataPtr >( void ) > _load_metadata;
+
+    // marks
+    std::function< std::vector< MarkPtr >( void ) > _load_marks;
+    std::function< bool( MarkPtr ) > _delete_mark;
+    std::function< bool( MarkPtr ) > _commit_mark;
+
 };
 typedef std::shared_ptr< BaseTranslator > BaseTranslatorPtr;
 

@@ -54,6 +54,7 @@ protected:
 
 private:
     static std::map< uint64_t, BaseEntityPtr >& getEntitys();
+    static uint64_t _max_id;
 };
 
 //------------------------------------------------------------
