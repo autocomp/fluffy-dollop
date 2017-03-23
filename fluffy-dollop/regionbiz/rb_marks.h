@@ -26,6 +26,9 @@ public:
 private:
     QPointF _center;
     uint64_t _parent_id;
+
+    // for RTTI
+    void rttiFunction() const override {}
 };
 
 typedef std::shared_ptr< Mark > MarkPtr;

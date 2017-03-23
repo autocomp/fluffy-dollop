@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <QSqlQuery>
+#include <QSqlRecord>
 #include <QSqlError>
 #include <QPolygonF>
 #include <QDebug>
@@ -36,203 +37,45 @@ void SqlTranslator::loadFunctions()
 
 std::vector< RegionPtr > SqlTranslator::loadRegions()
 {
-    std::vector< RegionPtr > regions;
-
-    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
-    QString select = "SELECT id, description FROM regions";
-    QSqlQuery query( db );
-    bool res = query.exec( select );
-    if( res )
-        for( query.first(); query.isValid(); query.next() )
-        {
-            uint64_t id = query.value( 0 ).toLongLong();
-            QString descr = query.value( 1 ).toString();
-
-            RegionPtr reg = BaseEntity::createWithId< Region >( id );
-            reg->setDesription( descr );
-            setParentForBaseLocation( reg, 0 );
-
-            regions.push_back( reg );
-        }
-
-    loadCoordinate< RegionPtr >( regions, "regions" );
-
-    return regions;
+    return loadBaseAreas< Region >( "regions" );
 }
 
 std::vector<LocationPtr> SqlTranslator::loadLocations()
 {
-    std::vector< LocationPtr > locations;
-
-    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
-    QString select = "SELECT id, parent, description, address FROM locations";
-    QSqlQuery query( db );
-    bool res = query.exec( select );
-    if( res )
-        for( query.first(); query.isValid(); query.next() )
-        {
-            uint64_t id = query.value( 0 ).toLongLong();
-            uint64_t parent_id = query.value( 1 ).toLongLong();
-            QString descr = query.value( 2 ).toString();
-            QString addr = query.value( 3 ).toString();
-
-            LocationPtr loc = BaseEntity::createWithId< Location >( id );
-            setParentForBaseLocation( loc, parent_id );
-            loc->setDesription( descr );
-            loc->setAddress( addr );
-            loadPlans( loc );
-
-            locations.push_back( loc );
-        }
-
-    loadCoordinate< LocationPtr >( locations, "locations" );
-
-    return locations;
+    return loadBaseAreas< Location >( "locations" );
 }
 
 std::vector<FacilityPtr> SqlTranslator::loadFacilitys()
 {
-    std::vector< FacilityPtr > facilitys;
-
-    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
-    QString select = "SELECT id, parent, description, address, cad_number FROM facilitys";
-    QSqlQuery query( db );
-    bool res = query.exec( select );
-    if( res )
-        for( query.first(); query.isValid(); query.next() )
-        {
-            uint64_t id = query.value( 0 ).toLongLong();
-            uint64_t parent_id = query.value( 1 ).toLongLong();
-            QString descr = query.value( 2 ).toString();
-            QString addr = query.value( 3 ).toString();
-            QString cad_number = query.value( 4 ).toString();
-
-            FacilityPtr fac = BaseEntity::createWithId< Facility >( id );
-            setParentForBaseLocation( fac, parent_id );
-            fac->setDesription( descr );
-            fac->setAddress( addr );
-            fac->setCadastralNumber( cad_number );
-
-            facilitys.push_back( fac );
-        }
-
-    loadCoordinate< FacilityPtr >( facilitys, "facilitys" );
-
-    return facilitys;
+    return loadBaseAreas< Facility >( "facilitys" );
 }
 
 std::vector<FloorPtr> SqlTranslator::loadFloors()
 {
-    std::vector< FloorPtr > floors;
-
-    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
-    QString select = "SELECT id, parent, number, name FROM floors;";
-    QSqlQuery query( db );
-    bool res = query.exec( select );
-    if( res )
-        for( query.first(); query.isValid(); query.next() )
-        {
-            uint64_t id = query.value( 0 ).toLongLong();
-            uint64_t parent_id = query.value( 1 ).toLongLong();
-            uint16_t number = query.value( 2 ).toInt();
-            QString name = query.value( 3 ).toString();
-
-            FloorPtr flo = BaseEntity::createWithId< Floor >( id );
-            setParentForBaseLocation( flo, parent_id );
-            flo->setName( name );
-            flo->setNumber( number );
-            loadPlans( flo );
-
-            floors.push_back( flo );
-        }
-
-    loadCoordinate< FloorPtr >( floors, "floors" );
-
-    return floors;
+    return loadBaseAreas< Floor >( "floors" );
 }
 
 std::vector<RoomsGroupPtr> SqlTranslator::loadRoomsGroups()
 {
-    std::vector< RoomsGroupPtr > rooms_groups;
-
-    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
-    QString select = "SELECT id, parent, address, cad_number FROM rooms_groups";
-    QSqlQuery query( db );
-    bool res = query.exec( select );
-    if( res )
-        for( query.first(); query.isValid(); query.next() )
-        {
-            uint64_t id = query.value( 0 ).toLongLong();
-            uint64_t parent_id = query.value( 1 ).toLongLong();
-            QString addr = query.value( 2 ).toString();
-            QString cad_number = query.value( 3 ).toString();
-
-            RoomsGroupPtr rg = BaseEntity::createWithId< RoomsGroup >( id );
-            setParentForBaseLocation( rg, parent_id );
-            rg->setAddress( addr );
-            rg->setCadastralNumber( cad_number );
-            loadPlans( rg );
-
-            rooms_groups.push_back( rg );
-        }
-
-    loadCoordinate< RoomsGroupPtr >( rooms_groups, "rooms_groups" );
-
-    return rooms_groups;
+    return loadBaseAreas< RoomsGroup >( "rooms_groups" );
 }
 
 std::vector<RoomPtr> SqlTranslator::loadRooms()
 {
-    std::vector< RoomPtr > rooms;
-
-    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
-    QString select = "SELECT id, parent, name FROM rooms;";
-    QSqlQuery query( db );
-    bool res = query.exec( select );
-    if( res )
-        for( query.first(); query.isValid(); query.next() )
-        {
-            uint64_t id = query.value( 0 ).toLongLong();
-            uint64_t parent_id = query.value( 1 ).toLongLong();
-            QString name = query.value( 2 ).toString();
-
-            RoomPtr roo = BaseEntity::createWithId< Room >( id );
-            setParentForBaseLocation( roo, parent_id );
-            roo->setName( name );
-            loadPlans( roo );
-
-            rooms.push_back( roo );
-        }
-
-    loadCoordinate< RoomPtr >( rooms, "rooms" );
-
-    return rooms;
+    return loadBaseAreas< Room >( "rooms" );
 }
+
+#define tryQuery( string ) \
+    if( !query.exec( string )) \
+    { \
+        db.rollback(); \
+        return false; \
+    } \
 
 bool SqlTranslator::deleteArea(BaseAreaPtr area)
 {
     // find a type
-    QString type = "";
-    switch ( area->getType() ) {
-    case BaseArea::AT_REGION:
-        type = "regions";
-        break;
-    case BaseArea::AT_LOCATION:
-        type = "locations";
-        break;
-    case BaseArea::AT_FACILITY:
-        type = "facilitys";
-        break;
-    case BaseArea::AT_FLOOR:
-        type = "floors";
-        break;
-    case BaseArea::AT_ROOMS_GROUP:
-        type = "rooms_groups";
-        break;
-    case BaseArea::AT_ROOM:
-        type = "rooms";
-        break;
-    }
+    QString type = getStringType( area->getType() );
     if( type.isEmpty() )
         return false;
 
@@ -244,27 +87,15 @@ bool SqlTranslator::deleteArea(BaseAreaPtr area)
     // delete all data
     QString delete_metadata = "DELETE FROM metadate "
                               "WHERE entity_id = " + QString::number( area->getId() );
-    if( !query.exec( delete_metadata ))
-    {
-        db.rollback();
-        return false;
-    }
+    tryQuery( delete_metadata );
 
     QString delete_coords = "DELETE FROM coords "
                             "WHERE id = " + QString::number( area->getId() );
-    if( !query.exec( delete_coords ))
-    {
-        db.rollback();
-        return false;
-    }
+    tryQuery( delete_coords );
 
     QString delete_area = "DELETE FROM " + type +
                           " WHERE id = " + QString::number( area->getId() );
-    if( !query.exec( delete_area ))
-    {
-        db.rollback();
-        return false;
-    }
+    tryQuery( delete_area );
 
     // TODO delete relations
 
@@ -275,14 +106,15 @@ bool SqlTranslator::deleteArea(BaseAreaPtr area)
 
 bool SqlTranslator::commitArea( BaseAreaPtr area )
 {
-    // FIXME all area types
-    if( BaseArea::AT_ROOM != area->getType() )
+    // find a type
+    QString type = getStringType( area->getType() );
+    if( type.isEmpty() )
         return false;
 
     // check exist
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
-    QString select = "SELECT id, parent, name FROM rooms "
-                     "WHERE id = " + QString::number( area->getId() );
+    QString select = "SELECT id, parent, name, description FROM " + type +
+                     " WHERE id = " + QString::number( area->getId() );
     QSqlQuery query( db );
     query.exec( select );
 
@@ -295,24 +127,23 @@ bool SqlTranslator::commitArea( BaseAreaPtr area )
     if( query.first() )
     {
         // update
-        insert_update = "UPDATE rooms SET id = ?, parent = ?, name = ? "
+        insert_update = "UPDATE " + type +
+                        " SET id = ?, parent = ?, name = ?, description = ? "
                         "WHERE id = " + QString::number( area->getId() );
     }
     else
     {
         // insert
-        insert_update = "INSERT INTO rooms (id, parent, name) VALUES (?, ?, ?);";
+        insert_update = "INSERT INTO " + type + " (id, parent, name, description ) "
+                        "VALUES (?, ?, ?, ?);";
     }
 
     query.prepare( insert_update );
     query.addBindValue( (qulonglong) area->getId() );
     query.addBindValue( (qulonglong) area->getParentId() );
-    query.addBindValue( BaseArea::convert< Room >( area )->getName() );
-    if( !query.exec() )
-    {
-        db.rollback();
-        return false;
-    }
+    query.addBindValue( area->getName() );
+    query.addBindValue( area->getDescription() );
+    tryQuery()
 
     // coordinates
     if( !commitCoordinates( area ))
@@ -456,12 +287,7 @@ bool SqlTranslator::commitMark( MarkPtr mark )
     QString delete_mark = "DELETE FROM marks "
                           "WHERE id = " + QString::number( mark->getId() );
     QSqlQuery query( db );
-    bool res = query.exec( delete_mark );
-    if( !res )
-    {
-        db.rollback();
-        return false;
-    }
+    tryQuery( delete_mark );
 
     QString insert_update = "INSERT INTO marks( id, x, y, parent_id ) VALUES (?, ?, ?, ?)";
     query.prepare( insert_update );
@@ -469,13 +295,7 @@ bool SqlTranslator::commitMark( MarkPtr mark )
     query.addBindValue( mark->getCenter().x() );
     query.addBindValue( mark->getCenter().y() );
     query.addBindValue( (qulonglong) mark->getParentId() );
-
-    res = query.exec();
-    if( !res )
-    {
-        db.rollback();
-        return false;
-    }
+    tryQuery();
 
     // commit metadate
     if( !commitMetadate( mark ))
@@ -499,22 +319,12 @@ bool SqlTranslator::deleteMark( MarkPtr mark )
     QString delete_mark = "DELETE FROM marks "
                           "WHERE id = " + QString::number( mark->getId() );
     QSqlQuery query( db );
-    bool res = query.exec( delete_mark );
-    if( !res )
-    {
-        db.rollback();
-        return false;
-    }
+    tryQuery( delete_mark );
 
     // metadate
     QString delete_coords = "DELETE FROM metadate "
                             "WHERE entity_id = " + QString::number( mark->getId() );
-    res = query.exec( delete_coords );
-    if( !res )
-    {
-        db.rollback();
-        return false;
-    }
+    tryQuery( delete_coords );
 
     // unlock base
     db.commit();
@@ -584,6 +394,48 @@ bool SqlTranslator::commitMetadate(BaseEntityPtr area)
 }
 
 //------------------------------------------------------
+
+template<typename LocType>
+std::vector< std::shared_ptr< LocType >> SqlTranslator::loadBaseAreas( QString type_name )
+{
+    typedef std::shared_ptr< LocType > LocTypePtr;
+    std::vector< LocTypePtr > areas;
+
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    QString select;
+    // region hasn't parent
+    if( typeid( LocType ) == typeid( Region ))
+        select = "SELECT id, name, description FROM " + type_name;
+    else
+        select = "SELECT id, parent, name, description FROM " + type_name;
+    QSqlQuery query( db );
+    bool res = query.exec( select );
+    if( res )
+        for( query.first(); query.isValid(); query.next() )
+        {
+            uint64_t id = query.value( "id" ).toLongLong();
+            uint64_t parent_id = 0;
+            if( query.record().contains( "parent" ))
+                parent_id = query.value( "parent" ).toLongLong();
+            QString name = query.value( "name" ).toString();
+            QString descr = query.value( "description" ).toString();
+
+            LocTypePtr area_ptr = BaseEntity::createWithId< LocType >( id );
+            setParentForBaseLocation( area_ptr, parent_id );
+            area_ptr->setName( name );
+            area_ptr->setDesription( descr );
+
+            PlanKeeperPtr plan_keeper = BaseArea::convert< PlanKeeper >( area_ptr );
+            if( plan_keeper )
+                loadPlans( area_ptr );
+
+            areas.push_back( area_ptr );
+        }
+
+    loadCoordinate< LocTypePtr >( areas, type_name );
+
+    return areas;
+}
 
 template<typename LocTypePtr>
 bool SqlTranslator::loadCoordinate( std::vector< LocTypePtr > &vector,
@@ -662,6 +514,33 @@ bool SqlTranslator::loadPayments(RentPtr /*rent*/)
 {
     // TODO load payments
     return true;
+}
+
+QString SqlTranslator::getStringType(BaseArea::AreaType area_type)
+{
+    QString type = "";
+    switch ( area_type ) {
+    case BaseArea::AT_REGION:
+        type = "regions";
+        break;
+    case BaseArea::AT_LOCATION:
+        type = "locations";
+        break;
+    case BaseArea::AT_FACILITY:
+        type = "facilitys";
+        break;
+    case BaseArea::AT_FLOOR:
+        type = "floors";
+        break;
+    case BaseArea::AT_ROOMS_GROUP:
+        type = "rooms_groups";
+        break;
+    case BaseArea::AT_ROOM:
+        type = "rooms";
+        break;
+    }
+
+    return type;
 }
 
 bool SqliteTranslator::initBySettings(QVariantMap settings)

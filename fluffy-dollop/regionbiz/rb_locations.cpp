@@ -64,6 +64,26 @@ void BaseArea::setParent(uint64_t id)
     _parent_id = id;
 }
 
+QString BaseArea::getDescription()
+{
+    return _description;
+}
+
+void BaseArea::setDesription(QString descr)
+{
+    _description = descr;
+}
+
+QString BaseArea::getName()
+{
+    return _name;
+}
+
+void BaseArea::setName(QString name)
+{
+    _name = name;
+}
+
 BizRelationKepper::BizRelationKepper(uint64_t id):
     BaseArea( id )
 {}
@@ -197,15 +217,7 @@ LocationType Region::getType()
     return AT_REGION;
 }
 
-QString Region::getDescription()
-{
-    return _description;
-}
 
-void Region::setDesription(QString descr)
-{
-    _description = descr;
-}
 
 std::vector<BaseAreaPtr> Region::getChilds(RegionChildFilter filter )
 {
@@ -251,16 +263,6 @@ Location::Location(uint64_t id):
 BaseArea::AreaType Location::getType()
 {
     return AT_LOCATION;
-}
-
-QString Location::getDescription()
-{
-    return _description;
-}
-
-void Location::setDesription(QString descr)
-{
-    _description = descr;
 }
 
 QString Location::getAddress()
@@ -319,16 +321,6 @@ BaseArea::AreaType Facility::getType()
     return AT_FACILITY;
 }
 
-QString Facility::getDescription()
-{
-    return _description;
-}
-
-void Facility::setDesription(QString descr)
-{
-    _description = descr;
-}
-
 QString Facility::getAddress()
 {
     return _address;
@@ -365,16 +357,6 @@ Floor::Floor(uint64_t id):
 BaseArea::AreaType Floor::getType()
 {
     return AT_FLOOR;
-}
-
-QString Floor::getName()
-{
-    return _name;
-}
-
-void Floor::setName(QString name)
-{
-    _name = name;
 }
 
 uint16_t Floor::getNumber()
@@ -469,14 +451,3 @@ BaseArea::AreaType Room::getType()
 {
     return AT_ROOM;
 }
-
-QString Room::getName()
-{
-    return _name;
-}
-
-void Room::setName(QString name)
-{
-    _name = name;
-}
-

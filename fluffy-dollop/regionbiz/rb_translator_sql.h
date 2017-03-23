@@ -42,11 +42,14 @@ private:
     // support functions
     template< typename LocTypePtr >
     bool loadCoordinate( std::vector< LocTypePtr >& vector, QString name );
+    template< typename LocType >
+    std::vector< std::shared_ptr< LocType >> loadBaseAreas( QString type_name );
     bool commitCoordinates( BaseAreaPtr area );
     bool commitMetadate(BaseEntityPtr area );
     bool loadPlans( BaseAreaPtr area );
     bool loadDocuments( BaseBizRelationPtr relation );
     bool loadPayments( RentPtr rent );
+    QString getStringType(BaseArea::AreaType area_type );
 };
 
 //------------------------------------------------------------

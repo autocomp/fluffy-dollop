@@ -49,6 +49,12 @@ public:
 
     bool commit();
 
+    // params
+    QString getDescription();
+    void setDesription( QString descr );
+    QString getName();
+    void setName( QString name );
+
     template< typename Type >
     static std::shared_ptr< Type > convert( BaseAreaPtr base )
     {
@@ -67,10 +73,15 @@ public:
 protected:
     QPolygonF _coords;
     uint64_t _parent_id = 0;
+    QString _description = "";
+    QString _name = "";
 
 private:
     // private, because we need protect it
     void setParent( uint64_t id );
+
+    // for RTTI
+    void rttiFunction() const override {}
 };
 
 //----------------------------------------
@@ -103,6 +114,7 @@ private:
     QString _plan_path = "";
     PlanParams _params;
 };
+typedef std::shared_ptr< PlanKeeper > PlanKeeperPtr;
 
 //----------------------------------------------
 
@@ -154,15 +166,8 @@ public:
     virtual ~Region(){}
     AreaType getType() override;
 
-    // params
-    QString getDescription();
-    void setDesription( QString descr );
-
     // getters
     std::vector< BaseAreaPtr > getChilds( RegionChildFilter filter = RCF_ALL );
-
-private:
-    QString _description = "";
 };
 typedef std::shared_ptr< Region > RegionPtr;
 typedef std::vector< RegionPtr > RegionPtrs;
@@ -180,8 +185,6 @@ public:
     AreaType getType() override;
 
     // params
-    QString getDescription();
-    void setDesription( QString descr );
     QString getAddress();
     void setAddress( QString address );
 
@@ -189,7 +192,6 @@ public:
     std::vector< FacilityPtr > getChilds();
 
 private:
-    QString _description = "";
     QString _address = "";
 };
 typedef std::shared_ptr< Location > LocationPtr;
@@ -208,8 +210,6 @@ public:
     AreaType getType() override;
 
     // params
-    QString getDescription();
-    void setDesription( QString descr );
     QString getAddress();
     void setAddress( QString address );
     QString getCadastralNumber();
@@ -219,7 +219,6 @@ public:
     std::vector< FloorPtr > getChilds();
 
 private:
-    QString _description = "";
     QString _address = "";
     QString _cadastral_number = "";
 };
@@ -242,9 +241,7 @@ public:
     virtual ~Floor(){}
     AreaType getType() override;
 
-    // params
-    QString getName();
-    void setName( QString name );
+
     uint16_t getNumber();
     void setNumber( uint16_t number );
 
@@ -252,9 +249,7 @@ public:
     BaseAreaPtrs getChilds( FloorChildFilter filter = FCF_ALL );
 
 private:
-    QString _name = "";
     int16_t _number = 0;
-
 };
 typedef std::vector< FloorPtr > FloorPtrs;
 
@@ -294,13 +289,6 @@ public:
     Room( uint64_t id );
     virtual ~Room(){}
     AreaType getType() override;
-
-    // params
-    QString getName();
-    void setName( QString name );
-
-private:
-    QString _name = "";
 };
 typedef std::vector< RoomPtr > RoomPtrs;
 
