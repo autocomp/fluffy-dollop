@@ -127,7 +127,7 @@ int main()
     }
     qDebug() << " Data square:" << area->getMetadata( "square" )->getValueAsString();
     // commit metadate (change base)
-    area->commit();
+    // area->commit();
 
     //! test of entitys
     qDebug() << "Max id =" << BaseEntity::getMaxId();
@@ -158,7 +158,8 @@ int main()
     auto room_ptr = mngr->addArea< Room >( 13 );
     RoomPtr room_for_marks = BaseArea::convert< Room >( room_ptr );
     // add mark
-    qDebug() << "Add mark:" << room_for_marks->addMark( QPointF( 30, 10 ));
+    MarkPtr mark = room_for_marks->addMark( QPointF( 30, 10 ));
+    qDebug() << "Add mark:" << (bool) mark;
     MarkPtrs marks = room_for_marks->getMarks();
     if( marks.size() )
     {
@@ -174,8 +175,8 @@ int main()
     marks = room_for_marks->getMarks();
     qDebug() << "We have" << marks.size() << "marks after commit-delete";
     // check other variant
-    qDebug() << "Add mark again:" << room_for_marks->addMark( QPointF( 50, 20 ));
-    qDebug() << "Add mark again:" << room_for_marks->addMark( QPointF( 31, 20 ));
+    room_for_marks->addMark( QPointF( 50, 20 ));
+    room_for_marks->addMark( QPointF( 31, 20 ));
     marks = room_for_marks->getMarks();
     qDebug() << "We have" << marks.size() << "marks again";
     qDebug() << "  Commit room's marks:" << room_for_marks->commitMarks();
