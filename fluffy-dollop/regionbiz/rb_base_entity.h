@@ -46,6 +46,14 @@ public:
         return std::dynamic_pointer_cast< Type >( base );
     }
 
+    // WARNING slow converter
+    template< typename Type >
+    std::shared_ptr< Type > convert()
+    {
+        BaseEntityPtr ptr = getItself();
+        return std::dynamic_pointer_cast< Type >( ptr );
+    }
+
 protected:
     static bool deleteEntity( BaseEntityPtr ent );
     static bool deleteEntity( uint64_t id );
@@ -55,6 +63,9 @@ protected:
 private:
     static std::map< uint64_t, BaseEntityPtr >& getEntitys();
     static uint64_t _max_id;
+
+    // get smart pointer on this
+    BaseEntityPtr getItself();
 
     // for RTTI
     virtual void rttiFunction() const = 0;

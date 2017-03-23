@@ -31,6 +31,9 @@ void SqlTranslator::loadFunctions()
 
     // metadata
     _load_metadata = std::bind( &SqlTranslator::loadMetadata, this );
+
+    // marks
+    _load_marks = std::bind( &SqlTranslator::loadMarks, this );
     _commit_mark = std::bind( &SqlTranslator::commitMark, this, std::placeholders::_1 );
     _delete_mark = std::bind( &SqlTranslator::deleteMark, this, std::placeholders::_1 );
 }

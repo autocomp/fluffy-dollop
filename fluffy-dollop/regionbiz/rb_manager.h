@@ -80,7 +80,9 @@ public:
     MarkPtr getMark( uint64_t id );
     MarkPtrs getMarksByParent( uint64_t id );
     MarkPtrs getMarksByParent( MarksHolderPtr parent );
-    bool addMark( uint64_t parent_id, QPointF center = QPointF() );
+    MarkPtrs getMarks();
+    MarkPtr addMark( uint64_t parent_id,
+                     QPointF center = QPointF() );
     bool commitMark( uint64_t id );
     bool commitMark( MarkPtr mark );
     bool deleteMark( uint64_t id );

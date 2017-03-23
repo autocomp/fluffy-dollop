@@ -7,7 +7,6 @@
 #include <QPointF>
 #include <QPolygon>
 
-//#include "rb_manager.h"
 #include "rb_biz_relations.h"
 #include "rb_base_entity.h"
 #include "rb_marks.h"
@@ -39,8 +38,11 @@ public:
     BaseArea( uint64_t id );
     virtual ~BaseArea(){}
 
+    // coords
     QPolygonF getCoords();
     void setCoords(QPolygonF coord );
+
+    // parent - child
     uint64_t getParentId();
     BaseAreaPtr getParent( AreaType parent_type );
     BaseAreaPtr getParent();
@@ -61,14 +63,13 @@ public:
         return std::dynamic_pointer_cast< Type >( base );
     }
 
-    // TODO think how to read
-    // template< typename Type >
-    // std::shared_ptr< Type > convert()
-    // {
-    //     auto mngr = RegionBizManager::instance();
-    //     BaseAreaPtr ptr = mngr->getBaseArea( _id, getType() );
-    //     return std::dynamic_pointer_cast< Type >( ptr );
-    // }
+    // WARNING slow converter
+    template< typename Type >
+    std::shared_ptr< Type > convert()
+    {
+        BaseAreaPtr ptr = BaseEntity::convert< BaseArea >( getItself() );
+        return std::dynamic_pointer_cast< Type >( ptr );
+    }
 
 protected:
     QPolygonF _coords;
@@ -138,7 +139,7 @@ public:
     uint64_t getHolderId();
     MarkPtrs getMarks();
 
-    bool addMark( QPointF center );
+    MarkPtr addMark( QPointF center = QPointF() );
     bool commitMarks();
     bool deleteMarks();
 
@@ -190,9 +191,6 @@ public:
 
     // getters
     std::vector< FacilityPtr > getChilds();
-
-private:
-    QString _address = "";
 };
 typedef std::shared_ptr< Location > LocationPtr;
 typedef std::vector< LocationPtr > LocationPtrs;
@@ -217,10 +215,6 @@ public:
 
     // getters
     std::vector< FloorPtr > getChilds();
-
-private:
-    QString _address = "";
-    QString _cadastral_number = "";
 };
 typedef std::vector< FacilityPtr > FacilityPtrs;
 
@@ -249,7 +243,6 @@ public:
     BaseAreaPtrs getChilds( FloorChildFilter filter = FCF_ALL );
 
 private:
-    int16_t _number = 0;
 };
 typedef std::vector< FloorPtr > FloorPtrs;
 
@@ -273,10 +266,6 @@ public:
 
     // getters
     std::vector< RoomPtr > getChilds();
-
-private:
-    QString _address = "";
-    QString _cadastral_number = "";
 };
 typedef std::shared_ptr< RoomsGroup > RoomsGroupPtr;
 typedef std::vector< RoomsGroupPtr > RoomsGroupPtrs;

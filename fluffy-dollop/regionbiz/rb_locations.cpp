@@ -150,7 +150,7 @@ MarkPtrs MarksHolder::getMarks()
     return marks;
 }
 
-bool MarksHolder::addMark(QPointF center)
+MarkPtr MarksHolder::addMark( QPointF center )
 {
     if( checkHolderId() )
     {
@@ -158,7 +158,7 @@ bool MarksHolder::addMark(QPointF center)
         return mngr->addMark( _holder_id, center );
     }
 
-    return false;
+    return MarkPtr();
 }
 
 bool MarksHolder::commitMarks()
@@ -195,12 +195,11 @@ bool MarksHolder::deleteMarks()
 
 bool MarksHolder::checkHolderId()
 {
-    // TODO think about cast fron BaseEntity
     auto mngr = RegionBizManager::instance();
-    BaseAreaPtr area = mngr->getBaseArea( _holder_id );
-    if( area )
+    BaseEntityPtr ent = mngr->getBaseArea( _holder_id );
+    if( ent )
     {
-        MarksHolderPtr holder = BaseArea::convert< MarksHolder >( area );
+        MarksHolderPtr holder = BaseEntity::convert< MarksHolder >( ent );
         if( holder )
             return true;
     }
@@ -267,12 +266,18 @@ BaseArea::AreaType Location::getType()
 
 QString Location::getAddress()
 {
-    return _address;
+    if( isMetadataPresent( "adress" ))
+        return getMetadataValue( "adress" ).toString();
+
+    return "";
 }
 
 void Location::setAddress(QString address)
 {
-    _address = address;
+    if( isMetadataPresent( "address" ))
+        setMetadataValue( "address", address );
+    else
+        addMetadata( "string", "address", address );
 }
 
 std::vector<FacilityPtr> Location::getChilds()
@@ -323,22 +328,34 @@ BaseArea::AreaType Facility::getType()
 
 QString Facility::getAddress()
 {
-    return _address;
+    if( isMetadataPresent( "adress" ))
+        return getMetadataValue( "adress" ).toString();
+
+    return "";
 }
 
 void Facility::setAddress(QString address)
 {
-    _address = address;
+    if( isMetadataPresent( "address" ))
+        setMetadataValue( "address", address );
+    else
+        addMetadata( "string", "address", address );
 }
 
 QString Facility::getCadastralNumber()
 {
-    return _cadastral_number;
+    if( isMetadataPresent( "cadastral_number" ))
+        return getMetadataValue( "cadastral_number" ).toString();
+
+    return "";
 }
 
 void Facility::setCadastralNumber(QString number)
 {
-    _cadastral_number = number;
+    if( isMetadataPresent( "cadastral_number" ))
+        setMetadataValue( "cadastral_number", number );
+    else
+        addMetadata( "string", "cadastral_number", number );
 }
 
 std::vector<FloorPtr> Facility::getChilds()
@@ -361,12 +378,18 @@ BaseArea::AreaType Floor::getType()
 
 uint16_t Floor::getNumber()
 {
-    return _number;
+    if( isMetadataPresent( "number" ))
+        return getMetadataValue( "number" ).toInt();
+
+    return 0;
 }
 
 void Floor::setNumber(uint16_t number)
 {
-    _number = number;
+    if( isMetadataPresent( "number" ))
+        setMetadataValue( "cadastral_number", number );
+    else
+        addMetadata( "integer", "number", number );
 }
 
 BaseAreaPtrs Floor::getChilds(Floor::FloorChildFilter filter)
@@ -414,24 +437,37 @@ BaseArea::AreaType RoomsGroup::getType()
     return AT_ROOMS_GROUP;
 }
 
+
 QString RoomsGroup::getAddress()
 {
-    return _address;
+    if( isMetadataPresent( "adress" ))
+        return getMetadataValue( "adress" ).toString();
+
+    return "";
 }
 
 void RoomsGroup::setAddress(QString address)
 {
-    _address = address;
+    if( isMetadataPresent( "address" ))
+        setMetadataValue( "address", address );
+    else
+        addMetadata( "string", "address", address );
 }
 
 QString RoomsGroup::getCadastralNumber()
 {
-    return _cadastral_number;
+    if( isMetadataPresent( "cadastral_number" ))
+        return getMetadataValue( "cadastral_number" ).toString();
+
+    return "";
 }
 
 void RoomsGroup::setCadastralNumber(QString number)
 {
-    _cadastral_number = number;
+    if( isMetadataPresent( "cadastral_number" ))
+        setMetadataValue( "cadastral_number", number );
+    else
+        addMetadata( "string", "cadastral_number", number );
 }
 
 std::vector< RoomPtr > RoomsGroup::getChilds()

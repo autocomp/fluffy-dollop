@@ -96,6 +96,30 @@ typedef std::vector< StringMetadataPtr > StringMetadataPtrs;
 
 //--------------------------------------------------
 
+class IntegerMetadata: public BaseMetadata
+{
+public:
+    IntegerMetadata( uint64_t parent_id );
+
+    // type
+    QString getType() override;
+
+    // value
+    QString getValueAsString() override;
+    void setValueByString( QString val ) override;
+    QVariant getValueAsVariant() override;
+    void setValueByVariant( QVariant val );
+    int getValue();
+    void setValue(int val );
+
+private:
+    int _value;
+};
+typedef std::shared_ptr< IntegerMetadata > IntegerMetadataPtr;
+typedef std::vector< IntegerMetadataPtr > IntegerMetadataPtrs;
+
+//--------------------------------------------------
+
 class MetadataFabric
 {
 public:

@@ -99,11 +99,52 @@ void StringMetadata::setValue(QString val)
     _value = val;
 }
 
+IntegerMetadata::IntegerMetadata(uint64_t parent_id):
+    BaseMetadata( parent_id )
+{}
+
+QString IntegerMetadata::getType()
+{
+    return "int";
+}
+
+QString IntegerMetadata::getValueAsString()
+{
+    return QString::number( _value );
+}
+
+void IntegerMetadata::setValueByString(QString val)
+{
+    _value = val.toInt();
+}
+
+QVariant IntegerMetadata::getValueAsVariant()
+{
+    return _value;
+}
+
+void IntegerMetadata::setValueByVariant(QVariant val)
+{
+    _value = val.toInt();
+}
+
+int IntegerMetadata::getValue()
+{
+    return _value;
+}
+
+void IntegerMetadata::setValue(int val)
+{
+    _value = val;
+}
+
 BaseMetadataPtr MetadataFabric::createMetadata( QString type,
                                                 uint64_t parent_id )
 {
     if( "double" == type )
         return DoubleMetadataPtr( new DoubleMetadata( parent_id ));
+    if( "int" == type )
+        return IntegerMetadataPtr( new IntegerMetadata( parent_id ));
     if( "string" == type )
         return StringMetadataPtr( new StringMetadata( parent_id ));
 

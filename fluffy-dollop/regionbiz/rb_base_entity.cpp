@@ -40,6 +40,11 @@ std::map< uint64_t, BaseEntityPtr >& BaseEntity::getEntitys()
     return entitys;
 }
 
+BaseEntityPtr BaseEntity::getItself()
+{
+    return getEntitys()[ _id ];
+}
+
 bool BaseEntity::isEntityExist(uint64_t id)
 {
     bool exist = getEntitys().find( id ) != getEntitys().end();

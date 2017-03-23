@@ -375,22 +375,27 @@ MarkPtrs RegionBizManager::getMarksByParent(MarksHolderPtr parent)
     return getMarksByParent( parent->getHolderId() );
 }
 
-bool RegionBizManager::addMark( uint64_t parent_id,
-                                QPointF center )
+MarkPtrs RegionBizManager::getMarks()
 {
-    // TODO check parent type
+    return _marks;
+}
 
-    MarkPtr mark = BaseEntity::createWithId< Mark >( BaseEntity::getMaxId() + 1 );
+MarkPtr RegionBizManager::addMark( uint64_t parent_id,
+                                   QPointF center )
+{
+    MarkPtr mark;
+    BaseAreaPtr parent = getBaseArea( parent_id );
+    if( !( parent->BaseEntity::convert< MarksHolder >() ))
+        return mark;
+
+    mark = BaseEntity::createWithId< Mark >( BaseEntity::getMaxId() + 1 );
     if( mark )
     {
         _marks.push_back( mark );
         mark->setCenter( center );
         mark->setParentId( parent_id );
-
-        return true;
     }
-    else
-        return false;
+    return mark;
 }
 
 bool RegionBizManager::commitMark(uint64_t id)
