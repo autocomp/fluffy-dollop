@@ -139,12 +139,19 @@ int main()
                       << QPointF( 100, 100 ) << QPointF( 100, 1 )));
     BaseArea::convert< Room >( room )->setName( QString::fromUtf8( "Тестовое имя" ));
     // commit room (change base)
-    qDebug() << "Commit:" << room->commit();
+    qDebug() << " Commit:" << room->commit();
+    // test other geometry
+    qDebug() << "  Geom:" << room->getCoords();
+    room->setCoords( QPolygonF() << QPointF( 10, 10 ) << QPointF( 10, 1000 )
+                     << QPointF( 1000, 1000 ) << QPointF( 1000, 10 )
+                     << QPointF( 600, 50 ));
+    qDebug() << " Commit again:" << room->commit();
+    qDebug() << "  Geom:" << room->getCoords();
 
     //! check delete
     room->addMetadata( "double", "some", 10 );
-    qDebug() << "Commit again:" << room->commit();
-    qDebug() << "Delete area:" << mngr->deleteArea( room );
+    qDebug() << " Commit again:" << room->commit();
+    qDebug() << " Delete area:" << mngr->deleteArea( room );
     qDebug() << "Max id after del =" << BaseEntity::getMaxId();
 
     //! check marks
