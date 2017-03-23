@@ -87,9 +87,9 @@ void ViraEditorView::setFloor(qulonglong floorId)
     // NOTE file load path
     QString destPath;
     QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath",
-                                                                "./data/", true);
+                                                                "./data", true);
     if(regionBizInitJson_Path.isValid())
-         destPath = regionBizInitJson_Path.toString();
+         destPath = regionBizInitJson_Path.toString() + QDir::separator();
 
     BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(floorId, BaseArea::AT_FLOOR);
     FloorPtr floorPtr = BaseArea::convert< Floor >(ptr);

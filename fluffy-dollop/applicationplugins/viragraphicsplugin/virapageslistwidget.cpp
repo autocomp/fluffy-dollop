@@ -33,9 +33,9 @@ void ViraPagesListWidget::reinit(qulonglong facilityId)
 
     QString destPath;
     QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath",
-                                                                "./data/", true);
+                                                                "./data", true);
     if(regionBizInitJson_Path.isValid())
-         destPath = regionBizInitJson_Path.toString();
+         destPath = regionBizInitJson_Path.toString() + QDir::separator();
 
     BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(facilityId, BaseArea::AT_FACILITY);
     FacilityPtr facilityPtr = BaseArea::convert< Facility >(ptr);
