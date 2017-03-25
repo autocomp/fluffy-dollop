@@ -31,6 +31,7 @@ public:
     void reinit(qulonglong facilityId);
     void centerEditorOn(qulonglong id);
     void selectionItemsChanged(uint64_t prev_id, uint64_t curr_id);
+    void editObjectGeometry(quint64 id);
 
 signals:
     
@@ -39,6 +40,7 @@ public slots:
     void zoomIn();
     void zoomOut();
     void zoomReset();
+    void slotSelectItem(qulonglong id, bool centerOnArea);
 
 protected:
     virtual void wheelEvent(QWheelEvent* e);
@@ -46,6 +48,8 @@ protected:
     virtual void mouseReleaseEvent(QMouseEvent* e);
     virtual void mouseMoveEvent(QMouseEvent* e);
     virtual void keyPressEvent(QKeyEvent *event);
+    virtual void mouseDoubleClickEvent(QMouseEvent *event);
+    void clearTempItems();
 
 private:
 //    void syncItems();
@@ -58,9 +62,9 @@ private:
     uint64_t _currFloor_id = 0;
     QList<GraphicsPixmapItem *> _owerViews;
     QMap<qulonglong, QGraphicsItem *> _itemsOnFloor;
+    uint64_t _editObjectGeometry = 0;
 
     QList<QGraphicsLineItem *> _lines;
-    QGraphicsLineItem * _currentLine = nullptr;
 };
 
 #endif // PDFEDITORVIEW_H

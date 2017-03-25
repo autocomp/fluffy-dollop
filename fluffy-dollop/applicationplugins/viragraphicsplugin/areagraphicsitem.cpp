@@ -29,7 +29,7 @@ void AreaGraphicsItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
         if(polygon().containsPoint(event->pos(), Qt::OddEvenFill))
         {
             event->accept();
-            regionbiz::RegionBizManager::instance()->centerOnArea(_areaInitData.id);
+            emit signalSelectItem(_areaInitData.id, true); // regionbiz::RegionBizManager::instance()->centerOnArea(_areaInitData.id);
         }
         else
         {
@@ -64,11 +64,6 @@ void AreaGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
         QGraphicsPolygonItem::paint(painter, option, widget);
 }
 
-bool AreaGraphicsItem::itemIsSelected()
-{
-    return _isSelected;
-}
-
 void AreaGraphicsItem::setItemselected(bool on_off)
 {
     _isSelected = on_off;
@@ -95,7 +90,7 @@ void AreaGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
     if(_areaInitData.isSelectableFromMap)
     {
         if(polygon().containsPoint(event->pos(), Qt::OddEvenFill))
-            regionbiz::RegionBizManager::instance()->selectArea(_areaInitData.id);
+            emit signalSelectItem(_areaInitData.id, false); // regionbiz::RegionBizManager::instance()->selectArea(_areaInitData.id);
         else
             QGraphicsPolygonItem::mousePressEvent(event);
     }

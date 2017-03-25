@@ -16,10 +16,13 @@ protected slots:
     void slotItemDoubleClicked(QTreeWidgetItem*,int);
     void slotObjectSelectionChanged(uint64_t prev_id, uint64_t curr_id);
     void slotHeaderSectionClicked(int index);
+    void slotEditObjectGeometry(QVariant);
 
 protected:
     const int ID = Qt::UserRole + 1;
     QMap<qulonglong, QTreeWidgetItem*> _items;
+    QColor _defaultColor;
+    uint64_t _editObjectGeometry = 0;
 };
 
 #endif // VIRATREEWIDGET_H

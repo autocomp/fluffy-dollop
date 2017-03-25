@@ -5,5 +5,6 @@
         <file>img/018_icons_32_back.png</file>
         <file>img/119_icons_32_gl.png</file>
         <file>img/mark.png</file>
+        <file>img/selected_mark.png</file>
     </qresource>
 </RCC>

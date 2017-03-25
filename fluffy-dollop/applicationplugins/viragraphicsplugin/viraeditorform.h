@@ -20,11 +20,13 @@ public:
     explicit ViraEditorForm(QWidget *parent = 0);
     ~ViraEditorForm();
     void setParentWindowId(qulonglong parentWindowId);
+    void editObjectGeometry(quint64 id);
 
 private slots:
     void slotSelectionItemsChanged(uint64_t,uint64_t);
     void slotCenterOn(uint64_t id);
     void centerEditorOn(qulonglong id);
+    void slotSwitchOnMap();
 
 signals:
     void switchOnMap();
@@ -45,6 +47,7 @@ private:
     ViraEditorView * _view;
     qulonglong _parentWindowId = 0;
     qulonglong _currFacilityId = 0;
+    uint64_t _editObjectGeometry = 0;
 };
 
 #endif // ViraEditorForm_H

@@ -22,7 +22,7 @@ ViraEditorForm::ViraEditorForm(QWidget *parent) :
     ui->setupUi(this);
     _sceneViraWidget = new SceneViraWidget;
     _sceneViraWidget->createModeButtonGroup();
-    connect(_sceneViraWidget, SIGNAL(switchOnMap()), this, SIGNAL(switchOnMap()));
+    connect(_sceneViraWidget, SIGNAL(switchOnMap()), this, SLOT(slotSwitchOnMap()));
 
     ui->topLayout->addWidget(_sceneViraWidget);
 
@@ -45,6 +45,19 @@ ViraEditorForm::~ViraEditorForm()
     delete _sceneViraWidget;
     delete _viraPagesListWidget;
     delete ui;
+}
+
+void ViraEditorForm::editObjectGeometry(quint64 id)
+{
+    _editObjectGeometry = id;
+    _view->editObjectGeometry(id);
+    _viraPagesListWidget->setEnabled(id == 0);
+}
+
+void ViraEditorForm::slotSwitchOnMap()
+{
+    if(_editObjectGeometry == 0)
+        emit switchOnMap();
 }
 
 void ViraEditorForm::slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_id)

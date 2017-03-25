@@ -9,8 +9,6 @@
 #include <ctrcore/visual/abstractscenewidget.h>
 #include <ctrcore/provider/dataproviderfactory.h>
 #include <ctrcore/provider/abstractdataprovider.h>
-#include <ctrcore/bus/common_message_notifier.h>
-#include <ctrcore/bus/bustags.h>
 #include <QMessageBox>
 #include <QFileInfo>
 #include <QFileDialog>

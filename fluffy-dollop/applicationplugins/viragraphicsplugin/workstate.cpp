@@ -119,6 +119,7 @@ void WorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom
                 for( FacilityPtr facilityPtr: facilities )
                 {
                     AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(facilityPtr->getCoords());
+                    connect(areaGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
                     facInitData.id = facilityPtr->getId();
                     areaGraphicsItem->init(facInitData);
                     _scene->addItem(areaGraphicsItem);
@@ -126,6 +127,21 @@ void WorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom
                 }
             }
         }
+    }
+}
+
+void WorkState::editObjectGeometry(quint64 id)
+{
+    _editObjectGeometry = id;
+}
+
+void WorkState::slotSelectItem(qulonglong id, bool centerOnArea)
+{
+    if(_editObjectGeometry == 0)
+    {
+        regionbiz::RegionBizManager::instance()->selectArea(id);
+        if(centerOnArea)
+            regionbiz::RegionBizManager::instance()->centerOnArea(id);
     }
 }
 

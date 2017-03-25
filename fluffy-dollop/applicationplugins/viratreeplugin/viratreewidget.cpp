@@ -5,15 +5,21 @@
 #include <iostream>
 #include <ctrcore/tempinputdata/tempdatatypies.h>
 #include <ctrcore/tempinputdata/tempdatacontroller.h>
+#include <ctrcore/bus/common_message_notifier.h>
+#include <ctrcore/bus/bustags.h>
 
 using namespace regionbiz;
 
 ViraTreeWidget::ViraTreeWidget(QWidget *parent)
     : QTreeWidget(parent)
 {
+    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::EditObjectGeometry, this, SLOT(slotEditObjectGeometry(QVariant)),
+                                      qMetaTypeId< quint64 >(),
+                                      QString("visualize_system") );
+
     setExpandsOnDoubleClick(false);
     setSelectionMode(QAbstractItemView::SingleSelection);
-    setColumnCount(5);
+    setColumnCount(6);
     setColumnWidth(0, 370);
     headerItem()->setText(0, QString::fromUtf8(""));
     headerItem()->setText(1, QString::fromUtf8("Площадь"));
@@ -85,6 +91,13 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
                             if(room)
                             {
                                 QTreeWidgetItem * roomItem = new QTreeWidgetItem(floorItem);
+                                if(room->getCoords().isEmpty())
+                                    for(int i(0); i < 6; ++i)
+                                    {
+                                        _defaultColor = roomItem->textColor(i);
+                                        roomItem->setTextColor(i, QColor(Qt::yellow));
+                                    }
+
                                 roomItem->setText(0, room->getName());
                                 const qulonglong id(room->getId());
                                 roomItem->setText(5, QString::number(id));
@@ -176,6 +189,29 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
     header()->setSortIndicatorShown(true);
     setSortingEnabled(true);
     sortByColumn(0, Qt::AscendingOrder);
+}
+
+void ViraTreeWidget::slotEditObjectGeometry(QVariant var)
+{
+    quint64 id = var.toUInt();
+    setEnabled(id == 0);
+    if(id == 0)
+    {
+        auto it = _items.find(_editObjectGeometry);
+        if(it != _items.end())
+        {
+            BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(_editObjectGeometry, BaseArea::AT_ROOM);
+            RoomPtr roomPtr = BaseArea::convert< Room >(ptr);
+            if(roomPtr)
+            {
+                QTreeWidgetItem* roomItem = it.value();
+                if(roomPtr->getCoords().isEmpty() == false)
+                    for(int i(0); i < 6; ++i)
+                        roomItem->setTextColor(i, _defaultColor);
+            }
+        }
+    }
+    _editObjectGeometry = id;
 }
 
 void ViraTreeWidget::slotItemSelectionChanged()

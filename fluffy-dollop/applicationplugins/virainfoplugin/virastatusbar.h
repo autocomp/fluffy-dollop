@@ -45,6 +45,7 @@ protected slots:
     void slotObjectSelectionChanged(uint64_t prev_id, uint64_t curr_id);
     void slotShowMoreInfo(bool on_off);
     void slotMoreInfoWidgetClosed();
+    void slotEditObject(bool on_off);
 
 protected:
     void reset();

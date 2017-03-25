@@ -23,6 +23,7 @@ private slots:
     void showFacility(qulonglong id);
     void switchOnMap();
     void switchOnEditor();
+    void slotEditObjectGeometry(QVariant var);
 
 private:
     bool _showFirstBaseCover = true;

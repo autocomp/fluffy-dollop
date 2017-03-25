@@ -17,7 +17,6 @@ LIBS += -L$${INSTALL_PATH_LIB} \
         -lctrcore \
         -lctrvisual \
         -lctrwidgets \
-        -lgdal \
         -lregionbiz \
 
 HEADERS += \

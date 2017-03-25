@@ -5,10 +5,12 @@
 #include <QMouseEvent>
 #include <QDir>
 #include <QInputDialog>
+#include <QMessageBox>
 #include <QDebug>
 #include <ctrcore/ctrcore/ctrconfig.h>
 #include <regionbiz/rb_manager.h>
 #include <regionbiz/rb_locations.h>
+#include "viragraphicsitem.h"
 
 using namespace regionbiz;
 
@@ -53,12 +55,7 @@ void ViraEditorView::setFloor(qulonglong floorId)
 {
     _currFloor_id = 0;
 
-    delete _currentLine;
-    _currentLine = 0;
-    foreach(QGraphicsLineItem * item, _lines)
-        delete item;
-    _lines.clear();
-
+    clearTempItems();
 
     foreach(GraphicsPixmapItem * item, _owerViews)
         delete item;
@@ -104,41 +101,57 @@ void ViraEditorView::setFloor(qulonglong floorId)
         setSceneRect(0, 0, pm.width(), pm.height());
         _owerViews.append(item);
 
+        //MarkPtrs marks_of_floor = floorPtr->getMarks();
+
         BaseAreaPtrs rooms = floorPtr->getChilds( Floor::FCF_ALL_ROOMS );
         for( BaseAreaPtr room_ptr: rooms )
         {
             RoomPtr room = BaseArea::convert< Room >( room_ptr );
             if(room)
             {
-                AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(room->getCoords());
-                areaGraphicsItem->setAcceptHoverEvents(true);
-                roomInitData.id = room->getId();
-                areaGraphicsItem->init(roomInitData);
-                scene()->addItem(areaGraphicsItem);
-                _itemsOnFloor.insert(room->getId(), areaGraphicsItem);
+                MarkPtrs marks_of_room = room->getMarks();
+                for( MarkPtr mark: marks_of_room )
+                {
+                    QPointF center = mark->getCenter();
+
+                    MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(room->getId(), QPixmap("/home/sergey/Загрузки/IMAGE0012.JPG"), QString::fromUtf8("Течёт унитаз"));
+                    _markGraphicsItem->setPos(center);
+                    if( mark->isMetadataPresent( "name" ))
+                        _markGraphicsItem->setToolTip(mark->getMetadata( "name" )->getValueAsVariant().toString());
+                    else
+                        _markGraphicsItem->setToolTip(QString::fromUtf8("Deffect"));
+
+                    scene()->addItem(_markGraphicsItem);
+                    connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                    _itemsOnFloor.insert(room->getId(), _markGraphicsItem);
+                }
+
+//                if(room->getId() == 98)
+//                {
+//                }
+//                else if(room->getId() == 99)
+//                {
+//                    MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(room->getId(), QPixmap("/home/sergey/Загрузки/IMAGE0015.JPG"), QString::fromUtf8("Оторваны обои"));
+//                    _markGraphicsItem->setPos(729.75,595.5);
+//                    _markGraphicsItem->setToolTip(QString::fromUtf8("Оторваны обои"));
+//                    scene()->addItem(_markGraphicsItem);
+//                    connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+//                    _itemsOnFloor.insert(room->getId(), _markGraphicsItem);
+//                }
+//                else
+                {
+                    AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(room->getCoords());
+                    areaGraphicsItem->setAcceptHoverEvents(true);
+                    roomInitData.id = room->getId();
+                    areaGraphicsItem->init(roomInitData);
+                    scene()->addItem(areaGraphicsItem);
+                    connect(areaGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                    _itemsOnFloor.insert(room->getId(), areaGraphicsItem);
+                }
             }
         }
     }
 
-    /*
-    if(floorPtr->getId() == 29)
-    {
-        {
-            MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(QPixmap(":/img/mark.png"));
-            _markGraphicsItem->setPos(897,511.75);
-            _markGraphicsItem->setToolTip(QString::fromUtf8("Течёт унитаз"));
-            scene()->addItem(_markGraphicsItem);
-            _itemsOnFloor.insert(10000, _markGraphicsItem);
-        }
-        {
-            MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(QPixmap(":/img/mark.png"));
-            _markGraphicsItem->setPos(729.75,595.5);
-            _markGraphicsItem->setToolTip(QString::fromUtf8("Оторваны обои"));
-            scene()->addItem(_markGraphicsItem);
-            _itemsOnFloor.insert(10001, _markGraphicsItem);
-        }
-    }
-    */
 
     /*
     reinit();
@@ -186,6 +199,16 @@ void ViraEditorView::setFloor(qulonglong floorId)
     */
 }
 
+void ViraEditorView::slotSelectItem(qulonglong id, bool centerOnArea)
+{
+    if(_editObjectGeometry == 0)
+    {
+        regionbiz::RegionBizManager::instance()->selectArea(id);
+        if(centerOnArea)
+            regionbiz::RegionBizManager::instance()->centerOnArea(id);
+    }
+}
+
 void ViraEditorView::selectionItemsChanged(uint64_t prev_id, uint64_t curr_id)
 {
     if(prev_id > 0)
@@ -193,9 +216,9 @@ void ViraEditorView::selectionItemsChanged(uint64_t prev_id, uint64_t curr_id)
         auto it = _itemsOnFloor.find(prev_id);
         if(it != _itemsOnFloor.end())
         {
-            AreaGraphicsItem * areaGraphicsItem = dynamic_cast<AreaGraphicsItem*>(it.value());
-            if(areaGraphicsItem)
-                areaGraphicsItem->setItemselected(false);
+            ViraGraphicsItem * viraGraphicsItem = dynamic_cast<ViraGraphicsItem*>(it.value());
+            if(viraGraphicsItem)
+                viraGraphicsItem->setItemselected(false);
         }
     }
     if(curr_id > 0)
@@ -203,11 +226,38 @@ void ViraEditorView::selectionItemsChanged(uint64_t prev_id, uint64_t curr_id)
         auto it = _itemsOnFloor.find(curr_id);
         if(it != _itemsOnFloor.end())
         {
-            AreaGraphicsItem * areaGraphicsItem = dynamic_cast<AreaGraphicsItem*>(it.value());
-            if(areaGraphicsItem)
-                areaGraphicsItem->setItemselected(true);
+            ViraGraphicsItem * viraGraphicsItem = dynamic_cast<ViraGraphicsItem*>(it.value());
+            if(viraGraphicsItem)
+                viraGraphicsItem->setItemselected(true);
         }
     }
+}
+
+void ViraEditorView::editObjectGeometry(quint64 id)
+{
+    if(id > 0)
+    {
+        auto it = _itemsOnFloor.find(id);
+        if(it != _itemsOnFloor.end())
+        {
+            AreaGraphicsItem * areaGraphicsItem = dynamic_cast<AreaGraphicsItem*>(it.value());
+            if(areaGraphicsItem)
+                areaGraphicsItem->hide();
+        }
+    }
+    else
+    {
+        auto it = _itemsOnFloor.find(_editObjectGeometry);
+        if(it != _itemsOnFloor.end())
+        {
+            AreaGraphicsItem * areaGraphicsItem = dynamic_cast<AreaGraphicsItem*>(it.value());
+            if(areaGraphicsItem)
+                areaGraphicsItem->show();
+        }
+
+        clearTempItems();
+    }
+    _editObjectGeometry = id;
 }
 
 //void ViraEditorView::syncItems()
@@ -243,10 +293,13 @@ void ViraEditorView::wheelEvent(QWheelEvent *e)
 
 void ViraEditorView::mouseMoveEvent(QMouseEvent* e)
 {
-    if(_currentLine)
+    if(_lines.size() >= 2)
     {
         QPointF scenePos = mapToScene(e->pos());
-        _currentLine->setLine(QLineF(_currentLine->line().p1(), scenePos));
+        _lines.first()->setLine(QLineF(scenePos, _lines.first()->line().p2()));
+        _lines.last()->setLine(QLineF(_lines.last()->line().p1(), scenePos));
+
+        // _currentLine->setLine(QLineF(_currentLine->line().p1(), scenePos));
     }
     QGraphicsView::mouseMoveEvent(e);
 }
@@ -255,21 +308,48 @@ void ViraEditorView::mousePressEvent(QMouseEvent *e)
 {
     if(e->button() & Qt::LeftButton)
     {
-        if(e->modifiers() & Qt::ControlModifier)
+        if(_editObjectGeometry > 0)
         {
             QPointF scenePos = mapToScene(e->pos());
-            if(_currentLine)
-            {
-                _lines.append(_currentLine);
-            }
-            _currentLine = new QGraphicsLineItem();
-            scene()->addItem(_currentLine);
-            _currentLine->setZValue(1000);
             QPen pen(Qt::red);
             pen.setCosmetic(true);
             pen.setWidth(1);
-            _currentLine->setPen(pen);
-            _currentLine->setLine(QLineF(scenePos, scenePos));
+            if(_lines.isEmpty())
+            {
+                QGraphicsLineItem * line = new QGraphicsLineItem();
+                scene()->addItem(line);
+                line->setZValue(1000);
+                line->setPen(pen);
+                line->setLine(QLineF(scenePos, scenePos));
+                _lines.append(line);
+
+                line = new QGraphicsLineItem();
+                scene()->addItem(line);
+                line->setZValue(1000);
+                line->setPen(pen);
+                line->setLine(QLineF(scenePos, scenePos));
+                _lines.append(line);
+            }
+            else
+            {
+                QGraphicsLineItem * line = new QGraphicsLineItem();
+                scene()->addItem(line);
+                line->setZValue(1000);
+                line->setPen(pen);
+                line->setLine(QLineF(scenePos, scenePos));
+                _lines.append(line);
+            }
+
+//            if(_currentLine)
+//            {
+//                _lines.append(_currentLine);
+//            }
+//            _currentLine = new QGraphicsLineItem();
+//            scene()->addItem(_currentLine);
+//            _currentLine->setZValue(1000);
+
+//            _currentLine->setPen(pen);
+//            _currentLine->setLine(QLineF(scenePos, scenePos));
         }
         else
         {
@@ -296,38 +376,142 @@ void ViraEditorView::mouseReleaseEvent(QMouseEvent *e)
     setCursor(QCursor(Qt::ArrowCursor));
 }
 
-void ViraEditorView::keyPressEvent(QKeyEvent *event)
+void ViraEditorView::mouseDoubleClickEvent(QMouseEvent *e)
 {
-    if(event->key() == Qt::Key_Escape)
-    {
-        delete _currentLine;
-        _currentLine = 0;
-        foreach(QGraphicsLineItem * item, _lines)
-            delete item;
-        _lines.clear();
-    }
-    else if(event->key() == Qt::Key_Space)
+    if(_lines.size() > 2)
     {
         QPolygonF pol;
-        foreach(QGraphicsLineItem * item, _lines)
+        for(int i(0); i < _lines.size()-1; ++i)
         {
+            QGraphicsLineItem * item = _lines.at(i);
             QLineF line = item->line();
             pol.append(line.p1());
         }
-        pol.append(_lines.last()->line().p2());
-
         qDebug() << "---------- parent ID:" << _currFloor_id;
         foreach(QPointF p, pol)
             qDebug() << p;
         qDebug() << "----------";
 
-        auto mngr = RegionBizManager::instance();
-        auto room = mngr->addArea< Room >( _currFloor_id );
-        room->setCoords(pol);
-        BaseArea::convert< Room >( room )->setName(QInputDialog::getText(0, QString::fromUtf8("!!!"), QString::fromUtf8("set room name")));
-        room->commit();
+        QPointF center = pol.boundingRect().center();
+        auto room_ptr = RegionBizManager::instance()->getBaseArea( _editObjectGeometry );
+        auto room = BaseArea::convert<Room>(room_ptr);
+        room->addMark( center );
+        room->commitMarks();
 
-        setFloor(_currFloor_id);
+        clearTempItems();
+        return;
+
+
+        if(QMessageBox::Ok == QMessageBox::question(this, QString::fromUtf8("Attention"), QString::fromUtf8("Do you save room geometry ?"), QMessageBox::Ok, QMessageBox::Cancel))
+        {
+//            auto it = _itemsOnFloor.find(_editObjectGeometry);
+//            if(it != _itemsOnFloor.end())
+//            {
+//                AreaGraphicsItem * areaGraphicsItem = dynamic_cast<AreaGraphicsItem*>(it.value());
+//                if(areaGraphicsItem)
+//                    areaGraphicsItem->show();
+//            }
+//            else
+//            {
+            BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(_editObjectGeometry, BaseArea::AT_ROOM);
+            RoomPtr room = BaseArea::convert< Room >(ptr);
+            if(room)
+            {
+                room->setCoords(pol);
+                room->commit();
+
+                AreaInitData roomInitData;
+                roomInitData.zValue = 10000;
+                roomInitData.isSelectableFromMap = true;
+                roomInitData.penNormal.setColor(Qt::green);
+                roomInitData.penNormal.setCosmetic(true);
+                roomInitData.penNormal.setWidth(2);
+                roomInitData.penHoverl = roomInitData.penNormal;
+                roomInitData.penHoverl.setWidth(3);
+                QColor roomBrushColor(Qt::green);
+                roomBrushColor.setAlpha(20);
+                roomInitData.brushNormal.setColor(roomBrushColor);
+                roomInitData.brushNormal.setStyle(Qt::SolidPattern);
+                roomBrushColor.setAlpha(70);
+                roomInitData.brushHoverl = roomInitData.brushNormal;
+                roomInitData.brushHoverl.setColor(roomBrushColor);
+
+                AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(pol);
+                areaGraphicsItem->setAcceptHoverEvents(true);
+                roomInitData.id = room->getId();
+                areaGraphicsItem->init(roomInitData);
+                scene()->addItem(areaGraphicsItem);
+                connect(areaGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                _itemsOnFloor.insert(room->getId(), areaGraphicsItem);
+
+                areaGraphicsItem->setItemselected(true);
+
+            }
+
+
+//            }
+
+
+        }
+        clearTempItems();
+    }
+
+    QGraphicsView::mouseReleaseEvent(e);
+}
+
+void ViraEditorView::clearTempItems()
+{
+    foreach(QGraphicsLineItem * item, _lines)
+        delete item;
+    _lines.clear();
+}
+
+void ViraEditorView::keyPressEvent(QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_Escape)
+    {
+        clearTempItems();
+    }
+    else if(event->key() == Qt::Key_Space)
+    {
+//        QPolygonF pol;
+//        foreach(QGraphicsLineItem * item, _lines)
+//        {
+//            QLineF line = item->line();
+//            pol.append(line.p1());
+//        }
+//        pol.append(_lines.last()->line().p2());
+
+//        qDebug() << "---------- parent ID:" << _currFloor_id;
+//        foreach(QPointF p, pol)
+//            qDebug() << p;
+//        qDebug() << "----------";
+
+
+//        if(QMessageBox::Ok == QMessageBox::question(this, QString::fromUtf8("Attention"), QString::fromUtf8("Do you save room geometry ?"), QMessageBox::Ok, QMessageBox::Cancel))
+//        {
+//            auto it = _itemsOnFloor.find(_editObjectGeometry);
+//            if(it != _itemsOnFloor.end())
+//            {
+//                AreaGraphicsItem * areaGraphicsItem = dynamic_cast<AreaGraphicsItem*>(it.value());
+//                if(areaGraphicsItem)
+//                    areaGraphicsItem->show();
+//            }
+//            else
+//            {
+//                auto room = RegionBizManager::instance()->addArea< Room >( _currFloor_id );
+//                room->setCoords(pol);
+//                room->commit();
+//            }
+
+////            auto mngr = RegionBizManager::instance();
+////            auto room = mngr->addArea< Room >( _currFloor_id );
+////            room->setCoords(pol);
+////            // BaseArea::convert< Room >( room )->setName(QInputDialog::getText(0, QString::fromUtf8("!!!"), QString::fromUtf8("set room name")));
+////            room->commit();
+//        }
+
+        // setFloor(_currFloor_id);
     }
 
 //    else if(event->key() == Qt::Key_Backspace)

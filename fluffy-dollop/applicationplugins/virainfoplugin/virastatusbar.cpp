@@ -7,7 +7,8 @@
 #include <libembeddedwidgets/embeddedapp.h>
 #include <ctrcore/tempinputdata/tempdatatypies.h>
 #include <ctrcore/tempinputdata/tempdatacontroller.h>
-
+#include <ctrcore/bus/common_message_notifier.h>
+#include <ctrcore/bus/bustags.h>
 #include "virainfowidget.h"
 
 using namespace regionbiz;
@@ -19,33 +20,34 @@ ViraStatusBar::ViraStatusBar( quint64 parentWidgetId, QWidget *parent ):
 {
     ui->setupUi(this);
     connect(ui->moreInfo, SIGNAL(clicked(bool)), this, SLOT(slotShowMoreInfo(bool)));
+    connect(ui->editObject, SIGNAL(clicked(bool)), this, SLOT(slotEditObject(bool)));
     reset();
 
     auto mngr = RegionBizManager::instance();
     mngr->subscribeOnSelect(this, SLOT(slotObjectSelectionChanged(uint64_t,uint64_t)));
 
-    auto moreInfoWidget = new ViraInfoWidget();
-    _iface = new EmbIFaceNotifier( moreInfoWidget );
-    QString tag = QString("ViraStatusBar_MoreInfoWidget");
-    quint64 widgetId = ewApp()->restoreWindow(tag, _iface);
-    if(0 == widgetId)
-    {
-        ew::EmbeddedWindowStruct struc;
-        ew::EmbeddedHeaderStruct headStr;
-        headStr.hasCloseButton = true;
-        headStr.hasMinMaxButton = false;
-        headStr.hasCollapseButton = false;
-        //headStr.headerPixmap = ":/img/061_icons_32_tools_pdf.png";
-        headStr.windowTitle = QString::fromUtf8("Информация");
-        struc.header = headStr;
-        struc.iface = _iface;
-        struc.widgetTag = tag;
-        struc.minSize = QSize(300,300);
-        struc.topOnHint = true;
-        ewApp()->createWindow(struc); //, parentWidgetId);
-    }
-    ewApp()->setVisible(_iface->id(), false);
-    connect(_iface, SIGNAL(signalClosed()), this, SLOT(slotMoreInfoWidgetClosed()));
+//    auto moreInfoWidget = new ViraInfoWidget();
+//    _iface = new EmbIFaceNotifier( moreInfoWidget );
+//    QString tag = QString("ViraStatusBar_MoreInfoWidget");
+//    quint64 widgetId = ewApp()->restoreWindow(tag, _iface);
+//    if(0 == widgetId)
+//    {
+//        ew::EmbeddedWindowStruct struc;
+//        ew::EmbeddedHeaderStruct headStr;
+//        headStr.hasCloseButton = true;
+//        headStr.hasMinMaxButton = false;
+//        headStr.hasCollapseButton = false;
+//        //headStr.headerPixmap = ":/img/061_icons_32_tools_pdf.png";
+//        headStr.windowTitle = QString::fromUtf8("Информация");
+//        struc.header = headStr;
+//        struc.iface = _iface;
+//        struc.widgetTag = tag;
+//        struc.minSize = QSize(300,300);
+//        struc.topOnHint = true;
+//        ewApp()->createWindow(struc); //, parentWidgetId);
+//    }
+//    ewApp()->setVisible(_iface->id(), false);
+//    connect(_iface, SIGNAL(signalClosed()), this, SLOT(slotMoreInfoWidgetClosed()));
 }
 
 ViraStatusBar::~ViraStatusBar()
@@ -85,9 +87,20 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
         showAreas( data, true );
         showArendators( data, true );
         showTasks( data );
-
+        ui->editObject->show();
         break;
     }
+    }
+}
+
+void ViraStatusBar::slotEditObject(bool on_off)
+{
+    quint64 id(on_off ? RegionBizManager::instance()->getSelectedArea() : 0);
+    CommonMessageNotifier::send( (uint)visualize_system::BusTags::EditObjectGeometry, QVariant(id), QString("visualize_system"));
+    if(on_off && ui->moreInfo->isChecked())
+    {
+        ui->moreInfo->setChecked(false);
+        slotShowMoreInfo(false);
     }
 }
 
@@ -102,6 +115,7 @@ void ViraStatusBar::reset()
         delete item;
     }
     ui->name->clear();
+    ui->editObject->hide();
 }
 
 void ViraStatusBar::showTasks( TestData data )
@@ -121,7 +135,7 @@ void ViraStatusBar::showArendators( TestData data, bool one )
     if( !one )
     {
         QLabel* arend_good = getArendator( AT_GOOD );
-        QLabel* arend_good_count = new QLabel( QString::number(  data.arendators_good ));
+        QLabel* arend_good_count = new QLabel( QString::number( data.arendators_good ));
         QLabel* arend_bad = getArendator( AT_BAD );
         QLabel* arend_bad_count = new QLabel( QString::number(  data.arendators_bad ));
 
@@ -360,8 +374,8 @@ void ViraStatusBar::slotShowMoreInfo(bool on_off)
 {
     if( !_iface )
     {
-        QLabel * testMoreInfoWidget = new QLabel("Hellow! I am more info widget :)");
-        _iface = new EmbIFaceNotifier(testMoreInfoWidget);
+        auto moreInfoWidget = new ViraInfoWidget();
+        _iface = new EmbIFaceNotifier( moreInfoWidget );
         QString tag = QString("ViraStatusBar_MoreInfoWidget");
         quint64 widgetId = ewApp()->restoreWindow(tag, _iface);
         if(0 == widgetId)
@@ -372,16 +386,39 @@ void ViraStatusBar::slotShowMoreInfo(bool on_off)
             headStr.hasMinMaxButton = false;
             headStr.hasCollapseButton = false;
             //headStr.headerPixmap = ":/img/061_icons_32_tools_pdf.png";
-            headStr.windowTitle = QString::fromUtf8("More info");
+            headStr.windowTitle = QString::fromUtf8("Информация");
             struc.header = headStr;
             struc.iface = _iface;
             struc.widgetTag = tag;
             struc.minSize = QSize(300,300);
             struc.topOnHint = true;
-            ewApp()->createWindow(struc, _parentWidgetId);
+            ewApp()->createWindow(struc); //, parentWidgetId);
         }
         ewApp()->setVisible(_iface->id(), false);
         connect(_iface, SIGNAL(signalClosed()), this, SLOT(slotMoreInfoWidgetClosed()));
+
+//        QLabel * testMoreInfoWidget = new QLabel("Hellow! I am more info widget :)");
+//        _iface = new EmbIFaceNotifier(testMoreInfoWidget);
+//        QString tag = QString("ViraStatusBar_MoreInfoWidget");
+//        quint64 widgetId = ewApp()->restoreWindow(tag, _iface);
+//        if(0 == widgetId)
+//        {
+//            ew::EmbeddedWindowStruct struc;
+//            ew::EmbeddedHeaderStruct headStr;
+//            headStr.hasCloseButton = true;
+//            headStr.hasMinMaxButton = false;
+//            headStr.hasCollapseButton = false;
+//            //headStr.headerPixmap = ":/img/061_icons_32_tools_pdf.png";
+//            headStr.windowTitle = QString::fromUtf8("More info");
+//            struc.header = headStr;
+//            struc.iface = _iface;
+//            struc.widgetTag = tag;
+//            struc.minSize = QSize(300,300);
+//            struc.topOnHint = true;
+//            ewApp()->createWindow(struc, _parentWidgetId);
+//        }
+//        ewApp()->setVisible(_iface->id(), false);
+//        connect(_iface, SIGNAL(signalClosed()), this, SLOT(slotMoreInfoWidgetClosed()));
     }
 
     ewApp()->setVisible(_iface->id(), on_off);

@@ -5,6 +5,7 @@
 #include <QGraphicsPolygonItem>
 #include <QPen>
 #include <QBrush>
+#include "viragraphicsitem.h"
 
 struct AreaInitData
 {
@@ -19,18 +20,14 @@ struct AreaInitData
     bool isSelectableFromMap = false;
 };
 
-class AreaGraphicsItem : public QObject, public QGraphicsPolygonItem
+class AreaGraphicsItem : public ViraGraphicsItem, public QGraphicsPolygonItem
 {
     Q_OBJECT
 public:
     AreaGraphicsItem(const QPolygonF& polygon);
     void init(const AreaInitData& areaInitData);
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR);
-    bool itemIsSelected();
     void setItemselected(bool on_off);
-
-signals:
-    void itemIsHover(qulonglong id, bool on_off);
 
 protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
@@ -39,7 +36,6 @@ protected:
     virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
 
     AreaInitData _areaInitData;
-    bool _isSelected = false;
 };
 
 #endif

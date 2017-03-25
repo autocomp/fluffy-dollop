@@ -34,6 +34,10 @@ void ViraGraphicsPlugin::init(uint visualizerId, quint64 visualizerWindowId)
     visualize_system::ViewInterface * viewInterface = visualize_system::VisualizerManager::instance()->getViewInterface(visualizerId);
     _stackedWidget = dynamic_cast<QStackedWidget*>(viewInterface->stackedWidget());
 
+    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::EditObjectGeometry, this, SLOT(slotEditObjectGeometry(QVariant)),
+                                      qMetaTypeId< quint64 >(),
+                                      QString("visualize_system") );
+
     QTimer::singleShot(1000, this, SLOT(launchWorkState()));
 }
 void ViraGraphicsPlugin::launchWorkState()
@@ -68,6 +72,13 @@ void ViraGraphicsPlugin::switchOnMap()
 void ViraGraphicsPlugin::switchOnEditor()
 {
     _stackedWidget->setCurrentIndex(_stackedWidget->property("pdfEditorFormIndex").toInt());
+}
+
+void ViraGraphicsPlugin::slotEditObjectGeometry(QVariant var)
+{
+    quint64 id = var.toUInt();
+    _workState->editObjectGeometry(id);
+    _pdfEditorForm->editObjectGeometry(id);
 }
 
 QList<InitPluginData> ViraGraphicsPlugin::getInitPluginData()

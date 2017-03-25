@@ -16,7 +16,6 @@ LIBS += -L$${INSTALL_PATH_LIB} \
         -lctrcore \
         -lctrvisual \
         -lctrwidgets \
-        -lgdal \
         -lregionbiz \
 #        -lpoppler-qt5 \
 
@@ -33,7 +32,8 @@ HEADERS += \
     workstate.h \
     areagraphicsitem.h \
     locationitem.h \
-    markgraphicsitem.h
+    markgraphicsitem.h \
+    viragraphicsitem.h
 
 SOURCES += \
     viragraphicsplugin.cpp \
