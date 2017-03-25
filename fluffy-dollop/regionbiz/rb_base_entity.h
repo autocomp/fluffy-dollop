@@ -17,9 +17,17 @@ class BaseEntity
 {
     friend class RegionBizManager;
 public:
+    enum EntityType
+    {
+        ET_AREA,
+        ET_MARK,
+        ET_RELATION
+    };
+
     // main
     BaseEntity( uint64_t id );
     uint64_t getId();
+    virtual EntityType getEntityType() = 0;
 
     // some technick functions
     static bool isEntityExist( uint64_t id );
@@ -58,17 +66,14 @@ protected:
     static bool deleteEntity( BaseEntityPtr ent );
     static bool deleteEntity( uint64_t id );
 
+    // get smart pointer on this
+    BaseEntityPtr getItself();
+
     uint64_t _id = 0;
 
 private:
     static std::map< uint64_t, BaseEntityPtr >& getEntitys();
     static uint64_t _max_id;
-
-    // get smart pointer on this
-    BaseEntityPtr getItself();
-
-    // for RTTI
-    virtual void rttiFunction() const = 0;
 };
 
 //------------------------------------------------------------

@@ -12,6 +12,11 @@ BaseArea::BaseArea(uint64_t id):
     BaseEntity( id )
 {}
 
+BaseEntity::EntityType BaseArea::getEntityType()
+{
+    return EntityType::ET_AREA;
+}
+
 QPolygonF BaseArea::getCoords()
 {
     return _coords;

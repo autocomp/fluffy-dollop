@@ -8,6 +8,11 @@ Mark::Mark(uint64_t id):
     BaseEntity( id )
 {}
 
+BaseEntity::EntityType Mark::getEntityType()
+{
+    return EntityType::ET_MARK;
+}
+
 QPointF Mark::getCenter()
 {
     return _center;

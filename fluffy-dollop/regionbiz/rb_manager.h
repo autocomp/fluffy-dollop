@@ -17,6 +17,8 @@ typedef std::shared_ptr< RegionBizManager > RegionBizManagerPtr;
 
 class RegionBizManager
 {
+    friend class BaseTranslator;
+
 public:
     virtual ~RegionBizManager(){}
 
@@ -88,6 +90,9 @@ public:
     bool deleteMark( uint64_t id );
     bool deleteMark( MarkPtr mark );
 
+    // tranlators
+    BaseTranslatorPtr getTranslatorByName( QString name );
+
     // selection managment
     uint64_t getSelectedArea();
     void selectArea( uint64_t id );
@@ -104,6 +109,10 @@ private:
 
     static void onExit();
     QVariantMap loadJsonConfig( QString &file_path );
+    bool processPlugins(QVariantMap settings);
+    bool processTranslators( QVariantMap settings );
+    bool loadPlugins( QString plugins_path, bool load_all,
+                      QStringList plugins = QStringList() );
     void loadDataByTranslator();
     void clearCurrentData(bool clear_entitys = true );
     void appendArea( BaseAreaPtr area );

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <algorithm>
 #include <functional>
+#include <dlfcn.h>
 #include <QFile>
 #include <QJsonDocument>
 #include <QVariant>
@@ -25,44 +26,21 @@ RegionBizManagerPtr RegionBizManager::instance()
 bool RegionBizManager::init(QString &config_path)
 {
     QVariantMap settings = loadJsonConfig( config_path );
-    if( settings.contains( "translator" ))
-    {
-        QVariantMap translator_settings = settings["translator"].toMap();
 
-        std::string translator_type = translator_settings["type"].toString().toStdString();
-        _translator = BaseTranslatorFabric::getTranslatorByType( translator_type );
-        if( _translator )
-        {
-            _translator->init( translator_settings );
+    // plugins
+    bool load_plugins = processPlugins( settings );
 
-            std::string error_text = "";
-            if( _translator->checkTranslator( error_text ))
-            {
-                loadDataByTranslator();
-            }
-            else
-            {
-                std::cerr << "Error with Translator:\n" << error_text << std::endl;
-                _translator = nullptr;
+    // translators
+    bool load_translators = processTranslators( settings );
 
-                return false;
-            }
-        }
-        else
-        {
-            std::cerr << "Region Biz Translator don't created" << std::endl;
-            return false;
-        }
-    }
-
-    return true;
+    return load_plugins && load_translators;
 }
 
 BaseAreaPtr RegionBizManager::getBaseArea( uint64_t id )
 {
     auto entity = BaseEntity::getEntity( id );
-    // TODO thin about static and dynamic cast
-    BaseAreaPtr loc = std::static_pointer_cast< BaseArea >( entity );
+    // TODO think about static and dynamic cast
+    BaseAreaPtr loc = BaseEntity::convert< BaseArea >( entity );
     return loc;
 }
 
@@ -145,7 +123,7 @@ BaseAreaPtrs RegionBizManager::getAreaChildsByParent( uint64_t id )
         if( !ent_ch )
             continue;
 
-        BaseAreaPtr area_ch = std::static_pointer_cast< BaseArea >( ent_ch );
+        BaseAreaPtr area_ch = BaseEntity::convert< BaseArea >( ent_ch );
         if( !area_ch )
             continue;
 
@@ -210,14 +188,6 @@ BaseAreaPtr RegionBizManager::addArea( BaseArea::AreaType type,
 bool RegionBizManager::deleteArea(BaseAreaPtr area)
 {
     bool del = _translator->deleteArea( area );
-    if( del )
-    {
-        // TODO delete ralations
-        _metadata.erase( area->getId() );
-        BaseEntity::deleteEntity( area );
-        removeArea( area );
-    }
-
     return del;
 }
 
@@ -229,10 +199,6 @@ bool RegionBizManager::deleteArea(uint64_t id)
 
 bool RegionBizManager::commitArea( BaseAreaPtr area )
 {
-    // if we try to commit area outside system
-    if( !getBaseArea( area->getId() ))
-        return false;
-
     return _translator->commitArea( area );
 }
 
@@ -350,8 +316,7 @@ bool RegionBizManager::addMetadata( BaseMetadataPtr data )
 MarkPtr RegionBizManager::getMark( uint64_t id )
 {
     auto entity = BaseEntity::getEntity( id );
-    // TODO thin about static and dynamic cast
-    MarkPtr mark = std::static_pointer_cast< Mark >( entity );
+    MarkPtr mark = BaseEntity::convert< Mark >( entity );
     return mark;
 }
 
@@ -423,13 +388,14 @@ bool RegionBizManager::deleteMark(uint64_t id)
 bool RegionBizManager::deleteMark(MarkPtr mark)
 {
     bool del = _translator->deleteMark( mark );
-    if( del )
-    {
-        _metadata.erase( mark->getId() );
-        BaseEntity::deleteEntity( mark );
-        removeMark( mark );
-    }
     return del;
+}
+
+BaseTranslatorPtr RegionBizManager::getTranslatorByName(QString name)
+{
+    BaseTranslatorPtr&& ptr =
+            BaseTranslatorFabric::getTranslatorByName( name );
+    return ptr;
 }
 
 uint64_t RegionBizManager::getSelectedArea()
@@ -477,7 +443,6 @@ QVariantMap RegionBizManager::loadJsonConfig( QString& file_path )
     if( file_path.startsWith ( "~/" ))
         file_path.replace (0, 1, QDir::homePath());
 
-
     // open
     QString file_in;
     QFile file( file_path );
@@ -496,11 +461,152 @@ QVariantMap RegionBizManager::loadJsonConfig( QString& file_path )
     QJsonParseError err;
     QJsonDocument json_doc = QJsonDocument::fromJson( file_in.toUtf8(), &err );
     if( err.error != QJsonParseError::NoError )
-        std::cerr << err.errorString().toStdString();
+        std::cerr << err.errorString().toUtf8().data();
 
     // return result
     QVariantMap settings = json_doc.toVariant().toMap();
     return settings;
+}
+
+bool RegionBizManager::processPlugins( QVariantMap settings )
+{
+    if( settings.contains( "plugins" ))
+    {
+        QVariantMap plugins_settings = settings["plugins"].toMap();
+        if( plugins_settings.contains( "plugins_path" ))
+        {
+            QString path = plugins_settings[ "plugins_path" ].toString();
+            bool load_list = true;
+
+            if( plugins_settings.contains( "plugins_load" ))
+            {
+                QString plugins_load = plugins_settings[ "plugins_load" ].toString();
+                if( "all" == plugins_load )
+                {
+                    load_list = false;
+
+                    bool load_all( true );
+                    return loadPlugins( path, load_all );
+                }
+                else if( "no" == plugins_load )
+                {
+                    load_list = false;
+                }
+                else if( "list" != plugins_load )
+                {
+                    std::cerr << "Incorrect plugins_load parameter: "
+                              << plugins_load.toUtf8().data() << std::endl;
+                    return false;
+                }
+            }
+
+            if( load_list )
+            {
+                if( plugins_settings.contains( "plugins_list" ))
+                {
+                    QStringList list = plugins_settings[ "plugins_list" ].toStringList();
+                    bool load_all( true );
+                    return loadPlugins( path, !load_all, list );
+                }
+            }
+        }
+    }
+    else
+        std::cout << "No plugins" << std::endl;
+
+    return true;
+}
+
+bool RegionBizManager::processTranslators(QVariantMap settings)
+{
+    bool no_error = true;
+
+    if( settings.contains( "translators" ))
+    {
+        QVariantList translator_settings_list = settings["translators"].toList();
+        for( QVariant translator_settings_var: translator_settings_list )
+        {
+            QVariantMap translator_settings = translator_settings_var.toMap();
+
+            QString translator_name = translator_settings["name"].toString();
+            BaseTranslatorPtr translator = getTranslatorByName( translator_name );
+            if( translator )
+            {
+                QVariantMap translator_params;
+                if( translator_settings.contains( "params" ))
+                    translator_params = translator_settings[ "params" ].toMap();
+
+                bool init_correct = translator->init( translator_params );
+                if( !init_correct )
+                    no_error = false;
+            }
+            else
+            {
+                std::cerr << "Region Biz Translator \"" << translator_name.toUtf8().data()
+                          << "\" don't created" << std::endl;
+                no_error = false;
+            }
+        }
+    }
+
+    QString error_text = "";
+    if( settings.contains( "main_translator" ))
+    {
+        QString name = settings[ "main_translator" ].toString();
+        _translator = getTranslatorByName( name );
+        if( _translator->checkTranslator( error_text ))
+        {
+            loadDataByTranslator();
+        }
+        else
+        {
+            std::cerr << "Error with Translator:\n" << error_text.toUtf8().data() << std::endl;
+            _translator = nullptr;
+
+            no_error = false;
+        }
+    }
+
+    return no_error;
+}
+
+bool RegionBizManager::loadPlugins( QString plugins_path, bool load_all,
+                                    QStringList plugins )
+{
+    bool no_error = true;
+
+    QDir plugin_dir( plugins_path );
+    QFileInfoList file_infos;
+    if( load_all)
+        file_infos = plugin_dir.entryInfoList( QDir::Files );
+    else
+    {
+        for( QString plugin: plugins )
+        {
+            QFileInfo file_info( plugins_path + QDir::separator() + plugin );
+            file_infos.append( file_info );
+        }
+    }
+
+    for( QFileInfo file_info: file_infos )
+    {
+        std::cout << "Start loading \"" << file_info.fileName().toUtf8().data()
+                  << "\"" << std::endl;
+
+        auto link = dlopen( file_info.filePath().toUtf8().data(), RTLD_LAZY );
+        if( link )
+            std::cout << "Plugin \"" << file_info.fileName().toUtf8().data()
+                      << "\" loaded" << std::endl;
+        else
+        {
+            std::cerr << "Error while loading \"" << file_info.fileName().toUtf8().data()
+                      << "\"\n" << dlerror() << std::endl;
+
+            no_error = false;
+        }
+    }
+
+    return no_error;
 }
 
 void RegionBizManager::loadDataByTranslator()
@@ -511,91 +617,34 @@ void RegionBizManager::loadDataByTranslator()
     clearCurrentData();
 
     // regions
-    auto regions_vec = _translator->loadRegions();
-    for( RegionPtr reg: regions_vec )
-    {
-        // TODO check id
-        _regions.push_back( reg );
-    }
-
+    _translator->loadRegions();
     // locations
-    auto locations_vec = _translator->loadLocations();
-    for( LocationPtr loc: locations_vec )
-    {
-        // TODO check id and parent id
-        _locations.push_back( loc );
-    }
-
+    _translator->loadLocations();
     // facilitys
-    auto facilitys_vec = _translator->loadFacilitys();
-    for( FacilityPtr fac: facilitys_vec )
-    {
-        // TODO check id and parent id
-        _facilitys.push_back( fac );
-    }
-
+    _translator->loadFacilitys();
     // floors
-    auto floors_vec = _translator->loadFloors();
-    for( FloorPtr flo: floors_vec )
-    {
-        // TODO check id and parent id
-        _floors.push_back( flo );
-    }
-
+    _translator->loadFloors();
     // rooms groups
-    auto rooms_groups_vec = _translator->loadRoomsGroups();
-    for( RoomsGroupPtr rg: rooms_groups_vec )
-    {
-        // TODO check id and parent id
-        _rooms_groups.push_back( rg );
-    }
-
+    _translator->loadRoomsGroups();
     // rooms
-    auto rooms_vec = _translator->loadRooms();
-    for( RoomPtr room: rooms_vec )
-    {
-        // TODO check id and parent id
-        _rooms.push_back( room );
-    }
+    _translator->loadRooms();
 
-    //--------------------------------
+    // TODO load rents and propertys
+//    // propertys
+//    auto prop_vec = _translator->loadPropertys();
+//    for( PropertyPtr prop: prop_vec )
+//        _propertys.push_back( prop );
 
-    // propertys
-    auto prop_vec = _translator->loadPropertys();
-    for( PropertyPtr prop: prop_vec )
-    {
-        // TODO check area id
-        _propertys.push_back( prop );
-    }
-
-    // rents
-    auto rent_vec = _translator->loadRents();
-    for( RentPtr rent: rent_vec )
-    {
-        // TODO check area id
-        _rents.push_back( rent );
-    }
-
-    //---------------------------------
+//    // rents
+//    auto rent_vec = _translator->loadRents();
+//    for( RentPtr rent: rent_vec )
+//        _rents.push_back( rent );
 
     // metadate
-    auto metadata_vec = _translator->loadMetadata();
-    for( BaseMetadataPtr data: metadata_vec )
-    {
-        // TODO check id
+    _translator->loadMetadata();
 
-        // add by parent_id / name of metadata
-        _metadata[ data->getParentId() ][ data->getName() ] = data;
-    }
-
-    //-------------------------------------
-
-    auto marks_vec = _translator->loadMarks();
-    for( MarkPtr mark: marks_vec )
-    {
-        // TODO check parent id
-        _marks.push_back( mark );
-    }
+    // marks
+    _translator->loadMarks();
 }
 
 void RegionBizManager::clearCurrentData( bool clear_entitys )
@@ -607,6 +656,10 @@ void RegionBizManager::clearCurrentData( bool clear_entitys )
     _floors.clear();
     _rooms_groups.clear();
     _rooms.clear();
+
+    // relations
+    _rents.clear();
+    _propertys.clear();
 
     //data
     _metadata.clear();

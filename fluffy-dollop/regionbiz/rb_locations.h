@@ -37,6 +37,8 @@ public:
 
     BaseArea( uint64_t id );
     virtual ~BaseArea(){}
+    virtual AreaType getType() = 0;
+    EntityType getEntityType() override;
 
     // coords
     QPolygonF getCoords();
@@ -47,7 +49,6 @@ public:
     BaseAreaPtr getParent( AreaType parent_type );
     BaseAreaPtr getParent();
     BaseAreaPtrs getChilds();
-    virtual AreaType getType() = 0;
 
     bool commit();
 
@@ -80,9 +81,6 @@ protected:
 private:
     // private, because we need protect it
     void setParent( uint64_t id );
-
-    // for RTTI
-    void rttiFunction() const override {}
 };
 
 //----------------------------------------

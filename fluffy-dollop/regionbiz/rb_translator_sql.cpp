@@ -9,6 +9,10 @@
 
 using namespace regionbiz;
 
+// register translator
+REGISTER_TRANSLATOR(PsqlTranslator)
+REGISTER_TRANSLATOR(SqliteTranslator)
+
 void SqlTranslator::loadFunctions()
 {
     // locations
@@ -245,6 +249,7 @@ BaseMetadataPtrs SqlTranslator::loadMetadata()
             QString value_str = query.value( 3 ).toString();
 
             BaseMetadataPtr data = MetadataFabric::createMetadata( type, area_id );
+
             data->setValueByString( value_str );
             data->setName( name );
 
@@ -564,6 +569,11 @@ bool SqliteTranslator::initBySettings(QVariantMap settings)
     }
 }
 
+QString SqliteTranslator::getTranslatorName()
+{
+    return "sqlite";
+}
+
 QString SqliteTranslator::getBaseName()
 {
     return "REGION_BIZ_SQLITE";
@@ -593,6 +603,11 @@ bool PsqlTranslator::initBySettings(QVariantMap settings)
                   << db.lastError().text().toUtf8().data() << std::endl;
         return false;
     }
+}
+
+QString PsqlTranslator::getTranslatorName()
+{
+    return "psql";
 }
 
 QString PsqlTranslator::getBaseName()

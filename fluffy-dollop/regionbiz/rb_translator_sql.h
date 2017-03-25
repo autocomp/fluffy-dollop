@@ -10,10 +10,14 @@ class SqlTranslator: public BaseTranslator
 private:
     void loadFunctions() override;
     virtual bool initBySettings(QVariantMap settings) = 0;
+
+    // get name
+    virtual QString getTranslatorName() override = 0;
+
+    // base name (for work with other QDatabase)
     virtual QString getBaseName() = 0;
 
     // read locations
-    // TODO write template method
     std::vector< RegionPtr > loadRegions();
     std::vector< LocationPtr > loadLocations();
     std::vector< FacilityPtr > loadFacilitys();
@@ -56,7 +60,9 @@ private:
 
 class SqliteTranslator: public SqlTranslator
 {
+private:
     bool initBySettings( QVariantMap settings ) override;
+    QString getTranslatorName() override;
     QString getBaseName() override;
 };
 
@@ -64,7 +70,9 @@ class SqliteTranslator: public SqlTranslator
 
 class PsqlTranslator: public SqlTranslator
 {
+private:
     bool initBySettings( QVariantMap settings ) override;
+    QString getTranslatorName() override;
     QString getBaseName() override;
 };
 

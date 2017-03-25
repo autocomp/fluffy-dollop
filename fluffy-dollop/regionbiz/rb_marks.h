@@ -11,6 +11,7 @@ class Mark: public BaseEntity
 {
 public:
     Mark( uint64_t id );
+    EntityType getEntityType() override;
 
     // center
     QPointF getCenter();
@@ -26,9 +27,6 @@ public:
 private:
     QPointF _center;
     uint64_t _parent_id;
-
-    // for RTTI
-    void rttiFunction() const override {}
 };
 
 typedef std::shared_ptr< Mark > MarkPtr;

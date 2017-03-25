@@ -18,16 +18,22 @@ class BaseTranslator
 {
 public:
     bool init(QVariantMap settings);
-    bool checkTranslator( std::string& err );
+    // TODO think about different checkers
+    bool checkTranslator( QString& err );
     bool checkTranslator();
 
+    // get name
+    virtual QString getTranslatorName() = 0;
+
     // locations
-    std::vector< RegionPtr > loadRegions();
-    std::vector< LocationPtr > loadLocations();
-    std::vector< FacilityPtr > loadFacilitys();
-    std::vector< FloorPtr > loadFloors();
-    std::vector< RoomsGroupPtr > loadRoomsGroups();
-    std::vector< RoomPtr > loadRooms();
+    RegionPtrs loadRegions();
+    LocationPtrs loadLocations();
+    FacilityPtrs loadFacilitys();
+    FloorPtrs loadFloors();
+    RoomsGroupPtrs loadRoomsGroups();
+    RoomPtrs loadRooms();
+
+    // TODO check all inside functions
 
     // commit locations
     bool commitArea(BaseAreaPtr area);
@@ -35,9 +41,9 @@ public:
     // delete locations
     bool deleteArea(BaseAreaPtr area);
 
-    // relations
-    std::vector< PropertyPtr > loadPropertys();
-    std::vector< RentPtr > loadRents();
+//    // relations
+//    std::vector< PropertyPtr > loadPropertys();
+//    std::vector< RentPtr > loadRents();
 
     // metadata
     BaseMetadataPtrs loadMetadata();
@@ -49,7 +55,7 @@ public:
 
 protected:
     virtual void loadFunctions() = 0;
-    virtual bool initBySettings( QVariantMap settings ) = 0;
+    virtual bool initBySettings(QVariantMap /*settings*/ );
     void setParentForBaseLocation( BaseAreaPtr loc, uint64_t parent_id );
     void setAreaForBaseRalation( BaseBizRelationPtr relation, uint64_t id );
 
@@ -79,15 +85,47 @@ protected:
     std::function< bool( MarkPtr ) > _delete_mark;
     std::function< bool( MarkPtr ) > _commit_mark;
 
+private:
+    template< typename Return, typename Func >
+    Return loadAreas( Func function );
 };
 typedef std::shared_ptr< BaseTranslator > BaseTranslatorPtr;
+typedef std::vector< BaseTranslatorPtr > BaseTranslatorPtrs;
 
 //-----------------------------------------------------------------
 
 class BaseTranslatorFabric
 {
+    template< typename Translator >
+    friend class BaseTranslatorFabricRegister;
+
 public:
-    static BaseTranslatorPtr getTranslatorByType( std::string& type );
+    static BaseTranslatorPtr getTranslatorByName(QString &name );
+
+private:
+    static void addTranslator(BaseTranslatorPtr translator );
+    static BaseTranslatorPtrs& getTranslators();
+};
+
+//------------------------------------------------------------------
+
+/**
+ * This macro must using ones per Traslator class
+ * becase it's create global register object with class name.
+ * It's involve header dependencys
+ **/
+#define REGISTER_TRANSLATOR( trans ) \
+    BaseTranslatorFabricRegister< trans > base_register_ ## trans;
+
+template< typename Translator >
+class BaseTranslatorFabricRegister
+{
+public:
+    BaseTranslatorFabricRegister()
+    {
+        BaseTranslatorPtr ptr = BaseTranslatorPtr( new Translator() );
+        BaseTranslatorFabric::addTranslator( BaseTranslatorPtr( ptr ));
+    }
 };
 
 }
