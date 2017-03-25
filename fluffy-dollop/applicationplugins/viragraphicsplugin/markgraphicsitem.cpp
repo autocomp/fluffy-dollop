@@ -122,6 +122,16 @@ void MarkGraphicsItem::setItemselected(bool on_off)
     _isSelected = on_off;
 }
 
+void MarkGraphicsItem::centerOnItem()
+{
+    foreach(QGraphicsView * view, scene()->views())
+    {
+        QRectF viewportSceneRect(view->mapToScene(view->contentsRect().topLeft()), view->mapToScene(view->contentsRect().bottomRight()));
+        if(viewportSceneRect.contains(scenePos()) == false)
+            view->centerOn(this);
+    }
+}
+
 void MarkGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     emit signalSelectItem(_id, false);

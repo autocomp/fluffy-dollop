@@ -10,6 +10,8 @@
 #include <ctrcore/ctrcore/ctrconfig.h>
 #include <regionbiz/rb_manager.h>
 #include <regionbiz/rb_locations.h>
+#include <ctrcore/bus/common_message_notifier.h>
+#include <ctrcore/bus/bustags.h>
 #include "viragraphicsitem.h"
 
 using namespace regionbiz;
@@ -114,7 +116,7 @@ void ViraEditorView::setFloor(qulonglong floorId)
                 {
                     QPointF center = mark->getCenter();
 
-                    MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(room->getId(), QPixmap("/home/sergey/Загрузки/IMAGE0012.JPG"), QString::fromUtf8("Течёт унитаз"));
+                    MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(mark->getId(), QPixmap("/home/sergey/Загрузки/IMAGE0012.JPG"), QString::fromUtf8("Течёт унитаз"));
                     _markGraphicsItem->setPos(center);
                     if( mark->isMetadataPresent( "name" ))
                         _markGraphicsItem->setToolTip(mark->getMetadata( "name" )->getValueAsVariant().toString());
@@ -392,67 +394,54 @@ void ViraEditorView::mouseDoubleClickEvent(QMouseEvent *e)
             qDebug() << p;
         qDebug() << "----------";
 
-        QPointF center = pol.boundingRect().center();
-        auto room_ptr = RegionBizManager::instance()->getBaseArea( _editObjectGeometry );
-        auto room = BaseArea::convert<Room>(room_ptr);
-        room->addMark( center );
-        room->commitMarks();
 
-        clearTempItems();
-        return;
+//!       CREAT MARK
+//        QPointF center = pol.boundingRect().center();
+//        auto room_ptr = RegionBizManager::instance()->getBaseArea( _editObjectGeometry );
+//        auto room = BaseArea::convert<Room>(room_ptr);
+//        room->addMark( center );
+//        room->commitMarks();
 
+//        clearTempItems();
+//        return;
 
-        if(QMessageBox::Ok == QMessageBox::question(this, QString::fromUtf8("Attention"), QString::fromUtf8("Do you save room geometry ?"), QMessageBox::Ok, QMessageBox::Cancel))
+        BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(_editObjectGeometry, BaseArea::AT_ROOM);
+        RoomPtr room = BaseArea::convert< Room >(ptr);
+        if(room)
         {
-//            auto it = _itemsOnFloor.find(_editObjectGeometry);
-//            if(it != _itemsOnFloor.end())
-//            {
-//                AreaGraphicsItem * areaGraphicsItem = dynamic_cast<AreaGraphicsItem*>(it.value());
-//                if(areaGraphicsItem)
-//                    areaGraphicsItem->show();
-//            }
-//            else
-//            {
-            BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(_editObjectGeometry, BaseArea::AT_ROOM);
-            RoomPtr room = BaseArea::convert< Room >(ptr);
-            if(room)
-            {
-                room->setCoords(pol);
-                room->commit();
+            room->setCoords(pol);
+            room->commit();
 
-                AreaInitData roomInitData;
-                roomInitData.zValue = 10000;
-                roomInitData.isSelectableFromMap = true;
-                roomInitData.penNormal.setColor(Qt::green);
-                roomInitData.penNormal.setCosmetic(true);
-                roomInitData.penNormal.setWidth(2);
-                roomInitData.penHoverl = roomInitData.penNormal;
-                roomInitData.penHoverl.setWidth(3);
-                QColor roomBrushColor(Qt::green);
-                roomBrushColor.setAlpha(20);
-                roomInitData.brushNormal.setColor(roomBrushColor);
-                roomInitData.brushNormal.setStyle(Qt::SolidPattern);
-                roomBrushColor.setAlpha(70);
-                roomInitData.brushHoverl = roomInitData.brushNormal;
-                roomInitData.brushHoverl.setColor(roomBrushColor);
+            AreaInitData roomInitData;
+            roomInitData.zValue = 10000;
+            roomInitData.isSelectableFromMap = true;
+            roomInitData.penNormal.setColor(Qt::green);
+            roomInitData.penNormal.setCosmetic(true);
+            roomInitData.penNormal.setWidth(2);
+            roomInitData.penHoverl = roomInitData.penNormal;
+            roomInitData.penHoverl.setWidth(3);
+            QColor roomBrushColor(Qt::green);
+            roomBrushColor.setAlpha(20);
+            roomInitData.brushNormal.setColor(roomBrushColor);
+            roomInitData.brushNormal.setStyle(Qt::SolidPattern);
+            roomBrushColor.setAlpha(70);
+            roomInitData.brushHoverl = roomInitData.brushNormal;
+            roomInitData.brushHoverl.setColor(roomBrushColor);
 
-                AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(pol);
-                areaGraphicsItem->setAcceptHoverEvents(true);
-                roomInitData.id = room->getId();
-                areaGraphicsItem->init(roomInitData);
-                scene()->addItem(areaGraphicsItem);
-                connect(areaGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
-                _itemsOnFloor.insert(room->getId(), areaGraphicsItem);
+            AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(pol);
+            areaGraphicsItem->setAcceptHoverEvents(true);
+            roomInitData.id = room->getId();
+            areaGraphicsItem->init(roomInitData);
+            scene()->addItem(areaGraphicsItem);
+            connect(areaGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+            _itemsOnFloor.insert(room->getId(), areaGraphicsItem);
 
-                areaGraphicsItem->setItemselected(true);
+            areaGraphicsItem->setItemselected(true);
 
-            }
-
-
-//            }
-
-
+            quint64 roomId(room->getId());
+            CommonMessageNotifier::send( (uint)visualize_system::BusTags::EditObjectGeometryFinish, QVariant(roomId), QString("visualize_system"));
         }
+
         clearTempItems();
     }
 
@@ -543,7 +532,11 @@ void ViraEditorView::centerEditorOn(qulonglong id)
 {
     auto it = _itemsOnFloor.find(id);
     if(it != _itemsOnFloor.end())
-        centerOn(it.value());
+    {
+        ViraGraphicsItem * viraGraphicsItem = dynamic_cast<ViraGraphicsItem*>(it.value());
+        if(viraGraphicsItem)
+            viraGraphicsItem->centerOnItem();
+    }
 }
 
 void ViraEditorView::zoomIn()

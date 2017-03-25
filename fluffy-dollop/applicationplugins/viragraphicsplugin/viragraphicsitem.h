@@ -11,6 +11,7 @@ public:
     virtual ~ViraGraphicsItem() {}
     bool itemIsSelected() {return _isSelected;}
     virtual void setItemselected(bool on_off) = 0;
+    virtual void centerOnItem() = 0;
 
 signals:
     void itemIsHover(qulonglong id, bool on_off);

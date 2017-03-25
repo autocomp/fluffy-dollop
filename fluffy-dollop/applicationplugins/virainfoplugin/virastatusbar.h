@@ -46,6 +46,8 @@ protected slots:
     void slotShowMoreInfo(bool on_off);
     void slotMoreInfoWidgetClosed();
     void slotEditObject(bool on_off);
+    void slotAddMark(bool on_off);
+    void slotEditObjectGeometryFinish(QVariant var);
 
 protected:
     void reset();

@@ -28,6 +28,7 @@ public:
     void init(const AreaInitData& areaInitData);
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR);
     void setItemselected(bool on_off);
+    void centerOnItem();
 
 protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);

@@ -18,6 +18,12 @@ TestData TestDataGetter::getData(uint64_t id)
 
     auto mngr = RegionBizManager::instance();
     BaseAreaPtr area = mngr->getBaseArea( id );
+    if( ! area)
+    {
+        TestData data;
+        data.id = id;
+        return data;
+    }
 
     TestData data;
     data.id = id;

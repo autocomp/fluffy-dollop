@@ -21,7 +21,8 @@ protected slots:
 protected:
     const int ID = Qt::UserRole + 1;
     QMap<qulonglong, QTreeWidgetItem*> _items;
-    QColor _defaultColor;
+    QColor _defaultColor = QColor(Qt::white);
+    QColor _noCoordColor = QColor(Qt::yellow);
     uint64_t _editObjectGeometry = 0;
 };
 

@@ -10,6 +10,8 @@ ViraInfoWidget::ViraInfoWidget(QWidget *parent) :
     ui(new Ui::ViraInfoWidget)
 {
     ui->setupUi(this);
+
+
 }
 
 ViraInfoWidget::~ViraInfoWidget()

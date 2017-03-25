@@ -19,12 +19,21 @@ ViraStatusBar::ViraStatusBar( quint64 parentWidgetId, QWidget *parent ):
     _parentWidgetId(parentWidgetId)
 {
     ui->setupUi(this);
+    ui->editObject->setIcon(QIcon(":/img/edit_mode"));
+    ui->moreInfo->setIcon(QIcon(":/img/info_button"));
+    ui->addMark->setIcon(QIcon(":/img/mark_button"));
+
     connect(ui->moreInfo, SIGNAL(clicked(bool)), this, SLOT(slotShowMoreInfo(bool)));
     connect(ui->editObject, SIGNAL(clicked(bool)), this, SLOT(slotEditObject(bool)));
+    connect(ui->addMark, SIGNAL(clicked(bool)), this, SLOT(slotAddMark(bool)));
     reset();
 
     auto mngr = RegionBizManager::instance();
     mngr->subscribeOnSelect(this, SLOT(slotObjectSelectionChanged(uint64_t,uint64_t)));
+
+    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::EditObjectGeometryFinish, this, SLOT(slotEditObjectGeometryFinish(QVariant)),
+                                      qMetaTypeId< quint64 >(),
+                                      QString("visualize_system") );
 
 //    auto moreInfoWidget = new ViraInfoWidget();
 //    _iface = new EmbIFaceNotifier( moreInfoWidget );
@@ -66,20 +75,23 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
     auto data = TestDataGetter::getData( curr_id );
 
     switch( ptr->getType() ) {
+    case BaseArea::AT_FLOOR:
+//    {
+//        ui->editObject->show();
+//        ui->editObject->setToolTip(QString::fromUtf8("Добавить комнату"));
+//    }
+//! without BREAK !!!
     case BaseArea::AT_REGION:
     case BaseArea::AT_LOCATION:
     case BaseArea::AT_FACILITY:
-    case BaseArea::AT_FLOOR:
     {
         showAddres( ptr );
         showTasks( data );
         showArendators( data, false );
         showAreas( data, false );
         showDebt( data );
-
         break;
     }
-
     case BaseArea::AT_ROOMS_GROUP:
     case BaseArea::AT_ROOM:
     {
@@ -88,8 +100,21 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
         showArendators( data, true );
         showTasks( data );
         ui->editObject->show();
+        ui->addMark->show();
+        ui->editObject->setToolTip(QString::fromUtf8("Редактировать контуры комнаты"));
         break;
     }
+    }
+}
+
+void ViraStatusBar::slotAddMark(bool on_off)
+{
+    quint64 id(on_off ? RegionBizManager::instance()->getSelectedArea() : 0);
+    CommonMessageNotifier::send( (uint)visualize_system::BusTags::EditObjectGeometry, QVariant(id), QString("visualize_system"));
+    if(on_off && ui->moreInfo->isChecked())
+    {
+        ui->moreInfo->setChecked(false);
+        slotShowMoreInfo(false);
     }
 }
 
@@ -104,6 +129,19 @@ void ViraStatusBar::slotEditObject(bool on_off)
     }
 }
 
+void ViraStatusBar::slotEditObjectGeometryFinish(QVariant var)
+{
+    quint64 id = var.toUInt();
+    if(id > 0)
+    {
+        ui->editObject->blockSignals(true);
+        ui->editObject->setChecked(false);
+        ui->editObject->blockSignals(false);
+        id = 0;
+        CommonMessageNotifier::send( (uint)visualize_system::BusTags::EditObjectGeometry, QVariant(id), QString("visualize_system"));
+    }
+}
+
 void ViraStatusBar::reset()
 {
     while ( ui->horizontalLayout_widgets->count() )
@@ -115,6 +153,7 @@ void ViraStatusBar::reset()
         delete item;
     }
     ui->name->clear();
+    ui->addMark->hide();
     ui->editObject->hide();
 }
 

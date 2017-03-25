@@ -11,6 +11,7 @@ class MarkGraphicsItem : public ViraGraphicsItem, public QGraphicsPixmapItem
 public:
     MarkGraphicsItem(qulonglong id, const QPixmap& pixmap, const QString& annotation);
     void setItemselected(bool on_off);
+    void centerOnItem();
 
 protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);

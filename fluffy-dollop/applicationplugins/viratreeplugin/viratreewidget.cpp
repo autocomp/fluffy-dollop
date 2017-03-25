@@ -93,10 +93,11 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
                                 QTreeWidgetItem * roomItem = new QTreeWidgetItem(floorItem);
                                 if(room->getCoords().isEmpty())
                                     for(int i(0); i < 6; ++i)
-                                    {
-                                        _defaultColor = roomItem->textColor(i);
-                                        roomItem->setTextColor(i, QColor(Qt::yellow));
-                                    }
+                                        roomItem->setTextColor(i, _noCoordColor);
+                                else
+                                    for(int i(0); i < 6; ++i)
+                                        roomItem->setTextColor(i, _defaultColor);
+
 
                                 roomItem->setText(0, room->getName());
                                 const qulonglong id(room->getId());

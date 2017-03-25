@@ -75,14 +75,26 @@ void AreaGraphicsItem::setItemselected(bool on_off)
 
     if(on_off)
     {
+        if(polygon().isEmpty() == false)
+            foreach(QGraphicsView * view, scene()->views())
+            {
+                QRectF viewportSceneRect(view->mapToScene(view->contentsRect().topLeft()), view->mapToScene(view->contentsRect().bottomRight()));
+                QPolygonF pol = ( polygon().intersected( QPolygonF(viewportSceneRect) ) );
+                if(pol.isEmpty())
+                    view->centerOn(this);
+            }
+    }
+}
+
+void AreaGraphicsItem::centerOnItem()
+{
+    if(polygon().isEmpty() == false)
         foreach(QGraphicsView * view, scene()->views())
         {
             QRectF viewportSceneRect(view->mapToScene(view->contentsRect().topLeft()), view->mapToScene(view->contentsRect().bottomRight()));
-            QPolygonF pol = ( polygon().intersected( QPolygonF(viewportSceneRect) ) );
-            if(pol == QPolygonF())
+            if(viewportSceneRect.contains(scenePos()) == false)
                 view->centerOn(this);
         }
-    }
 }
 
 void AreaGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
