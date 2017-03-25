@@ -3,7 +3,7 @@
 #include <ctrcore/provider/timagecache.h>
 #include <ctrcore/visual/visualizermanager.h>
 #include <ctrcore/visual/datainterface.h>
-#include <gdal/ogr_spatialref.h>
+//#include <gdal/ogr_spatialref.h>
 #include <QImage>
 #include <QPixmap>
 #include <QUrl>
@@ -422,31 +422,31 @@ int RasterTileMapper::loadTile(image_types::TImage *img, int x, int y, int z, QP
 
     if(sceneDescriptor.isGeoScene())
     {
-        OGRSpatialReference * inRef = new OGRSpatialReference;
-        OGRErr errIn = inRef->importFromEPSG(4326);
+//        OGRSpatialReference * inRef = new OGRSpatialReference;
+//        OGRErr errIn = inRef->importFromEPSG(4326);
 
-        OGRSpatialReference * outRef = new OGRSpatialReference;
-        // int code = sceneDescriptor.refEpsgSRS();
-        OGRErr errOut = outRef->importFromEPSG(sceneDescriptor.refEpsgSRS());
+//        OGRSpatialReference * outRef = new OGRSpatialReference;
+//        // int code = sceneDescriptor.refEpsgSRS();
+//        OGRErr errOut = outRef->importFromEPSG(sceneDescriptor.refEpsgSRS());
 
         QPolygonF refPol;
-        if(errIn == OGRERR_NONE && errOut == OGRERR_NONE)
-        {
-            QPolygonF wgsBboundingPol(raster_provider->spatialRect());
-            OGRCoordinateTransformation * trans = OGRCreateCoordinateTransformation(inRef, outRef);
-            if(trans)
-            {
-                foreach(QPointF p, wgsBboundingPol)
-                {
-                    double x(p.x()), y(p.y());
-                    trans->Transform(1,&x,&y);
-                    refPol.append(QPointF(x,y));
-                }
-                OGRCoordinateTransformation::DestroyCT(trans);
-            }
-        }
-        OGRSpatialReference::DestroySpatialReference(inRef);
-        OGRSpatialReference::DestroySpatialReference(outRef);
+//        if(errIn == OGRERR_NONE && errOut == OGRERR_NONE)
+//        {
+//            QPolygonF wgsBboundingPol(raster_provider->spatialRect());
+//            OGRCoordinateTransformation * trans = OGRCreateCoordinateTransformation(inRef, outRef);
+//            if(trans)
+//            {
+//                foreach(QPointF p, wgsBboundingPol)
+//                {
+//                    double x(p.x()), y(p.y());
+//                    trans->Transform(1,&x,&y);
+//                    refPol.append(QPointF(x,y));
+//                }
+//                OGRCoordinateTransformation::DestroyCT(trans);
+//            }
+//        }
+//        OGRSpatialReference::DestroySpatialReference(inRef);
+//        OGRSpatialReference::DestroySpatialReference(outRef);
 
         QRectF geoBboundingRect = refPol.boundingRect();
         if(geoBboundingRect != QRectF())
