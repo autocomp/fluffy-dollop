@@ -12,7 +12,7 @@ LIBS += -L$${ROOT_DIR}bin/lib \
         -lctrcore \
         -lctrvisual \
         -lctrrasterrender \
-        -lGeographic \
+#        -lGeographic \
 #        -ldpf_core \
 #        -ldpf_geo \
 #        -ldpf_io_base \
