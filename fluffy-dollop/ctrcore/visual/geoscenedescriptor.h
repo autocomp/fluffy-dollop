@@ -5,8 +5,8 @@
 #include <QRectF>
 #include <QString>
 
-class OGRCoordinateTransformation;
-class OGRSpatialReference;
+//class OGRCoordinateTransformation;
+//class OGRSpatialReference;
 
 namespace visualize_system
 {
@@ -90,8 +90,8 @@ private:
     QPointF _origin;
     double _unitsPerPixel;
     QSize _sceneInTiles, _tileSize;
-    OGRCoordinateTransformation * _trans, * _revTrans;
-    OGRSpatialReference * _srsGeogSrc, * _srsGeogTrg;
+//    OGRCoordinateTransformation * _trans, * _revTrans;
+//    OGRSpatialReference * _srsGeogSrc, * _srsGeogTrg;
 };
 
 }

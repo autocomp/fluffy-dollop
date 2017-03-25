@@ -10,9 +10,10 @@ TempDataController * TempDataController::_instance = nullptr;
 TempDataController::TempDataController()
 {
     QString destPath;
-    QVariant regionBizInitJson_Path = CtrConfig::getValueByName(QString("application_settings.regionBizInitJson_Path"));
+    QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath",
+                                                                "./data/", true);
     if(regionBizInitJson_Path.isValid())
-         destPath = QFileInfo(regionBizInitJson_Path.toString()).absolutePath() + QDir::separator();
+         destPath = regionBizInitJson_Path.toString() + QDir::separator();
 
     readTenantData(destPath + QString("tenant.xml"));
     readRoomInfo(destPath + QString("roominfo.xml"));

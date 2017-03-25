@@ -1,5 +1,5 @@
 #include "geoscenedescriptor.h"
-#include <gdal/ogr_spatialref.h>
+//#include <gdal/ogr_spatialref.h>
 #include <QDomDocument>
 #include <QRectF>
 #include <QDebug>
@@ -11,10 +11,10 @@ GeoSceneDescriptor::GeoSceneDescriptor(const QString & xml, const QString & grid
     , _refEPSG(0)
     , _unitsPerPixel(0)
     , _tileSize(256,256)
-    , _trans(0)
-    , _revTrans(0)
-    , _srsGeogSrc(0)
-    , _srsGeogTrg(0)
+//    , _trans(0)
+//    , _revTrans(0)
+//    , _srsGeogSrc(0)
+//    , _srsGeogTrg(0)
 {
     QDomDocument doc;
     if(doc.setContent(xml))
@@ -157,6 +157,7 @@ GeoSceneDescriptor::GeoSceneDescriptor(const QString & xml, const QString & grid
             return;
         }
 
+        /*
         if(_refEPSG != 4326)
         {
             _srsGeogSrc = new OGRSpatialReference;
@@ -181,6 +182,7 @@ GeoSceneDescriptor::GeoSceneDescriptor(const QString & xml, const QString & grid
             _trans = OGRCreateCoordinateTransformation(_srsGeogSrc, _srsGeogTrg);
             _revTrans = OGRCreateCoordinateTransformation(_srsGeogTrg, _srsGeogSrc);
         }
+        */
 
         _isValid = true;
         qDebug() << "*********************GeoSceneDescriptor is valid";
@@ -193,6 +195,7 @@ GeoSceneDescriptor::GeoSceneDescriptor(const QString & xml, const QString & grid
 
 GeoSceneDescriptor::~GeoSceneDescriptor()
 {
+    /*
     if(_trans)
     {
         OGRCoordinateTransformation::DestroyCT(_trans);
@@ -209,182 +212,183 @@ GeoSceneDescriptor::~GeoSceneDescriptor()
     {
         OGRSpatialReference::DestroySpatialReference(_srsGeogTrg);
     }
+    */
 }
 
 bool GeoSceneDescriptor::convertNativeToScene(double &x, double &y) const
 {
-    if(_isValid == false)
+//    if(_isValid == false)
         return false;
 
-    double _X = x; // -180 / +180
-    double _Y = y; // -90 / +90
+//    double _X = x; // -180 / +180
+//    double _Y = y; // -90 / +90
 
-    if(_refEPSG != 4326)
-        _revTrans->Transform(1,&_X,&_Y);
+//    if(_refEPSG != 4326)
+//        _revTrans->Transform(1,&_X,&_Y);
 
-    if(_bbox.contains(QPointF(_X,_Y)) == false)
-    {
-        x = -1;
-        y = -1;
-        return false;
-    }
+//    if(_bbox.contains(QPointF(_X,_Y)) == false)
+//    {
+//        x = -1;
+//        y = -1;
+//        return false;
+//    }
 
-    x = (_X - _bbox.left()) / _unitsPerPixel;
-    double origY = (_Y - _bbox.top()) / _unitsPerPixel;
-    y = _sceneInTiles.height()*_tileSize.height() - origY;
+//    x = (_X - _bbox.left()) / _unitsPerPixel;
+//    double origY = (_Y - _bbox.top()) / _unitsPerPixel;
+//    y = _sceneInTiles.height()*_tileSize.height() - origY;
 
-    return true;
+//    return true;
 }
 
 bool GeoSceneDescriptor::convertSceneToNative(double &x, double &y) const
 {
-    if(_isValid == false)
+//    if(_isValid == false)
         return false;
 
-    // переводим пиксели сцены в родные географические координаты сцены
-    double geoOrigX = x * _unitsPerPixel + _bbox.left();
-    double revY = (_sceneInTiles.height()*_tileSize.height() - y);
-    double geoOrigY = revY * _unitsPerPixel + _bbox.top();
+//    // переводим пиксели сцены в родные географические координаты сцены
+//    double geoOrigX = x * _unitsPerPixel + _bbox.left();
+//    double revY = (_sceneInTiles.height()*_tileSize.height() - y);
+//    double geoOrigY = revY * _unitsPerPixel + _bbox.top();
 
-    if(_refEPSG == 4326)
-    {
-        x = geoOrigX;
-        y = geoOrigY;
-    }
-    else
-    {
-        // вновь переводим родные гео в WGS координаты
-        double geoWgsX = geoOrigX;
-        double geoWgsY = geoOrigY;
-        _trans->Transform(1,&geoWgsX,&geoWgsY); //
+//    if(_refEPSG == 4326)
+//    {
+//        x = geoOrigX;
+//        y = geoOrigY;
+//    }
+//    else
+//    {
+//        // вновь переводим родные гео в WGS координаты
+//        double geoWgsX = geoOrigX;
+//        double geoWgsY = geoOrigY;
+//        _trans->Transform(1,&geoWgsX,&geoWgsY); //
 
-        // вновь переводим WGS координаты в родные гео, чтоб сравнить их
-        double _geoOrigX = geoWgsX;
-        double _geoOrigY = geoWgsY;
-        _revTrans->Transform(1,&_geoOrigX,&_geoOrigY);
+//        // вновь переводим WGS координаты в родные гео, чтоб сравнить их
+//        double _geoOrigX = geoWgsX;
+//        double _geoOrigY = geoWgsY;
+//        _revTrans->Transform(1,&_geoOrigX,&_geoOrigY);
 
-        if(_refEPSG != 0)
-            if(QString::number(geoOrigX,'f',2) != QString::number(_geoOrigX,'f',2) || QString::number(geoOrigY,'f',2) != QString::number(_geoOrigY,'f',2))
-            {
-                x = -360;
-                y = -360;
-                // qDebug() << _refEPSG << "!!!" << QString::number(geoOrigX,'f',2) << "!=" << QString::number(_geoOrigX,'f',2) << " || " << QString::number(geoOrigY,'f',2) << "!=" << QString::number(_geoOrigY,'f',2);
-                return false;
-            }
+//        if(_refEPSG != 0)
+//            if(QString::number(geoOrigX,'f',2) != QString::number(_geoOrigX,'f',2) || QString::number(geoOrigY,'f',2) != QString::number(_geoOrigY,'f',2))
+//            {
+//                x = -360;
+//                y = -360;
+//                // qDebug() << _refEPSG << "!!!" << QString::number(geoOrigX,'f',2) << "!=" << QString::number(_geoOrigX,'f',2) << " || " << QString::number(geoOrigY,'f',2) << "!=" << QString::number(_geoOrigY,'f',2);
+//                return false;
+//            }
 
-        x = geoWgsX;
-        y = geoWgsY;
-    }
+//        x = geoWgsX;
+//        y = geoWgsY;
+//    }
 
-    return true;
+//    return true;
 }
 
 bool GeoSceneDescriptor::convertRefSystemToScene(double &x, double &y) const
 {
-    if(_isValid == false)
+//    if(_isValid == false)
         return false;
 
-    double _X = x;
-    double _Y = y;
+//    double _X = x;
+//    double _Y = y;
 
-    if(_bbox.contains(QPointF(_X,_Y)) == false)
-    {
-        x = -1;
-        y = -1;
-        return false;
-    }
+//    if(_bbox.contains(QPointF(_X,_Y)) == false)
+//    {
+//        x = -1;
+//        y = -1;
+//        return false;
+//    }
 
-    x = (_X - _bbox.left()) / _unitsPerPixel;
-    double origY = (_Y - _bbox.top()) / _unitsPerPixel;
-    y = _sceneInTiles.height()*_tileSize.height() - origY;
-    return true;
+//    x = (_X - _bbox.left()) / _unitsPerPixel;
+//    double origY = (_Y - _bbox.top()) / _unitsPerPixel;
+//    y = _sceneInTiles.height()*_tileSize.height() - origY;
+//    return true;
 }
 
 bool GeoSceneDescriptor::convertSceneToRefSystem(double &x, double &y) const
 {
-    if(_isValid == false)
+//    if(_isValid == false)
         return false;
 
-    // переводим пиксели сцены в родные географические координаты сцены
-    double geoOrigX = x * _unitsPerPixel + _bbox.left();
-    double revY = (_sceneInTiles.height()*_tileSize.height() - y);
-    double geoOrigY = revY * _unitsPerPixel + _bbox.top();
+//    // переводим пиксели сцены в родные географические координаты сцены
+//    double geoOrigX = x * _unitsPerPixel + _bbox.left();
+//    double revY = (_sceneInTiles.height()*_tileSize.height() - y);
+//    double geoOrigY = revY * _unitsPerPixel + _bbox.top();
 
-    if(_refEPSG == 4326)
-    {
-        x = geoOrigX;
-        y = geoOrigY;
-        return true;
-    }
+//    if(_refEPSG == 4326)
+//    {
+//        x = geoOrigX;
+//        y = geoOrigY;
+//        return true;
+//    }
 
-    // вновь переводим родные гео в WGS координаты
-    double geoWgsX = geoOrigX;
-    double geoWgsY = geoOrigY;
-    _trans->Transform(1,&geoWgsX,&geoWgsY); //
+//    // вновь переводим родные гео в WGS координаты
+//    double geoWgsX = geoOrigX;
+//    double geoWgsY = geoOrigY;
+//    _trans->Transform(1,&geoWgsX,&geoWgsY); //
 
-    // вновь переводим WGS координаты в родные гео, чтоб сравнить их
-    double _geoOrigX = geoWgsX;
-    double _geoOrigY = geoWgsY;
-    _revTrans->Transform(1,&_geoOrigX,&_geoOrigY);
+//    // вновь переводим WGS координаты в родные гео, чтоб сравнить их
+//    double _geoOrigX = geoWgsX;
+//    double _geoOrigY = geoWgsY;
+//    _revTrans->Transform(1,&_geoOrigX,&_geoOrigY);
 
-    if(_refEPSG != 0)
-        if( QString::number(geoOrigX,'f',2) != QString::number(_geoOrigX,'f',2) || QString::number(geoOrigY,'f',2) != QString::number(_geoOrigY,'f',2))
-        {
-            x = -360;
-            y = -360;
-            return false;
-        }
+//    if(_refEPSG != 0)
+//        if( QString::number(geoOrigX,'f',2) != QString::number(_geoOrigX,'f',2) || QString::number(geoOrigY,'f',2) != QString::number(_geoOrigY,'f',2))
+//        {
+//            x = -360;
+//            y = -360;
+//            return false;
+//        }
 
-    x = geoOrigX; // geoWgsX;
-    y = geoOrigY; // geoWgsY;
-    return true;
+//    x = geoOrigX; // geoWgsX;
+//    y = geoOrigY; // geoWgsY;
+//    return true;
 }
 
 bool GeoSceneDescriptor::convertEpsgToScene(int epsgCode, double &x, double &y) const
 {
-    if(_isValid == false)
+//    if(_isValid == false)
         return false;
 
-    if(epsgCode != _refEPSG)
-    {
-        OGRSpatialReference * inRef = new OGRSpatialReference;
-        OGRErr err = inRef->importFromEPSG(epsgCode);
-        if(err != OGRERR_NONE)
-        {
-            OGRSpatialReference::DestroySpatialReference(inRef);
-            return false;
-        }
-        OGRCoordinateTransformation * trans = OGRCreateCoordinateTransformation(inRef, _srsGeogSrc);
-        trans->Transform(1,&x,&y);
-        OGRCoordinateTransformation::DestroyCT(trans);
-        OGRSpatialReference::DestroySpatialReference(inRef);
-    }
-    return convertRefSystemToScene(x,y);
+//    if(epsgCode != _refEPSG)
+//    {
+//        OGRSpatialReference * inRef = new OGRSpatialReference;
+//        OGRErr err = inRef->importFromEPSG(epsgCode);
+//        if(err != OGRERR_NONE)
+//        {
+//            OGRSpatialReference::DestroySpatialReference(inRef);
+//            return false;
+//        }
+//        OGRCoordinateTransformation * trans = OGRCreateCoordinateTransformation(inRef, _srsGeogSrc);
+//        trans->Transform(1,&x,&y);
+//        OGRCoordinateTransformation::DestroyCT(trans);
+//        OGRSpatialReference::DestroySpatialReference(inRef);
+//    }
+//    return convertRefSystemToScene(x,y);
 }
 
 bool GeoSceneDescriptor::convertSceneToEpsg(int epsgCode, double &x, double &y) const
 {
-    if(_isValid == false)
+//    if(_isValid == false)
         return false;
 
-    if(convertSceneToRefSystem(x,y) == false)
-        return false;
+//    if(convertSceneToRefSystem(x,y) == false)
+//        return false;
 
-    if(epsgCode != _refEPSG)
-    {
-        OGRSpatialReference * outRef = new OGRSpatialReference;
-        OGRErr err = outRef->importFromEPSG(epsgCode);
-        if(err != OGRERR_NONE)
-        {
-            OGRSpatialReference::DestroySpatialReference(outRef);
-            return false;
-        }
-        OGRCoordinateTransformation * trans = OGRCreateCoordinateTransformation(_srsGeogSrc, outRef);
-        trans->Transform(1,&x,&y);
-        OGRCoordinateTransformation::DestroyCT(trans);
-        OGRSpatialReference::DestroySpatialReference(outRef);
-    }
-    return true;
+//    if(epsgCode != _refEPSG)
+//    {
+//        OGRSpatialReference * outRef = new OGRSpatialReference;
+//        OGRErr err = outRef->importFromEPSG(epsgCode);
+//        if(err != OGRERR_NONE)
+//        {
+//            OGRSpatialReference::DestroySpatialReference(outRef);
+//            return false;
+//        }
+//        OGRCoordinateTransformation * trans = OGRCreateCoordinateTransformation(_srsGeogSrc, outRef);
+//        trans->Transform(1,&x,&y);
+//        OGRCoordinateTransformation::DestroyCT(trans);
+//        OGRSpatialReference::DestroySpatialReference(outRef);
+//    }
+//    return true;
 }
 
 int GeoSceneDescriptor::refEpsgSRS() const
