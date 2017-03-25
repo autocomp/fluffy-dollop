@@ -35,8 +35,8 @@
 #include <QWebFrame>
 #include <QWebPage>
 #else
-#include <QtWebEngineWidgets/QWebEnginePage>
-#include <QtWebEngineWidgets/QWebEngineView>
+#include <QWebEnginePage>
+#include <QWebEngineView>
 #endif
 using namespace ew::network;
 

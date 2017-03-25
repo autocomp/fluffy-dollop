@@ -22,8 +22,8 @@
 #ifndef QT_V5
 #include <QWebView>
 #else
-#include <QtWebEngineWidgets/QWebEnginePage>
-#include <QtWebEngineWidgets/QWebEngineView>
+#include <QWebEnginePage>
+#include <QWebEngineView>
 #endif
 
 #include <QPlainTextEdit>
