@@ -1,6 +1,30 @@
 {
-    "translator":{
-        "type":"sqlite",
-        "file_path":"./base.sql"
+    "main_translator":"psql",
+    "translators":[
+	{
+	    "name":"psql",
+	    "params":{
+		"host":"217.148.208.59",
+		"db_name":"vira",
+		"user":"vira",
+		"pass":"zaebobr"
+	    }
+	},
+	{
+	    "name":"xlsx",
+	    "params":{
+		"template":{
+		    "first_row":"7",
+		    "columns":"floor:1;room_name:3;room_descr:4;room_area:5;room_arend:6"
+		}
+	    }
+	}
+    ],
+    "plugins":{
+	"plugins_path":"./plugins/regionbiz",
+	"plugins_load":"all",
+	"plugins_list":[
+	    "libxlsx_translator.so"
+	]
     }
 }
