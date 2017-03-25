@@ -6,6 +6,7 @@ SUBDIRS = \
     dmanager \
     qtxlsx  \	
     regionbiz \
+    regionbiz/regionbiz_plugins \
     ctrcore \
     ctrrasterrender \
     ctrvisual \

@@ -1,4 +1,5 @@
 #include <QDebug>
+#include <QDir>
 
 #include <regionbiz/rb_manager.h>
 
@@ -8,15 +9,11 @@ int main()
 {
     using namespace regionbiz;
 
-    // test destructor
-    Location* loc = new Location(1);
-    delete loc;
-
     //! init
     auto mngr = RegionBizManager::instance();
     QString str = "~/.contour_ng/regionbiz_psql.json";
     //QString str = "~/.contour_ng/regionbiz_psql.json";
-    mngr->init( str );
+    bool inited = mngr->init( str );
 
     //! load regons
     std::vector< RegionPtr > regions = mngr->getRegions();
@@ -125,7 +122,8 @@ int main()
         qDebug() << "  Data:" << data->getName() << "-" << data->getValueAsString();
         qDebug() << "  Variant val:" << data->getValueAsVariant();
     }
-    qDebug() << " Data square:" << area->getMetadata( "square" )->getValueAsString();
+    BaseMetadataPtr data = area->getMetadata( "area" );
+    qDebug() << " Data square:" << ( data ? data->getValueAsString() : "NONE" );
     // commit metadate (change base)
     // area->commit();
 
@@ -185,4 +183,23 @@ int main()
     qDebug() << "We have" << marks.size() << "marks again after commit-delete";
     // clear
     mngr->deleteArea( room_ptr );
+
+    //! load xlsx
+    // select facility
+    BaseAreaPtr facility = mngr->addArea< Facility >( 1 );
+    if( facility )
+        mngr->selectArea( facility->getId() );
+
+    // load translator
+    BaseTranslatorPtr ptr = mngr->getTranslatorByName( "xlsx" );
+    // set settings of path
+    QVariantMap settings = {{ "file_path", "./data/гостиница Россия.xlsx" }};
+    ptr->init( settings );
+
+    // load floors and rooms
+    // after loading all areas in model system
+    auto floors = ptr->loadFloors();
+    auto rooms = ptr->loadRooms();
+    qDebug() << "We load floors and rooms:" << floors.size() << rooms.size();
+    // now you can modify and commit all that areas
 }

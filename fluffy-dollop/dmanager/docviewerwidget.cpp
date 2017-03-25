@@ -25,8 +25,8 @@
 #include <QWebFrame>
 #include <QWebView>
 #else
-#include <QWebEnginePage>
-#include <QWebEngineView>
+#include <QtWebEngineWidgets/QWebEnginePage>
+#include <QtWebEngineWidgets/QWebEngineView>
 #endif
 
 #include "docdebugger.h"

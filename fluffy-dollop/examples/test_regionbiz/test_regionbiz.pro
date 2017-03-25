@@ -19,6 +19,7 @@ INCLUDEPATH += $${INSTALL_PATH_INCLUDE}
 
 # libs
 LIBS += -L$${INSTALL_PATH_LIB} \
+        -ldl \
         -lregionbiz
 
 HEADERS += \
