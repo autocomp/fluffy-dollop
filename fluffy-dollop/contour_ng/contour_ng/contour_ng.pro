@@ -26,7 +26,7 @@ LIBS += -L$${INSTALL_PATH_LIB} \
         -lctrvisual \
         -lctrwidgets \
         -lembeddedwidgets \
-        -lGeographic \
+#        -lGeographic \
         -lregionbiz \
 #        -lctrutils \
 #        -lctrobjectwidgets \
