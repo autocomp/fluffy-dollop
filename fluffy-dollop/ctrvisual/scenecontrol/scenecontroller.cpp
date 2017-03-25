@@ -9,9 +9,9 @@
 //#include <objrepr/reprServer.h>
 //#include <ctrcore/visual/dpfcoordtransformer.h>
 
-#include <GeographicLib/PolygonArea.hpp>
-#include <GeographicLib/Geodesic.hpp>
-#include <GeographicLib/Constants.hpp>
+//#include <GeographicLib/PolygonArea.hpp>
+//#include <GeographicLib/Geodesic.hpp>
+//#include <GeographicLib/Constants.hpp>
 
 //using namespace objrepr;
 using namespace visualize_system;
@@ -249,20 +249,20 @@ double SceneController::getDistanceWGS84(QPointF firstWGS84Point, QPointF second
     double yLen = (M_PI*R*( (secondWGS84Point.y() - firstWGS84Point.y()) )/ 180.0);
     double dist = sqrt( xLen*xLen + yLen*yLen );*/
 
-    GeographicLib::Geodesic geod(GeographicLib::Constants::WGS84_a(), GeographicLib::Constants::WGS84_f());
+//    GeographicLib::Geodesic geod(GeographicLib::Constants::WGS84_a(), GeographicLib::Constants::WGS84_f());
 
-    GeographicLib::PolygonArea poly(geod);
+//    GeographicLib::PolygonArea poly(geod);
 
     //sceneToRealGeo(firstWGS84Point);
     //sceneToRealGeo(secondWGS84Point);
-    double lat1 = firstWGS84Point.x();
-    double lon1 = firstWGS84Point.y(); // JFK
-    double lat2 = secondWGS84Point.x();
-    double lon2 = secondWGS84Point.y(); // SIN
-    double s12, azi1, azi2;
+//    double lat1 = firstWGS84Point.x();
+//    double lon1 = firstWGS84Point.y(); // JFK
+//    double lat2 = secondWGS84Point.x();
+//    double lon2 = secondWGS84Point.y(); // SIN
+//    double s12, azi1, azi2;
 
-    double a12 = geod.Inverse(lat1, lon1, lat2, lon2, s12, azi1, azi2);
-    return s12;
+//    double a12 = geod.Inverse(lat1, lon1, lat2, lon2, s12, azi1, azi2);
+    return 0; // s12;
 }
 
 /**

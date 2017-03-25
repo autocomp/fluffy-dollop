@@ -39,7 +39,7 @@ FORMS += \
 LIBS += -L$${ROOT_DIR}bin/lib \
         -lctrcore \
         -lctrrasterrender \
-        -lGeographic \
+#        -lGeographic \
 #        -ldpf_core \
 #        -ldpf_geo \
 #        -ldpf_io_base \

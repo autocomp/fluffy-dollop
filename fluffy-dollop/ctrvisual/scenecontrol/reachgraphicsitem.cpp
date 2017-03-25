@@ -11,9 +11,9 @@
 #include "scenecontroller.h"
 
 
-#include <GeographicLib/PolygonArea.hpp>
-#include <GeographicLib/Geodesic.hpp>
-#include <GeographicLib/Constants.hpp>
+//#include <GeographicLib/PolygonArea.hpp>
+//#include <GeographicLib/Geodesic.hpp>
+//#include <GeographicLib/Constants.hpp>
 
 
 ReachGraphicsItem::ReachGraphicsItem(visualize_system::SceneController * contr,QGraphicsEllipseItem * gParent, QObject *parent) :
@@ -83,22 +83,22 @@ QPointF ReachGraphicsItem::getDirectGeoPoint(
         )
 {
 
-    static GeographicLib::Geodesic * geod = new GeographicLib::Geodesic(
-                GeographicLib::Constants::WGS84_a(),
-                GeographicLib::Constants::WGS84_f()
-                );
+//    static GeographicLib::Geodesic * geod = new GeographicLib::Geodesic(
+//                GeographicLib::Constants::WGS84_a(),
+//                GeographicLib::Constants::WGS84_f()
+//                );
 
 
 
     double lat(0), lon(0);
-    geod->Direct(
-                lat_lon.x(),          // широта исх.точки
-                lat_lon.y(),              // долгота исх.точки
-                yaw,           // направление (азимут)
-                distanse,
-                lat,
-                lon
-                );
+//    geod->Direct(
+//                lat_lon.x(),          // широта исх.точки
+//                lat_lon.y(),              // долгота исх.точки
+//                yaw,           // направление (азимут)
+//                distanse,
+//                lat,
+//                lon
+//                );
     return QPointF( lat, lon );
 }
 

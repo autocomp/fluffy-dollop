@@ -31,9 +31,9 @@
 
 #include <iostream>
 #include <exception>
-#include <GeographicLib/PolygonArea.hpp>
-#include <GeographicLib/Geodesic.hpp>
-#include <GeographicLib/Constants.hpp>
+//#include <GeographicLib/PolygonArea.hpp>
+//#include <GeographicLib/Geodesic.hpp>
+//#include <GeographicLib/Constants.hpp>
 
 
 #include "routescalegraphicsitem.h"
@@ -3451,25 +3451,25 @@ void ViewerController::slotSearchRectCreationCompleted(QRectF searchRect, quint6
 
 void ViewerController::slotGetRealDistanceMeters(QLineF lineF ,qreal* dist)
 {
-    GeographicLib::Geodesic geod(GeographicLib::Constants::WGS84_a(), GeographicLib::Constants::WGS84_f());
+//    GeographicLib::Geodesic geod(GeographicLib::Constants::WGS84_a(), GeographicLib::Constants::WGS84_f());
 
-    GeographicLib::PolygonArea poly(geod);
+//    GeographicLib::PolygonArea poly(geod);
 
-    QPointF p1 = lineF.p1();
-    QPointF p2 = lineF.p2();
+//    QPointF p1 = lineF.p1();
+//    QPointF p2 = lineF.p2();
 
-    m_sceneControlle->sceneToRealGeo(p1);
-    m_sceneControlle->sceneToRealGeo(p2);
-    double lat1 = p1.x();
-    double lon1 = p1.y(); // JFK
-    double lat2 = p2.x();
-    double lon2 = p2.y(); // SIN
-    double s12, azi1, azi2;
+//    m_sceneControlle->sceneToRealGeo(p1);
+//    m_sceneControlle->sceneToRealGeo(p2);
+//    double lat1 = p1.x();
+//    double lon1 = p1.y(); // JFK
+//    double lat2 = p2.x();
+//    double lon2 = p2.y(); // SIN
+//    double s12, azi1, azi2;
 
-    double a12 = geod.Inverse(lat1, lon1, lat2, lon2, s12, azi1, azi2);
+//    double a12 = geod.Inverse(lat1, lon1, lat2, lon2, s12, azi1, azi2);
 
 
-    *dist = s12;
+//    *dist = s12;
 }
 
 
@@ -3704,79 +3704,79 @@ void ViewerController::slotGetRealSquareMeters(QPolygonF polyPoints,qreal* squar
 
 void ViewerController::slotGetRealAngle(QLineF lineF1, QLineF lineF2, qreal* angle)
 {
-    GeographicLib::Geodesic geod1(GeographicLib::Constants::WGS84_a(), GeographicLib::Constants::WGS84_f());
+//    GeographicLib::Geodesic geod1(GeographicLib::Constants::WGS84_a(), GeographicLib::Constants::WGS84_f());
 
-    QPointF p11 = lineF1.p1();
-    QPointF  p12 = lineF1.p2();
-    QPointF p21 = lineF2.p1();
-    QPointF p22 = lineF2.p2();
+//    QPointF p11 = lineF1.p1();
+//    QPointF  p12 = lineF1.p2();
+//    QPointF p21 = lineF2.p1();
+//    QPointF p22 = lineF2.p2();
 
-    m_sceneControlle->sceneToRealGeo(p11);
-    m_sceneControlle->sceneToRealGeo(p12);
-    m_sceneControlle->sceneToRealGeo(p21);
-    m_sceneControlle->sceneToRealGeo(p22);
+//    m_sceneControlle->sceneToRealGeo(p11);
+//    m_sceneControlle->sceneToRealGeo(p12);
+//    m_sceneControlle->sceneToRealGeo(p21);
+//    m_sceneControlle->sceneToRealGeo(p22);
 
-    double lat11 = p11.x();
-    double lon11 = p11.y(); // JFK
-    double lat12 = p12.x();
-    double lon12 = p12.y(); // SIN
-    double s121, azi112, azi121;
+//    double lat11 = p11.x();
+//    double lon11 = p11.y(); // JFK
+//    double lat12 = p12.x();
+//    double lon12 = p12.y(); // SIN
+//    double s121, azi112, azi121;
 
-    double a121 = geod1.Inverse(lat11, lon11, lat12, lon12, s121, azi112, azi121);
-
-
-    GeographicLib::Geodesic geod2(GeographicLib::Constants::WGS84_a(), GeographicLib::Constants::WGS84_f());
-
-    double lat21 = p21.x();
-    double lon21 = p21.y(); // JFK
-    double lat22 = p22.x();
-    double lon22 = p22.y(); // SIN
-    double s221, azi212, azi221;
-
-    double a122 = geod2.Inverse(lat21, lon21, lat22, lon22, s221, azi212, azi221);
-
-    qreal angle1 = 0;
-
-    if(azi121 < 0)
-    {
-        azi121 = 360 + azi121;
-    }
-
-    if(azi212 < 0)
-    {
-        azi212 = 360 + azi212;
-    }
-
-    if(azi212 > azi121)
-    {
-        angle1 = azi212 - azi121;
-    }
-    else
-    {
-        angle1 = (360 - azi121) + azi212;
-    }
+//    double a121 = geod1.Inverse(lat11, lon11, lat12, lon12, s121, azi112, azi121);
 
 
-    QPolygonF geoCoords;
-    // QPolygonF polyPointsTmp = polyPoints;
-    bool isNeedInvert = false;
-    QPointF wgs84_1(m_sceneControlle->sceneToGeo2( mapToScene(rect().center())));
-    QPointF wgs84_2(m_sceneControlle->sceneToGeo2( mapToScene(rect().center().x() + 1, rect().center().y() + 1)));
+//    GeographicLib::Geodesic geod2(GeographicLib::Constants::WGS84_a(), GeographicLib::Constants::WGS84_f());
 
-    if( !((wgs84_1.x() >= wgs84_2.x() && wgs84_1.y() <= wgs84_2.y())
-          || (wgs84_1.x() <= wgs84_2.x() && wgs84_1.y() >= wgs84_2.y() )) )
-    {
-        isNeedInvert = true;
-    }
+//    double lat21 = p21.x();
+//    double lon21 = p21.y(); // JFK
+//    double lat22 = p22.x();
+//    double lon22 = p22.y(); // SIN
+//    double s221, azi212, azi221;
 
-    qDebug() << azi121 << " "<< azi212 << " " << angle1;
-    //    *angle = angle1;
+//    double a122 = geod2.Inverse(lat21, lon21, lat22, lon22, s221, azi212, azi221);
 
-    if( m_sceneControlle->sceneIsGeo() || (m_sceneControlle->frameIsMatching() && !isNeedInvert))
-        *angle = angle1;
+//    qreal angle1 = 0;
 
-    if( (m_sceneControlle->frameIsMatching() && isNeedInvert))
-        *angle = 360.0 - angle1;
+//    if(azi121 < 0)
+//    {
+//        azi121 = 360 + azi121;
+//    }
+
+//    if(azi212 < 0)
+//    {
+//        azi212 = 360 + azi212;
+//    }
+
+//    if(azi212 > azi121)
+//    {
+//        angle1 = azi212 - azi121;
+//    }
+//    else
+//    {
+//        angle1 = (360 - azi121) + azi212;
+//    }
+
+
+//    QPolygonF geoCoords;
+//    // QPolygonF polyPointsTmp = polyPoints;
+//    bool isNeedInvert = false;
+//    QPointF wgs84_1(m_sceneControlle->sceneToGeo2( mapToScene(rect().center())));
+//    QPointF wgs84_2(m_sceneControlle->sceneToGeo2( mapToScene(rect().center().x() + 1, rect().center().y() + 1)));
+
+//    if( !((wgs84_1.x() >= wgs84_2.x() && wgs84_1.y() <= wgs84_2.y())
+//          || (wgs84_1.x() <= wgs84_2.x() && wgs84_1.y() >= wgs84_2.y() )) )
+//    {
+//        isNeedInvert = true;
+//    }
+
+//    qDebug() << azi121 << " "<< azi212 << " " << angle1;
+//    //    *angle = angle1;
+
+//    if( m_sceneControlle->sceneIsGeo() || (m_sceneControlle->frameIsMatching() && !isNeedInvert))
+//        *angle = angle1;
+
+//    if( (m_sceneControlle->frameIsMatching() && isNeedInvert))
+//        *angle = 360.0 - angle1;
 
     /*if(!isNeedInvert)
         *angle = 360 - angle1;
