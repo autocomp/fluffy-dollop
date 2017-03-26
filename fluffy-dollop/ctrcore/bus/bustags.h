@@ -33,9 +33,16 @@ enum class BusTags
     //! Запрос на открытие каталога с изображениями в плагине галерее изображений пиксельного визуализатора, , параметр QList<QVariant>, где первый параметр-ИД пиксельного визуализатора(uint), второй параметр - путь к каталогу (QString).
     OpenFolderInImageGallery,
     //! Запуск\окончание, параметр - quint64 (>0 - ИД object, ==0 - окончание).
-    EditObjectGeometry,
+    EditAreaGeometry,
+    //!
+    SetMarkPosition,
     //! Запуск\окончание, параметр - quint64 (>0 - ИД object). recivers - virainfoplugin, check off edit button and send EditObjectGeometry to other plugins.
-    EditObjectGeometryFinish,
+    EditModeFinish,
+    //! , параметр - bool (true - старт работы потока, false - окончание).
+    BlockGUI,
+
+
+
 };
 }
 
