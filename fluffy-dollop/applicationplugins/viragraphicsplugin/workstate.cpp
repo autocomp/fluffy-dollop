@@ -4,6 +4,8 @@
 #include "locationitem.h"
 #include "types.h"
 #include <regionbiz/rb_manager.h>
+#include <ctrcore/bus/common_message_notifier.h>
+#include <ctrcore/bus/bustags.h>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsPolygonItem>
 #include <QFileInfo>
@@ -45,6 +47,10 @@ void WorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom
 {
     ScrollBaseState::init(scene, view, zoom, scale, frameCoef, visualizerId);
     setActiveForScene(true);
+
+    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::BlockGUI, this, SLOT(slotBlockGUI(QVariant)),
+                                      qMetaTypeId< bool >(),
+                                      QString("visualize_system") );
 
     AreaInitData regionInitData;
     regionInitData.zValue = 100;
@@ -130,14 +136,14 @@ void WorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom
     }
 }
 
-void WorkState::editObjectGeometry(quint64 id)
+void WorkState::slotBlockGUI(QVariant var)
 {
-    _editObjectGeometry = id;
+    _blockGUI = var.toBool();
 }
 
 void WorkState::slotSelectItem(qulonglong id, bool centerOnArea)
 {
-    if(_editObjectGeometry == 0)
+    if( ! _blockGUI)
     {
         regionbiz::RegionBizManager::instance()->selectArea(id);
         if(centerOnArea)

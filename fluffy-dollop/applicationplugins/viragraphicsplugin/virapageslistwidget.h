@@ -20,6 +20,7 @@ protected:
 
 private slots:
     void slotSelectionChanged();
+    void slotBlockGUI(QVariant var);
 
 private:
     QSize _iconSize;

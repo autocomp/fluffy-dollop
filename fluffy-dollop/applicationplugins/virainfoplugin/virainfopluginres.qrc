@@ -4,5 +4,8 @@
         <file>img/edit_mode.png</file>
         <file>img/info_button.png</file>
         <file>img/mark_button.png</file>
+        <file>img/add_image.png</file>
+        <file>img/close_button.png</file>
+        <file>img/ok_button.png</file>
     </qresource>
 </RCC>

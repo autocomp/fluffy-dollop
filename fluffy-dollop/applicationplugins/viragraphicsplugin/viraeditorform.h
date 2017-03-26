@@ -20,7 +20,6 @@ public:
     explicit ViraEditorForm(QWidget *parent = 0);
     ~ViraEditorForm();
     void setParentWindowId(qulonglong parentWindowId);
-    void editObjectGeometry(quint64 id);
 
 private slots:
     void slotSelectionItemsChanged(uint64_t,uint64_t);
@@ -34,6 +33,7 @@ signals:
 private slots:
 //    void finishRun();
     void slotSetFloor(qulonglong);
+    void slotBlockGUI(QVariant var);
 
 private:
 //    void run(QString pdfFilePath, QString savePath);
@@ -47,7 +47,7 @@ private:
     ViraEditorView * _view;
     qulonglong _parentWindowId = 0;
     qulonglong _currFacilityId = 0;
-    uint64_t _editObjectGeometry = 0;
+    bool _blockGUI = false;
 };
 
 #endif // ViraEditorForm_H

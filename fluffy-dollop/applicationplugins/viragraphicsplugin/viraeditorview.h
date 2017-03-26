@@ -31,7 +31,7 @@ public:
     void reinit(qulonglong facilityId);
     void centerEditorOn(qulonglong id);
     void selectionItemsChanged(uint64_t prev_id, uint64_t curr_id);
-    void editObjectGeometry(quint64 id);
+    void selectViraItem(qulonglong id, bool centerOnArea);
 
 signals:
     
@@ -41,6 +41,8 @@ public slots:
     void zoomOut();
     void zoomReset();
     void slotSelectItem(qulonglong id, bool centerOnArea);
+    void slotEditAreaGeometry(QVariant var);
+    void slotSetMarkPosition(QVariant var);
 
 protected:
     virtual void wheelEvent(QWheelEvent* e);
@@ -52,8 +54,9 @@ protected:
     void clearTempItems();
 
 private:
-//    void syncItems();
+    enum Mode {ScrollMode, EditAreaMode, EditMarkMode};
 
+    Mode _mode = ScrollMode;
     int _zoom = 1;
     int _zoomMin = 1;
     int _zoomMax = 1;
@@ -63,6 +66,7 @@ private:
     QList<GraphicsPixmapItem *> _owerViews;
     QMap<qulonglong, QGraphicsItem *> _itemsOnFloor;
     uint64_t _editObjectGeometry = 0;
+    QPolygonF _editObjectExtend;
 
     QList<QGraphicsLineItem *> _lines;
 };

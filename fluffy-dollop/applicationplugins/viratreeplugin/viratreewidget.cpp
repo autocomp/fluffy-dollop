@@ -13,7 +13,11 @@ using namespace regionbiz;
 ViraTreeWidget::ViraTreeWidget(QWidget *parent)
     : QTreeWidget(parent)
 {
-    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::EditObjectGeometry, this, SLOT(slotEditObjectGeometry(QVariant)),
+    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::BlockGUI, this, SLOT(slotBlockGUI(QVariant)),
+                                      qMetaTypeId< bool >(),
+                                      QString("visualize_system") );
+
+    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::EditModeFinish, this, SLOT(slotEditModeFinish(QVariant)),
                                       qMetaTypeId< quint64 >(),
                                       QString("visualize_system") );
 
@@ -192,16 +196,20 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
     sortByColumn(0, Qt::AscendingOrder);
 }
 
-void ViraTreeWidget::slotEditObjectGeometry(QVariant var)
+void ViraTreeWidget::slotBlockGUI(QVariant var)
+{
+    setDisabled(var.toBool());
+}
+
+void ViraTreeWidget::slotEditModeFinish(QVariant var)
 {
     quint64 id = var.toUInt();
-    setEnabled(id == 0);
-    if(id == 0)
+    if(id != 0)
     {
-        auto it = _items.find(_editObjectGeometry);
+        auto it = _items.find(id);
         if(it != _items.end())
         {
-            BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(_editObjectGeometry, BaseArea::AT_ROOM);
+            BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(id, BaseArea::AT_ROOM);
             RoomPtr roomPtr = BaseArea::convert< Room >(ptr);
             if(roomPtr)
             {
@@ -212,7 +220,6 @@ void ViraTreeWidget::slotEditObjectGeometry(QVariant var)
             }
         }
     }
-    _editObjectGeometry = id;
 }
 
 void ViraTreeWidget::slotItemSelectionChanged()

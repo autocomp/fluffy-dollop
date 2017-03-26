@@ -19,7 +19,6 @@ public:
     virtual bool mousePressEvent(QMouseEvent* e, QPointF scenePos);
     virtual void init(QGraphicsScene * scene, QGraphicsView * view, const int * zoom, const double * scale, double frameCoef, uint visualizerId);
     virtual void zoomChanged();
-    void editObjectGeometry(quint64 id);
 
 signals:
     void showFacility(qulonglong id);
@@ -35,6 +34,7 @@ protected slots:
     void slotSelectionItemsChanged(uint64_t,uint64_t);
     void slotCenterOn(uint64_t);
     void slotSelectItem(qulonglong id, bool centerOnArea);
+    void slotBlockGUI(QVariant var);
 
 private:
     QMap<qulonglong, AreaGraphicsItem*> _items;
@@ -42,7 +42,8 @@ private:
 
     QMap<qulonglong, QString> _itemId_facilityFolder;
     qulonglong _prevSelectedFacilityId = 0;
-    uint64_t _editObjectGeometry = 0;
+    //uint64_t _editObjectGeometry = 0;
+    bool _blockGUI = false;
 };
 
 

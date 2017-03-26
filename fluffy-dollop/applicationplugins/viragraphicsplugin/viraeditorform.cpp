@@ -12,6 +12,8 @@
 #include <QDomDocument>
 #include <libembeddedwidgets/embeddedapp.h>
 #include <regionbiz/rb_manager.h>
+#include <ctrcore/bus/common_message_notifier.h>
+#include <ctrcore/bus/bustags.h>
 
 using namespace regionbiz;
 
@@ -38,6 +40,10 @@ ViraEditorForm::ViraEditorForm(QWidget *parent) :
     auto mngr = RegionBizManager::instance();
     mngr->subscribeCenterOn(this, SLOT(slotCenterOn(uint64_t)));
     mngr->subscribeOnSelect(this, SLOT(slotSelectionItemsChanged(uint64_t,uint64_t)));
+
+    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::BlockGUI, this, SLOT(slotBlockGUI(QVariant)),
+                                      qMetaTypeId< bool >(),
+                                      QString("visualize_system") );
 }
 
 ViraEditorForm::~ViraEditorForm()
@@ -47,16 +53,14 @@ ViraEditorForm::~ViraEditorForm()
     delete ui;
 }
 
-void ViraEditorForm::editObjectGeometry(quint64 id)
+void ViraEditorForm::slotBlockGUI(QVariant var)
 {
-    _editObjectGeometry = id;
-    _view->editObjectGeometry(id);
-    _viraPagesListWidget->setEnabled(id == 0);
+    _blockGUI = var.toBool();
 }
 
 void ViraEditorForm::slotSwitchOnMap()
 {
-    if(_editObjectGeometry == 0)
+    if( ! _blockGUI)
         emit switchOnMap();
 }
 
@@ -65,45 +69,45 @@ void ViraEditorForm::slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_i
     if(curr_id > 0)
     {
         BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(curr_id);
-        if( ! ptr)
-            return;
-
-        uint64_t facilityId(0);
-        switch(ptr->getType())
+        if(ptr)
         {
-        case BaseArea::AT_REGION :
-        case BaseArea::AT_LOCATION :
-            return;
-
-        case BaseArea::AT_FACILITY :
-        {
-            facilityId = curr_id;
-        }break;
-
-        case BaseArea::AT_FLOOR :
-        case BaseArea::AT_ROOMS_GROUP :
-        case BaseArea::AT_ROOM :
-        {
-            BaseAreaPtr parentPtr = ptr->getParent();
-            while(parentPtr)
+            uint64_t facilityId(0);
+            switch(ptr->getType())
             {
-                if(parentPtr->getType() == BaseArea::AT_FACILITY)
+            case BaseArea::AT_REGION :
+            case BaseArea::AT_LOCATION :
+                return;
+
+            case BaseArea::AT_FACILITY :
+            {
+                facilityId = curr_id;
+            }break;
+
+            case BaseArea::AT_FLOOR :
+            case BaseArea::AT_ROOMS_GROUP :
+            case BaseArea::AT_ROOM :
+            {
+                BaseAreaPtr parentPtr = ptr->getParent();
+                while(parentPtr)
                 {
-                    facilityId = parentPtr->getId();
-                    break;
+                    if(parentPtr->getType() == BaseArea::AT_FACILITY)
+                    {
+                        facilityId = parentPtr->getId();
+                        break;
+                    }
+                    parentPtr = parentPtr->getParent();
                 }
-                parentPtr = parentPtr->getParent();
+            }break;
             }
-        }break;
-        }
 
-        if(facilityId > 0)
-            if(_currFacilityId != facilityId)
-            {
-                _currFacilityId = facilityId;
-                _viraPagesListWidget->reinit(facilityId);
-                _view->reinit(facilityId);
-            }
+            if(facilityId > 0)
+                if(_currFacilityId != facilityId)
+                {
+                    _currFacilityId = facilityId;
+                    _viraPagesListWidget->reinit(facilityId);
+                    _view->reinit(facilityId);
+                }
+        }
     }
     _viraPagesListWidget->selectionItemsChanged(prev_id, curr_id);
     _view->selectionItemsChanged(prev_id, curr_id);

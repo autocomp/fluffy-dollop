@@ -1,17 +1,103 @@
 #include "markgraphicsitem.h"
-
+#include "viraeditorview.h"
 #include <QGraphicsPixmapItem>
 #include <QGraphicsView>
-#include <QLabel>
+#include <QDir>
+#include <ctrcore/ctrcore/ctrconfig.h>
+#include <regionbiz/rb_manager.h>
+#include <regionbiz/rb_locations.h>
 
-MarkGraphicsItem::MarkGraphicsItem(qulonglong id, const QPixmap &pixmap, const QString &annotation)
+using namespace regionbiz;
+
+MarkGraphicsItem::MarkGraphicsItem(qulonglong id)
     : _id(id)
 {
     setFlag(QGraphicsItem::ItemIgnoresTransformations);
-    setZValue(10000);
+    setZValue(100000);
     setPixmap(QPixmap(":/img/mark.png"));
     setOffset(-6, -43);
     setAcceptHoverEvents(true);
+
+    reinit();
+}
+
+void MarkGraphicsItem::setItemselected(bool on_off)
+{
+    setPixmap(on_off ? QPixmap(":/img/selected_mark.png") : QPixmap(":/img/mark.png"));
+    if(on_off)
+    {
+        foreach(QGraphicsView * view, scene()->views())
+        {
+            QRectF viewportSceneRect(view->mapToScene(view->contentsRect().topLeft()), view->mapToScene(view->contentsRect().bottomRight()));
+            if(viewportSceneRect.contains(scenePos()) == false)
+                view->centerOn(this);
+        }
+
+        _preview = new QGraphicsPixmapItem(_pixmap, this);
+        _preview->setFlag(QGraphicsItem::ItemIsSelectable, false);
+        _preview->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
+        _preview->setFlag(QGraphicsItem::ItemStacksBehindParent, true);
+        _preview->setAcceptHoverEvents(true);
+        _preview->setPos(-6, - (40 + _pixmap.height())); // -6, -43
+    }
+    else
+    {
+        delete _preview;
+        _preview = nullptr;
+    }
+
+    _isSelected = on_off;
+}
+
+void MarkGraphicsItem::centerOnItem()
+{
+    foreach(QGraphicsView * view, scene()->views())
+    {
+        QRectF viewportSceneRect(view->mapToScene(view->contentsRect().topLeft()), view->mapToScene(view->contentsRect().bottomRight()));
+        if(viewportSceneRect.contains(scenePos()) == false)
+            view->centerOn(this);
+    }
+}
+
+quint64 MarkGraphicsItem::getId()
+{
+    return _id;
+}
+
+void MarkGraphicsItem::reinit()
+{
+    MarkPtr ptr = RegionBizManager::instance()->getMark(_id);
+    if( ! ptr)
+        return;
+
+    QString annotation = QString::fromUtf8("дефект");
+    BaseMetadataPtr defect = ptr->getMetadata("defect");
+    if(defect)
+        annotation.append(defect->getValueAsString());
+
+    BaseMetadataPtr responsible = ptr->getMetadata("responsible");
+    if(responsible)
+        annotation.append(QString(" ") + responsible->getValueAsString());
+
+    BaseMetadataPtr data_time = ptr->getMetadata("data_time");
+    if(data_time)
+        annotation.append(QString(" ") + data_time->getValueAsString());
+
+    QPixmap pixmap;
+    QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath");
+    if(regionBizInitJson_Path.isValid())
+    {
+         QString destPath = regionBizInitJson_Path.toString()+ QDir::separator() + QString::number(_id);
+         QDir dir(destPath);
+         QStringList list = dir.entryList(QDir::Files);
+         if(list.isEmpty() == false)
+         {
+             destPath = destPath + QDir::separator() + list.first();
+             pixmap = QPixmap(destPath);
+         }
+    }
+    if(pixmap.isNull())
+        return;
 
     double aspectRatio = ((double)pixmap.width() / (double)pixmap.height());
     QSize dstSize(200 * aspectRatio,200);
@@ -92,49 +178,13 @@ MarkGraphicsItem::MarkGraphicsItem(qulonglong id, const QPixmap &pixmap, const Q
                 pr.drawText(2, 2+ img.height() + 2 + fm.height() * (++N), line);
         }
     }
-}
 
-void MarkGraphicsItem::setItemselected(bool on_off)
-{
-    setPixmap(on_off ? QPixmap(":/img/selected_mark.png") : QPixmap(":/img/mark.png"));
-    if(on_off)
-    {
-        foreach(QGraphicsView * view, scene()->views())
-        {
-            QRectF viewportSceneRect(view->mapToScene(view->contentsRect().topLeft()), view->mapToScene(view->contentsRect().bottomRight()));
-            if(viewportSceneRect.contains(scenePos()) == false)
-                view->centerOn(this);
-        }
-
-        _preview = new QGraphicsPixmapItem(_pixmap, this);
-        _preview->setFlag(QGraphicsItem::ItemIsSelectable, false);
-        _preview->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
-        _preview->setFlag(QGraphicsItem::ItemStacksBehindParent, true);
-        _preview->setAcceptHoverEvents(true);
-        _preview->setPos(-6, - (40 + _pixmap.height())); // -6, -43
-    }
-    else
-    {
-        delete _preview;
-        _preview = nullptr;
-    }
-
-    _isSelected = on_off;
-}
-
-void MarkGraphicsItem::centerOnItem()
-{
-    foreach(QGraphicsView * view, scene()->views())
-    {
-        QRectF viewportSceneRect(view->mapToScene(view->contentsRect().topLeft()), view->mapToScene(view->contentsRect().bottomRight()));
-        if(viewportSceneRect.contains(scenePos()) == false)
-            view->centerOn(this);
-    }
 }
 
 void MarkGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     emit signalSelectItem(_id, false);
+    //QGraphicsPixmapItem::mousePressEvent(event);
 }
 
 void MarkGraphicsItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)

@@ -3,6 +3,8 @@
 #include <QDir>
 #include <ctrcore/ctrcore/ctrconfig.h>
 #include <regionbiz/rb_manager.h>
+#include <ctrcore/bus/common_message_notifier.h>
+#include <ctrcore/bus/bustags.h>
 
 using namespace regionbiz;
 
@@ -21,6 +23,10 @@ ViraPagesListWidget::ViraPagesListWidget()
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
     connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(slotSelectionChanged()));
+
+    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::BlockGUI, this, SLOT(slotBlockGUI(QVariant)),
+                                      qMetaTypeId< bool >(),
+                                      QString("visualize_system") );
 }
 
 void ViraPagesListWidget::reinit(qulonglong facilityId)
@@ -77,6 +83,11 @@ void ViraPagesListWidget::slotSelectionChanged()
         emit setFloor(id);
         _block = false;
     }
+}
+
+void ViraPagesListWidget::slotBlockGUI(QVariant var)
+{
+    setDisabled(var.toBool());
 }
 
 void ViraPagesListWidget::selectionItemsChanged(uint64_t prev_id, uint64_t curr_id)

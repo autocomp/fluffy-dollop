@@ -85,6 +85,9 @@ border-color: rgb(255, 255, 255);</string>
      <property name="text">
       <string/>
      </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
    <item>

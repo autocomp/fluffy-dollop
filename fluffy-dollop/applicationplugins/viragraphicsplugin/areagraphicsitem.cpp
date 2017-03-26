@@ -97,12 +97,22 @@ void AreaGraphicsItem::centerOnItem()
         }
 }
 
+quint64 AreaGraphicsItem::getId()
+{
+    return _areaInitData.id;
+}
+
+void AreaGraphicsItem::reinit()
+{
+
+}
+
 void AreaGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     if(_areaInitData.isSelectableFromMap)
     {
         if(polygon().containsPoint(event->pos(), Qt::OddEvenFill))
-            emit signalSelectItem(_areaInitData.id, false); // regionbiz::RegionBizManager::instance()->selectArea(_areaInitData.id);
+            emit signalSelectItem(_areaInitData.id, false);
         else
             QGraphicsPolygonItem::mousePressEvent(event);
     }

@@ -1,5 +1,6 @@
 #include "virastatusbar.h"
 #include "ui_virastatusbar.h"
+#include "markform.h"
 
 #include <QDebug>
 
@@ -24,39 +25,17 @@ ViraStatusBar::ViraStatusBar( quint64 parentWidgetId, QWidget *parent ):
     ui->addMark->setIcon(QIcon(":/img/mark_button"));
 
     connect(ui->moreInfo, SIGNAL(clicked(bool)), this, SLOT(slotShowMoreInfo(bool)));
-    connect(ui->editObject, SIGNAL(clicked(bool)), this, SLOT(slotEditObject(bool)));
+    connect(ui->editObject, SIGNAL(clicked(bool)), this, SLOT(slotEditAreaGeometry(bool)));
     connect(ui->addMark, SIGNAL(clicked(bool)), this, SLOT(slotAddMark(bool)));
     reset();
 
     auto mngr = RegionBizManager::instance();
     mngr->subscribeOnSelect(this, SLOT(slotObjectSelectionChanged(uint64_t,uint64_t)));
+    mngr->subscribeCenterOn(this, SLOT(slotObjectCenterOn(uint64_t)));
 
-    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::EditObjectGeometryFinish, this, SLOT(slotEditObjectGeometryFinish(QVariant)),
+    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::EditModeFinish, this, SLOT(slotEditObjectGeometryFinish(QVariant)),
                                       qMetaTypeId< quint64 >(),
                                       QString("visualize_system") );
-
-//    auto moreInfoWidget = new ViraInfoWidget();
-//    _iface = new EmbIFaceNotifier( moreInfoWidget );
-//    QString tag = QString("ViraStatusBar_MoreInfoWidget");
-//    quint64 widgetId = ewApp()->restoreWindow(tag, _iface);
-//    if(0 == widgetId)
-//    {
-//        ew::EmbeddedWindowStruct struc;
-//        ew::EmbeddedHeaderStruct headStr;
-//        headStr.hasCloseButton = true;
-//        headStr.hasMinMaxButton = false;
-//        headStr.hasCollapseButton = false;
-//        //headStr.headerPixmap = ":/img/061_icons_32_tools_pdf.png";
-//        headStr.windowTitle = QString::fromUtf8("Информация");
-//        struc.header = headStr;
-//        struc.iface = _iface;
-//        struc.widgetTag = tag;
-//        struc.minSize = QSize(300,300);
-//        struc.topOnHint = true;
-//        ewApp()->createWindow(struc); //, parentWidgetId);
-//    }
-//    ewApp()->setVisible(_iface->id(), false);
-//    connect(_iface, SIGNAL(signalClosed()), this, SLOT(slotMoreInfoWidgetClosed()));
 }
 
 ViraStatusBar::~ViraStatusBar()
@@ -64,9 +43,29 @@ ViraStatusBar::~ViraStatusBar()
     delete ui;
 }
 
+void ViraStatusBar::slotObjectCenterOn(uint64_t id)
+{
+    MarkPtr ptr = RegionBizManager::instance()->getMark(id);
+    if(ptr)
+    {
+        showMarkInfoWidgwt(false, ptr->getId());
+    }
+}
+
 void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t curr_id )
 {
     reset();
+
+    if(curr_id == 0)
+        return;
+
+    MarkPtr markPtr = RegionBizManager::instance()->getMark(curr_id);
+    if(markPtr)
+    {
+        //! Alex, write code for set info about selected mark to status bar !
+        ui->moreInfo->show();
+        return;
+    }
 
     BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(curr_id);
     if(! ptr)
@@ -76,10 +75,9 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
 
     switch( ptr->getType() ) {
     case BaseArea::AT_FLOOR:
-//    {
-//        ui->editObject->show();
-//        ui->editObject->setToolTip(QString::fromUtf8("Добавить комнату"));
-//    }
+        ui->moreInfo->show();
+        //! Alex, write code for set any info about selected floor to status bar !
+
 //! without BREAK !!!
     case BaseArea::AT_REGION:
     case BaseArea::AT_LOCATION:
@@ -100,6 +98,7 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
         showArendators( data, true );
         showTasks( data );
         ui->editObject->show();
+        ui->moreInfo->show();
         ui->addMark->show();
         ui->editObject->setToolTip(QString::fromUtf8("Редактировать контуры комнаты"));
         break;
@@ -109,24 +108,35 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
 
 void ViraStatusBar::slotAddMark(bool on_off)
 {
+    CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(true), QString("visualize_system"));
+
     quint64 id(on_off ? RegionBizManager::instance()->getSelectedArea() : 0);
-    CommonMessageNotifier::send( (uint)visualize_system::BusTags::EditObjectGeometry, QVariant(id), QString("visualize_system"));
+    CommonMessageNotifier::send( (uint)visualize_system::BusTags::SetMarkPosition, QVariant(id), QString("visualize_system"));
+
     if(on_off && ui->moreInfo->isChecked())
     {
         ui->moreInfo->setChecked(false);
         slotShowMoreInfo(false);
     }
+    ui->moreInfo->setDisabled(on_off);
+    ui->editObject->setDisabled(on_off);
 }
 
-void ViraStatusBar::slotEditObject(bool on_off)
+void ViraStatusBar::slotEditAreaGeometry(bool on_off)
 {
     quint64 id(on_off ? RegionBizManager::instance()->getSelectedArea() : 0);
-    CommonMessageNotifier::send( (uint)visualize_system::BusTags::EditObjectGeometry, QVariant(id), QString("visualize_system"));
+
+    CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(true), QString("visualize_system"));
+
+    CommonMessageNotifier::send( (uint)visualize_system::BusTags::EditAreaGeometry, QVariant(id), QString("visualize_system"));
+
     if(on_off && ui->moreInfo->isChecked())
     {
         ui->moreInfo->setChecked(false);
         slotShowMoreInfo(false);
     }
+    ui->moreInfo->setDisabled(on_off);
+    ui->addMark->setDisabled(on_off);
 }
 
 void ViraStatusBar::slotEditObjectGeometryFinish(QVariant var)
@@ -134,11 +144,23 @@ void ViraStatusBar::slotEditObjectGeometryFinish(QVariant var)
     quint64 id = var.toUInt();
     if(id > 0)
     {
-        ui->editObject->blockSignals(true);
-        ui->editObject->setChecked(false);
-        ui->editObject->blockSignals(false);
-        id = 0;
-        CommonMessageNotifier::send( (uint)visualize_system::BusTags::EditObjectGeometry, QVariant(id), QString("visualize_system"));
+        if(ui->editObject->isChecked())
+        {
+            ui->editObject->blockSignals(true);
+            ui->editObject->setChecked(false);
+            ui->editObject->blockSignals(false);
+        }
+        if(ui->addMark->isChecked())
+        {
+            ui->addMark->blockSignals(true);
+            ui->addMark->setChecked(false);
+            ui->addMark->blockSignals(false);
+
+            showMarkInfoWidgwt(true, id);
+        }
+
+        CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(false), QString("visualize_system"));
+        RegionBizManager::instance()->selectArea(id);
     }
 }
 
@@ -153,6 +175,7 @@ void ViraStatusBar::reset()
         delete item;
     }
     ui->name->clear();
+    ui->moreInfo->hide();
     ui->addMark->hide();
     ui->editObject->hide();
 }
@@ -411,56 +434,46 @@ QLabel *ViraStatusBar::getArea(ViraStatusBar::AreaType type, TestData data)
 
 void ViraStatusBar::slotShowMoreInfo(bool on_off)
 {
-    if( !_iface )
+    quint64 id = RegionBizManager::instance()->getSelectedArea();
+    MarkPtr markPtr = RegionBizManager::instance()->getMark(id);
+    if(markPtr)
+    {
+        disconnect(ui->moreInfo, SIGNAL(clicked(bool)), this, SLOT(slotShowMoreInfo(bool)));
+        ui->moreInfo->setChecked(false);
+        connect(ui->moreInfo, SIGNAL(clicked(bool)), this, SLOT(slotShowMoreInfo(bool)));
+
+        showMarkInfoWidgwt(false, id);
+
+        return;
+    }
+
+    if( !_ifaceInfoAreaWidget )
     {
         auto moreInfoWidget = new ViraInfoWidget();
-        _iface = new EmbIFaceNotifier( moreInfoWidget );
+        _ifaceInfoAreaWidget = new EmbIFaceNotifier( moreInfoWidget );
         QString tag = QString("ViraStatusBar_MoreInfoWidget");
-        quint64 widgetId = ewApp()->restoreWindow(tag, _iface);
+        quint64 widgetId = ewApp()->restoreWidget(tag, _ifaceInfoAreaWidget);
         if(0 == widgetId)
         {
-            ew::EmbeddedWindowStruct struc;
+            ew::EmbeddedWidgetStruct struc;
             ew::EmbeddedHeaderStruct headStr;
             headStr.hasCloseButton = true;
             headStr.hasMinMaxButton = false;
             headStr.hasCollapseButton = false;
-            //headStr.headerPixmap = ":/img/061_icons_32_tools_pdf.png";
+            headStr.headerPixmap = ":/img/info_button.png";
             headStr.windowTitle = QString::fromUtf8("Информация");
             struc.header = headStr;
-            struc.iface = _iface;
+            struc.iface = _ifaceInfoAreaWidget;
             struc.widgetTag = tag;
             struc.minSize = QSize(300,300);
             struc.topOnHint = true;
-            ewApp()->createWindow(struc); //, parentWidgetId);
+            ewApp()->createWidget(struc, _parentWidgetId);
         }
-        ewApp()->setVisible(_iface->id(), false);
-        connect(_iface, SIGNAL(signalClosed()), this, SLOT(slotMoreInfoWidgetClosed()));
-
-//        QLabel * testMoreInfoWidget = new QLabel("Hellow! I am more info widget :)");
-//        _iface = new EmbIFaceNotifier(testMoreInfoWidget);
-//        QString tag = QString("ViraStatusBar_MoreInfoWidget");
-//        quint64 widgetId = ewApp()->restoreWindow(tag, _iface);
-//        if(0 == widgetId)
-//        {
-//            ew::EmbeddedWindowStruct struc;
-//            ew::EmbeddedHeaderStruct headStr;
-//            headStr.hasCloseButton = true;
-//            headStr.hasMinMaxButton = false;
-//            headStr.hasCollapseButton = false;
-//            //headStr.headerPixmap = ":/img/061_icons_32_tools_pdf.png";
-//            headStr.windowTitle = QString::fromUtf8("More info");
-//            struc.header = headStr;
-//            struc.iface = _iface;
-//            struc.widgetTag = tag;
-//            struc.minSize = QSize(300,300);
-//            struc.topOnHint = true;
-//            ewApp()->createWindow(struc, _parentWidgetId);
-//        }
-//        ewApp()->setVisible(_iface->id(), false);
-//        connect(_iface, SIGNAL(signalClosed()), this, SLOT(slotMoreInfoWidgetClosed()));
+        ewApp()->setVisible(_ifaceInfoAreaWidget->id(), false);
+        connect(_ifaceInfoAreaWidget, SIGNAL(signalClosed()), this, SLOT(slotMoreInfoWidgetClosed()));
     }
 
-    ewApp()->setVisible(_iface->id(), on_off);
+    ewApp()->setVisible(_ifaceInfoAreaWidget->id(), on_off);
 }
 
 void ViraStatusBar::slotMoreInfoWidgetClosed()
@@ -470,7 +483,55 @@ void ViraStatusBar::slotMoreInfoWidgetClosed()
     connect(ui->moreInfo, SIGNAL(clicked(bool)), this, SLOT(slotShowMoreInfo(bool)));
 }
 
+void ViraStatusBar::slotMarkWidgetClosed()
+{
+    qDebug() << "slotMarkWidgetClosed";
+}
 
+void ViraStatusBar::slotCloseMarkWindow()
+{
+    ewApp()->setVisible(_ifaceInfoMarkWidget->id(), false);
+}
+
+void ViraStatusBar::showMarkInfoWidgwt(bool isEditMode, qulonglong id)
+{
+    if( !_ifaceInfoMarkWidget )
+    {
+        _markForm = new MarkForm;
+        connect(_markForm, SIGNAL(signalCloseWindow()), this, SLOT(slotCloseMarkWindow()));
+        _markForm->showEditWidget(id);
+
+        _ifaceInfoMarkWidget = new EmbIFaceNotifier(_markForm);
+        connect(_ifaceInfoMarkWidget, SIGNAL(signalClosed()), this, SLOT(slotMarkWidgetClosed()));
+        QString tag = QString("ViraStatusBar_MarkInfoWidget");
+        quint64 widgetId = ewApp()->restoreWidget(tag, _ifaceInfoMarkWidget);
+        if(0 == widgetId)
+        {
+            ew::EmbeddedWidgetStruct struc;
+            ew::EmbeddedHeaderStruct headStr;
+            headStr.hasCloseButton = true;
+            headStr.hasMinMaxButton = false;
+            headStr.hasCollapseButton = false;
+            headStr.headerPixmap = ":/img/mark_button.png";
+            headStr.windowTitle = QString::fromUtf8("Информация о дефекте");
+            struc.header = headStr;
+            struc.iface = _ifaceInfoMarkWidget;
+            struc.widgetTag = tag;
+            struc.minSize = QSize(300,300);
+            struc.topOnHint = true;
+            struc.isModal = true;
+            ewApp()->createWidget(struc, _parentWidgetId);
+        }
+    }
+    else
+    {
+        if(isEditMode)
+            _markForm->showEditWidget(id);
+        else
+            _markForm->showInfoWidget(id);
+        ewApp()->setVisible(_ifaceInfoMarkWidget->id(), true);
+    }
+}
 
 
 
