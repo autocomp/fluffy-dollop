@@ -264,7 +264,7 @@ MarkPtrs SqlTranslator::loadMarks()
     MarkPtrs marks;
 
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
-    QString select = "SELECT id, x, y, parent_id FROM marks";
+    QString select = "SELECT id, x, y, parent_id, name, description FROM marks";
     QSqlQuery query( db );
     bool res = query.exec( select );
     if( res )
@@ -274,10 +274,14 @@ MarkPtrs SqlTranslator::loadMarks()
             double x = query.value( 1 ).toDouble();
             double y = query.value( 2 ).toDouble();
             uint64_t parent_id = query.value( 3 ).toLongLong();
+            QString name = query.value( 4 ).toString();
+            QString descr = query.value( 5 ).toString();
 
             MarkPtr mark = BaseEntity::createWithId< Mark >( id );
             mark->setCenter( QPointF( x, y ));
             mark->setParentId( parent_id );
+            mark->setName( name );
+            mark->setDesription( descr );
 
             marks.push_back( mark );
         }
@@ -297,12 +301,15 @@ bool SqlTranslator::commitMark( MarkPtr mark )
     QSqlQuery query( db );
     tryQuery( delete_mark );
 
-    QString insert_update = "INSERT INTO marks( id, x, y, parent_id ) VALUES (?, ?, ?, ?)";
+    QString insert_update = "INSERT INTO marks( id, x, y, parent_id, name, description ) "
+                            "VALUES (?, ?, ?, ?, ?, ?)";
     query.prepare( insert_update );
     query.addBindValue( (qulonglong) mark->getId() );
     query.addBindValue( mark->getCenter().x() );
     query.addBindValue( mark->getCenter().y() );
     query.addBindValue( (qulonglong) mark->getParentId() );
+    query.addBindValue( mark->getName() );
+    query.addBindValue( mark->getDescription() );
     tryQuery();
 
     // commit metadate
@@ -429,6 +436,9 @@ std::vector< std::shared_ptr< LocType >> SqlTranslator::loadBaseAreas( QString t
             QString descr = query.value( "description" ).toString();
 
             LocTypePtr area_ptr = BaseEntity::createWithId< LocType >( id );
+            if( !area_ptr )
+                continue;
+
             setParentForBaseLocation( area_ptr, parent_id );
             area_ptr->setName( name );
             area_ptr->setDesription( descr );

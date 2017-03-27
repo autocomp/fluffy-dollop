@@ -1,5 +1,5 @@
-#ifndef RB_SELECTION_MANAGER_H
-#define RB_SELECTION_MANAGER_H
+#ifndef RB_SIGNAL_MANAGER_H
+#define RB_SIGNAL_MANAGER_H
 
 #include <QObject>
 
@@ -31,4 +31,4 @@ private:
 // WARNING resolve dependency include trouble
 #include "rb_manager.h"
 
-#endif // RB_SELECTION_MANAGER_H
+#endif // RB_SIGNAL_MANAGER_H

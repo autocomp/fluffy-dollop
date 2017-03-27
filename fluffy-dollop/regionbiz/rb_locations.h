@@ -50,13 +50,8 @@ public:
     BaseAreaPtr getParent();
     BaseAreaPtrs getChilds();
 
+    // commit
     bool commit();
-
-    // params
-    QString getDescription();
-    void setDesription( QString descr );
-    QString getName();
-    void setName( QString name );
 
     template< typename Type >
     static std::shared_ptr< Type > convert( BaseAreaPtr base )
@@ -75,8 +70,6 @@ public:
 protected:
     QPolygonF _coords;
     uint64_t _parent_id = 0;
-    QString _description = "";
-    QString _name = "";
 
 private:
     // private, because we need protect it

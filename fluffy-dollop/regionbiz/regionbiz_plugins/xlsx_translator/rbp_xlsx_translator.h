@@ -5,10 +5,11 @@
 
 namespace regionbiz {
 
+REGISTER_PLUGIN( xlsx_tranlator )
+
 class XlsxTranlsator: public QObject, public BaseTranslator
 {
     Q_OBJECT
-
 public:
     XlsxTranlsator();
 

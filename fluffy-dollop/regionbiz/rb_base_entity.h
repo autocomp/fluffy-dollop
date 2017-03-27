@@ -29,6 +29,12 @@ public:
     uint64_t getId();
     virtual EntityType getEntityType() = 0;
 
+    // params
+    QString getDescription();
+    void setDesription( QString descr );
+    QString getName();
+    void setName( QString name );
+
     // some technick functions
     static bool isEntityExist( uint64_t id );
     static uint64_t getMaxId();
@@ -70,6 +76,8 @@ protected:
     BaseEntityPtr getItself();
 
     uint64_t _id = 0;
+    QString _description = "";
+    QString _name = "";
 
 private:
     static std::map< uint64_t, BaseEntityPtr >& getEntitys();

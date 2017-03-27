@@ -6,7 +6,7 @@
 
 #include "rb_locations.h"
 #include "rb_translator.h"
-#include "rb_selection_manager.h"
+#include "rb_signal_manager.h"
 #include "rb_metadata.h"
 #include "rb_marks.h"
 

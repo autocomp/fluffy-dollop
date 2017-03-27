@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <algorithm>
 #include <functional>
-#include <dlfcn.h>
+#include <QPluginLoader>
 #include <QFile>
 #include <QJsonDocument>
 #include <QVariant>
@@ -554,7 +554,7 @@ bool RegionBizManager::processTranslators(QVariantMap settings)
     {
         QString name = settings[ "main_translator" ].toString();
         _translator = getTranslatorByName( name );
-        if( _translator->checkTranslator( error_text ))
+        if( _translator->checkTranslator( BaseTranslator::CT_READ, error_text ))
         {
             loadDataByTranslator();
         }
@@ -593,14 +593,14 @@ bool RegionBizManager::loadPlugins( QString plugins_path, bool load_all,
         std::cout << "Start loading \"" << file_info.fileName().toUtf8().data()
                   << "\"" << std::endl;
 
-        auto link = dlopen( file_info.filePath().toUtf8().data(), RTLD_LAZY );
-        if( link )
+        QPluginLoader loader( file_info.filePath() );
+        if( loader.load() )
             std::cout << "Plugin \"" << file_info.fileName().toUtf8().data()
                       << "\" loaded" << std::endl;
         else
         {
             std::cerr << "Error while loading \"" << file_info.fileName().toUtf8().data()
-                      << "\"\n" << dlerror() << std::endl;
+                      << "\"\n" << loader.errorString().toUtf8().data() << std::endl;
 
             no_error = false;
         }

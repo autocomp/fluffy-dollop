@@ -11,8 +11,8 @@ int main()
 
     //! init
     auto mngr = RegionBizManager::instance();
-    QString str = "~/.contour_ng/regionbiz_psql.json";
-    //QString str = "~/.contour_ng/regionbiz_psql.json";
+//    QString str = "~/.contour_ng/regionbiz_psql.json";
+    QString str = "~/.contour_ng/regionbiz_sqlite.json";
     bool inited = mngr->init( str );
 
     //! load regons
@@ -173,8 +173,10 @@ int main()
     marks = room_for_marks->getMarks();
     qDebug() << "We have" << marks.size() << "marks after commit-delete";
     // check other variant
-    room_for_marks->addMark( QPointF( 50, 20 ));
-    room_for_marks->addMark( QPointF( 31, 20 ));
+    MarkPtr mark_new = room_for_marks->addMark( QPointF( 50, 20 ));
+    mark_new->setName( "Тест" );
+    mark_new->setDesription( "Описание" );
+
     marks = room_for_marks->getMarks();
     qDebug() << "We have" << marks.size() << "marks again";
     qDebug() << "  Commit room's marks:" << room_for_marks->commitMarks();
@@ -195,6 +197,10 @@ int main()
     // set settings of path
     QVariantMap settings = {{ "file_path", "./data/гостиница Россия.xlsx" }};
     ptr->init( settings );
+    QString err = "";
+    bool try_check_all_load = ptr->checkTranslator( BaseTranslator::CT_READ, err );
+    if( !try_check_all_load )
+        qDebug() << "Yes, some wrong" << err;
 
     // load floors and rooms
     // after loading all areas in model system

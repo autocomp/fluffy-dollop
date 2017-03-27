@@ -40,9 +40,24 @@ std::map< uint64_t, BaseEntityPtr >& BaseEntity::getEntitys()
     return entitys;
 }
 
-BaseEntityPtr BaseEntity::getItself()
+QString BaseEntity::getDescription()
 {
-    return getEntitys()[ _id ];
+    return _description;
+}
+
+void BaseEntity::setDesription(QString descr)
+{
+    _description = descr;
+}
+
+QString BaseEntity::getName()
+{
+    return _name;
+}
+
+void BaseEntity::setName(QString name)
+{
+    _name = name;
 }
 
 bool BaseEntity::isEntityExist(uint64_t id)
@@ -118,3 +133,7 @@ bool BaseEntity::deleteEntity(uint64_t id)
     return getEntitys().erase( id );
 }
 
+BaseEntityPtr BaseEntity::getItself()
+{
+    return getEntitys()[ _id ];
+}

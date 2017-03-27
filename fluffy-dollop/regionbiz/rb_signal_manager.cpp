@@ -1,4 +1,4 @@
-#include "rb_selection_manager.h"
+#include "rb_signal_manager.h"
 
 using namespace regionbiz;
 

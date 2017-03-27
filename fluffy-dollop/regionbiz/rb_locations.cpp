@@ -69,26 +69,6 @@ void BaseArea::setParent(uint64_t id)
     _parent_id = id;
 }
 
-QString BaseArea::getDescription()
-{
-    return _description;
-}
-
-void BaseArea::setDesription(QString descr)
-{
-    _description = descr;
-}
-
-QString BaseArea::getName()
-{
-    return _name;
-}
-
-void BaseArea::setName(QString name)
-{
-    _name = name;
-}
-
 BizRelationKepper::BizRelationKepper(uint64_t id):
     BaseArea( id )
 {}

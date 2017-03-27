@@ -1,6 +1,7 @@
 #include "rb_translator.h"
 
 #include <iostream>
+#include <tuple>
 
 #include "rb_manager.h"
 
@@ -13,60 +14,52 @@ bool BaseTranslator::init( QVariantMap settings )
     return init_correct;
 }
 
-bool BaseTranslator::checkTranslator(QString &err)
+// use template checker
+#define CHECK_FUNCTIONS( this_type, total_type, ret, ... ) \
+    if( this_type & total_type ) \
+        ret = checkFunctions( std::make_tuple( __VA_ARGS__ )) \
+
+bool BaseTranslator::checkTranslator( CheckType type, QString &err )
 {
-    if( !_load_regions )
+    bool no_warning = true;
+
+    // all load
+    CHECK_FUNCTIONS( CT_READ, type, no_warning,
+                     _load_regions, _load_locations, _load_facilitys,
+                     _load_floors, _load_rooms_groups, _load_rooms,
+                     _load_propertys, _load_rents,
+                     _load_metadata, _load_marks );
+    if( !no_warning )
     {
-        err = "Load Regions functon not declared";
-        return false;
+        err = "Some of Load functons not declared";
+        return no_warning;
     }
-
-    if( !_load_locations )
-    {
-        err = "Load Locations functon not declared";
-        return false;
-    }
-
-    if( !_load_facilitys )
-    {
-        err = "Load Facilitys functon not declared";
-        return false;
-    }
-
-    if( !_load_floors )
-    {
-        err = "Load Floors functon not declared";
-        return false;
-    }
-
-    if( !_load_rooms_groups )
-    {
-        err = "Load Rooms Groups functon not declared";
-        return false;
-    }
-
-    if( !_load_rooms )
-    {
-        err = "Load Rooms functon not declared";
-        return false;
-    }
-
-    // TODO add checkers
-    // relations
-
-    // metadata
 
     // commit
+    CHECK_FUNCTIONS( CT_COMMIT, type, no_warning,
+                     _commit_area, _commit_mark );
+    if( !no_warning )
+    {
+        err = "Some of Commit functons not declared";
+        return no_warning;
+    }
 
-    // marks
+    // delete
+    CHECK_FUNCTIONS( CT_DELETE, type, no_warning,
+                     _delete_area, _delete_mark );
+    if( !no_warning )
+    {
+        err = "Some of Delete functons not declared";
+        return no_warning;
+    }
 
-    return true;
+    return no_warning;
 }
 
-bool BaseTranslator::checkTranslator()
+bool BaseTranslator::checkTranslator(CheckType check_type)
 {
     QString tmp_str;
-    bool check_state = checkTranslator( tmp_str );
+    bool check_state = checkTranslator( check_type, tmp_str );
     return check_state;
 }
 

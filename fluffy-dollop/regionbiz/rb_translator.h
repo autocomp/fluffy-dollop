@@ -17,10 +17,17 @@ namespace regionbiz {
 class BaseTranslator
 {
 public:
+    enum CheckType
+    {
+        CT_READ = 0x1,
+        CT_COMMIT = 0x2,
+        CT_DELETE = 0x3
+    };
+
     bool init(QVariantMap settings);
     // TODO think about different checkers
-    bool checkTranslator( QString& err );
-    bool checkTranslator();
+    bool checkTranslator( CheckType check_type, QString& err );
+    bool checkTranslator( CheckType check_type );
 
     // get name
     virtual QString getTranslatorName() = 0;
@@ -86,6 +93,35 @@ protected:
     std::function< bool( MarkPtr ) > _commit_mark;
 
 private:
+    /**
+     * Template functors to check (by bool interpret) all elemets
+     * CheckTuple - check functor. It's recursive form template
+     * checkFunctions -function, that create CheckTuple by size
+     */
+    template< int index, typename... Ts>
+    struct CheckTuple {
+        bool operator() (const std::tuple<Ts...>& t) {
+            if( !( std::get< index >( t )))
+                return false;
+            // recursive step
+            return CheckTuple< index - 1, Ts... >{}( t );
+        }
+    };
+    template<typename... Ts>
+    struct CheckTuple<0, Ts...> {
+        bool operator() (const std::tuple<Ts...>& t) {
+            // recursive base
+            return (bool) ( std::get< 0 >( t ));
+        }
+    };
+    template<typename... Ts>
+    bool checkFunctions( const std::tuple<Ts...>& t ) {
+        // determine size
+        const auto size = std::tuple_size<std::tuple<Ts...>>::value;
+        // start recursive
+        return CheckTuple<size - 1, Ts...>{}( t );
+    }
+
     template< typename Return, typename Func >
     Return loadAreas( Func function );
 };
@@ -116,6 +152,17 @@ private:
  **/
 #define REGISTER_TRANSLATOR( trans ) \
     BaseTranslatorFabricRegister< trans > base_register_ ## trans;
+
+/**
+  * This macro register plugin with empty metadate
+  * for QPluginLoader. Must be used on header (for moc)
+  */
+#define REGISTER_PLUGIN( plugin ) \
+    class plugin: public QObject \
+    { \
+        Q_OBJECT \
+        Q_PLUGIN_METADATA(IID "ru.vega.contour.RegionBizPluginIface") \
+    };
 
 template< typename Translator >
 class BaseTranslatorFabricRegister

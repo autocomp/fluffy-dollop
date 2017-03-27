@@ -91,6 +91,7 @@ void XlsxTranlsator::loadData( const QString& file_path )
         }
     }
 
+    // TODO smart xlsx read by template
     // check template
     if( key_value.find( "floor" ) == key_value.end()
             || key_value.find( "room_name" ) == key_value.end()
@@ -216,7 +217,7 @@ RoomPtrs XlsxTranlsator::loadRooms()
     for( RoomEntry entry: _entrys )
     {
         BaseAreaPtr room = BaseEntity::createWithId< Room >( BaseEntity::getMaxId() + 1 );
-        if( floor )
+        if( room )
         {
             setParentForBaseLocation( room, _floor_name_to_id[ entry.floor ] );
             room->setName( entry.name );
