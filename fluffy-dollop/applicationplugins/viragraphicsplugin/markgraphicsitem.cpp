@@ -70,16 +70,15 @@ void MarkGraphicsItem::reinit()
     if( ! ptr)
         return;
 
-    QString annotation = QString::fromUtf8("дефект");
-    BaseMetadataPtr defect = ptr->getMetadata("defect");
-    if(defect)
-        annotation.append(defect->getValueAsString());
+    QString annotation = ptr->getName();
+    if( annotation.isEmpty() )
+        annotation = QString::fromUtf8("дефект");
 
-    BaseMetadataPtr responsible = ptr->getMetadata("responsible");
+    BaseMetadataPtr responsible = ptr->getMetadata("worker");
     if(responsible)
         annotation.append(QString(" ") + responsible->getValueAsString());
 
-    BaseMetadataPtr data_time = ptr->getMetadata("data_time");
+    BaseMetadataPtr data_time = ptr->getMetadata("date");
     if(data_time)
         annotation.append(QString(" ") + data_time->getValueAsString());
 

@@ -101,16 +101,16 @@ void MarkForm::slotApply()
     if(ptr)
     {
         if(ui->defect->text().isEmpty() == false)
-            ptr->addMetadata("string", "defect", ui->defect->text());
+            ptr->setName( ui->defect->text());
 
         if(ui->responsible->text().isEmpty() == false)
-            ptr->addMetadata("string", "responsible", ui->responsible->text());
+            ptr->addMetadata("string", "worker", ui->responsible->text());
 
         if(ui->description->toPlainText().isEmpty() == false)
-            ptr->addMetadata("string", "description", ui->description->toPlainText());
+            ptr->setDesription( ui->description->toPlainText());
 
-        ptr->addMetadata("string", "data_time", ui->dateTime->dateTime().toString());
-        ptr->addMetadata("string", "importance", ui->importance->currentText());
+        ptr->addMetadata("string", "date", ui->dateTime->dateTime().toString());
+        ptr->addMetadata("string", "priority", ui->importance->currentText());
         ptr->addMetadata("string", "status", ui->status->currentText());
         ptr->addMetadata("string", "category", ui->category->currentText());
 
