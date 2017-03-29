@@ -17,6 +17,7 @@ TileSceneAsinc::TileSceneAsinc()
 {
     connect(&_futureWatcher, SIGNAL(finished()), this, SLOT(renderFinished()));
     _scene.setBackgroundBrush(QBrush(Qt::gray));
+    _scene.setItemIndexMethod(QGraphicsScene::NoIndex);
 }
 
 bool TileSceneAsinc::isActive()
