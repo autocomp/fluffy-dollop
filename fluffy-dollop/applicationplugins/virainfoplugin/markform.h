@@ -19,11 +19,11 @@ public:
     explicit MarkForm(QWidget *parent = 0);
     ~MarkForm();
 
-    void showEditWidget(quint64 id);
-    void showInfoWidget(quint64 id);
+    void showWidget(quint64 id);
 
 signals:
     void signalCloseWindow();
+    void signalUpdateMark(quint64 id);
 
 private slots:
     void slotLoadImage();

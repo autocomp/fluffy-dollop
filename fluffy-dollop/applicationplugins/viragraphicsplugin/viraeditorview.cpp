@@ -30,6 +30,10 @@ ViraEditorView::ViraEditorView()
     CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::SetMarkPosition, this, SLOT(slotSetMarkPosition(QVariant)),
                                       qMetaTypeId< quint64 >(),
                                       QString("visualize_system") );
+
+    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::UpdateMark, this, SLOT(slotUpdateMark(QVariant)),
+                                      qMetaTypeId< quint64 >(),
+                                      QString("visualize_system") );
 }
 
 ViraEditorView::~ViraEditorView()
@@ -258,6 +262,7 @@ void ViraEditorView::slotEditAreaGeometry(QVariant var)
                 areaGraphicsItem->hide();
         }
         _mode = EditAreaMode;
+        setCursor(QCursor(QPixmap(":/img/cursor_polygon.png")));
     }
     else
     {
@@ -271,18 +276,42 @@ void ViraEditorView::slotEditAreaGeometry(QVariant var)
         }
         _editObjectGeometry = 0;
         _mode = ScrollMode;
+        setCursor(QCursor(Qt::ArrowCursor));
     }
 }
 
 void ViraEditorView::slotSetMarkPosition(QVariant var)
 {
     _editObjectGeometry = var.toUInt();
+    if(_editObjectGeometry > 0)
+    {
+        auto room_ptr = RegionBizManager::instance()->getBaseArea( _editObjectGeometry );
+        auto room = BaseArea::convert<Room>(room_ptr);
+        if(room)
+        {
+            _editObjectExtend = room->getCoords();
+            _mode = EditMarkMode;
+        }
+    }
+    else
+    {
+        setCursor(QCursor(Qt::ArrowCursor));
+        _mode = ScrollMode;
+    }
+}
 
-    auto room_ptr = RegionBizManager::instance()->getBaseArea( _editObjectGeometry );
-    auto room = BaseArea::convert<Room>(room_ptr);
-    _editObjectExtend = room->getCoords();
+void ViraEditorView::slotUpdateMark(QVariant var)
+{
+    auto it = _itemsOnFloor.find(var.toUInt());
+    if(it != _itemsOnFloor.end())
+    {
+        MarkGraphicsItem * markItem = dynamic_cast<MarkGraphicsItem*>(it.value());
+        if(markItem)
+        {
+            markItem->reinit();
+        }
+    }
 
-    _mode = EditMarkMode;
 }
 
 void ViraEditorView::wheelEvent(QWheelEvent *e)
@@ -308,7 +337,7 @@ void ViraEditorView::mouseMoveEvent(QMouseEvent* e)
     {
         QPointF scenePos = mapToScene(e->pos());
         if(_editObjectExtend.containsPoint(scenePos, Qt::OddEvenFill))
-            setCursor(QCursor(Qt::ArrowCursor));
+            setCursor(QCursor(Qt::ArrowCursor)); //
         else
             setCursor(QCursor(Qt::ForbiddenCursor));
     }
@@ -360,11 +389,12 @@ void ViraEditorView::mousePressEvent(QMouseEvent *e)
                 auto room_ptr = RegionBizManager::instance()->getBaseArea( _editObjectGeometry );
                 auto room = BaseArea::convert<Room>(room_ptr);
                 MarkPtr markPtr = room->addMark( scenePos );
-                room->commitMarks();
+                markPtr->setName(QString::fromUtf8("дефект"));
+                bool res = markPtr->commit();
 
                 MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(markPtr->getId());
                 _markGraphicsItem->setPos(scenePos);
-                _markGraphicsItem->setToolTip(QString::fromUtf8("Deffect"));
+                //_markGraphicsItem->setToolTip(QString::fromUtf8("Deffect"));
                 scene()->addItem(_markGraphicsItem);
                 connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
                 _itemsOnFloor.insert(markPtr->getId(), _markGraphicsItem);
@@ -372,6 +402,7 @@ void ViraEditorView::mousePressEvent(QMouseEvent *e)
                 _editObjectExtend.clear();
                 _editObjectGeometry = 0;
                 _mode = ScrollMode;
+                setCursor(QCursor(Qt::ArrowCursor));
 
                 quint64 markId(markPtr->getId());
                 CommonMessageNotifier::send( (uint)visualize_system::BusTags::EditModeFinish, QVariant(markId), QString("visualize_system"));
@@ -464,6 +495,7 @@ void ViraEditorView::mouseDoubleClickEvent(QMouseEvent *e)
 
                 _editObjectGeometry = 0;
                 _mode = ScrollMode;
+                setCursor(QCursor(Qt::ArrowCursor));
 
                 quint64 roomId(room->getId());
                 CommonMessageNotifier::send( (uint)visualize_system::BusTags::EditModeFinish, QVariant(roomId), QString("visualize_system"));

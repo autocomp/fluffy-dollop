@@ -53,6 +53,7 @@ protected slots:
     void slotMarkWidgetClosed();
     void slotCloseMarkWindow();
     void slotObjectCenterOn(uint64_t id);
+    void slotUpdateMark(quint64 id);
 
 protected:
     void reset();

@@ -74,13 +74,15 @@ void MarkGraphicsItem::reinit()
     if( annotation.isEmpty() )
         annotation = QString::fromUtf8("дефект");
 
-    BaseMetadataPtr responsible = ptr->getMetadata("worker");
-    if(responsible)
-        annotation.append(QString(" ") + responsible->getValueAsString());
-
     BaseMetadataPtr data_time = ptr->getMetadata("date");
     if(data_time)
-        annotation.append(QString(" ") + data_time->getValueAsString());
+        annotation.append(QString(", выполнить до:") + data_time->getValueAsString());
+
+    BaseMetadataPtr responsible = ptr->getMetadata("worker");
+    if(responsible)
+        annotation.append(QString(", исполнитель:") + responsible->getValueAsString());
+
+    setToolTip(annotation);
 
     QPixmap pixmap;
     QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath");
@@ -177,7 +179,8 @@ void MarkGraphicsItem::reinit()
                 pr.drawText(2, 2+ img.height() + 2 + fm.height() * (++N), line);
         }
     }
-
+    if(_preview)
+        _preview->setPixmap(_pixmap);
 }
 
 void MarkGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)

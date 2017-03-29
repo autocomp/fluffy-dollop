@@ -43,6 +43,7 @@ public slots:
     void slotSelectItem(qulonglong id, bool centerOnArea);
     void slotEditAreaGeometry(QVariant var);
     void slotSetMarkPosition(QVariant var);
+    void slotUpdateMark(QVariant var);
 
 protected:
     virtual void wheelEvent(QWheelEvent* e);

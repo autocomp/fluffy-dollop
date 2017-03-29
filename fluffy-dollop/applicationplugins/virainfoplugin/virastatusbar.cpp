@@ -108,7 +108,7 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
 
 void ViraStatusBar::slotAddMark(bool on_off)
 {
-    CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(true), QString("visualize_system"));
+    CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(on_off), QString("visualize_system"));
 
     quint64 id(on_off ? RegionBizManager::instance()->getSelectedArea() : 0);
     CommonMessageNotifier::send( (uint)visualize_system::BusTags::SetMarkPosition, QVariant(id), QString("visualize_system"));
@@ -126,7 +126,7 @@ void ViraStatusBar::slotEditAreaGeometry(bool on_off)
 {
     quint64 id(on_off ? RegionBizManager::instance()->getSelectedArea() : 0);
 
-    CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(true), QString("visualize_system"));
+    CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, ((bool)id), QString("visualize_system"));
 
     CommonMessageNotifier::send( (uint)visualize_system::BusTags::EditAreaGeometry, QVariant(id), QString("visualize_system"));
 
@@ -499,7 +499,8 @@ void ViraStatusBar::showMarkInfoWidgwt(bool isEditMode, qulonglong id)
     {
         _markForm = new MarkForm;
         connect(_markForm, SIGNAL(signalCloseWindow()), this, SLOT(slotCloseMarkWindow()));
-        _markForm->showEditWidget(id);
+        connect(_markForm, SIGNAL(signalUpdateMark(quint64)), this, SLOT(slotUpdateMark(quint64)));
+        _markForm->showWidget(id);
 
         _ifaceInfoMarkWidget = new EmbIFaceNotifier(_markForm);
         connect(_ifaceInfoMarkWidget, SIGNAL(signalClosed()), this, SLOT(slotMarkWidgetClosed()));
@@ -525,14 +526,18 @@ void ViraStatusBar::showMarkInfoWidgwt(bool isEditMode, qulonglong id)
     }
     else
     {
-        if(isEditMode)
-            _markForm->showEditWidget(id);
-        else
-            _markForm->showInfoWidget(id);
+        _markForm->showWidget(id);
         ewApp()->setVisible(_ifaceInfoMarkWidget->id(), true);
     }
 }
 
+void ViraStatusBar::slotUpdateMark(quint64 id)
+{
+    CommonMessageNotifier::send( (uint)visualize_system::BusTags::UpdateMark, QVariant(id), QString("visualize_system"));
+
+    //! Alex, write code for update info about mark to status bar !
+    //...
+}
 
 
 
