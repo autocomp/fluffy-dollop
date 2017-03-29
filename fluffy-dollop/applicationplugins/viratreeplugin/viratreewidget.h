@@ -24,6 +24,7 @@ protected slots:
 
 protected:
     void recalcAreaInFacility(QTreeWidgetItem * facilityItem);
+    void recalcTasksInFacility(QTreeWidgetItem * facilityItem);
 
     QMap<qulonglong, QTreeWidgetItem*> _items;
     QColor _defaultColor = QColor(Qt::white);

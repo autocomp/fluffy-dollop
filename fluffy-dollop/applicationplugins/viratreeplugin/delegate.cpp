@@ -240,6 +240,72 @@ void LineEditDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionV
     editor->setGeometry(option.rect);
 }
 
+//-------------------------------------------------------------------------
+
+StatusDelegate::StatusDelegate(QObject *parent)
+    : ViraDelegate(parent)
+{
+}
+
+void StatusDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    int itemType = index.model()->data(index, TYPE).toInt();
+    if(itemType == ItemTypeRoom || itemType == ItemTypeFloor || itemType == ItemTypeFacility)
+    {
+        int tasks_new = index.model()->data(index, TASKS_NEW).toInt();
+        int tasks_in_work = index.model()->data(index, TASKS_IN_WORK).toInt();
+        int tasks_for_check = index.model()->data(index, TASKS_FOR_CHECK).toInt();
+        if(tasks_new == 0 && tasks_in_work == 0 && tasks_for_check == 0)
+        {
+            QStyledItemDelegate::paint(painter, option, index);
+        }
+        else
+        {
+            int part = option.rect.width()/3;
+
+            painter->save();
+            QRect leftRect(option.rect.left(), option.rect.top(), part, option.rect.height());
+            painter->setPen(Qt::NoPen);
+            painter->setBrush(QBrush(QColor(233,124,27)));
+            painter->drawRect(leftRect);
+
+            painter->setBrush(QBrush(Qt::NoBrush));
+            painter->setPen(Qt::white);
+            painter->drawText(leftRect, Qt::AlignCenter, QString::number(tasks_new));
+
+//-----------
+
+            QRect centerRect(option.rect.left() + part, option.rect.top(), part, option.rect.height());
+            painter->setPen(Qt::NoPen);
+            painter->setBrush(QBrush(QColor(226,224,111)));
+            painter->drawRect(centerRect);
+
+            painter->setBrush(QBrush(Qt::NoBrush));
+            painter->setPen(Qt::white);
+            painter->drawText(centerRect, Qt::AlignCenter, QString::number(tasks_in_work));
+
+//-----------
+
+            QRect rightRect(option.rect.left() + part*2, option.rect.top(), part, option.rect.height());
+            painter->setPen(Qt::NoPen);
+            painter->setBrush(QBrush(QColor(86,206,18)));
+            painter->drawRect(rightRect);
+
+            painter->setBrush(QBrush(Qt::NoBrush));
+            painter->setPen(Qt::white);
+            painter->drawText(rightRect, Qt::AlignCenter, QString::number(tasks_for_check));
+
+            painter->restore();
+        }
+    }
+    else
+    {
+        QStyledItemDelegate::paint(painter, option, index);
+    }
+}
+
+
+
 
 
 

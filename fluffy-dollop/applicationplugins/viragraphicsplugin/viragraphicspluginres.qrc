@@ -7,5 +7,6 @@
         <file>img/mark.png</file>
         <file>img/selected_mark.png</file>
         <file>img/cursor_polygon.png</file>
+        <file>img/mark_tr.png</file>
     </qresource>
 </RCC>

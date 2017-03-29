@@ -29,7 +29,7 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
 
     setExpandsOnDoubleClick(false);
     setSelectionMode(QAbstractItemView::SingleSelection);
-    setColumnCount(7);
+    setColumnCount(6);
     setColumnWidth(0, 200);
     setColumnWidth(1, 200);
     setColumnWidth(2, 200);
@@ -41,7 +41,7 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
     headerItem()->setText(3, QString::fromUtf8("Арендатор"));
     headerItem()->setText(4, QString::fromUtf8("Задачи"));
     headerItem()->setText(5, QString::fromUtf8("Комментарий"));
-    headerItem()->setText(6, QString::fromUtf8("ID"));
+    //headerItem()->setText(6, QString::fromUtf8("ID"));
     for(int i(0); i<6; ++ i)
         headerItem()->setTextAlignment(i, Qt::AlignCenter);
 
@@ -61,6 +61,9 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
     connect(comboBoxDelegate, SIGNAL(resaclArea(QModelIndex)), this, SLOT(slotResaclArea(QModelIndex)));
     connect(comboBoxDelegate, SIGNAL(saveItemToDb(QModelIndex)), this, SLOT(slotSaveItemToDb(QModelIndex)));
     setItemDelegateForColumn(2, comboBoxDelegate);
+
+    StatusDelegate * statusDelegate = new StatusDelegate(this);
+    setItemDelegateForColumn(4, statusDelegate);
 
     connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(slotItemSelectionChanged()));
     connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), this, SLOT(slotItemDoubleClicked(QTreeWidgetItem*,int)));
@@ -174,7 +177,27 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
                                 if(commentPtr)
                                     roomItem->setText(5, commentPtr->getValueAsVariant().toString());
 
-
+                                int tasks_new(0);
+                                int tasks_in_work(0);
+                                int tasks_for_check(0);
+                                MarkPtrs marks_of_room = room->getMarks();
+                                for( MarkPtr mark: marks_of_room )
+                                {
+                                    BaseMetadataPtr status = mark->getMetadata("status");
+                                    if(status)
+                                    {
+                                        QString statusStr = status->getValueAsString();
+                                        if(statusStr == QString::fromUtf8("новый"))
+                                            ++tasks_new;
+                                        else if(statusStr == QString::fromUtf8("в работе"))
+                                            ++tasks_in_work;
+                                        else if(statusStr == QString::fromUtf8("на проверку"))
+                                            ++tasks_for_check;
+                                    }
+                                }
+                                roomItem->setData(4, TASKS_NEW, tasks_new);
+                                roomItem->setData(4, TASKS_IN_WORK, tasks_in_work);
+                                roomItem->setData(4, TASKS_FOR_CHECK, tasks_for_check);
 
                                 _items.insert(id, roomItem);
                             }
@@ -183,6 +206,7 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
                     }
                     facilityItem->setExpanded(true);
                     recalcAreaInFacility(facilityItem);
+                    recalcTasksInFacility(facilityItem);
                 }
                 locationItem->setExpanded(true);
             }
@@ -222,6 +246,37 @@ void ViraTreeWidget::recalcAreaInFacility(QTreeWidgetItem * facilityItem)
     }
     facilityItem->setData(1, RENTED_AREA, facilityRentedArea);
     facilityItem->setData(1, TOTAL_AREA, facilityTotalArea);
+}
+
+void ViraTreeWidget::recalcTasksInFacility(QTreeWidgetItem * facilityItem)
+{
+    int facility_tasks_new(0);
+    int facility_tasks_in_work(0);
+    int facility_tasks_for_check(0);
+    for(int i(0); i < facilityItem->childCount(); ++i)
+    {
+        int floor_tasks_new(0);
+        int floor_tasks_in_work(0);
+        int floor_tasks_for_check(0);
+        QTreeWidgetItem * floorItem = facilityItem->child(i);
+        for(int i(0); i < floorItem->childCount(); ++i)
+        {
+            QTreeWidgetItem * roomItem = floorItem->child(i);
+            floor_tasks_new += roomItem->data(4, TASKS_NEW).toInt();
+            floor_tasks_in_work += roomItem->data(4, TASKS_IN_WORK).toInt();
+            facility_tasks_for_check += roomItem->data(4, TASKS_FOR_CHECK).toInt();
+        }
+        floorItem->setData(4, TASKS_NEW, floor_tasks_new);
+        floorItem->setData(4, TASKS_IN_WORK, floor_tasks_in_work);
+        floorItem->setData(4, TASKS_FOR_CHECK, floor_tasks_for_check);
+
+        facility_tasks_new += floor_tasks_new;
+        facility_tasks_in_work += floor_tasks_in_work;
+        facility_tasks_for_check += floor_tasks_for_check;
+    }
+    facilityItem->setData(4, TASKS_NEW, facility_tasks_new);
+    facilityItem->setData(4, TASKS_IN_WORK, facility_tasks_in_work);
+    facilityItem->setData(4, TASKS_FOR_CHECK, facility_tasks_for_check);
 }
 
 void ViraTreeWidget::slotBlockGUI(QVariant var)
@@ -328,7 +383,48 @@ void ViraTreeWidget::slotUpdateMark(QVariant var)
     BaseAreaPtr parentPtr = RegionBizManager::instance()->getBaseArea(markPtr->getParentId());
     if(! parentPtr) return;
 
+    QTreeWidgetItem * item(0);
+    auto it = _items.find(parentPtr->getId());
+    if(it != _items.end())
+        item = it.value();
 
+    RoomPtr room = BaseArea::convert< Room >( parentPtr );
+    if(room && item)
+    {
+        int tasks_new(0);
+        int tasks_in_work(0);
+        int tasks_for_check(0);
+        MarkPtrs marks_of_room = room->getMarks();
+        for( MarkPtr mark: marks_of_room )
+        {
+            BaseMetadataPtr status = mark->getMetadata("status");
+            if(status)
+            {
+                QString statusStr = status->getValueAsString();
+                if(statusStr == QString::fromUtf8("новый"))
+                    ++tasks_new;
+                else if(statusStr == QString::fromUtf8("в работе"))
+                    ++tasks_in_work;
+                else if(statusStr == QString::fromUtf8("на проверку"))
+                    ++tasks_for_check;
+            }
+        }
+        item->setData(4, TASKS_NEW, tasks_new);
+        item->setData(4, TASKS_IN_WORK, tasks_in_work);
+        item->setData(4, TASKS_FOR_CHECK, tasks_for_check);
+
+        int itemType = item->data(0, TYPE).toInt();
+        while(itemType != ItemTypeFacility)
+        {
+            item = item->parent();
+            if( ! item)
+                break;
+            itemType = item->data(0, TYPE).toInt();
+        }
+
+        if(item)
+            recalcTasksInFacility(item);
+    }
 }
 
 void ViraTreeWidget::slotItemSelectionChanged()

@@ -14,7 +14,7 @@ MarkGraphicsItem::MarkGraphicsItem(qulonglong id)
 {
     setFlag(QGraphicsItem::ItemIgnoresTransformations);
     setZValue(100000);
-    setPixmap(QPixmap(":/img/mark.png"));
+    setPixmap(QPixmap(":/img/mark_tr.png"));
     setOffset(-6, -43);
     setAcceptHoverEvents(true);
 
@@ -23,7 +23,7 @@ MarkGraphicsItem::MarkGraphicsItem(qulonglong id)
 
 void MarkGraphicsItem::setItemselected(bool on_off)
 {
-    setPixmap(on_off ? QPixmap(":/img/selected_mark.png") : QPixmap(":/img/mark.png"));
+    //setPixmap(on_off ? QPixmap(":/img/selected_mark.png") : QPixmap(":/img/mark.png"));
     if(on_off)
     {
         foreach(QGraphicsView * view, scene()->views())
@@ -87,6 +87,37 @@ void MarkGraphicsItem::reinit()
     }
 
     setToolTip(annotation);
+
+    QColor color;
+    BaseMetadataPtr status = ptr->getMetadata("status");
+    if(status)
+    {
+        QString statusStr = status->getValueAsString();
+        if(statusStr == QString::fromUtf8("новый"))
+            color = QColor(233,124,27);
+        else if(statusStr == QString::fromUtf8("в работе"))
+            color = QColor(Qt::yellow); // 226,224,111);
+        else if(statusStr == QString::fromUtf8("на проверку"))
+            color = QColor(Qt::green); // 86,206,18);
+
+        color.setAlpha(120);
+
+        QPixmap pmOrig(":/img/mark_tr.png");
+        QPixmap pm(pmOrig.size());
+        pm.fill(Qt::transparent);
+        QPainter pr(&pm);
+        pr.setPen(Qt::NoPen);
+        pr.setBrush(QBrush(color));
+
+        QPolygonF pixmapFillPolygon;
+        pixmapFillPolygon << QPointF(1,5) << QPointF(46,5) << QPointF(46,35) << QPointF(14,35) << QPointF(7,41) << QPointF(1,35);
+        pr.drawPolygon(pixmapFillPolygon);
+        pr.drawPixmap(0, 0, pmOrig);
+
+        setPixmap(pm);
+    }
+    else
+        setPixmap(QPixmap(":/img/mark_tr.png"));
 
     QPixmap pixmap;
     QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath");

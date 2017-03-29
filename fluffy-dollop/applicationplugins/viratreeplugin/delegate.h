@@ -9,6 +9,9 @@ const int TYPE = Qt::UserRole + 2;
 const int RENTED_AREA = Qt::UserRole + 3;
 const int TOTAL_AREA = Qt::UserRole + 4;
 const int CALC_TOTAL_AREA_AUTOMATIC = Qt::UserRole + 5;
+const int TASKS_NEW = Qt::UserRole + 6;
+const int TASKS_IN_WORK = Qt::UserRole + 7;
+const int TASKS_FOR_CHECK = Qt::UserRole + 8;
 
 class ViraDelegate : public QStyledItemDelegate
 {
@@ -56,5 +59,12 @@ public:
     void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 };
 
+class StatusDelegate : public ViraDelegate
+{
+    Q_OBJECT
+public:
+    StatusDelegate(QObject *parent = 0);
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+};
 
 #endif
