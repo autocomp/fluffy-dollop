@@ -62,8 +62,6 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
     MarkPtr markPtr = RegionBizManager::instance()->getMark(curr_id);
     if(markPtr)
     {
-        //! Alex, write code for set info about selected mark to status bar !
-        ui->moreInfo->show();
         return;
     }
 
@@ -71,14 +69,10 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
     if(! ptr)
         return;
 
-    auto data = TestDataGetter::getData( curr_id );
+    auto data = DataGetter::getData( curr_id );
 
     switch( ptr->getType() ) {
     case BaseArea::AT_FLOOR:
-        ui->moreInfo->show();
-        //! Alex, write code for set any info about selected floor to status bar !
-
-//! without BREAK !!!
     case BaseArea::AT_REGION:
     case BaseArea::AT_LOCATION:
     case BaseArea::AT_FACILITY:
@@ -87,7 +81,9 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
         showTasks( data );
         showArendators( data, false );
         showAreas( data, false );
-        showDebt( data );
+        //showDebt( data );
+
+        ui->moreInfo->show();
         break;
     }
     case BaseArea::AT_ROOMS_GROUP:
@@ -97,6 +93,7 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
         showAreas( data, true );
         showArendators( data, true );
         showTasks( data );
+
         ui->editObject->show();
         ui->moreInfo->show();
         ui->addMark->show();
@@ -180,26 +177,33 @@ void ViraStatusBar::reset()
     ui->editObject->hide();
 }
 
-void ViraStatusBar::showTasks( TestData data )
+void ViraStatusBar::showTasks( AreaData data )
 {
     QLabel* work_task = getTask( TT_WORK, data );
-    QLabel* lost_task = getTask( TT_LOST, data );
+    work_task->setToolTip(QString::fromUtf8("Задачи в работе"));
+    QLabel* check_task = getTask( TT_CHECK, data );
+    check_task->setToolTip(QString::fromUtf8("Задачи на проверку"));
     QLabel* new_task = getTask( TT_NEW, data );
+    new_task->setToolTip(QString::fromUtf8("Новые задачи"));
 
-    ui->horizontalLayout_widgets->addWidget( work_task );
-    ui->horizontalLayout_widgets->addWidget( lost_task );
     ui->horizontalLayout_widgets->addWidget( new_task );
+    ui->horizontalLayout_widgets->addWidget( work_task );
+    ui->horizontalLayout_widgets->addWidget( check_task );
     ui->horizontalLayout_widgets->addStretch();
 }
 
-void ViraStatusBar::showArendators( TestData data, bool one )
+void ViraStatusBar::showArendators( AreaData data, bool one )
 {
     if( !one )
     {
         QLabel* arend_good = getArendator( AT_GOOD );
+        arend_good->setToolTip( QString::fromUtf8( "Арендаторы" ));
         QLabel* arend_good_count = new QLabel( QString::number( data.arendators_good ));
+        arend_good_count->setToolTip( QString::fromUtf8( "Арендаторы" ));
         QLabel* arend_bad = getArendator( AT_BAD );
+        arend_bad->setToolTip( QString::fromUtf8( "Должники" ));
         QLabel* arend_bad_count = new QLabel( QString::number(  data.arendators_bad ));
+        arend_bad_count->setToolTip( QString::fromUtf8( "Должники" ));
 
         ui->horizontalLayout_widgets->addWidget( arend_good );
         ui->horizontalLayout_widgets->addWidget( arend_good_count );
@@ -222,8 +226,10 @@ void ViraStatusBar::showArendators( TestData data, bool one )
                                "" : *( data.arendators_good_set.begin() ));
             man = getArendator( AT_GOOD );
         }
+        man->setToolTip( QString::fromUtf8( "Арендатор" ));
 
         QLabel* arend = new QLabel( arend_name );
+        arend->setToolTip( QString::fromUtf8( "Арендатор" ));
         if( !arend_name.isEmpty() )
             ui->horizontalLayout_widgets->addWidget( man );
         ui->horizontalLayout_widgets->addWidget( arend );
@@ -232,12 +238,14 @@ void ViraStatusBar::showArendators( TestData data, bool one )
     ui->horizontalLayout_widgets->addStretch();
 }
 
-void ViraStatusBar::showAreas( TestData data, bool one )
+void ViraStatusBar::showAreas( AreaData data, bool one )
 {
     if( !one )
     {
         QLabel* area_rent = getArea( AT_RENT, data );
+        area_rent->setToolTip( QString::fromUtf8( "Площадь в аренде" ));
         QLabel* area_free = getArea( AT_FREE, data );
+        area_free->setToolTip( QString::fromUtf8( "Свободная площадь" ));
 
         ui->horizontalLayout_widgets->addWidget( area_rent );
         ui->horizontalLayout_widgets->addWidget( area_free );
@@ -261,8 +269,10 @@ void ViraStatusBar::showAreas( TestData data, bool one )
             area = getArea( AT_PROP, data );
             status = QString::fromUtf8( "Собственность" );
         }
+        area->setToolTip( QString::fromUtf8( "Площадь" ));
 
         QLabel* status_lbl = new QLabel( status );
+        status_lbl->setToolTip( QString::fromUtf8( "Статус" ));
         status_lbl->setStyleSheet( area->styleSheet() );
 
         ui->horizontalLayout_widgets->addWidget( area );
@@ -292,6 +302,7 @@ void ViraStatusBar::showAddres(BaseAreaPtr ptr)
     }
 
     ui->name->setText( addr );
+    ui->name->setToolTip( QString::fromUtf8( "Адрес" ));
 }
 
 void ViraStatusBar::showName(BaseAreaPtr ptr)
@@ -309,9 +320,10 @@ void ViraStatusBar::showName(BaseAreaPtr ptr)
     }
 
     ui->name->setText( name );
+    ui->name->setToolTip( QString::fromUtf8( "Название" ));
 }
 
-void ViraStatusBar::showDebt(TestData data)
+void ViraStatusBar::showDebt(AreaData data)
 {
     QLabel* debt = new QLabel;
     debt->setStyleSheet( "background-color: #ffaaaa;"
@@ -334,12 +346,12 @@ QLabel *ViraStatusBar::getArendator(ArendatorType type )
     {
     case AT_GOOD:
     {
-        color = "#aaffaa";
+        color = "#3CE63C";
         break;
     }
     case AT_BAD:
     {
-        color = "#ffaaaa";
+        color = "#FF6347";
         break;
     }
     }
@@ -356,28 +368,28 @@ QLabel *ViraStatusBar::getArendator(ArendatorType type )
     return arend;
 }
 
-QLabel *ViraStatusBar::getTask(ViraStatusBar::TaskType type, TestData data)
+QLabel *ViraStatusBar::getTask(ViraStatusBar::TaskType type, AreaData data)
 {
     QString color;
     int tasks;
     switch( type )
     {
-    case TT_LOST:
+    case TT_CHECK:
     {
-        tasks = data.task_lost;
-        color = "#ffaaaa";
+        tasks = data.task_check;
+        color = "#3CE63C";
         break;
     }
     case TT_WORK:
     {
         tasks = data.task_work;
-        color = "#aaffaa";
+        color = "#F0E68C";
         break;
     }
     case TT_NEW:
     {
         tasks = data.task_new;
-        color = "#ffffaa";
+        color = "#FF8C00";
         break;
     }
     }
@@ -394,7 +406,7 @@ QLabel *ViraStatusBar::getTask(ViraStatusBar::TaskType type, TestData data)
     return task;
 }
 
-QLabel *ViraStatusBar::getArea(ViraStatusBar::AreaType type, TestData data)
+QLabel *ViraStatusBar::getArea(ViraStatusBar::AreaType type, AreaData data)
 {
     QString color;
     int area_cnt;
@@ -403,19 +415,19 @@ QLabel *ViraStatusBar::getArea(ViraStatusBar::AreaType type, TestData data)
     case AT_RENT:
     {
         area_cnt = data.area_rent;
-        color = "#ffffaa";
+        color = "#F0E68C";
         break;
     }
     case AT_FREE:
     {
         area_cnt = data.area_free;
-        color = "#aaffaa";
+        color = "#3CE63C";
         break;
     }
     case AT_PROP:
     {
         area_cnt = data.area_property;
-        color = "#aaaaff";
+        color = "#6495ED";
         break;
     }
     }
@@ -534,9 +546,6 @@ void ViraStatusBar::showMarkInfoWidgwt(bool isEditMode, qulonglong id)
 void ViraStatusBar::slotUpdateMark(quint64 id)
 {
     CommonMessageNotifier::send( (uint)visualize_system::BusTags::UpdateMark, QVariant(id), QString("visualize_system"));
-
-    //! Alex, write code for update info about mark to status bar !
-    //...
 }
 
 

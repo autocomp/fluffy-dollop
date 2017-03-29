@@ -7,7 +7,7 @@
 #include <ctrcore/plugin/embifacenotifier.h>
 #include <regionbiz/rb_manager.h>
 
-#include "test_data_getter.h"
+#include "data_getter.h"
 
 namespace Ui {
 class ViraStatusBar;
@@ -22,7 +22,7 @@ class ViraStatusBar : public QWidget
     enum TaskType
     {
         TT_WORK,
-        TT_LOST,
+        TT_CHECK,
         TT_NEW
     };
 
@@ -57,17 +57,17 @@ protected slots:
 
 protected:
     void reset();
-    void showTasks(TestData data);
-    void showArendators(TestData data, bool one);
-    void showAreas(TestData data, bool one );
+    void showTasks(AreaData data);
+    void showArendators(AreaData data, bool one);
+    void showAreas(AreaData data, bool one );
     void showAddres( regionbiz::BaseAreaPtr ptr );
     void showName( regionbiz::BaseAreaPtr ptr );
-    void showDebt( TestData data );
+    void showDebt( AreaData data );
     void showMarkInfoWidgwt(bool isEditMode, qulonglong id);
 
     QLabel* getArendator(ArendatorType type);
-    QLabel* getTask( TaskType type, TestData data );
-    QLabel* getArea( AreaType type, TestData data );
+    QLabel* getTask( TaskType type, AreaData data );
+    QLabel* getArea( AreaType type, AreaData data );
 
     Ui::ViraStatusBar *ui;
     quint64 _parentWidgetId;

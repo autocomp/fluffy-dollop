@@ -7,7 +7,7 @@
 #include <regionbiz/rb_manager.h>
 #include <regionbiz/rb_locations.h>
 
-struct TestData
+struct AreaData
 {
     uint64_t id = 0;
 
@@ -16,7 +16,7 @@ struct TestData
     double area_property = 0;
 
     int task_work = 0;
-    int task_lost = 0;
+    int task_check = 0;
     int task_new = 0;
 
     int arendators_good = 0;
@@ -27,16 +27,14 @@ struct TestData
     double debt;
 };
 
-class TestDataGetter
+class DataGetter
 {
 public:
-    static TestDataGetter& instance();
-    static TestData getData( uint64_t id );
+    static DataGetter& instance();
+    static AreaData getData( uint64_t id );
 
 private:
-    TestDataGetter(){}
-
-    QMap< uint64_t, TestData > _datas;
+    DataGetter(){}
 };
 
 #endif // TEST_DATA_GETTER_H

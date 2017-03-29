@@ -162,8 +162,8 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
                                 if(statusPtr)
                                 {
                                     QString status = statusPtr->getValueAsVariant().toString();
-                                    if(status == QString::fromUtf8("Cвободно") || status == QString::fromUtf8("Свободно"))
-                                        roomItem->setText(2, QString::fromUtf8("Свободно"));
+                                    if(status == QString::fromUtf8("Свободно"))
+                                        roomItem->setText(2, status);
                                     else if(status == QString::fromUtf8("В аренде"))
                                         roomItem->setText(2, status);
                                     else

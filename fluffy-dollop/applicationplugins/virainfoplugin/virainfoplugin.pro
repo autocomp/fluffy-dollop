@@ -23,15 +23,15 @@ HEADERS += \
     virainfoplugin.h \
     virainfowidget.h \
     virastatusbar.h \
-    test_data_getter.h \
-    markform.h
+    markform.h \
+    data_getter.h
 
 SOURCES += \
     virainfoplugin.cpp \
     virainfowidget.cpp \
     virastatusbar.cpp \
-    test_data_getter.cpp \
-    markform.cpp
+    markform.cpp \
+    data_getter.cpp
 
 RESOURCES += \
     virainfopluginres.qrc
