@@ -18,9 +18,12 @@ protected slots:
     void slotHeaderSectionClicked(int index);
     void slotBlockGUI(QVariant var);
     void slotEditModeFinish(QVariant var);
+    void slotResaclArea(const QModelIndex &index);
+    void slotSaveItemToDb(const QModelIndex &index);
 
 protected:
-    const int ID = Qt::UserRole + 1;
+    void recalcAreaInFacility(QTreeWidgetItem * facilityItem);
+
     QMap<qulonglong, QTreeWidgetItem*> _items;
     QColor _defaultColor = QColor(Qt::white);
     QColor _noCoordColor = QColor(Qt::yellow);

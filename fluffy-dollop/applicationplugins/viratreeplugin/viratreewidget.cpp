@@ -1,4 +1,5 @@
 #include "viratreewidget.h"
+#include "delegate.h"
 #include <QDebug>
 #include <QHeaderView>
 #include <regionbiz/rb_manager.h>
@@ -7,6 +8,7 @@
 #include <ctrcore/tempinputdata/tempdatacontroller.h>
 #include <ctrcore/bus/common_message_notifier.h>
 #include <ctrcore/bus/bustags.h>
+#include <map>
 
 using namespace regionbiz;
 
@@ -23,14 +25,38 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
 
     setExpandsOnDoubleClick(false);
     setSelectionMode(QAbstractItemView::SingleSelection);
-    setColumnCount(6);
-    setColumnWidth(0, 370);
+    setColumnCount(7);
+    setColumnWidth(0, 200);
+    setColumnWidth(1, 200);
+    setColumnWidth(2, 200);
+    setColumnWidth(3, 200);
+    setColumnWidth(4, 200);
     headerItem()->setText(0, QString::fromUtf8(""));
     headerItem()->setText(1, QString::fromUtf8("Площадь"));
-    headerItem()->setText(2, QString::fromUtf8("Аренда"));
-    headerItem()->setText(3, QString::fromUtf8("Задачи"));
-    headerItem()->setText(4, QString::fromUtf8("Арендатор"));
-    headerItem()->setText(5, QString::fromUtf8("ID"));
+    headerItem()->setText(2, QString::fromUtf8("Статус"));
+    headerItem()->setText(3, QString::fromUtf8("Арендатор"));
+    headerItem()->setText(4, QString::fromUtf8("Задачи"));
+    headerItem()->setText(5, QString::fromUtf8("Комментарий"));
+    headerItem()->setText(6, QString::fromUtf8("ID"));
+    for(int i(0); i<6; ++ i)
+        headerItem()->setTextAlignment(i, Qt::AlignCenter);
+
+    LineEditDelegate * lineEditDelegate = new LineEditDelegate(this);
+    connect(lineEditDelegate, SIGNAL(saveItemToDb(QModelIndex)), this, SLOT(slotSaveItemToDb(QModelIndex)));
+    setItemDelegateForColumn(0, lineEditDelegate);
+    setItemDelegateForColumn(3, lineEditDelegate);
+    setItemDelegateForColumn(4, lineEditDelegate);
+    setItemDelegateForColumn(5, lineEditDelegate);
+
+    SpinBoxDelegate * spinBoxDelegate = new SpinBoxDelegate(this);
+    connect(spinBoxDelegate, SIGNAL(resaclArea(QModelIndex)), this, SLOT(slotResaclArea(QModelIndex)));
+    connect(spinBoxDelegate, SIGNAL(saveItemToDb(QModelIndex)), this, SLOT(slotSaveItemToDb(QModelIndex)));
+    setItemDelegateForColumn(1, spinBoxDelegate);
+
+    ComboBoxDelegate * comboBoxDelegate = new ComboBoxDelegate(this);
+    connect(comboBoxDelegate, SIGNAL(resaclArea(QModelIndex)), this, SLOT(slotResaclArea(QModelIndex)));
+    connect(comboBoxDelegate, SIGNAL(saveItemToDb(QModelIndex)), this, SLOT(slotSaveItemToDb(QModelIndex)));
+    setItemDelegateForColumn(2, comboBoxDelegate);
 
     connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(slotItemSelectionChanged()));
     connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), this, SLOT(slotItemDoubleClicked(QTreeWidgetItem*,int)));
@@ -43,8 +69,9 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
         QTreeWidgetItem * regionItem = new QTreeWidgetItem(this);
         regionItem->setText(0, regionPtr->getDescription());
         const qulonglong id(regionPtr->getId());
-        regionItem->setText(5, QString::number(id));
-        regionItem->setData(0, ID, id);
+//        regionItem->setText(5, QString::number(id));
+        for(int i(0); i<6; ++i) regionItem->setData(i, ID, id);
+        for(int i(0); i<6; ++i) regionItem->setData(i, TYPE, (int)ItemTypeOther);
         _items.insert(id, regionItem);
 
         std::vector<BaseAreaPtr> locations = regionPtr->getChilds( Region::RCF_LOCATIONS );
@@ -56,21 +83,23 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
                 QTreeWidgetItem * locationItem = new QTreeWidgetItem(regionItem);
                 locationItem->setText(0, locationPtr->getDescription());
                 const qulonglong id(locationPtr->getId());
-                locationItem->setText(5, QString::number(id));
-                locationItem->setData(0, ID, id);
+                locationItem->setText(6, QString::number(id));
+//                locationItem->setText(5, QString::number(id));
+                for(int i(0); i<6; ++i) locationItem->setData(i, ID, id);
+                for(int i(0); i<6; ++i) locationItem->setData(i, TYPE, (int)ItemTypeOther);
                 _items.insert(id, locationItem);
 
                 std::vector< FacilityPtr > facilities = locationPtr->getChilds();
                 for( FacilityPtr facilityPtr: facilities )
                 {
                     QTreeWidgetItem * facilityItem = new QTreeWidgetItem(locationItem);
+                    facilityItem->setFlags(facilityItem->flags() | Qt::ItemIsEditable);
                     facilityItem->setText(0, facilityPtr->getDescription());
                     const qulonglong id(facilityPtr->getId());
-                    facilityItem->setText(5, QString::number(id));
-                    facilityItem->setData(0, ID, id);
+                    facilityItem->setText(6, QString::number(id));
+                    for(int i(0); i<6; ++i) facilityItem->setData(i, ID, id);
+                    for(int i(0); i<6; ++i) facilityItem->setData(i, TYPE, (int)ItemTypeFacility);
                     _items.insert(id, facilityItem);
-
-                    temp_data::AreaInfo facilityInfo;
 
                     FloorPtrs floors = facilityPtr->getChilds();
                     for( FloorPtr floorPtr: floors )
@@ -78,15 +107,14 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
                         QTreeWidgetItem * floorItem = new QTreeWidgetItem(facilityItem);
                         floorItem->setText(0, floorPtr->getName());
                         const qulonglong id(floorPtr->getId());
-                        floorItem->setText(5, QString::number(id));
-                        floorItem->setData(0, ID, id);
+                        floorItem->setText(6, QString::number(id));
+                        floorItem->setFlags(floorItem->flags() | Qt::ItemIsEditable);
+                        for(int i(0); i<6; ++i) floorItem->setData(i, ID, id);
+                        for(int i(0); i<6; ++i) floorItem->setData(i, TYPE, (int)ItemTypeFloor);
+                        floorItem->setTextAlignment(1, Qt::AlignCenter);
+                        floorItem->setData(1, RENTED_AREA, 234.4);
+                        floorItem->setData(1, TOTAL_AREA, 373.6);
                         _items.insert(id, floorItem);
-
-                        temp_data::AreaInfo floorInfo;
-
-//                        floorItem->setText(2, floorPtr->getPlanPath());
-//                        QPixmap pm("/home/sergey/contour_ng/0.tiff");
-//                        floorItem->setIcon(0, QIcon(pm));
 
                         BaseAreaPtrs rooms = floorPtr->getChilds( Floor::FCF_ALL_ROOMS );
                         for( BaseAreaPtr room_ptr: rooms )
@@ -94,95 +122,63 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
                             RoomPtr room = BaseArea::convert< Room >( room_ptr );
                             if(room)
                             {
+                                const qulonglong id(room->getId());
                                 QTreeWidgetItem * roomItem = new QTreeWidgetItem(floorItem);
-                                if(room->getCoords().isEmpty())
-                                    for(int i(0); i < 6; ++i)
-                                        roomItem->setTextColor(i, _noCoordColor);
-                                else
-                                    for(int i(0); i < 6; ++i)
-                                        roomItem->setTextColor(i, _defaultColor);
+                                roomItem->setFlags(roomItem->flags() | Qt::ItemIsEditable);
+                                roomItem->setTextAlignment(1, Qt::AlignCenter);
+                                roomItem->setTextAlignment(2, Qt::AlignCenter);
+                                roomItem->setTextAlignment(3, Qt::AlignCenter);
+                                roomItem->setTextAlignment(4, Qt::AlignCenter);
 
+                                for(int i(0); i<6; ++i) roomItem->setData(i, TYPE, (int)ItemTypeRoom);
+                                for(int i(0); i<6; ++i) roomItem->setData(i, ID, id);
+                                if(room->getCoords().isEmpty())
+                                    for(int i(0); i < 6; ++i) roomItem->setTextColor(i, _noCoordColor);
+                                else
+                                    for(int i(0); i < 6; ++i) roomItem->setTextColor(i, _defaultColor);
 
                                 roomItem->setText(0, room->getName());
-                                const qulonglong id(room->getId());
-                                roomItem->setText(5, QString::number(id));
-                                roomItem->setData(0, ID, id);
+                                roomItem->setText(6, QString::number(id));
 
-                                temp_data::RoomInfo roomInfo;
-                                if(TempDataController::instance()->getRoomInfo(room->getId(), roomInfo))
+                                BaseMetadataPtr areaPtr = room->getMetadata("area");
+                                if(areaPtr)
                                 {
-                                    roomItem->setText(1, QString::number(roomInfo.square, 'f', 1));
-                                    switch (roomInfo.state)
-                                    {
-                                    case temp_data::RoomState::Free :
-                                        roomItem->setText(2, QString::fromUtf8("Свободно"));
-                                        floorInfo.squareFree += roomInfo.square;
-                                        break;
-                                    case temp_data::RoomState::InTenant :
-                                        roomItem->setText(2, QString::fromUtf8("В аренде"));
-                                        floorInfo.squareInTenant += roomInfo.square;
-                                        break;
-                                    case temp_data::RoomState::Reconstruction :
-                                        roomItem->setText(2, QString::fromUtf8("Ремонт"));
-                                        floorInfo.squareFree += roomInfo.square;
-                                        break;
-                                    case temp_data::RoomState::Sale :
-                                        roomItem->setText(2, QString::fromUtf8("Продажа"));
-                                        floorInfo.squareFree += roomInfo.square;
-                                        break;
-                                    }
+                                    double area = areaPtr->getValueAsVariant().toDouble();
+                                    roomItem->setText(1, QString::number(area, 'f', 1));
+                                }
 
-                                    temp_data::Tenant tenant;
-                                    if(TempDataController::instance()->getTenant(roomInfo.tenant, tenant))
+                                BaseMetadataPtr rentorPtr = room->getMetadata("rentor");
+                                if(rentorPtr)
+                                    roomItem->setText(3, rentorPtr->getValueAsVariant().toString());
+
+                                BaseMetadataPtr statusPtr = room->getMetadata("status");
+                                if(statusPtr)
+                                {
+                                    QString status = statusPtr->getValueAsVariant().toString();
+                                    if(status == QString::fromUtf8("Cвободно") || status == QString::fromUtf8("Свободно"))
+                                        roomItem->setText(2, QString::fromUtf8("Свободно"));
+                                    else if(status == QString::fromUtf8("В аренде"))
+                                        roomItem->setText(2, status);
+                                    else
                                     {
-                                        roomItem->setText(4, tenant.name);
-                                        floorInfo.tenants.insert(roomInfo.tenant);
-                                        facilityInfo.tenants.insert(roomInfo.tenant);
+                                        roomItem->setText(2, QString::fromUtf8("Недоступно"));
+                                        qDebug() << QString::fromUtf8("Недоступно --->") << statusPtr->getValueAsVariant();
                                     }
                                 }
+
+                                BaseMetadataPtr commentPtr = room->getMetadata("comment");
+                                if(commentPtr)
+                                    roomItem->setText(5, commentPtr->getValueAsVariant().toString());
+
+
 
                                 _items.insert(id, roomItem);
                             }
                         }
                         //floorItem->setExpanded(true);
-                        facilityInfo.squareFree += floorInfo.squareFree;
-                        facilityInfo.squareInTenant += floorInfo.squareInTenant;
-                        QString text1 = QString::number(floorInfo.squareInTenant) + QString(" / ") + QString::number(floorInfo.squareFree);
-                        floorItem->setText(1, text1);
-
-                        foreach(qulonglong id, floorInfo.tenants)
-                        {
-                            temp_data::Tenant tenant;
-                            if(TempDataController::instance()->getTenant(id, tenant))
-                            {
-                                if(tenant.debt > 0)
-                                    floorInfo.debt += tenant.debt;
-                            }
-                        }
-
-                        QString text2 = QString::number(floorInfo.tenants.size()) + QString(" / ") + QString::number(floorInfo.debt);
-                        floorItem->setText(2, text2);
-
-                        TempDataController::instance()->setAreaInfo(floorPtr->getId(), floorInfo);
                     }
                     facilityItem->setExpanded(true);
-
-                    QString text1 = QString::number(facilityInfo.squareInTenant) + QString(" / ") + QString::number(facilityInfo.squareFree);
-                    facilityItem->setText(1, text1);
-
-                    foreach(qulonglong id, facilityInfo.tenants)
-                    {
-                        temp_data::Tenant tenant;
-                        if(TempDataController::instance()->getTenant(id, tenant))
-                        {
-                            if(tenant.debt > 0)
-                                facilityInfo.debt += tenant.debt;
-                        }
-                    }
-                    QString text2 = QString::number(facilityInfo.tenants.size()) + QString(" / ") + QString::number(facilityInfo.debt);
-                    facilityItem->setText(2, text2);
-
-                    TempDataController::instance()->setAreaInfo(facilityPtr->getId(), facilityInfo);
+                    recalcAreaInFacility(facilityItem);
                 }
                 locationItem->setExpanded(true);
             }
@@ -194,6 +190,34 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
     header()->setSortIndicatorShown(true);
     setSortingEnabled(true);
     sortByColumn(0, Qt::AscendingOrder);
+}
+
+void ViraTreeWidget::recalcAreaInFacility(QTreeWidgetItem * facilityItem)
+{
+    double facilityRentedArea = 0;
+    double facilityTotalArea = 0;
+
+    for(int i(0); i < facilityItem->childCount(); ++i)
+    {
+        double floorRentedArea = 0;
+        double floorTotalArea = 0;
+        QTreeWidgetItem * floorItem = facilityItem->child(i);
+        for(int i(0); i < floorItem->childCount(); ++i)
+        {
+            QTreeWidgetItem * roomItem = floorItem->child(i);
+            double area = roomItem->text(1).toDouble();
+            floorTotalArea += area;
+            if(roomItem->text(2) == QString::fromUtf8("В аренде"))
+                floorRentedArea += area;
+        }
+        floorItem->setData(1, RENTED_AREA, floorRentedArea);
+        floorItem->setData(1, TOTAL_AREA, floorTotalArea);
+
+        facilityTotalArea += floorTotalArea;
+        facilityRentedArea += floorRentedArea;
+    }
+    facilityItem->setData(1, RENTED_AREA, facilityRentedArea);
+    facilityItem->setData(1, TOTAL_AREA, facilityTotalArea);
 }
 
 void ViraTreeWidget::slotBlockGUI(QVariant var)
@@ -220,6 +244,77 @@ void ViraTreeWidget::slotEditModeFinish(QVariant var)
             }
         }
     }
+}
+
+void ViraTreeWidget::slotResaclArea(const QModelIndex &index)
+{
+    QTreeWidgetItem * item = itemFromIndex(index);
+    if( ! item) return;
+
+    int itemType = item->data(0, TYPE).toInt();
+    while(itemType != ItemTypeFacility)
+    {
+        item = item->parent();
+        if( ! item)
+            break;
+        itemType = item->data(0, TYPE).toInt();
+    }
+
+    if(item)
+        recalcAreaInFacility(item);
+}
+
+void ViraTreeWidget::slotSaveItemToDb(const QModelIndex &index)
+{
+    qDebug() << "---> slotSaveItemToDb" << index.column() << index.row();
+    QTreeWidgetItem * item = itemFromIndex(index);
+    if( ! item) return;
+
+    const qulonglong id(item->data(0, ID).toULongLong());
+    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(id);
+    if( ! ptr) return;
+    switch(item->data(0, TYPE).toInt())
+    {
+    case ItemTypeRoom :
+    {
+        if(item->text(1).isEmpty() == false)
+            ptr->addMetadata("double", "area", item->text(1).toDouble());
+
+        if(item->text(2).isEmpty() == false)
+            ptr->addMetadata("string", "status", item->text(2));
+
+        if(item->text(3).isEmpty() == false)
+            ptr->addMetadata("string", "rentor", item->text(3));
+
+        //if(item->text(5).isEmpty() == false)
+            ptr->addMetadata("string", "comment", item->text(5));
+    }break;
+    case ItemTypeFloor : {
+//        ptr->addMetadata("string", "comment", item->text(5));
+
+    }break;
+    case ItemTypeFacility : {
+//        ptr->addMetadata("string", "comment", item->text(5));
+
+    }break;
+    case ItemTypeOther : {
+//        ptr->addMetadata("string", "comment", item->text(5));
+
+    }break;
+    default:
+        return;
+    };
+    bool res = ptr->commit();
+    qDebug() << "ID :" << id << ", commit:" << res;
+    qDebug() << ptr->getName() << "---------------";
+    MetadataByName map = ptr->getMetadataMap();
+    for(auto it=map.begin(); it != map.end(); ++it)
+    {
+        QString tag = it->first;
+        BaseMetadataPtr _ptr = it->second;
+        qDebug() << tag << _ptr->getValueAsVariant();
+    }
+    qDebug() << "===================================";
 }
 
 void ViraTreeWidget::slotItemSelectionChanged()
