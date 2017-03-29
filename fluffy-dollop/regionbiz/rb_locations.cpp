@@ -372,9 +372,9 @@ uint16_t Floor::getNumber()
 void Floor::setNumber(uint16_t number)
 {
     if( isMetadataPresent( "number" ))
-        setMetadataValue( "cadastral_number", number );
+        setMetadataValue( "number", number );
     else
-        addMetadata( "integer", "number", number );
+        addMetadata( "int", "number", number );
 }
 
 BaseAreaPtrs Floor::getChilds(Floor::FloorChildFilter filter)

@@ -322,6 +322,11 @@ bool RegionBizManager::addMetadata( BaseMetadataPtr data )
 
        return true;
     }
+    else
+    {
+        setMetadataValue( data->getParentId(), data->getName(), data->getValueAsString() );
+        return true;
+    }
 
     return false;
 }

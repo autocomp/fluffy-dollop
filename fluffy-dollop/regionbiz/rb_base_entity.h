@@ -78,6 +78,7 @@ protected:
     uint64_t _id = 0;
     QString _description = "";
     QString _name = "";
+    // TODO flag of commited
 
 private:
     static std::map< uint64_t, BaseEntityPtr >& getEntitys();

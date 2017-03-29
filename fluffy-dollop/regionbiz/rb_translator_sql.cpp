@@ -6,6 +6,7 @@
 #include <QSqlError>
 #include <QPolygonF>
 #include <QDebug>
+#include <QSqlDriver>
 
 #include "rb_manager.h"
 
@@ -120,17 +121,20 @@ bool SqlTranslator::commitArea( BaseAreaPtr area )
     if( type.isEmpty() )
         return false;
 
-    // check exist
+    // lock base
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    db.transaction();
+
+    // check exist
     QString select = "SELECT id, parent, name, description FROM " + type +
                      " WHERE id = " + QString::number( area->getId() );
     QSqlQuery query( db );
+    query.setForwardOnly( true );
     query.exec( select );
 
     QString insert_update;
 
     // lock base
-    db.transaction();
 
     // room
     if( query.first() )
@@ -352,6 +356,7 @@ bool SqlTranslator::commitCoordinates(BaseAreaPtr area)
 {
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
     QSqlQuery query( db );
+    query.setForwardOnly( true );
     QString delete_coords = "DELETE FROM coords "
                             "WHERE id = " + QString::number( area->getId() );
     if( !query.exec( delete_coords ))
