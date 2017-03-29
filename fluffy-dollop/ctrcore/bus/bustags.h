@@ -40,6 +40,7 @@ enum class BusTags
     EditModeFinish,
     //! , параметр - bool (true - старт работы потока, false - окончание).
     BlockGUI,
+    UpdateMark,
 
 
 
