@@ -23,6 +23,10 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
                                       qMetaTypeId< quint64 >(),
                                       QString("visualize_system") );
 
+    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::UpdateMark, this, SLOT(slotUpdateMark(QVariant)),
+                                      qMetaTypeId< quint64 >(),
+                                      QString("visualize_system") );
+
     setExpandsOnDoubleClick(false);
     setSelectionMode(QAbstractItemView::SingleSelection);
     setColumnCount(7);
@@ -315,6 +319,16 @@ void ViraTreeWidget::slotSaveItemToDb(const QModelIndex &index)
         qDebug() << tag << _ptr->getValueAsVariant();
     }
     qDebug() << "===================================";
+}
+
+void ViraTreeWidget::slotUpdateMark(QVariant var)
+{
+    MarkPtr markPtr = RegionBizManager::instance()->getMark(var.toUInt());
+    if(! markPtr) return;
+    BaseAreaPtr parentPtr = RegionBizManager::instance()->getBaseArea(markPtr->getParentId());
+    if(! parentPtr) return;
+
+
 }
 
 void ViraTreeWidget::slotItemSelectionChanged()

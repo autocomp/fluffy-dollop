@@ -105,22 +105,12 @@
        </item>
        <item>
         <property name="text">
-         <string>назначен</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
          <string>в работе</string>
         </property>
        </item>
        <item>
         <property name="text">
          <string>на проверку</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>выполнен</string>
         </property>
        </item>
       </widget>

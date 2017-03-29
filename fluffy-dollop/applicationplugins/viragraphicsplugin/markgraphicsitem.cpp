@@ -80,7 +80,11 @@ void MarkGraphicsItem::reinit()
 
     BaseMetadataPtr responsible = ptr->getMetadata("worker");
     if(responsible)
-        annotation.append(QString(", исполнитель:") + responsible->getValueAsString());
+    {
+        QString text = responsible->getValueAsString();
+        if(text.isEmpty() == false)
+            annotation.append(QString(", исполнитель:") + text);
+    }
 
     setToolTip(annotation);
 
@@ -180,7 +184,15 @@ void MarkGraphicsItem::reinit()
         }
     }
     if(_preview)
-        _preview->setPixmap(_pixmap);
+    {
+        delete _preview;
+        _preview = new QGraphicsPixmapItem(_pixmap, this);
+        _preview->setFlag(QGraphicsItem::ItemIsSelectable, false);
+        _preview->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
+        _preview->setFlag(QGraphicsItem::ItemStacksBehindParent, true);
+        _preview->setAcceptHoverEvents(true);
+        _preview->setPos(-6, - (40 + _pixmap.height()));
+    }
 }
 
 void MarkGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)

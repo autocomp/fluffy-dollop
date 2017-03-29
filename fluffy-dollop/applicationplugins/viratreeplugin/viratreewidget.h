@@ -20,6 +20,7 @@ protected slots:
     void slotEditModeFinish(QVariant var);
     void slotResaclArea(const QModelIndex &index);
     void slotSaveItemToDb(const QModelIndex &index);
+    void slotUpdateMark(QVariant var);
 
 protected:
     void recalcAreaInFacility(QTreeWidgetItem * facilityItem);
