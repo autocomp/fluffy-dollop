@@ -32,16 +32,16 @@
 
 #if !defined(QT_STATIC) && !defined(XLSX_NO_LIB)
 #  if defined(QT_BUILD_XLSX_LIB)
-#    define Q_XLSX_EXPORT Q_DECL_EXPORT
+#    define Q_XLSX_EXPORT //Q_DECL_EXPORT // NOTE Removed for MinGw build
 #  else
-#    define Q_XLSX_EXPORT Q_DECL_IMPORT
+#    define Q_XLSX_EXPORT //Q_DECL_IMPORT // NOTE Removed for MinGw build
 #  endif
 #else
 #  define Q_XLSX_EXPORT
 #endif
 
 #ifdef XLSX_TEST
-#  define XLSX_AUTOTEST_EXPORT Q_XLSX_EXPORT
+#  define XLSX_AUTOTEST_EXPORT //Q_XLSX_EXPORT // NOTE Removed for MinGw build
 #else
 #  define XLSX_AUTOTEST_EXPORT
 #endif
