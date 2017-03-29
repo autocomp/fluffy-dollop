@@ -50,7 +50,7 @@ void ViraPagesListWidget::reinit(qulonglong facilityId)
         FloorPtrs floors = facilityPtr->getChilds();
         for( FloorPtr floorPtr: floors )
         {
-            QString pixmapPath = destPath + floorPtr->getPlanPath();
+            QString pixmapPath = destPath + QString::number(floorPtr->getId()) + QDir::separator() + QString("area.tiff"); //floorPtr->getPlanPath();
             QPixmap pm(pixmapPath);
             _coef = (double)pm.height() / (double)pm.width();
             QListWidgetItem * item = new QListWidgetItem(QIcon(pm), floorPtr->getName(), this);

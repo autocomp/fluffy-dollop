@@ -107,7 +107,7 @@ ComboBoxDelegate::ComboBoxDelegate(QObject *parent)
 
 void ComboBoxDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-//    QStyledItemDelegate::paint(painter, option, index);
+    QStyledItemDelegate::paint(painter, option, index);
 //    if(option.state == QStyle::State_Selected)
 //        return;
 

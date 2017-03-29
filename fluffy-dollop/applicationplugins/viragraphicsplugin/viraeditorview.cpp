@@ -107,7 +107,7 @@ void ViraEditorView::setFloor(qulonglong floorId)
     {
         _currFloor_id = floorId;
 
-        QString pixmapPath = destPath + floorPtr->getPlanPath();
+        QString pixmapPath = destPath + QString::number(floorId) + QDir::separator() + QString("area.tiff"); // floorPtr->getPlanPath();
         QPixmap pm(pixmapPath);
         GraphicsPixmapItem* item = new GraphicsPixmapItem(pm);
         scene()->addItem(item);
@@ -246,13 +246,31 @@ void ViraEditorView::selectionItemsChanged(uint64_t prev_id, uint64_t curr_id)
 
 void ViraEditorView::slotEditAreaGeometry(QVariant var)
 {
-    _editObjectGeometry = var.toUInt();
-    auto it = _itemsOnFloor.find(_editObjectGeometry);
-    if(it != _itemsOnFloor.end())
+    uint id = var.toUInt();
+    if(id > 0)
     {
-        AreaGraphicsItem * areaGraphicsItem = dynamic_cast<AreaGraphicsItem*>(it.value());
-        if(areaGraphicsItem)
-            areaGraphicsItem->hide();
+        _editObjectGeometry = id;
+        auto it = _itemsOnFloor.find(_editObjectGeometry);
+        if(it != _itemsOnFloor.end())
+        {
+            AreaGraphicsItem * areaGraphicsItem = dynamic_cast<AreaGraphicsItem*>(it.value());
+            if(areaGraphicsItem)
+                areaGraphicsItem->hide();
+        }
+        _mode = EditAreaMode;
+    }
+    else
+    {
+        clearTempItems();
+        auto it = _itemsOnFloor.find(_editObjectGeometry);
+        if(it != _itemsOnFloor.end())
+        {
+            AreaGraphicsItem * areaGraphicsItem = dynamic_cast<AreaGraphicsItem*>(it.value());
+            if(areaGraphicsItem)
+                areaGraphicsItem->show();
+        }
+        _editObjectGeometry = 0;
+        _mode = ScrollMode;
     }
 }
 
