@@ -11,8 +11,6 @@
 #include <QDebug>
 #include <QDir>
 
-#define FIND_IF( cont, func ) std::find_if( cont.begin(), cont.end(), func );
-
 using namespace regionbiz;
 
 RegionBizManagerPtr RegionBizManager::instance()
@@ -187,6 +185,21 @@ BaseAreaPtr RegionBizManager::addArea( BaseArea::AreaType type,
 
 bool RegionBizManager::deleteArea(BaseAreaPtr area)
 {
+    // delete childs recursive
+    auto childs = area->getChilds();
+    for( BaseAreaPtr child: childs )
+        deleteArea( child );
+
+    // delete marks
+    MarksHolderPtr holder = area->convert< MarksHolder >();
+    if( holder )
+    {
+        auto marks = holder->getMarks();
+        for( MarkPtr mark: marks )
+            deleteMark( mark );
+    }
+
+    // delete this one
     bool del = _translator->deleteArea( area );
     return del;
 }

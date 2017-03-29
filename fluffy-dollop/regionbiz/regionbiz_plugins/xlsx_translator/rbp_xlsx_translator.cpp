@@ -223,7 +223,18 @@ RoomPtrs XlsxTranlsator::loadRooms()
             room->setName( entry.name );
             room->setDesription( entry.descr );
             room->addMetadata( "double", "area", entry.area );
-            room->addMetadata( "string", "arend", entry.arend );
+
+            if( entry.arend == QString::fromUtf8( "свободно" ))
+            {
+                room->addMetadata( "string", "status", QString::fromUtf8( "Cвободно" ));
+                room->addMetadata( "string", "rentor", "" );
+            }
+            else
+            {
+                room->addMetadata( "string", "status", QString::fromUtf8( "В аренде" ));
+                room->addMetadata( "string", "rentor", entry.arend );
+            }
+            room->addMetadata( "string", "comment", "" );
 
             rooms.push_back( room->convert< Room >() );
         }

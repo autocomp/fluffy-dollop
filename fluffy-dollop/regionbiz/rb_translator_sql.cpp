@@ -7,6 +7,8 @@
 #include <QPolygonF>
 #include <QDebug>
 
+#include "rb_manager.h"
+
 using namespace regionbiz;
 
 // register translator
@@ -422,10 +424,16 @@ std::vector< std::shared_ptr< LocType >> SqlTranslator::loadBaseAreas( QString t
     if( typeid( LocType ) == typeid( Region ))
         select = "SELECT id, name, description FROM " + type_name;
     else
-        select = "SELECT id, parent, name, description FROM " + type_name;
+        select = "SELECT id, name, description, parent FROM " + type_name;
     QSqlQuery query( db );
+
+    bool plan_keeper = false;
+
+    // boost speed
+    query.setForwardOnly( true );
     bool res = query.exec( select );
     if( res )
+    {
         for( query.first(); query.isValid(); query.next() )
         {
             uint64_t id = query.value( "id" ).toLongLong();
@@ -443,13 +451,16 @@ std::vector< std::shared_ptr< LocType >> SqlTranslator::loadBaseAreas( QString t
             area_ptr->setName( name );
             area_ptr->setDesription( descr );
 
-            PlanKeeperPtr plan_keeper = BaseArea::convert< PlanKeeper >( area_ptr );
-            if( plan_keeper )
-                loadPlans( area_ptr );
+            PlanKeeperPtr plan_keeper_ptr = BaseArea::convert< PlanKeeper >( area_ptr );
+            if( plan_keeper_ptr )
+                plan_keeper = true;
 
             areas.push_back( area_ptr );
         }
+    }
 
+    if( plan_keeper )
+        loadPlans< LocTypePtr >( areas );
     loadCoordinate< LocTypePtr >( areas, type_name );
 
     return areas;
@@ -465,6 +476,8 @@ bool SqlTranslator::loadCoordinate( std::vector< LocTypePtr > &vector,
     QSqlQuery query( db );
     QString select_coords = "SELECT c.id, c.x, c.y, c.number FROM " + name + " as n JOIN coords as c "
                             "ON n.id = c.id ORDER by c.id, c.number";
+    // boost speed of query
+    query.setForwardOnly( true );
     bool res = query.exec( select_coords );
     if( res )
     {
@@ -486,19 +499,30 @@ bool SqlTranslator::loadCoordinate( std::vector< LocTypePtr > &vector,
     return res;
 }
 
-bool SqlTranslator::loadPlans( BaseAreaPtr area )
+template< typename LocTypePtr >
+bool SqlTranslator::loadPlans( std::vector< LocTypePtr >& areas )
 {
-    std::shared_ptr< PlanKeeper > keeper = BaseArea::convert< PlanKeeper >( area );
-    if( keeper )
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    QSqlQuery query( db );
+    // boost speed
+    query.setForwardOnly( true );
+    QString select_plans = "SELECT parent, path, scale_w, scale_h, angle, x, y FROM plans ";
+    bool res = query.exec( select_plans );
+    if( res )
     {
-        QSqlDatabase db = QSqlDatabase::database( getBaseName() );
-        QSqlQuery query( db );
-        QString select_plans = "SELECT parent, path, scale_w, scale_h, angle, x, y FROM plans "
-                               "WHERE parent = " + QString::number( area->getId() );
-        bool res = query.exec( select_plans );
-        if( res )
+        for( query.first(); query.isValid(); query.next() )
         {
-            for( query.first(); query.isValid(); query.next() )
+            uint64_t parent_id = query.value( 0 ).toLongLong();
+            std::function< bool( BaseAreaPtr ) > check_id =
+                    [ parent_id ]( BaseAreaPtr ba ){ return parent_id == ba->getId(); };
+
+            BaseAreaPtr area;
+            auto iter = FIND_IF( areas, check_id );
+            if( iter != areas.end() )
+                area = *iter;
+
+            std::shared_ptr< PlanKeeper > keeper = BaseArea::convert< PlanKeeper >( area );
+            if( keeper )
             {
                 QString path = query.value( 1 ).toString();
 
@@ -513,13 +537,11 @@ bool SqlTranslator::loadPlans( BaseAreaPtr area )
                 keeper->setPlanPath( path );
             }
         }
-        else
-            return false;
-
-        return true;
     }
+    else
+        return false;
 
-    return false;
+    return true;
 }
 
 bool SqlTranslator::loadDocuments( BaseBizRelationPtr /*relation*/ )

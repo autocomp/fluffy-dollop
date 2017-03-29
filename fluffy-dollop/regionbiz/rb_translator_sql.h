@@ -50,7 +50,8 @@ private:
     std::vector< std::shared_ptr< LocType >> loadBaseAreas( QString type_name );
     bool commitCoordinates( BaseAreaPtr area );
     bool commitMetadate(BaseEntityPtr area );
-    bool loadPlans( BaseAreaPtr area );
+    template< typename LocTypePtr >
+    bool loadPlans(std::vector< LocTypePtr >& areas );
     bool loadDocuments( BaseBizRelationPtr relation );
     bool loadPayments( RentPtr rent );
     QString getStringType(BaseArea::AreaType area_type );

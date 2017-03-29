@@ -5,14 +5,67 @@
 
 #include "test_reciver.h"
 
+void loadXlsx()
+{
+    using namespace regionbiz;
+    auto mngr = RegionBizManager::instance();
+
+    // select facility
+    BaseAreaPtr facility = mngr->getBaseArea( 21 )->convert< Facility >();
+    if( !facility )
+    {
+        qDebug() << "It's not facility";
+        return;
+    }
+
+    auto childs = facility->getChilds();
+    for( BaseAreaPtr child: childs )
+    {
+        qDebug() << "Start delete" << child->getName()
+                 << ":" << mngr->deleteArea( child );
+    }
+    qDebug() << "All deleted";
+
+    mngr->selectArea( facility->getId() );
+
+    // load translator
+    BaseTranslatorPtr ptr = mngr->getTranslatorByName( "xlsx" );
+    // set settings of path
+    QVariantMap settings = {{ "file_path", "./data/гостиница Россия.xlsx" }};
+    ptr->init( settings );
+    QString err = "";
+    bool try_check_all_load = ptr->checkTranslator( BaseTranslator::CT_READ, err );
+    if( !try_check_all_load )
+        qDebug() << "Yes, some wrong" << err;
+
+    // load floors and rooms
+    // after loading all areas in model system
+    auto floors = ptr->loadFloors();
+    auto rooms = ptr->loadRooms();
+    qDebug() << "We load floors and rooms:" << floors.size() << rooms.size();
+
+    // now we can modify and commit all that areas
+    for( FloorPtr flo: floors )
+    {
+        qDebug() << "Start commit" << flo->getName()
+                 << ":" << flo->commit();
+    }
+    for( RoomPtr roo: rooms )
+    {
+        qDebug() << "Start commit" << roo->getName()
+                 << ":" << roo->commit();
+    }
+    qDebug() << "All commited";
+}
+
 int main()
 {
     using namespace regionbiz;
 
     //! init
     auto mngr = RegionBizManager::instance();
-//    QString str = "~/.contour_ng/regionbiz_psql.json";
-    QString str = "~/.contour_ng/regionbiz_sqlite.json";
+    QString str = "~/.contour_ng/regionbiz_psql.json";
+    //QString str = "~/.contour_ng/regionbiz_sqlite.json";
     bool inited = mngr->init( str );
 
     //! load regons
@@ -187,25 +240,5 @@ int main()
     mngr->deleteArea( room_ptr );
 
     //! load xlsx
-    // select facility
-    BaseAreaPtr facility = mngr->addArea< Facility >( 1 );
-    if( facility )
-        mngr->selectArea( facility->getId() );
-
-    // load translator
-    BaseTranslatorPtr ptr = mngr->getTranslatorByName( "xlsx" );
-    // set settings of path
-    QVariantMap settings = {{ "file_path", "./data/гостиница Россия.xlsx" }};
-    ptr->init( settings );
-    QString err = "";
-    bool try_check_all_load = ptr->checkTranslator( BaseTranslator::CT_READ, err );
-    if( !try_check_all_load )
-        qDebug() << "Yes, some wrong" << err;
-
-    // load floors and rooms
-    // after loading all areas in model system
-    auto floors = ptr->loadFloors();
-    auto rooms = ptr->loadRooms();
-    qDebug() << "We load floors and rooms:" << floors.size() << rooms.size();
-    // now you can modify and commit all that areas
+    //loadXlsx();
 }

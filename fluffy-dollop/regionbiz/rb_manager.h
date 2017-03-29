@@ -10,6 +10,8 @@
 #include "rb_metadata.h"
 #include "rb_marks.h"
 
+#define FIND_IF( cont, func ) std::find_if( cont.begin(), cont.end(), func );
+
 namespace regionbiz {
 
 class RegionBizManager;
