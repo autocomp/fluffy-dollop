@@ -133,7 +133,7 @@ void ViraStatusBar::slotEditAreaGeometry(bool on_off)
         slotShowMoreInfo(false);
     }
     ui->moreInfo->setDisabled(on_off);
-    ui->addMark->setDisabled(on_off);
+//    ui->addMark->setDisabled(on_off);
 }
 
 void ViraStatusBar::slotEditObjectGeometryFinish(QVariant var)
