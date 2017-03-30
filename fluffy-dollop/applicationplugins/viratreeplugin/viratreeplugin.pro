@@ -21,12 +21,14 @@ LIBS += -L$${INSTALL_PATH_LIB} \
 HEADERS += \
     viratreeplugin.h \
     viratreewidget.h \
-    delegate.h
+    delegate.h \
+    area_treewidget_items.h
 
 SOURCES += \
     viratreeplugin.cpp \
     viratreewidget.cpp \
-    delegate.cpp
+    delegate.cpp \
+    area_treewidget_items.cpp
 
 RESOURCES += \
     viratreepluginres.qrc

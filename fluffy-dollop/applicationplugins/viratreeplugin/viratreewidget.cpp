@@ -1,5 +1,6 @@
 #include "viratreewidget.h"
 #include "delegate.h"
+#include "area_treewidget_items.h"
 #include <QDebug>
 #include <QHeaderView>
 #include <regionbiz/rb_manager.h>
@@ -49,7 +50,7 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
     connect(lineEditDelegate, SIGNAL(saveItemToDb(QModelIndex)), this, SLOT(slotSaveItemToDb(QModelIndex)));
     setItemDelegateForColumn(0, lineEditDelegate);
     setItemDelegateForColumn(3, lineEditDelegate);
-    setItemDelegateForColumn(4, lineEditDelegate);
+    //setItemDelegateForColumn(4, lineEditDelegate);
     setItemDelegateForColumn(5, lineEditDelegate);
 
     SpinBoxDelegate * spinBoxDelegate = new SpinBoxDelegate(this);
@@ -111,8 +112,10 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
                     FloorPtrs floors = facilityPtr->getChilds();
                     for( FloorPtr floorPtr: floors )
                     {
-                        QTreeWidgetItem * floorItem = new QTreeWidgetItem(facilityItem);
+                        QTreeWidgetItem* floorItem = new FloorTreeWidgetItem(facilityItem);
                         floorItem->setText(0, floorPtr->getName());
+                        if( !floorPtr->getDescription().isEmpty() )
+                            floorItem->setToolTip( 0, floorPtr->getDescription() );
                         const qulonglong id(floorPtr->getId());
                         floorItem->setText(6, QString::number(id));
                         floorItem->setFlags(floorItem->flags() | Qt::ItemIsEditable);
@@ -145,6 +148,8 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
                                     for(int i(0); i < 6; ++i) roomItem->setTextColor(i, _defaultColor);
 
                                 roomItem->setText(0, room->getName());
+                                if( !room->getDescription().isEmpty() )
+                                    roomItem->setToolTip( 0, room->getDescription() );
                                 roomItem->setText(6, QString::number(id));
 
                                 BaseMetadataPtr areaPtr = room->getMetadata("area");
@@ -342,10 +347,10 @@ void ViraTreeWidget::slotSaveItemToDb(const QModelIndex &index)
         if(item->text(2).isEmpty() == false)
             ptr->addMetadata("string", "status", item->text(2));
 
-        if(item->text(3).isEmpty() == false)
+        // if(item->text(3).isEmpty() == false)
             ptr->addMetadata("string", "rentor", item->text(3));
 
-        //if(item->text(5).isEmpty() == false)
+        // if(item->text(5).isEmpty() == false)
             ptr->addMetadata("string", "comment", item->text(5));
     }break;
     case ItemTypeFloor : {
@@ -472,28 +477,3 @@ void ViraTreeWidget::slotHeaderSectionClicked(int index)
 {
     sortByColumn(index);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
