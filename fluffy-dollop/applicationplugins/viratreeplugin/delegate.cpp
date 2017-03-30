@@ -75,6 +75,7 @@ void SpinBoxDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
         value = index.model()->data(index, TOTAL_AREA).toDouble();
 
     QDoubleSpinBox *spinBox = static_cast<QDoubleSpinBox*>(editor);
+    spinBox->setProperty("original_value", QString::number(value, 'f', 1));
     spinBox->setValue(value);
 }
 
@@ -83,14 +84,18 @@ void SpinBoxDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, c
     QDoubleSpinBox *spinBox = static_cast<QDoubleSpinBox*>(editor);
     spinBox->interpretText();
     double value = spinBox->value();
-    int itemType = index.model()->data(index, TYPE).toInt();
-    if(itemType == ItemTypeRoom)
-        model->setData(index, value, Qt::EditRole);
-    else
-        model->setData(index, value, TOTAL_AREA);
+    QString original_value = spinBox->property("original_value").toString();
+    if(original_value != QString::number(value, 'f', 1))
+    {
+        int itemType = index.model()->data(index, TYPE).toInt();
+        if(itemType == ItemTypeRoom)
+            model->setData(index, value, Qt::EditRole);
+        else
+            model->setData(index, value, TOTAL_AREA);
 
-    emit resaclArea(index);
-    emit saveItemToDb(index);
+        emit resaclArea(index);
+        emit saveItemToDb(index);
+    }
 }
 
 void SpinBoxDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &/* index */) const
@@ -154,10 +159,7 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     qDebug() << "ComboBoxDelegate::createEditor col:" << index.column() << ", row:" << index.row() << ", TYPE:" << itemType << ", ID:" << id;
 
     if(itemType != ItemTypeRoom)
-    {
-        qDebug() << "333 ---> return nullptr";
         return nullptr;
-    }
 
     QStringList list;
     list << QString::fromUtf8("Свободно") << QString::fromUtf8("В аренде") << QString::fromUtf8("Недоступно");
@@ -173,16 +175,20 @@ void ComboBoxDelegate::setEditorData(QWidget *editor, const QModelIndex &index) 
     QString value = index.model()->data(index, Qt::EditRole).toString();
     QComboBox *comboBox = static_cast<QComboBox*>(editor);
     comboBox->setCurrentText(value);
+    comboBox->setProperty("original_value", value);
 }
 
 void ComboBoxDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
 {
     QComboBox *comboBox = static_cast<QComboBox*>(editor);
     QString value = comboBox->currentText();
-    model->setData(index, value, Qt::EditRole);
-
-    emit resaclArea(index);
-    emit saveItemToDb(index);
+    QString original_value = comboBox->property("original_value").toString();
+    if(original_value != value)
+    {
+        model->setData(index, value, Qt::EditRole);
+        emit resaclArea(index);
+        emit saveItemToDb(index);
+    }
 }
 
 void ComboBoxDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &/* index */) const
@@ -199,21 +205,13 @@ LineEditDelegate::LineEditDelegate(QObject *parent)
 
 QWidget *LineEditDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &/* option */, const QModelIndex & index ) const
 {
-    qulonglong id = index.model()->data(index, ID).toULongLong();
     int itemType = index.model()->data(index, TYPE).toInt();
-    qDebug() << "LineEditDelegate::createEditor col:" << index.column() << ", row:" << index.row() << ", TYPE:" << itemType << ", ID:" << id;
 
     if(index.column() == 4)
-    {
-        qDebug() << "111 ---> return nullptr";
         return nullptr;
-    }
 
     if(itemType != ItemTypeRoom && (index.column() == 3 || index.column() == 4 || index.column() == 5))
-    {
-        qDebug() << "222 ---> return nullptr";
         return nullptr;
-    }
 
     QLineEdit *editor = new QLineEdit(parent);
     return editor;
@@ -223,6 +221,7 @@ void LineEditDelegate::setEditorData(QWidget *editor, const QModelIndex &index) 
 {
     QString value = index.model()->data(index, Qt::EditRole).toString();
     QLineEdit *lineEdit = static_cast<QLineEdit*>(editor);
+    lineEdit->setProperty("original_value", value);
     lineEdit->setText(value);
 }
 
@@ -230,9 +229,12 @@ void LineEditDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, 
 {
     QLineEdit *lineEdit = static_cast<QLineEdit*>(editor);
     QString value = lineEdit->text();
-    model->setData(index, value, Qt::EditRole);
-
-    emit saveItemToDb(index);
+    QString original_value = lineEdit->property("original_value").toString();
+    if(original_value != value)
+    {
+        model->setData(index, value, Qt::EditRole);
+        emit saveItemToDb(index);
+    }
 }
 
 void LineEditDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &/* index */) const
