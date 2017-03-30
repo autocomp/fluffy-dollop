@@ -304,6 +304,11 @@ void StatusDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option
     }
 }
 
+QWidget *StatusDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    return nullptr;
+}
+
 
 
 
