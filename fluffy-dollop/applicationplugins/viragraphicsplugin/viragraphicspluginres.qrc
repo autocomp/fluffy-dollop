@@ -4,9 +4,18 @@
         <file>img/mark_on_map.png</file>
         <file>img/018_icons_32_back.png</file>
         <file>img/119_icons_32_gl.png</file>
-        <file>img/mark.png</file>
-        <file>img/selected_mark.png</file>
         <file>img/cursor_polygon.png</file>
+        <file>img/balance-ruler.png</file>
+        <file>img/bathtube.png</file>
+        <file>img/cursor_mark.png</file>
+        <file>img/electrical-plug.png</file>
+        <file>img/heater.png</file>
+        <file>img/lamp.png</file>
+        <file>img/plumbing.png</file>
+        <file>img/stairs.png</file>
+        <file>img/tiles.png</file>
+        <file>img/water-heater.png</file>
+        <file>img/wrench.png</file>
         <file>img/mark_tr.png</file>
     </qresource>
 </RCC>

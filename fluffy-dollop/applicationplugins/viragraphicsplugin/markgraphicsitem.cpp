@@ -88,6 +88,32 @@ void MarkGraphicsItem::reinit()
 
     setToolTip(annotation);
 
+    QPixmap pmOrig(":/img/mark_tr.png");
+    BaseMetadataPtr category = ptr->getMetadata("category");
+    if(category)
+    {
+        QString categoryStr = category->getValueAsString();
+        if(categoryStr == QString::fromUtf8("электроснабжение"))
+            pmOrig = QPixmap(":/img/lamp.png");
+        else if(categoryStr == QString::fromUtf8("водоснабжение"))
+            pmOrig = QPixmap(":/img/bathtube.png");
+        else if(categoryStr == QString::fromUtf8("водоотведение"))
+            pmOrig = QPixmap(":/img/plumbing.png");
+        else if(categoryStr == QString::fromUtf8("отопление"))
+            pmOrig = QPixmap(":/img/heater.png");
+        else if(categoryStr == QString::fromUtf8("вентиляция"))
+            pmOrig = QPixmap(":/img/tiles.png");
+        else if(categoryStr == QString::fromUtf8("тепловые сети"))
+            pmOrig = QPixmap(":/img/balance-ruler.png");
+        else if(categoryStr == QString::fromUtf8("слаботочные сети"))
+            pmOrig = QPixmap(":/img/electrical-plug.png");
+        else if(categoryStr == QString::fromUtf8("газоснабжение"))
+            pmOrig = QPixmap(":/img/water-heater.png");
+        else if(categoryStr == QString::fromUtf8("технологические решения"))
+            pmOrig = QPixmap(":/img/wrench.png");
+        else if(categoryStr == QString::fromUtf8("архитектурные решения"))
+            pmOrig = QPixmap(":/img/stairs.png");
+    }
     QColor color;
     BaseMetadataPtr status = ptr->getMetadata("status");
     if(status)
@@ -102,7 +128,6 @@ void MarkGraphicsItem::reinit()
 
         color.setAlpha(120);
 
-        QPixmap pmOrig(":/img/mark_tr.png");
         QPixmap pm(pmOrig.size());
         pm.fill(Qt::transparent);
         QPainter pr(&pm);
