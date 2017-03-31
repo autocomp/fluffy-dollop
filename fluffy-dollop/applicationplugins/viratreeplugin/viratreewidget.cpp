@@ -441,7 +441,7 @@ void ViraTreeWidget::slotItemSelectionChanged()
         QTreeWidgetItem* item = list.first();
         id = item->data(0, ID).toULongLong();
     }
-    RegionBizManager::instance()->selectArea(id);
+    RegionBizManager::instance()->selectEntity(id);
     qDebug() << "slotItemSelectionChanged, ID :" << id;
 }
 
@@ -450,7 +450,7 @@ void ViraTreeWidget::slotItemDoubleClicked(QTreeWidgetItem * item, int)
     if(item)
     {
         const qulonglong id(item->data(0, ID).toULongLong());
-        RegionBizManager::instance()->centerOnArea(id);
+        RegionBizManager::instance()->centerOnEntity(id);
         qDebug() << "slotItemDoubleClicked, ID :" << id;
     }
 }

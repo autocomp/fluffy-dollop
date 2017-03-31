@@ -141,13 +141,13 @@ void WorkState::slotBlockGUI(QVariant var)
     _blockGUI = var.toBool();
 }
 
-void WorkState::slotSelectItem(qulonglong id, bool centerOnArea)
+void WorkState::slotSelectItem(qulonglong id, bool centerOnEntity)
 {
     if( ! _blockGUI)
     {
-        regionbiz::RegionBizManager::instance()->selectArea(id);
-        if(centerOnArea)
-            regionbiz::RegionBizManager::instance()->centerOnArea(id);
+        regionbiz::RegionBizManager::instance()->selectEntity(id);
+        if(centerOnEntity)
+            regionbiz::RegionBizManager::instance()->centerOnEntity(id);
     }
 }
 

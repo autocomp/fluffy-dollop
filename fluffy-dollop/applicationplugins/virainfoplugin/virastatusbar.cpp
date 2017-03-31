@@ -107,7 +107,7 @@ void ViraStatusBar::slotAddMark(bool on_off)
 {
     CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(on_off), QString("visualize_system"));
 
-    quint64 id(on_off ? RegionBizManager::instance()->getSelectedArea() : 0);
+    quint64 id(on_off ? RegionBizManager::instance()->getSelectedEntity() : 0);
     CommonMessageNotifier::send( (uint)visualize_system::BusTags::SetMarkPosition, QVariant(id), QString("visualize_system"));
 
     if(on_off && ui->moreInfo->isChecked())
@@ -121,7 +121,7 @@ void ViraStatusBar::slotAddMark(bool on_off)
 
 void ViraStatusBar::slotEditAreaGeometry(bool on_off)
 {
-    quint64 id(on_off ? RegionBizManager::instance()->getSelectedArea() : 0);
+    quint64 id(on_off ? RegionBizManager::instance()->getSelectedEntity() : 0);
 
     CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, ((bool)id), QString("visualize_system"));
 
@@ -157,7 +157,7 @@ void ViraStatusBar::slotEditObjectGeometryFinish(QVariant var)
         }
 
         CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(false), QString("visualize_system"));
-        RegionBizManager::instance()->selectArea(id);
+        RegionBizManager::instance()->selectEntity(id);
     }
 }
 
@@ -446,7 +446,7 @@ QLabel *ViraStatusBar::getArea(ViraStatusBar::AreaType type, AreaData data)
 
 void ViraStatusBar::slotShowMoreInfo(bool on_off)
 {
-    quint64 id = RegionBizManager::instance()->getSelectedArea();
+    quint64 id = RegionBizManager::instance()->getSelectedEntity();
     MarkPtr markPtr = RegionBizManager::instance()->getMark(id);
     if(markPtr)
     {

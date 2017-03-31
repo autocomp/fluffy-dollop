@@ -14,16 +14,34 @@ class SelectionManager: public QObject
     friend class RegionBizManager;
 
 Q_SIGNALS:
-    void selectBaseArea( uint64_t old_id,
-                         uint64_t new_id );
-    void centerOnBaseArea( uint64_t id );
+    void selectBaseEntity( uint64_t old_id,
+                           uint64_t new_id );
+    void centerOnBaseEntity( uint64_t id );
 
 private:
     SelectionManager();
-    void selectNewArea( uint64_t new_id );
-    void centerOnNewArea(uint64_t id );
+    void selectNewEntity( uint64_t new_id );
+    void centerOnNewEntity(uint64_t id );
 
-    uint64_t _selected_area_id = 0;
+    uint64_t _selected_entity_id = 0;
+};
+
+class ChangeEntitysWatcher: public QObject
+{
+    Q_OBJECT
+
+    friend class RegionBizManager;
+
+Q_SIGNALS:
+    void changeBaseEntity( uint64_t id );
+    void deleteBaseEntity( uint64_t id );
+    void addBaseEntity( uint64_t id );
+
+private:
+    ChangeEntitysWatcher();
+    void changeEntity( uint64_t id );
+    void deleteEntity( uint64_t id );
+    void addEntity( uint64_t id );
 };
 
 }

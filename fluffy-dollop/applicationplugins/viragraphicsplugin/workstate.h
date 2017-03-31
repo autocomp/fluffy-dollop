@@ -33,7 +33,7 @@ protected slots:
     void slotSetItemselect(qulonglong id, bool on_off);
     void slotSelectionItemsChanged(uint64_t,uint64_t);
     void slotCenterOn(uint64_t);
-    void slotSelectItem(qulonglong id, bool centerOnArea);
+    void slotSelectItem(qulonglong id, bool centerOnEntity);
     void slotBlockGUI(QVariant var);
 
 private:

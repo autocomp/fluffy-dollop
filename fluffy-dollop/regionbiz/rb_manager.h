@@ -54,6 +54,9 @@ public:
         {
             area->setParent( parent_id );
             appendArea( area );
+
+            // emit signal
+            _change_watcher.addEntity( area->getId() );
         }
         return area;
     }
@@ -96,15 +99,25 @@ public:
     BaseTranslatorPtr getTranslatorByName( QString name );
 
     // selection managment
-    uint64_t getSelectedArea();
-    void selectArea( uint64_t id );
+    uint64_t getSelectedEntity();
+    void selectEntity( uint64_t id );
     void subscribeOnSelect( QObject* obj,
                             const char *slot,
                             bool queue = false );
-    void centerOnArea( uint64_t id );
+    void centerOnEntity( uint64_t id );
     void subscribeCenterOn( QObject* obj,
                             const char *slot,
                             bool queue = false );
+    // other signals
+    void subscribeOnChangeEntity( QObject* obj,
+                                  const char *slot,
+                                  bool queue = false );
+    void subscribeOnDeleteEntity( QObject* obj,
+                                  const char *slot,
+                                  bool queue = false );
+    void subscribeOnAddEntity( QObject* obj,
+                               const char *slot,
+                               bool queue = false );
 
 private:
     RegionBizManager();
@@ -146,8 +159,9 @@ private:
     // marks
     MarkPtrs _marks;
 
-    // selection
+    // signals
     SelectionManager _select_manager;
+    ChangeEntitysWatcher _change_watcher;
 };
 
 }

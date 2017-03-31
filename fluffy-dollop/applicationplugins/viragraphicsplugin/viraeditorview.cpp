@@ -204,23 +204,23 @@ void ViraEditorView::setFloor(qulonglong floorId)
     */
 }
 
-void ViraEditorView::selectViraItem(qulonglong id, bool centerOnArea)
+void ViraEditorView::selectViraItem(qulonglong id, bool centerOnEntity)
 {
     if(_mode == ScrollMode)
     {
-        regionbiz::RegionBizManager::instance()->selectArea(id);
-        if(centerOnArea)
-            regionbiz::RegionBizManager::instance()->centerOnArea(id);
+        regionbiz::RegionBizManager::instance()->selectEntity(id);
+        if(centerOnEntity)
+            regionbiz::RegionBizManager::instance()->centerOnEntity(id);
     }
 }
 
-void ViraEditorView::slotSelectItem(qulonglong id, bool centerOnArea)
+void ViraEditorView::slotSelectItem(qulonglong id, bool centerOnEntity)
 {
     if(_mode == ScrollMode)
     {
-        regionbiz::RegionBizManager::instance()->selectArea(id);
-        if(centerOnArea)
-            regionbiz::RegionBizManager::instance()->centerOnArea(id);
+        regionbiz::RegionBizManager::instance()->selectEntity(id);
+        if(centerOnEntity)
+            regionbiz::RegionBizManager::instance()->centerOnEntity(id);
     }
 }
 
@@ -416,7 +416,7 @@ void ViraEditorView::mousePressEvent(QMouseEvent *e)
                 ViraGraphicsItem * viraGraphicsItem = dynamic_cast<ViraGraphicsItem*>(item);
                 if(viraGraphicsItem)
                 {
-                    regionbiz::RegionBizManager::instance()->selectArea(viraGraphicsItem->getId());
+                    regionbiz::RegionBizManager::instance()->selectEntity(viraGraphicsItem->getId());
                     return;
                 }
             }
@@ -512,12 +512,12 @@ void ViraEditorView::mouseDoubleClickEvent(QMouseEvent *e)
             ViraGraphicsItem * viraGraphicsItem = dynamic_cast<ViraGraphicsItem*>(item);
             if(viraGraphicsItem)
             {
-                regionbiz::RegionBizManager::instance()->centerOnArea(viraGraphicsItem->getId());
+                regionbiz::RegionBizManager::instance()->centerOnEntity(viraGraphicsItem->getId());
                 return;
             }
         }
 
-        regionbiz::RegionBizManager::instance()->selectArea(0);
+        regionbiz::RegionBizManager::instance()->selectEntity(0);
         QGraphicsView::mouseReleaseEvent(e);
     }
 }

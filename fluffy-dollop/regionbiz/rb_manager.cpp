@@ -165,22 +165,26 @@ std::vector<RoomPtr> RegionBizManager::getRoomsByParent(uint64_t parent_id)
 BaseAreaPtr RegionBizManager::addArea( BaseArea::AreaType type,
                                        uint64_t parent_id )
 {
+    BaseAreaPtr add_area;
+
     switch ( type ) {
     case BaseArea::AT_REGION:
-        return addArea< Region >( parent_id );
+        add_area = addArea< Region >( parent_id );
     case BaseArea::AT_LOCATION:
-        return addArea< Location >( parent_id );
+        add_area = addArea< Location >( parent_id );
     case BaseArea::AT_FACILITY:
-        return addArea< Facility >( parent_id );
+        add_area = addArea< Facility >( parent_id );
     case BaseArea::AT_FLOOR:
-        return addArea< Floor >( parent_id );
+        add_area = addArea< Floor >( parent_id );
     case BaseArea::AT_ROOMS_GROUP:
-        return addArea< RoomsGroup >( parent_id );
+        add_area = addArea< RoomsGroup >( parent_id );
     case BaseArea::AT_ROOM:
-        return addArea< Room >( parent_id );
+        add_area = addArea< Room >( parent_id );
     default:
         return nullptr;
     }
+
+    return add_area;
 }
 
 bool RegionBizManager::deleteArea(BaseAreaPtr area)
@@ -201,6 +205,11 @@ bool RegionBizManager::deleteArea(BaseAreaPtr area)
 
     // delete this one
     bool del = _translator->deleteArea( area );
+    if( del )
+    {
+        // emit signal
+        _change_watcher.deleteEntity( area->getId() );
+    }
     return del;
 }
 
@@ -212,7 +221,13 @@ bool RegionBizManager::deleteArea(uint64_t id)
 
 bool RegionBizManager::commitArea( BaseAreaPtr area )
 {
-    return _translator->commitArea( area );
+    bool com = _translator->commitArea( area );
+    if( com )
+    {
+        // emit signal
+        _change_watcher.changeEntity( area->getId() );
+    }
+    return com;
 }
 
 bool RegionBizManager::commitArea( uint64_t id )
@@ -377,6 +392,9 @@ MarkPtr RegionBizManager::addMark( uint64_t parent_id,
         _marks.push_back( mark );
         mark->setCenter( center );
         mark->setParentId( parent_id );
+
+        // emit signal
+        _change_watcher.addEntity( mark->getId() );
     }
     return mark;
 }
@@ -392,6 +410,11 @@ bool RegionBizManager::commitMark(uint64_t id)
 bool RegionBizManager::commitMark(MarkPtr mark)
 {
     bool comm = _translator->commitMark( mark );
+    if( comm )
+    {
+        // emit signal
+        _change_watcher.changeEntity( mark->getId() );
+    }
     return comm;
 }
 
@@ -406,6 +429,11 @@ bool RegionBizManager::deleteMark(uint64_t id)
 bool RegionBizManager::deleteMark(MarkPtr mark)
 {
     bool del = _translator->deleteMark( mark );
+    if( del )
+    {
+        // emit signal
+        _change_watcher.deleteEntity( mark->getId() );
+    }
     return del;
 }
 
@@ -416,30 +444,48 @@ BaseTranslatorPtr RegionBizManager::getTranslatorByName(QString name)
     return ptr;
 }
 
-uint64_t RegionBizManager::getSelectedArea()
+uint64_t RegionBizManager::getSelectedEntity()
 {
-    return _select_manager._selected_area_id;
+    return _select_manager._selected_entity_id;
 }
 
-void RegionBizManager::selectArea(uint64_t id)
+void RegionBizManager::selectEntity(uint64_t id)
 {
-    _select_manager.selectNewArea( id );
+    _select_manager.selectNewEntity( id );
 }
 
 void RegionBizManager::subscribeOnSelect(QObject *obj, const char *slot, bool queue)
 {
-    QObject::connect( &_select_manager, SIGNAL( selectBaseArea(uint64_t,uint64_t) ),
+    QObject::connect( &_select_manager, SIGNAL( selectBaseEntity(uint64_t,uint64_t) ),
                       obj, slot, ( queue ? Qt::QueuedConnection : Qt::DirectConnection ));
 }
 
-void RegionBizManager::centerOnArea(uint64_t id)
+void RegionBizManager::centerOnEntity(uint64_t id)
 {
-    _select_manager.centerOnBaseArea( id );
+    _select_manager.centerOnBaseEntity( id );
 }
 
 void RegionBizManager::subscribeCenterOn(QObject *obj, const char *slot, bool queue)
 {
-    QObject::connect( &_select_manager, SIGNAL( centerOnBaseArea( uint64_t )),
+    QObject::connect( &_select_manager, SIGNAL( centerOnBaseEntity( uint64_t )),
+                      obj, slot, ( queue ? Qt::QueuedConnection : Qt::DirectConnection ));
+}
+
+void RegionBizManager::subscribeOnChangeEntity(QObject *obj, const char *slot, bool queue)
+{
+    QObject::connect( &_change_watcher, SIGNAL( changeBaseEntity( uint64_t )),
+                      obj, slot, ( queue ? Qt::QueuedConnection : Qt::DirectConnection ));
+}
+
+void RegionBizManager::subscribeOnDeleteEntity(QObject *obj, const char *slot, bool queue)
+{
+    QObject::connect( &_change_watcher, SIGNAL( deleteBaseEntity( uint64_t )),
+                      obj, slot, ( queue ? Qt::QueuedConnection : Qt::DirectConnection ));
+}
+
+void RegionBizManager::subscribeOnAddEntity(QObject *obj, const char *slot, bool queue)
+{
+    QObject::connect( &_change_watcher, SIGNAL( addBaseEntity( uint64_t )),
                       obj, slot, ( queue ? Qt::QueuedConnection : Qt::DirectConnection ));
 }
 

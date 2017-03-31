@@ -31,7 +31,7 @@ public:
     void reinit(qulonglong facilityId);
     void centerEditorOn(qulonglong id);
     void selectionItemsChanged(uint64_t prev_id, uint64_t curr_id);
-    void selectViraItem(qulonglong id, bool centerOnArea);
+    void selectViraItem(qulonglong id, bool centerOnEntity);
 
 signals:
     
@@ -40,7 +40,7 @@ public slots:
     void zoomIn();
     void zoomOut();
     void zoomReset();
-    void slotSelectItem(qulonglong id, bool centerOnArea);
+    void slotSelectItem(qulonglong id, bool centerOnEntity);
     void slotEditAreaGeometry(QVariant var);
     void slotSetMarkPosition(QVariant var);
     void slotUpdateMark(QVariant var);

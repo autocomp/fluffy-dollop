@@ -134,8 +134,6 @@ bool SqlTranslator::commitArea( BaseAreaPtr area )
 
     QString insert_update;
 
-    // lock base
-
     // room
     if( query.first() )
     {

@@ -17,7 +17,7 @@ public:
 
 signals:
     void itemIsHover(qulonglong id, bool on_off);
-    void signalSelectItem(qulonglong id, bool centerOnArea);
+    void signalSelectItem(qulonglong id, bool centerOnEntity);
 
 protected:
     bool _isSelected = false;

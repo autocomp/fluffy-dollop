@@ -29,7 +29,7 @@ void AreaGraphicsItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
         if(polygon().containsPoint(event->pos(), Qt::OddEvenFill))
         {
             event->accept();
-            emit signalSelectItem(_areaInitData.id, true); // regionbiz::RegionBizManager::instance()->centerOnArea(_areaInitData.id);
+            emit signalSelectItem(_areaInitData.id, true); // regionbiz::RegionBizManager::instance()->centerOnEntity(_areaInitData.id);
         }
         else
         {
