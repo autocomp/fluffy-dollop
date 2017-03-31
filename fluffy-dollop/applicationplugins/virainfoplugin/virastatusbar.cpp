@@ -4,8 +4,8 @@
 
 #include <QDebug>
 
-#include <libembeddedwidgets/embeddedstruct.h>
-#include <libembeddedwidgets/embeddedapp.h>
+#include <dmanager/embeddedstruct.h>
+#include <dmanager/embeddedapp.h>
 #include <ctrcore/tempinputdata/tempdatatypies.h>
 #include <ctrcore/tempinputdata/tempdatacontroller.h>
 #include <ctrcore/bus/common_message_notifier.h>

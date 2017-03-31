@@ -481,7 +481,7 @@ bool EmbeddedApp::init(ew::EmbeddedApp::EmbeddedInitStruct initStruct)
             path = path.prepend(QCoreApplication::applicationDirPath() + QDir::separator());
         }
 
-        ew::network::DocDebugger::instance()->init(path);
+        //ew::network::DocDebugger::instance()->init(path);
     }
 
     if(initStruct.loggerFuncDebug)
@@ -794,7 +794,7 @@ quint64 EmbeddedApp::createMainWindowPrivate(const ew::EmbeddedMainWindowStruct 
 
         //privWindowStruct->embWidgetPtr->setVisible(!privWindowStruct->embWidgetStruct->addHided);
 
-        ew::network::DocDebugger::instance()->installDoc(embWindowPtr);
+        //ew::network::DocDebugger::instance()->installDoc(embWindowPtr);
     }
     else
     {
@@ -1297,7 +1297,7 @@ quint64 EmbeddedApp::createServiceWidgetPrivate(const EmbeddedWidgetStruct &str,
             }
         }
 
-        ew::network::DocDebugger::instance()->installDoc(privWidgetStruct->embWidgetPtr);
+        //ew::network::DocDebugger::instance()->installDoc(privWidgetStruct->embWidgetPtr);
     }
     else
     {
@@ -1949,7 +1949,7 @@ quint64 EmbeddedApp::createWindowPrivate(const ew::EmbeddedWindowStruct & str, q
     if(privWindowStruct->embWidgetStruct->isModal && !privWindowStruct->embWidgetStruct->addHided)
     {
         ewApp()->embWidgetChanged(id);
-        ew::network::DocDebugger::instance()->installDoc(embWindowPtr);
+        //ew::network::DocDebugger::instance()->installDoc(embWindowPtr);
 
         if(restore)
         {
@@ -1964,7 +1964,7 @@ quint64 EmbeddedApp::createWindowPrivate(const ew::EmbeddedWindowStruct & str, q
     }
 
     ewApp()->embWidgetChanged(id);
-    ew::network::DocDebugger::instance()->installDoc(embWindowPtr);
+    //ew::network::DocDebugger::instance()->installDoc(embWindowPtr);
 
     if(restore)
     {
@@ -2489,7 +2489,7 @@ quint64 EmbeddedApp::createWidgetPrivate(const ew::EmbeddedWidgetStruct & str, q
         if(!privWidgetStruct->embWidgetStruct->addHided)
         {
             ewApp()->embWidgetChanged(id);
-            ew::network::DocDebugger::instance()->installDoc(embWidgetPtr);
+            //ew::network::DocDebugger::instance()->installDoc(embWidgetPtr);
 
             if(restore)
             {
@@ -2513,7 +2513,7 @@ quint64 EmbeddedApp::createWidgetPrivate(const ew::EmbeddedWidgetStruct & str, q
 
 
     ewApp()->embWidgetChanged(id);
-    ew::network::DocDebugger::instance()->installDoc(embWidgetPtr);
+    //ew::network::DocDebugger::instance()->installDoc(embWidgetPtr);
 
     if(restore)
     {
@@ -3486,7 +3486,7 @@ quint64 EmbeddedApp::getTopWidgetId(QWidget *wdg)
 
 void EmbeddedApp::setVisibleDocViewer(bool vis)
 {
-    DocDebugger::instance()->setVisibleDocViewer(vis);
+    //DocDebugger::instance()->setVisibleDocViewer(vis);
 }
 
 

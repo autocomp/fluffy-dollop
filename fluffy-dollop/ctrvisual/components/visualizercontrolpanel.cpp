@@ -1,6 +1,6 @@
 #include "visualizercontrolpanel.h"
 #include <QFrame>
-#include <libembeddedwidgets/embeddedapp.h>
+#include <dmanager/embeddedapp.h>
 #include <QStyleOption>
 #include <QPainter>
 

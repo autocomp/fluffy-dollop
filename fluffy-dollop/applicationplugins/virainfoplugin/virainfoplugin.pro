@@ -18,6 +18,7 @@ LIBS += -L$${INSTALL_PATH_LIB} \
         -lctrvisual \
         -lctrwidgets \
         -lregionbiz \
+        -lembeddedwidgets
 
 HEADERS += \
     virainfoplugin.h \

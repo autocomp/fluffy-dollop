@@ -5,6 +5,7 @@
 #include <QCoreApplication>
 #include <QFileInfo>
 #include <QRegExp>
+#include <QDebug>
 
 QMap<QString, QVariant> CtrConfig::m_custom_data;
 
@@ -187,6 +188,7 @@ bool CtrConfig::checkConfigs()
     initParametersObserver();
 
     QString common_settings_path = ctrconfig::getCommonConfigPath(_application_name);
+    qDebug() << common_settings_path;
     QString user_settings_path = ctrconfig::getUserConfigPath(_application_name);
 
 //    UNILOG_INFO(_logger) << "application common config path is: "

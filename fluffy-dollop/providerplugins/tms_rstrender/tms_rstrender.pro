@@ -5,6 +5,10 @@ ROOT_DIR=../../
 
 include($${ROOT_DIR}pri/plugins.pri)
 
+LIBS += -L$${INSTALL_PATH_LIB} \
+        -lctrcore \
+        -lctrrasterrender \
+
 SOURCES += \
     *.cpp
 

@@ -4,8 +4,8 @@
 #include <ctrcore/visual/datainterface.h>
 #include <ctrcore/provider/dataproviderfactory.h>
 #include <ctrcore/ctrcore/ctrconfig.h>
-#include <libembeddedwidgets/embeddedstruct.h>
-#include <libembeddedwidgets/embeddedapp.h>
+#include <dmanager/embeddedstruct.h>
+#include <dmanager/embeddedapp.h>
 #include <ctrcore/bus/common_message_notifier.h>
 #include <ctrcore/bus/bustags.h>
 

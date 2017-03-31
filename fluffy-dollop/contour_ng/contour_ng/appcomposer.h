@@ -3,8 +3,8 @@
 
 #include <QObject>
 #include <QVariantMap>
-#include <libembeddedwidgets/embeddedstruct.h>
-#include <libembeddedwidgets/embeddedsubiface.h>
+#include <dmanager/embeddedstruct.h>
+#include <dmanager/embeddedsubiface.h>
 #include <ctrcore/bus/globalmessages.h>
 #include <ctrcore/plugin/ctrappvisualizerplugin.h>
 

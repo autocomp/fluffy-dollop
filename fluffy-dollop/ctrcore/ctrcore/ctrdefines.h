@@ -28,7 +28,14 @@ namespace ctrconfig
     /// Значение переменной окружения для опеределения пути к домашнему каталогу пользователя
     #define ENV_USER_HOME_DIR getenv("HOME")
 
+#ifdef Q_OS_LINUX
     #define COMMON_CONFIG_ROOT_DIR "/etc/"
+#elif defined(Q_OS_WIN32)
+    #define COMMON_CONFIG_ROOT_DIR (QDir::currentPath())
+#else
+    #error "We don't support that version yet..."
+#endif
+
 
     /// Имя конфигурационного файла приложения, в котором хранятся стартовые настройки
     /// пути к плагинам приложения
@@ -45,7 +52,11 @@ namespace ctrconfig
  */
 inline QString  getCommonConfigPath(const QString& applicationName)
 {
-    return QString().append(COMMON_CONFIG_ROOT_DIR).append(applicationName);
+    QDir path(QString().append(COMMON_CONFIG_ROOT_DIR).append(QDir::separator()).append(applicationName));
+    //qDebug() << "CONFIG PATH: " << path.absolutePath();
+    return path.absolutePath();
+    //return QString().append(COMMON_CONFIG_ROOT_DIR).append(QDir::separator()).append(applicationName);
+    //return (QDir(QString(COMMON_CONFIG_ROOT_DIR)) / QDir(applicationName)).absolutePath();
 }
 
 /**

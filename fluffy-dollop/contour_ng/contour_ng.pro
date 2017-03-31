@@ -4,5 +4,5 @@ CONFIG += ordered
 
 SUBDIRS = \
     contour_ng \
-    excelExmpl
+#    excelExmpl
 

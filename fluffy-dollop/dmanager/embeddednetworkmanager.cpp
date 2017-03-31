@@ -78,8 +78,8 @@ void EmbeddedNetworkManager::init(EmbeddedNetworkManager::WorkMode wm, quint16 p
 
           connect(StyleDebugger::instance(), SIGNAL(signalWidgetClicked(QString))
                   , this, SLOT(slotWidgetSelected(QString)));
-          connect(DocDebugger::instance(), SIGNAL(signalWidgetClicked(QString))
-                  , this, SLOT(slotWidgetSelected(QString)));
+          //connect(DocDebugger::instance(), SIGNAL(signalWidgetClicked(QString))
+          //        , this, SLOT(slotWidgetSelected(QString)));
       } break;
       default:
           break;
@@ -281,7 +281,7 @@ void EmbeddedNetworkManager::slotDataAvailableFromServer() //slot ReadyRead serv
 
         if( MT_DOX_MESSAGE == head.messageClassType)
         {
-            DocDebugger::instance()->setReceivedMessage((DocMessageType)head.messageType, head.data);
+            //DocDebugger::instance()->setReceivedMessage((DocMessageType)head.messageType, head.data);
         }
     }
 }
@@ -331,9 +331,9 @@ void EmbeddedNetworkManager::slotClientReceivedData() // slot readyread client
         } break;
         case MT_DOX_MESSAGE:
         {
-            DocMessageType answMsgType = (DocMessageType)head.messageType;
-            arr = DocDebugger::instance()->getDocMsgAnswer((DocMessageType)head.messageType, head.data, asyncAnswer, answMsgType);
-            head.messageType = answMsgType;
+            //DocMessageType answMsgType = (DocMessageType)head.messageType;
+            //arr = DocDebugger::instance()->getDocMsgAnswer((DocMessageType)head.messageType, head.data, asyncAnswer, answMsgType);
+            //head.messageType = answMsgType;
         } break;
         default:
             break;

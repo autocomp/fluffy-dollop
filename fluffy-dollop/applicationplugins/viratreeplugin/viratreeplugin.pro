@@ -17,6 +17,7 @@ LIBS += -L$${INSTALL_PATH_LIB} \
         -lctrvisual \
         -lctrwidgets \
         -lregionbiz \
+        -lembeddedwidgets
 
 HEADERS += \
     viratreeplugin.h \

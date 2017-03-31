@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <QRegExp>
-#include <execinfo.h>
+//#include <execinfo.h>
 #include <QTimer>
 
 ParamsObserver::ParamsObserver(QObject *parent):
@@ -13,16 +13,16 @@ QString ParamsObserver::getFunctionFromBacktrace( const int step )
 {
     void* buffer[SIZE];
     size_t size;
-    size = backtrace( buffer, SIZE );
-    char** strings;
-    strings = backtrace_symbols( buffer, size );
+  //  size = backtrace( buffer, SIZE );
+  //  char** strings;
+  //  strings = backtrace_symbols( buffer, size );
 
-    QString func = strings[step];
-    QRegExp rx_left = QRegExp( "(\\W|\\w)*[(]" );
-    QRegExp rx_right = QRegExp( "[+](\\W|\\w)*" );
-    func = func.remove( rx_left ).remove( rx_right );
+    QString func;// = strings[step];
+    //QRegExp rx_left = QRegExp( "(\\W|\\w)*[(]" );
+    //QRegExp rx_right = QRegExp( "[+](\\W|\\w)*" );
+    //func = func.remove( rx_left ).remove( rx_right );
 
-    free( strings );
+    //free( strings );
     return func;
 }
 

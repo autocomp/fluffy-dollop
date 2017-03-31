@@ -1,7 +1,7 @@
 #ifndef CONCRETEEMBEDDEDSUBIFACE_H
 #define CONCRETEEMBEDDEDSUBIFACE_H
 
-#include <libembeddedwidgets/embeddedsubiface.h>
+#include <dmanager/embeddedsubiface.h>
 
 class EmbIFaceNotifier : public QObject, public ew::EmbeddedSubIFace
 {

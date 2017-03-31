@@ -32,7 +32,7 @@ LIBS += -L$${INSTALL_PATH_LIB} \
 
 SOURCES += \
 #    components/filedialog/*.cpp \
-    components/waitdialog/*.cpp \
+    $$files(components/waitdialog/*.cpp) \
 #    components/filepathwidget/*.cpp \
 #    components/sourcesensorwidget/*.cpp \
 #    components/endworkingwidgets/*.cpp \
@@ -41,7 +41,7 @@ SOURCES += \
 
 HEADERS += \
 #    components/filedialog/*.h \
-    components/waitdialog/*.h \
+    $$files(components/waitdialog/*.h) \
 #    components/filepathwidget/*.h \
 #    components/sourcesensorwidget/*.h \
 #    components/endworkingwidgets/*.h \

@@ -5,8 +5,12 @@ ROOT_DIR=../../
 
 include($${ROOT_DIR}pri/plugins.pri)
 
+LIBS += -L$${ROOT_DIR}bin/lib \
+        -lctrcore \
+        -lctrrasterrender \
+
 SOURCES += \
-    *.cpp
+    $$files(*.cpp)
 
 HEADERS += \
-    *.h
+    $$files(*.h)

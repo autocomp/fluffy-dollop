@@ -16,7 +16,7 @@ QT += webkit
 }
 
 greaterThan(QT_MAJOR_VERSION, 4) {
-QT += core widgets  webenginewidgets
+QT += core widgets
 DEFINES += QT_V5
 }
 
@@ -52,8 +52,8 @@ SOURCES += \
     dataserializer.cpp \
     embeddednetworktypes.cpp \
     styledebugger.cpp \
-    docviewerwidget.cpp \
-    docdebugger.cpp \
+#    docviewerwidget.cpp \
+#    docdebugger.cpp \
     waitdialog.cpp \
     embeddedlogger.cpp
 
@@ -89,8 +89,8 @@ HEADERS  += \
     embeddednetworktypes.h \
     dataserializer.h \
     styledebugger.h \
-    docdebugger.h \
-    docviewerwidget.h \
+#    docdebugger.h \
+#    docviewerwidget.h \
     waitdialog.h \
     embeddedlogger.h
 

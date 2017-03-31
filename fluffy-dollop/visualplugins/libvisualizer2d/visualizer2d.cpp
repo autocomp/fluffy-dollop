@@ -11,7 +11,7 @@
 #include <ctrcore/visual/visualizermanager.h>
 #include <ctrcore/plugin/ctrpluginloader.h>
 #include <ctrcore/ctrcore/ctrconfig.h>
-#include <libembeddedwidgets/embeddedapp.h>
+#include <dmanager/embeddedapp.h>
 #include <ctrcore/provider/sincxmlloader.h>
 #include <QHBoxLayout>
 #include <QDomDocument>

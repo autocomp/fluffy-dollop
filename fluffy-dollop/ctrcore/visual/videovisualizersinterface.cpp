@@ -2,8 +2,8 @@
 #include "visualizermanager.h"
 #include "datainterface.h"
 #include "viewinterface.h"
-#include <libembeddedwidgets/embeddedstruct.h>
-#include <libembeddedwidgets/embeddedapp.h>
+#include <dmanager/embeddedstruct.h>
+#include <dmanager/embeddedapp.h>
 #include <ctrcore/provider/dataproviderfactory.h>
 #include <ctrcore/provider/abstractvideodataprovider.h>
 #include <QFileInfo>

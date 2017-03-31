@@ -13,7 +13,7 @@
 #include <ctrcore/visual/visualizermanager.h>
 #include <ctrcore/visual/viewinterface.h>
 #include <ctrcore/visual/datainterface.h>
-#include <libembeddedwidgets/embeddedapp.h>
+#include <dmanager/embeddedapp.h>
 #include <ctrcore/bus/common_message_notifier.h>
 #include <ctrcore/bus/bustags.h>
 

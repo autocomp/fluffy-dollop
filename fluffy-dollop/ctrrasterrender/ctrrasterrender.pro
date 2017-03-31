@@ -17,13 +17,16 @@ QMAKE_CXXFLAGS += -std=c++11
 
 QT += xml network opengl
 
+LIBS += -L$${INSTALL_PATH_LIB} \
+        -lctrcore \
+
 SOURCES += \
-    tms/*.cpp \
-    image/*.cpp \
+    $$files(tms/*.cpp) \
+    $$files(image/*.cpp) \
 
 HEADERS += \
-    tms/*.h \
-    image/*.h \
+    $$files(tms/*.h) \
+    $$files(image/*.h) \
 
 DISTFILES += \
 

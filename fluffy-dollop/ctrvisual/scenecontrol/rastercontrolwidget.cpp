@@ -10,7 +10,7 @@
 #include <ctrcore/visual/datainterface.h>
 #include <ctrcore/visual/viewinterface.h>
 #include <ctrcore/visual/selectionmodelinterface.h>
-#include <libembeddedwidgets/embeddedapp.h>
+#include <dmanager/embeddedapp.h>
 
 using namespace visualize_system;
 

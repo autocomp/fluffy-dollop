@@ -20,16 +20,16 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 QMAKE_CXXFLAGS += -std=c++11
 
 SOURCES += \
-    state/*.cpp \
-    scenewidget/*.cpp \
-    scenecontrol/*.cpp \
-    components/*.cpp \
+    $$files(state/*.cpp) \
+    $$files(scenewidget/*.cpp) \
+    $$files(scenecontrol/*.cpp) \
+    $$files(components/*.cpp) \
 
 HEADERS += \
-    state/*.h \
-    scenewidget/*.h \
-    scenecontrol/*.h \
-    components/*.h \
+    $$files(state/*.h) \
+    $$files(scenewidget/*.h) \
+    $$files(scenecontrol/*.h) \
+    $$files(components/*.h) \
 
 #TRANSLATIONS += ctrvisual.ts
 
@@ -39,6 +39,7 @@ FORMS += \
 LIBS += -L$${ROOT_DIR}bin/lib \
         -lctrcore \
         -lctrrasterrender \
+        -lembeddedwidgets \
 #        -lGeographic \
 #        -ldpf_core \
 #        -ldpf_geo \

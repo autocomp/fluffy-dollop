@@ -26,8 +26,8 @@
 #include <ctrcore/ctrcore/ctrconfig.h>
 #include <ctrcore/ctrcore/ctrdefines.h>
 
-#include <libembeddedwidgets/embeddedapp.h>
-#include <libembeddedwidgets/embeddedmainwindow.h>
+#include <dmanager/embeddedapp.h>
+#include <dmanager/embeddedmainwindow.h>
 
 
 //#include <ctrcore/asbtractplugins/adaptersfactory.h>
@@ -44,8 +44,8 @@
 #include <QTranslator>
 #include <QApplication>
 //#include <QCleanlooksStyle>
-#include <libembeddedwidgets/sqliteserializer.h>
-#include <libembeddedwidgets/docviewerwidget.h>
+#include <dmanager/sqliteserializer.h>
+#include <dmanager/docviewerwidget.h>
 //#include "libstyledebuggerplugin/debuggerinstaller.h"
 
 #include <ctrcore/undoactions/undocontroller.h>

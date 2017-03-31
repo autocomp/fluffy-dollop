@@ -1,7 +1,7 @@
 #include "viratreeplugin.h"
 #include "viratreewidget.h"
-#include <libembeddedwidgets/embeddedstruct.h>
-#include <libembeddedwidgets/embeddedapp.h>
+#include <dmanager/embeddedstruct.h>
+#include <dmanager/embeddedapp.h>
 #include <ctrcore/ctrcore/ctrconfig.h>
 #include <ctrcore/visual/viewinterface.h>
 #include <ctrcore/visual/datainterface.h>

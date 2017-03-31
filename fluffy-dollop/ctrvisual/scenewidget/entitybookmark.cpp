@@ -5,6 +5,8 @@ bool is_prefix(const char *pre, const char *str) {
 }
 
 Folder* readTree(const char *file) {
+    return NULL;
+/*
     FILE *fp = fopen(file, "r");
     char *line = NULL;
     size_t len;
@@ -76,6 +78,7 @@ Folder* readTree(const char *file) {
         }
     }
     return root;
+*/
 }
 
 //TODO:

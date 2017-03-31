@@ -22,8 +22,8 @@
 #ifndef QT_V5
 #include <QWebView>
 #else
-#include <QWebEnginePage>
-#include <QWebEngineView>
+//#include <QWebEnginePage>
+//#include <QWebEngineView>
 #endif
 
 #include <QPlainTextEdit>
@@ -675,7 +675,7 @@ void ew::EmbeddedActionLogger::connect_(QWidget *wdg)
             connect(qab,SIGNAL(actionTriggered ( QAction *  )),SLOT(slotQToolBar_actionTriggered()));
         }
     }
-
+/*
 #ifndef QT_V5
     {
         QWebView *qab = qobject_cast<QWebView*>(wdg);
@@ -702,7 +702,7 @@ void ew::EmbeddedActionLogger::connect_(QWidget *wdg)
         }
     }
 #endif
-
+*/
     {
         QAbstractButton * qab = qobject_cast<QAbstractButton*>(wdg);
         if(qab)

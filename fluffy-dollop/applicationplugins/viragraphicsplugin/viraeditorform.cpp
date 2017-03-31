@@ -10,7 +10,7 @@
 #include <ctrcore/ctrcore/ctrconfig.h>
 #include <QDir>
 #include <QDomDocument>
-#include <libembeddedwidgets/embeddedapp.h>
+#include <dmanager/embeddedapp.h>
 #include <regionbiz/rb_manager.h>
 #include <ctrcore/bus/common_message_notifier.h>
 #include <ctrcore/bus/bustags.h>

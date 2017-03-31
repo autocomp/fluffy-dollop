@@ -4,9 +4,9 @@ CONFIG   += ordered debug
 
 SUBDIRS = \
     dmanager \
-    qtxlsx  \	
+#    qtxlsx  \
     regionbiz \
-    regionbiz/regionbiz_plugins \
+#    regionbiz/regionbiz_plugins \
     ctrcore \
     ctrrasterrender \
     ctrvisual \

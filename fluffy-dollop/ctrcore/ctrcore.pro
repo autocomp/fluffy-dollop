@@ -19,22 +19,22 @@ QT += core gui network sql xml
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 SOURCES +=     \
-    provider/*.cpp \
-    plugin/*.cpp \
-    visual/*.cpp \
-    ctrcore/*.cpp \
-    bus/*.cpp \
-    undoactions/*.cpp \
-    tempinputdata/*.cpp \
+    $$files(provider/*.cpp) \
+    $$files(plugin/*.cpp) \
+    $$files(visual/*.cpp) \
+    $$files(ctrcore/*.cpp) \
+    $$files(bus/*.cpp) \
+    $$files(undoactions/*.cpp) \
+    $$files(tempinputdata/*.cpp) \
 
 HEADERS += \
-    provider/*.h \
-    plugin/*.h \
-    visual/*.h \
-    ctrcore/*.h \
-    bus/*.h \
-    undoactions/*.h \
-    tempinputdata/*.h
+    $$files(provider/*.h) \
+    $$files(plugin/*.h) \
+    $$files(visual/*.h) \
+    $$files(ctrcore/*.h) \
+    $$files(bus/*.h) \
+    $$files(undoactions/*.h) \
+    $$files(tempinputdata/*.h)
 
 #TRANSLATIONS += ctrcore.ts
 

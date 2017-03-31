@@ -18,9 +18,9 @@
 
 #include <QMessageBox>
 #include <QFileInfo>
-#include <libembeddedwidgets/embeddedapp.h>
-#include <libembeddedwidgets/sqliteserializer.h>
-#include <libembeddedwidgets/docviewerwidget.h>
+#include <dmanager/embeddedapp.h>
+#include <dmanager/sqliteserializer.h>
+#include <dmanager/docviewerwidget.h>
 //using namespace unilog;
 using namespace ctrcore;
 
