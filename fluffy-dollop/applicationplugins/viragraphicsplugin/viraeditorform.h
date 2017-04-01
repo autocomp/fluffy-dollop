@@ -2,7 +2,7 @@
 #define VIRAEDITORFORM_H
 
 #include "scenevirawidget.h"
-#include "virapageslistwidget.h"
+//#include "virapageslistwidget.h"
 #include "viraeditorview.h"
 #include <QWidget>
 #include <QFutureWatcher>
@@ -41,7 +41,7 @@ private:
 
     Ui::ViraEditorForm *ui;
     SceneViraWidget * _sceneViraWidget;
-    ViraPagesListWidget * _viraPagesListWidget;
+//    ViraPagesListWidget * _viraPagesListWidget;
     QFutureWatcher<void>* _futureWatcher;
     QGraphicsScene _scene;
     ViraEditorView * _view;

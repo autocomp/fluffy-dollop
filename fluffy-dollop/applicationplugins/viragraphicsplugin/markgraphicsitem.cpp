@@ -74,19 +74,19 @@ void MarkGraphicsItem::reinit()
     if( annotation.isEmpty() )
         annotation = QString::fromUtf8("дефект");
 
+    QString toolotip = annotation;
     BaseMetadataPtr data_time = ptr->getMetadata("date");
     if(data_time)
-        annotation.append(QString(", выполнить до:") + data_time->getValueAsString());
+        toolotip.append(QString(", выполнить до : ") + data_time->getValueAsString());
 
     BaseMetadataPtr responsible = ptr->getMetadata("worker");
     if(responsible)
     {
         QString text = responsible->getValueAsString();
         if(text.isEmpty() == false)
-            annotation.append(QString(", исполнитель:") + text);
+            toolotip.append(QString(", исполнитель : ") + text);
     }
-
-    setToolTip(annotation);
+    setToolTip(toolotip);
 
     QPixmap pmOrig(":/img/mark_tr.png");
     BaseMetadataPtr category = ptr->getMetadata("category");

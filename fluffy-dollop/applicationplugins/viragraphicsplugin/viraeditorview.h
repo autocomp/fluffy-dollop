@@ -8,6 +8,8 @@
 #include <QPainter>
 #include "types.h"
 #include "roomgraphicstem.h"
+#include <QToolButton>
+#include <QLabel>
 
 class GraphicsPixmapItem : public QGraphicsPixmapItem
 {
@@ -43,7 +45,9 @@ public slots:
     void slotSelectItem(qulonglong id, bool centerOnEntity);
     void slotEditAreaGeometry(QVariant var);
     void slotSetMarkPosition(QVariant var);
-    void slotUpdateMark(QVariant var);
+    void slotObjectChanged(uint64_t id);
+    void slotFacilityUp();
+    void slotFacilityDown();
 
 protected:
     virtual void wheelEvent(QWheelEvent* e);
@@ -68,6 +72,9 @@ private:
     QMap<qulonglong, QGraphicsItem *> _itemsOnFloor;
     uint64_t _editObjectGeometry = 0;
     QPolygonF _editObjectExtend;
+    QToolButton* _upButton, *_downButton;
+    QLabel * _currentFacility;
+    QMap<uint64_t, QString> _floorsMap;
 
     QList<QGraphicsLineItem *> _lines;
 };

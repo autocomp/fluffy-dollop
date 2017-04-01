@@ -17,5 +17,7 @@
         <file>img/water-heater.png</file>
         <file>img/wrench.png</file>
         <file>img/mark_tr.png</file>
+        <file>img/down.png</file>
+        <file>img/up.png</file>
     </qresource>
 </RCC>

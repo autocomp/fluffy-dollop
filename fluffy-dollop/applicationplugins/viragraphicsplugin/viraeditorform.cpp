@@ -28,9 +28,9 @@ ViraEditorForm::ViraEditorForm(QWidget *parent) :
 
     ui->topLayout->addWidget(_sceneViraWidget);
 
-    _viraPagesListWidget = new ViraPagesListWidget;
-    connect(_viraPagesListWidget, SIGNAL(setFloor(qulonglong)), this, SLOT(slotSetFloor(qulonglong)));
-    ui->downLayout->addWidget(_viraPagesListWidget);
+//    _viraPagesListWidget = new ViraPagesListWidget;
+//    connect(_viraPagesListWidget, SIGNAL(setFloor(qulonglong)), this, SLOT(slotSetFloor(qulonglong)));
+//    ui->downLayout->addWidget(_viraPagesListWidget);
 
     _scene.setBackgroundBrush(QBrush(Qt::black));
     _view = new ViraEditorView();
@@ -49,7 +49,7 @@ ViraEditorForm::ViraEditorForm(QWidget *parent) :
 ViraEditorForm::~ViraEditorForm()
 {
     delete _sceneViraWidget;
-    delete _viraPagesListWidget;
+//    delete _viraPagesListWidget;
     delete ui;
 }
 
@@ -104,12 +104,12 @@ void ViraEditorForm::slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_i
                 if(_currFacilityId != facilityId)
                 {
                     _currFacilityId = facilityId;
-                    _viraPagesListWidget->reinit(facilityId);
+//                    _viraPagesListWidget->reinit(facilityId);
                     _view->reinit(facilityId);
                 }
         }
     }
-    _viraPagesListWidget->selectionItemsChanged(prev_id, curr_id);
+//    _viraPagesListWidget->selectionItemsChanged(prev_id, curr_id);
     _view->selectionItemsChanged(prev_id, curr_id);
 }
 

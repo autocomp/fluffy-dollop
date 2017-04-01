@@ -5,6 +5,43 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <regionbiz/rb_manager.h>
+#include <ctrcore/ctrcore/ctrconfig.h>
+
+AreaInitData::AreaInitData(bool selectableFromMap, double _zValue, QColor color)
+    : isSelectableFromMap(selectableFromMap)
+    , zValue(_zValue)
+{
+    setColor(color);
+}
+
+void AreaInitData::setColor(QColor color)
+{
+    uint area_normal_alpha = CtrConfig::getValueByName("vira_graphic_settings.area_normal_alpha", (quint64)110, true).toUInt();
+    uint area_hover_alpha = CtrConfig::getValueByName("vira_graphic_settings.area_hover_alpha", (quint64)140, true).toUInt();
+    uint area_select_alpha = CtrConfig::getValueByName("vira_graphic_settings.area_select_alpha", (quint64)180, true).toUInt();
+
+    penNormal.setColor(color);
+    penNormal.setCosmetic(true);
+    penNormal.setWidth(2);
+
+    penHoverl.setColor(color);
+    penHoverl.setCosmetic(true);
+    penHoverl.setWidth(3);
+
+    color.setAlpha(area_normal_alpha);
+    brushNormal.setColor(color);
+    brushNormal.setStyle(Qt::SolidPattern);
+
+    color.setAlpha(area_hover_alpha);
+    brushHoverl.setColor(color);
+    brushHoverl.setStyle(Qt::SolidPattern);
+
+    color.setAlpha(area_select_alpha);
+    brushSelect.setColor(color);
+    brushSelect.setStyle(Qt::SolidPattern);
+}
+
+//-----------------------------
 
 AreaGraphicsItem::AreaGraphicsItem(const QPolygonF &polygon)
     : QGraphicsPolygonItem(polygon)
@@ -18,8 +55,28 @@ void AreaGraphicsItem::init(const AreaInitData& areaInitData)
     setPen(_areaInitData.penNormal);
     setBrush(_areaInitData.brushNormal);
     setZValue(_areaInitData.zValue);
-//    setToolTip(_areaInitData.tooltip);
-//    setAcceptHoverEvents(true);
+    //    setToolTip(_areaInitData.tooltip);
+    //    setAcceptHoverEvents(true);
+}
+
+void AreaGraphicsItem::setColor(QColor color)
+{
+    _areaInitData.setColor(color);
+    if(_isSelected)
+    {
+        QPen pen(_areaInitData.penNormal.color(), 4, Qt::DotLine);
+        pen.setCosmetic(true);
+        setPen(pen);
+        setBrush(_areaInitData.brushSelect);
+    }
+    else
+    {
+        setPen(_areaInitData.penNormal);
+        setBrush(_areaInitData.brushNormal);
+        setZValue(_areaInitData.zValue);
+    }
+
+    update();
 }
 
 void AreaGraphicsItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
@@ -29,7 +86,7 @@ void AreaGraphicsItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
         if(polygon().containsPoint(event->pos(), Qt::OddEvenFill))
         {
             event->accept();
-            emit signalSelectItem(_areaInitData.id, true); // regionbiz::RegionBizManager::instance()->centerOnEntity(_areaInitData.id);
+            emit signalSelectItem(_areaInitData.id, true);
         }
         else
         {
@@ -46,19 +103,13 @@ void AreaGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
     painter->setRenderHint(QPainter::Antialiasing);
     if(_isSelected)
     {
-        QPen pen1(Qt::black, 2, Qt::SolidLine);
+        QPen pen1(Qt::black, 4, Qt::SolidLine);
         pen1.setCosmetic(true);
         painter->setPen(pen1);
+        painter->setBrush(QBrush(Qt::NoBrush));
         painter->drawPolygon(polygon());
 
-        QColor col(Qt::yellow);
-        col.setAlpha(70);
-        painter->setBrush(QBrush(col, Qt::SolidPattern));
-
-        QPen pen2(Qt::yellow, 2, Qt::DotLine);
-        pen2.setCosmetic(true);
-        painter->setPen(pen2);
-        painter->drawPolygon(polygon());
+        QGraphicsPolygonItem::paint(painter, option, widget);
     }
     else
         QGraphicsPolygonItem::paint(painter, option, widget);
@@ -68,13 +119,14 @@ void AreaGraphicsItem::setItemselected(bool on_off)
 {
     _isSelected = on_off;
 
-    QPen pen(Qt::gray, 2, Qt::DotLine);
-    pen.setCosmetic(true);
-    setPen(_isSelected ? pen : _areaInitData.penNormal);
-    setBrush(_areaInitData.brushNormal);
-
     if(on_off)
     {
+        QPen pen(_areaInitData.penNormal.color(), 4, Qt::DotLine);
+        pen.setCosmetic(true);
+        setPen(pen);
+        setBrush(_areaInitData.brushSelect);
+        setZValue(_areaInitData.zValue + 1);
+
         if(polygon().isEmpty() == false)
             foreach(QGraphicsView * view, scene()->views())
             {
@@ -83,6 +135,12 @@ void AreaGraphicsItem::setItemselected(bool on_off)
                 if(pol.isEmpty())
                     view->centerOn(this);
             }
+    }
+    else
+    {
+        setPen(_areaInitData.penNormal);
+        setBrush(_areaInitData.brushNormal);
+        setZValue(_areaInitData.zValue);
     }
 }
 
@@ -141,12 +199,3 @@ void AreaGraphicsItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
     }
     QGraphicsPolygonItem::hoverLeaveEvent(event);
 }
-
-
-
-
-
-
-
-
-

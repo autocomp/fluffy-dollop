@@ -4,6 +4,7 @@
 #include "locationitem.h"
 #include "types.h"
 #include <regionbiz/rb_manager.h>
+#include <ctrcore/ctrcore/ctrconfig.h>
 #include <ctrcore/bus/common_message_notifier.h>
 #include <ctrcore/bus/bustags.h>
 #include <QGraphicsPixmapItem>
@@ -102,12 +103,32 @@ void WorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom
         _scene->addItem(areaGraphicsItem);
         _items.insert(regionPtr->getId(), areaGraphicsItem);
 
+        QString destPath;
+        QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath",
+                                                                    "./data", true);
+        if(regionBizInitJson_Path.isValid())
+             destPath = regionBizInitJson_Path.toString() + QDir::separator();
+
         std::vector<BaseAreaPtr> locations = regionPtr->getChilds( Region::RCF_LOCATIONS );
         for( BaseAreaPtr ptr: locations )
         {
             LocationPtr locationPtr = BaseArea::convert< Location >( ptr );
             if(locationPtr)
             {
+                QString planPath = locationPtr->getPlanPath();
+                if(planPath.isEmpty() == false)
+                {
+                    planPath = destPath + QString::number(locationPtr->getId()) + QDir::separator() + planPath;
+                    QGraphicsPixmapItem * pixmapItem = new QGraphicsPixmapItem(QPixmap(planPath));
+                    PlanKeeper::PlanParams planParams = locationPtr->getPlanParams();
+                    pixmapItem->setTransform(QTransform().scale(planParams.scale_w, planParams.scale_h));
+                    pixmapItem->setPos(planParams.x, planParams.y);
+                    pixmapItem->setZValue(100);
+                    pixmapItem->setOpacity(0.5);
+                    _scene->addItem(pixmapItem);
+
+                }
+
                 //qDebug() << "locationPtr :" << QString::fromStdString(locationPtr->getDescription());
                 AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(locationPtr->getCoords());
                 locationInitData.id = locationPtr->getId();
@@ -124,6 +145,49 @@ void WorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom
                 std::vector< FacilityPtr > facilities = locationPtr->getChilds();
                 for( FacilityPtr facilityPtr: facilities )
                 {
+//                    if(facilityPtr->getId() == 21)
+//                    {
+//                        QPolygonF pol;
+//                        pol.append(QPointF(299.11338806, 149.05607224));
+//                        pol.append(QPointF(299.11358261, 149.05606461));
+//                        pol.append(QPointF(299.11357498, 149.05584717));
+//                        pol.append(QPointF(299.11426926, 149.05582428));
+//                        pol.append(QPointF(299.11429596, 149.05656433));
+//                        pol.append(QPointF(299.11475372, 149.05654907));
+//                        pol.append(QPointF(299.11473846, 149.05598068));
+//                        pol.append(QPointF(299.11454391, 149.05598450));
+//                        pol.append(QPointF(299.11452103, 149.05527496));
+//                        pol.append(QPointF(299.11536407, 149.05525208));
+//                        pol.append(QPointF(299.11539459, 149.05619049));
+//                        pol.append(QPointF(299.11514282, 149.05620956));
+//                        pol.append(QPointF(299.11516190, 149.05670929));
+//                        pol.append(QPointF(299.11557770, 149.05670929));
+//                        pol.append(QPointF(299.11560440, 149.05716324));
+//                        pol.append(QPointF(299.11517334, 149.05717468));
+//                        pol.append(QPointF(299.11518860, 149.05765533));
+//                        pol.append(QPointF(299.11543655, 149.05765915));
+//                        pol.append(QPointF(299.11545944, 149.05860138));
+//                        pol.append(QPointF(299.11462021, 149.05862808));
+//                        pol.append(QPointF(299.11459351, 149.05792618));
+//                        pol.append(QPointF(299.11479568, 149.05792236));
+//                        pol.append(QPointF(299.11477661, 149.05734253));
+//                        pol.append(QPointF(299.11431885, 149.05735779));
+//                        pol.append(QPointF(299.11434174, 149.05810928));
+//                        pol.append(QPointF(299.11365128, 149.05813599));
+//                        pol.append(QPointF(299.11363602, 149.05791473));
+//                        pol.append(QPointF(299.11344528, 149.05791473));
+//                        pol.append(QPointF(299.11343384, 149.05745316));
+//                        pol.append(QPointF(299.11362839, 149.05743408));
+//                        pol.append(QPointF(299.11361313, 149.05722809));
+//                        pol.append(QPointF(299.11342239, 149.05722427));
+//                        pol.append(QPointF(299.11341095, 149.05676270));
+//                        pol.append(QPointF(299.11360168, 149.05675888));
+//                        pol.append(QPointF(299.11359787, 149.05654907));
+//                        pol.append(QPointF(299.11339951, 149.05654907));
+//                        facilityPtr->setCoords(pol);
+//                        facilityPtr->commit();
+//                    }
+
                     AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(facilityPtr->getCoords());
                     connect(areaGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
                     facInitData.id = facilityPtr->getId();
@@ -305,8 +369,8 @@ void WorkState::slotCenterOn(uint64_t id)
 
 void WorkState::zoomChanged()
 {
-    foreach(LocationItem * locationItem, _locationItems)
-        locationItem->zoomChanged(*_zoom);
+//    foreach(LocationItem * locationItem, _locationItems)
+//        locationItem->zoomChanged(*_zoom);
 }
 
 void WorkState::slotSetItemselect(qulonglong id, bool on_off)

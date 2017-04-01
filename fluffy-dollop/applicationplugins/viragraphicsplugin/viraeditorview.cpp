@@ -13,6 +13,8 @@
 #include <ctrcore/bus/common_message_notifier.h>
 #include <ctrcore/bus/bustags.h>
 #include "viragraphicsitem.h"
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 
 using namespace regionbiz;
 
@@ -31,9 +33,41 @@ ViraEditorView::ViraEditorView()
                                       qMetaTypeId< quint64 >(),
                                       QString("visualize_system") );
 
-    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::UpdateMark, this, SLOT(slotUpdateMark(QVariant)),
-                                      qMetaTypeId< quint64 >(),
-                                      QString("visualize_system") );
+    auto mngr = RegionBizManager::instance();
+    mngr->subscribeOnChangeEntity(this, SLOT(slotObjectChanged(uint64_t)));
+
+    _upButton = new QToolButton();
+    _upButton->setIcon(QIcon(":/img/up.png"));
+    _upButton->setFixedSize(32,32);
+    _upButton->setStyleSheet("border-radius:4;border-color: rgb(255, 255, 255);");
+    connect(_upButton, SIGNAL(clicked(bool)), this, SLOT(slotFacilityUp()));
+
+    _currentFacility = new QLabel;
+    _currentFacility->setStyleSheet("border-radius:4;border-color: rgb(255, 255, 255);");
+
+    _downButton = new QToolButton();
+    _downButton->setIcon(QIcon(":/img/down.png"));
+    _downButton->setFixedSize(32,32);
+    _downButton->setStyleSheet("border-radius:4;border-color: rgb(255, 255, 255);");
+    connect(_downButton, SIGNAL(clicked(bool)), this, SLOT(slotFacilityDown()));
+
+    QVBoxLayout* vLayout = new QVBoxLayout;
+
+    vLayout->addSpacerItem(new QSpacerItem(0,0,QSizePolicy::Fixed,QSizePolicy::Expanding));
+    vLayout->addWidget(_upButton);
+    vLayout->addSpacerItem(new QSpacerItem(0,20,QSizePolicy::Fixed,QSizePolicy::Fixed));
+
+    vLayout->addWidget(_currentFacility);
+
+    vLayout->addSpacerItem(new QSpacerItem(0,20,QSizePolicy::Fixed,QSizePolicy::Fixed));
+    vLayout->addWidget(_downButton);
+    vLayout->addSpacerItem(new QSpacerItem(0,0,QSizePolicy::Fixed,QSizePolicy::Expanding));
+
+    QHBoxLayout* hLayout = new QHBoxLayout;
+    hLayout->addSpacerItem(new QSpacerItem(20,0,QSizePolicy::Fixed,QSizePolicy::Fixed));
+    hLayout->addLayout(vLayout);
+    hLayout->addSpacerItem(new QSpacerItem(0,0,QSizePolicy::Expanding,QSizePolicy::Fixed));
+    setLayout(hLayout);
 }
 
 ViraEditorView::~ViraEditorView()
@@ -51,6 +85,12 @@ void ViraEditorView::reinit(qulonglong facilityId)
         delete item;
     _itemsOnFloor.clear();
 
+    _floorsMap.clear();
+
+    _upButton->setDisabled(true);
+    _downButton->setDisabled(true);
+    _currentFacility->clear();
+
     // find first floor
     BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(facilityId, BaseArea::AT_FACILITY);
     FacilityPtr facilityPtr = BaseArea::convert< Facility >(ptr);
@@ -58,10 +98,10 @@ void ViraEditorView::reinit(qulonglong facilityId)
     {
         FloorPtrs floors = facilityPtr->getChilds();
         for( FloorPtr floorPtr: floors )
-        {
-            setFloor(floorPtr->getId());
-            break;
-        }
+            _floorsMap.insert(floorPtr->getId(), floorPtr->getName());
+
+        if(_floorsMap.isEmpty() == false)
+            setFloor(_floorsMap.begin().key());
     }
 }
 
@@ -82,22 +122,6 @@ void ViraEditorView::setFloor(qulonglong floorId)
         delete item;
     _itemsOnFloor.clear();
 
-    AreaInitData roomInitData;
-    roomInitData.zValue = 10000;
-    roomInitData.isSelectableFromMap = true;
-    roomInitData.penNormal.setColor(Qt::green);
-    roomInitData.penNormal.setCosmetic(true);
-    roomInitData.penNormal.setWidth(2);
-    roomInitData.penHoverl = roomInitData.penNormal;
-    roomInitData.penHoverl.setWidth(3);
-    QColor roomBrushColor(Qt::green);
-    roomBrushColor.setAlpha(20);
-    roomInitData.brushNormal.setColor(roomBrushColor);
-    roomInitData.brushNormal.setStyle(Qt::SolidPattern);
-    roomBrushColor.setAlpha(70);
-    roomInitData.brushHoverl = roomInitData.brushNormal;
-    roomInitData.brushHoverl.setColor(roomBrushColor);
-
     // NOTE file load path
     QString destPath;
     QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath",
@@ -110,6 +134,19 @@ void ViraEditorView::setFloor(qulonglong floorId)
     if(floorPtr)
     {
         _currFloor_id = floorId;
+
+        _currentFacility->setText(floorPtr->getName());
+        int i(0);
+        for(auto it = _floorsMap.begin(); it != _floorsMap.end(); ++it)
+        {
+            if(it.key() == _currFloor_id)
+            {
+                _upButton->setDisabled(i == _floorsMap.size()-1);
+                _downButton->setDisabled(i == 0);
+                break;
+            }
+            ++i;
+        }
 
         QString pixmapPath = destPath + QString::number(floorId) + QDir::separator() + QString("area.tiff"); // floorPtr->getPlanPath();
         QPixmap pm(pixmapPath);
@@ -136,15 +173,25 @@ void ViraEditorView::setFloor(qulonglong floorId)
                     QPointF center = mark->getCenter();
                     MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(mark->getId());
                     _markGraphicsItem->setPos(center);
-                    if( mark->isMetadataPresent( "name" ))
-                        _markGraphicsItem->setToolTip(mark->getMetadata( "name" )->getValueAsVariant().toString());
-                    else
-                        _markGraphicsItem->setToolTip(QString::fromUtf8("Deffect"));
 
                     scene()->addItem(_markGraphicsItem);
                     connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
                     _itemsOnFloor.insert(mark->getId(), _markGraphicsItem);
                 }
+
+                QColor roomColor(Qt::gray);
+                BaseMetadataPtr statusPtr = room->getMetadata("status");
+                if(statusPtr)
+                {
+                    QString status = statusPtr->getValueAsVariant().toString();
+                    if(status == QString::fromUtf8("Свободно"))
+                        roomColor = QColor(86,206,18);
+                    else if(status == QString::fromUtf8("В аренде"))
+                        roomColor = QColor(226,224,111);
+                    else
+                        roomColor = QColor(Qt::gray);
+                }
+                AreaInitData roomInitData(true, 10000, roomColor);
 
                 AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(room->getCoords());
                 areaGraphicsItem->setAcceptHoverEvents(true);
@@ -245,6 +292,25 @@ void ViraEditorView::selectionItemsChanged(uint64_t prev_id, uint64_t curr_id)
             if(viraGraphicsItem)
                 viraGraphicsItem->setItemselected(true);
         }
+        else
+        {
+            auto it = _floorsMap.find(curr_id);
+            if(it != _floorsMap.end())
+            {
+                setFloor(curr_id);
+            }
+            else
+            {
+                BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(curr_id, BaseArea::AT_ROOM);
+                RoomPtr roomPtr = BaseArea::convert< Room >(ptr);
+                if(roomPtr)
+                {
+                    auto it = _floorsMap.find(roomPtr->getParentId());
+                    if(it != _floorsMap.end())
+                        setFloor(it.key());
+                }
+            }
+        }
     }
 }
 
@@ -262,7 +328,7 @@ void ViraEditorView::slotEditAreaGeometry(QVariant var)
                 areaGraphicsItem->hide();
         }
         _mode = EditAreaMode;
-        setCursor(QCursor(QPixmap(":/img/cursor_polygon.png")));
+        setCursor(QCursor(QPixmap(":/img/cursor_polygon.png"), 0, 0));
     }
     else
     {
@@ -290,6 +356,7 @@ void ViraEditorView::slotSetMarkPosition(QVariant var)
         if(room)
         {
             _editObjectExtend = room->getCoords();
+            setCursor(QCursor(QPixmap(":/img/cursor_mark.png"), 0, 0));
             _mode = EditMarkMode;
         }
     }
@@ -300,18 +367,99 @@ void ViraEditorView::slotSetMarkPosition(QVariant var)
     }
 }
 
-void ViraEditorView::slotUpdateMark(QVariant var)
+void ViraEditorView::slotObjectChanged(uint64_t id)
 {
-    auto it = _itemsOnFloor.find(var.toUInt());
+    auto it = _itemsOnFloor.find(id);
     if(it != _itemsOnFloor.end())
     {
-        MarkGraphicsItem * markItem = dynamic_cast<MarkGraphicsItem*>(it.value());
-        if(markItem)
+        AreaGraphicsItem * areaItem = dynamic_cast<AreaGraphicsItem*>(it.value());
+        if(areaItem)
         {
-            markItem->reinit();
+            BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(id, BaseArea::AT_ROOM);
+            RoomPtr roomPtr = BaseArea::convert< Room >(ptr);
+            if(roomPtr)
+            {
+                QColor roomColor(Qt::gray);
+                BaseMetadataPtr statusPtr = roomPtr->getMetadata("status");
+                if(statusPtr)
+                {
+                    QString status = statusPtr->getValueAsVariant().toString();
+                    if(status == QString::fromUtf8("Свободно"))
+                        roomColor = QColor(86,206,18);
+                    else if(status == QString::fromUtf8("В аренде"))
+                        roomColor = QColor(226,224,111);
+                    else
+                        roomColor = QColor(Qt::gray);
+
+                    areaItem->setColor(roomColor);
+                }
+            }
+        }
+        else
+        {
+            MarkGraphicsItem * markItem = dynamic_cast<MarkGraphicsItem*>(it.value());
+            if(markItem)
+            {
+                MarkPtr markPtr = RegionBizManager::instance()->getMark(id);
+                if(markPtr)
+                {
+                    BaseMetadataPtr status = markPtr->getMetadata("status");
+                    if(status)
+                    {
+                        QString statusStr = status->getValueAsString();
+                        if(statusStr == QString::fromUtf8("в архиве"))
+                        {
+                            _itemsOnFloor.erase(it);
+                            delete markItem;
+                            return;
+                        }
+                    }
+                }
+
+                markItem->reinit();
+            }
         }
     }
+}
 
+void ViraEditorView::slotFacilityUp()
+{
+    if(_mode != ScrollMode)
+        return;
+
+    int i(0);
+    for(auto it = _floorsMap.begin(); it != _floorsMap.end(); ++it)
+    {
+        if(it.key() == _currFloor_id)
+        {
+            ++it;
+            if(it != _floorsMap.end())
+                RegionBizManager::instance()->selectEntity(it.key());
+            break;
+        }
+        ++i;
+    }
+}
+
+void ViraEditorView::slotFacilityDown()
+{
+    if(_mode != ScrollMode)
+        return;
+
+    int i(0);
+    for(auto it = _floorsMap.begin(); it != _floorsMap.end(); ++it)
+    {
+        if(it.key() == _currFloor_id)
+        {
+            if(it != _floorsMap.begin())
+            {
+                --it;
+                RegionBizManager::instance()->selectEntity(it.key());
+            }
+            break;
+        }
+        ++i;
+    }
 }
 
 void ViraEditorView::wheelEvent(QWheelEvent *e)
@@ -394,7 +542,6 @@ void ViraEditorView::mousePressEvent(QMouseEvent *e)
 
                 MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(markPtr->getId());
                 _markGraphicsItem->setPos(scenePos);
-                //_markGraphicsItem->setToolTip(QString::fromUtf8("Deffect"));
                 scene()->addItem(_markGraphicsItem);
                 connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
                 _itemsOnFloor.insert(markPtr->getId(), _markGraphicsItem);
@@ -467,21 +614,19 @@ void ViraEditorView::mouseDoubleClickEvent(QMouseEvent *e)
                 room->setCoords(pol);
                 room->commit();
 
-                AreaInitData roomInitData;
-                roomInitData.zValue = 10000;
-                roomInitData.isSelectableFromMap = true;
-                roomInitData.penNormal.setColor(Qt::green);
-                roomInitData.penNormal.setCosmetic(true);
-                roomInitData.penNormal.setWidth(2);
-                roomInitData.penHoverl = roomInitData.penNormal;
-                roomInitData.penHoverl.setWidth(3);
-                QColor roomBrushColor(Qt::green);
-                roomBrushColor.setAlpha(20);
-                roomInitData.brushNormal.setColor(roomBrushColor);
-                roomInitData.brushNormal.setStyle(Qt::SolidPattern);
-                roomBrushColor.setAlpha(70);
-                roomInitData.brushHoverl = roomInitData.brushNormal;
-                roomInitData.brushHoverl.setColor(roomBrushColor);
+                QColor roomColor(Qt::gray);
+                BaseMetadataPtr statusPtr = room->getMetadata("status");
+                if(statusPtr)
+                {
+                    QString status = statusPtr->getValueAsVariant().toString();
+                    if(status == QString::fromUtf8("Свободно"))
+                        roomColor = QColor(86,206,18);
+                    else if(status == QString::fromUtf8("В аренде"))
+                        roomColor = QColor(226,224,111);
+                    else
+                        roomColor = QColor(Qt::gray);
+                }
+                AreaInitData roomInitData(true, 10000, roomColor);
 
                 AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(pol);
                 areaGraphicsItem->setAcceptHoverEvents(true);
