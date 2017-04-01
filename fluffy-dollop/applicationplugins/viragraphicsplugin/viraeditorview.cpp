@@ -44,6 +44,7 @@ ViraEditorView::ViraEditorView()
 
     _currentFacility = new QLabel;
     _currentFacility->setStyleSheet("border-radius:4;border-color: rgb(255, 255, 255);");
+    _currentFacility->setMinimumSize( 100, 30 );
 
     _downButton = new QToolButton();
     _downButton->setIcon(QIcon(":/img/down.png"));
@@ -51,22 +52,15 @@ ViraEditorView::ViraEditorView()
     _downButton->setStyleSheet("border-radius:4;border-color: rgb(255, 255, 255);");
     connect(_downButton, SIGNAL(clicked(bool)), this, SLOT(slotFacilityDown()));
 
-    QVBoxLayout* vLayout = new QVBoxLayout;
-
-    vLayout->addSpacerItem(new QSpacerItem(0,0,QSizePolicy::Fixed,QSizePolicy::Expanding));
-    vLayout->addWidget(_upButton);
-    vLayout->addSpacerItem(new QSpacerItem(0,20,QSizePolicy::Fixed,QSizePolicy::Fixed));
-
-    vLayout->addWidget(_currentFacility);
-
-    vLayout->addSpacerItem(new QSpacerItem(0,20,QSizePolicy::Fixed,QSizePolicy::Fixed));
-    vLayout->addWidget(_downButton);
-    vLayout->addSpacerItem(new QSpacerItem(0,0,QSizePolicy::Fixed,QSizePolicy::Expanding));
-
     QHBoxLayout* hLayout = new QHBoxLayout;
-    hLayout->addSpacerItem(new QSpacerItem(20,0,QSizePolicy::Fixed,QSizePolicy::Fixed));
-    hLayout->addLayout(vLayout);
-    hLayout->addSpacerItem(new QSpacerItem(0,0,QSizePolicy::Expanding,QSizePolicy::Fixed));
+    hLayout->addStretch();
+    hLayout->addWidget(_upButton);
+    hLayout->setAlignment( _upButton, Qt::AlignTop );
+    hLayout->addWidget(_currentFacility);
+    hLayout->setAlignment( _currentFacility, Qt::AlignTop );
+    hLayout->addWidget(_downButton);
+    hLayout->setAlignment( _downButton, Qt::AlignTop );
+    hLayout->addStretch();
     setLayout(hLayout);
 }
 
