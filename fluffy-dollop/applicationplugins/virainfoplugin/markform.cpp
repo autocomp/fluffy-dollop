@@ -95,7 +95,7 @@ void MarkForm::showWidget(quint64 id)
 
 void MarkForm::slotLoadImage()
 {
-    QStringList list = QFileDialog::getOpenFileNames(this); //, QString::fromUtf8(""));
+    QStringList list = QFileDialog::getOpenFileNames(this);
     foreach (QString name, list)
     {
         QPixmap pm(name);

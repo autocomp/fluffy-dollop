@@ -14,6 +14,7 @@ class ViraStatusBar;
 }
 
 class MarkForm;
+class InfoForm;
 
 class ViraStatusBar : public QWidget
 {
@@ -45,14 +46,14 @@ public:
 
 protected slots:
     void slotObjectSelectionChanged(uint64_t prev_id, uint64_t curr_id);
-    void slotShowMoreInfo(bool on_off);
+    void slotShowMoreInfo();
     void slotMoreInfoWidgetClosed();
     void slotEditAreaGeometry(bool on_off);
     void slotAddMark(bool on_off);
     void slotEditObjectGeometryFinish(QVariant var);
-    void slotMarkWidgetClosed();
     void slotCloseMarkWindow();
     void slotObjectCenterOn(uint64_t id);
+    void slotCloseMoreInfoForm();
 
 protected:
     void reset();
@@ -63,11 +64,12 @@ protected:
     void showName( regionbiz::BaseAreaPtr ptr );
     void showDebt( AreaData data );
     void showMarkName( QString name );
-    void showMarkInfoWidgwt(bool isEditMode, qulonglong id);
+    void showMarkInfoWidgwt(qulonglong id);
     void showMarkStatus( QString status );
     void showMarkWorker(QString worker );
     void showMarkCategory(QString category );
     void showMarkPriority(QString priority );
+    void showMoreInfo(quint64 id);
 
     QString recursiveGetName(regionbiz::BaseAreaPtr area );
 
@@ -77,9 +79,10 @@ protected:
 
     Ui::ViraStatusBar *ui;
     quint64 _parentWidgetId;
-    EmbIFaceNotifier* _ifaceInfoAreaWidget = nullptr;
     MarkForm * _markForm;
     EmbIFaceNotifier* _ifaceInfoMarkWidget = nullptr;
+    InfoForm * _infoForm;
+    EmbIFaceNotifier* _ifaceInfoWidget = nullptr;
 };
 
 #endif // VIRASTATUSBAR_H
