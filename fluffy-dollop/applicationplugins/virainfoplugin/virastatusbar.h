@@ -37,7 +37,8 @@ class ViraStatusBar : public QWidget
     {
         AT_RENT,
         AT_FREE,
-        AT_PROP
+        AT_PROP,
+        AT_UNAVAILABLE
     };
 
 public:

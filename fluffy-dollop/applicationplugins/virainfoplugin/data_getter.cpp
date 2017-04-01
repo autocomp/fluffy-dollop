@@ -33,15 +33,25 @@ AreaData DataGetter::getData(uint64_t id)
 
         double area = ( room->isMetadataPresent( "area" ) ?
                             room->getMetadataValue( "area" ).toDouble() : 0 );
+
         bool free = room->isMetadataPresent( "status" ) && QString::fromUtf8( "Свободно" )
                 == room->getMetadataValue( "status" ).toString();
+
+        bool on_rent = room->isMetadataPresent( "status" ) && QString::fromUtf8( "В аренде" )
+                == room->getMetadataValue( "status" ).toString();
+
+        bool unavailable = room->isMetadataPresent( "status" ) && QString::fromUtf8( "Недоступно" )
+                == room->getMetadataValue( "status" ).toString();
+
         QString rentor = ( room->isMetadataPresent( "rentor" ) ?
                                room->getMetadataValue( "rentor" ).toString() : "" );
 
         if( free )
             data.area_free = area;
-        else
+        else if( on_rent )
             data.area_rent = area;
+        else if( unavailable )
+            data.area_unavailable = area;
 
         // task
         MarkPtrs marks = room->getMarks();

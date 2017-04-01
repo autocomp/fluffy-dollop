@@ -282,6 +282,8 @@ MarkPtrs SqlTranslator::loadMarks()
             QString descr = query.value( 5 ).toString();
 
             MarkPtr mark = BaseEntity::createWithId< Mark >( id );
+            if( !mark )
+                continue;
             mark->setCenter( QPointF( x, y ));
             mark->setParentId( parent_id );
             mark->setName( name );

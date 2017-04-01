@@ -285,10 +285,15 @@ void ViraStatusBar::showAreas( AreaData data, bool one )
             area = getArea( AT_RENT, data );
             status = QString::fromUtf8( "В аренде" );
         }
-        else
+        else if( data.area_property > 1e-5)
         {
             area = getArea( AT_PROP, data );
             status = QString::fromUtf8( "Собственность" );
+        }
+        else
+        {
+            area = getArea( AT_UNAVAILABLE, data );
+            status = QString::fromUtf8( "Недоступно" );
         }
         area->setToolTip( QString::fromUtf8( "Площадь" ));
 
@@ -427,6 +432,12 @@ QLabel *ViraStatusBar::getArea(ViraStatusBar::AreaType type, AreaData data)
     {
         area_cnt = data.area_property;
         color = "#6495ED";
+        break;
+    }
+    case AT_UNAVAILABLE:
+    {
+        area_cnt = data.area_unavailable;
+        color = "#666666";
         break;
     }
     }
