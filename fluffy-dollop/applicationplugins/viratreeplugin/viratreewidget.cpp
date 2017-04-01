@@ -38,7 +38,7 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
     headerItem()->setText(3, QString::fromUtf8("Арендатор"));
     headerItem()->setText(4, QString::fromUtf8("Задачи"));
     headerItem()->setText(5, QString::fromUtf8("Комментарий"));
-    //headerItem()->setText(6, QString::fromUtf8("ID"));
+//    headerItem()->setText(6, QString::fromUtf8("ID"));
     for(int i(0); i<6; ++ i)
         headerItem()->setTextAlignment(i, Qt::AlignCenter);
 
@@ -118,8 +118,6 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
                         for(int i(0); i<6; ++i) floorItem->setData(i, ID, id);
                         for(int i(0); i<6; ++i) floorItem->setData(i, TYPE, (int)ItemTypeFloor);
                         floorItem->setTextAlignment(1, Qt::AlignCenter);
-//                        floorItem->setData(1, RENTED_AREA, 234.4);
-//                        floorItem->setData(1, TOTAL_AREA, 373.6);
                         _items.insert(id, floorItem);
 
                         BaseAreaPtrs rooms = floorPtr->getChilds( Floor::FCF_ALL_ROOMS );

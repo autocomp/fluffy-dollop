@@ -43,6 +43,7 @@ ViraEditorView::ViraEditorView()
     connect(_upButton, SIGNAL(clicked(bool)), this, SLOT(slotFacilityUp()));
 
     _currentFacility = new QLabel;
+    _currentFacility->setAlignment(Qt::AlignCenter);
     _currentFacility->setStyleSheet("border-radius:4;border-color: rgb(255, 255, 255);");
     _currentFacility->setMinimumSize( 100, 30 );
 
