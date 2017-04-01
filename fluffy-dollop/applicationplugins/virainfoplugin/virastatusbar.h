@@ -55,6 +55,7 @@ protected slots:
     void slotCloseMarkWindow();
     void slotObjectCenterOn(uint64_t id);
     void slotCloseMoreInfoForm();
+    void showMarkInfoWidgwt(quint64 id);
 
 protected:
     void reset();
@@ -65,7 +66,6 @@ protected:
     void showName( regionbiz::BaseAreaPtr ptr );
     void showDebt( AreaData data );
     void showMarkName( QString name );
-    void showMarkInfoWidgwt(qulonglong id);
     void showMarkStatus( QString status );
     void showMarkWorker(QString worker );
     void showMarkCategory(QString category );

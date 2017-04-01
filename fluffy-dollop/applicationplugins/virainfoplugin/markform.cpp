@@ -18,7 +18,7 @@ MarkForm::MarkForm(QWidget *parent) :
     ui(new Ui::MarkForm)
 {
     ui->setupUi(this);
-    _listWidget = new MarkFormListWidget;
+    _listWidget = new PixmapListWidget;
     ui->galeryLayout->addWidget(_listWidget);
 
     ui->cancel->setIcon(QIcon(":/img/close_button.png"));
@@ -123,16 +123,19 @@ void MarkForm::closeAndCommit(bool moveToArchive)
     MarkPtr ptr = RegionBizManager::instance()->getMark(_id);
     if(ptr)
     {
-        QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath");
-        if(regionBizInitJson_Path.isValid())
+        if(_pixmaps.isEmpty() == false)
         {
-            QString destPath = regionBizInitJson_Path.toString();
-            QDir dir(destPath);
-            dir.mkdir(QString::number(_id));
-            destPath = destPath + QDir::separator() + QString::number(_id) + QDir::separator();
-            int N(0);
-            foreach(QPixmap pm, _pixmaps)
-                pm.save(destPath + QString::number(QDateTime::currentMSecsSinceEpoch()) + QString("_") + QString::number(++N) + ".tiff");
+            QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath");
+            if(regionBizInitJson_Path.isValid())
+            {
+                QString destPath = regionBizInitJson_Path.toString();
+                QDir dir(destPath);
+                dir.mkdir(QString::number(_id));
+                destPath = destPath + QDir::separator() + QString::number(_id) + QDir::separator();
+                int N(0);
+                foreach(QPixmap pm, _pixmaps)
+                    pm.save(destPath + QString::number(QDateTime::currentMSecsSinceEpoch()) + QString("_") + QString::number(++N) + ".tiff");
+            }
         }
 
         ptr->setName( ui->defect->text());
@@ -153,33 +156,7 @@ void MarkForm::closeAndCommit(bool moveToArchive)
     emit signalCloseWindow();
 }
 
-//------------------------------------------------
 
-MarkFormListWidget::MarkFormListWidget()
-{
-    setViewMode(QListView::IconMode);
-    setFlow(QListView::LeftToRight);
-    setWrapping(false);
-    setIconSize(QSize(200,100));
-
-    setSelectionMode(QAbstractItemView::SingleSelection);
-    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-}
-
-void MarkFormListWidget::addItem(const QPixmap &pm)
-{
-    _coef = (double)pm.height() / (double)pm.width();
-    QListWidgetItem * item = new QListWidgetItem(QIcon(pm), "", this);
-}
-
-void MarkFormListWidget::resizeEvent(QResizeEvent *e)
-{
-    int H = e->size().height();
-    _iconSize = QSize(H/_coef - 25, H - 25);
-    setIconSize(_iconSize);
-    QListWidget::resizeEvent(e);
-}
 
 
 

@@ -1,5 +1,6 @@
 #include "infoform.h"
 #include "ui_infoform.h"
+#include <ctrcore/ctrcore/ctrconfig.h>
 #include <QFileDialog>
 
 using namespace regionbiz;
@@ -9,6 +10,9 @@ InfoForm::InfoForm(QWidget *parent) :
     ui(new Ui::InfoForm)
 {
     ui->setupUi(this);
+
+    _listWidget = new PixmapListWidget;
+    ui->galeryLayout->addWidget(_listWidget);
 
     ui->cancel->setIcon(QIcon(":/img/close_button.png"));
     ui->apply->setIcon(QIcon(":/img/ok_button.png"));
@@ -62,6 +66,7 @@ InfoForm::InfoForm(QWidget *parent) :
 
 InfoForm::~InfoForm()
 {
+    delete _listWidget;
     delete ui;
 }
 
@@ -77,6 +82,8 @@ void InfoForm::showWidget(quint64 id)
     ui->square->setValue(0);
     ui->marksTreeWidget->clear();
     ui->description->clear();
+    _listWidget->clear();
+    _pixmaps.clear();
 
     ui->tasksNew->setText("0");
     ui->tasksInWork->setText("0");
@@ -112,33 +119,64 @@ void InfoForm::showWidget(quint64 id)
             {
                 double area = areaPtr->getValueAsVariant().toDouble();
                 ui->square->setValue(area);
+                ui->square->setProperty("area", QString::number(area, 'f', 1));
             }
 
             BaseMetadataPtr rentorPtr = room->getMetadata("rentor");
             if(rentorPtr)
-                ui->renter->setText(rentorPtr->getValueAsVariant().toString());
+            {
+                QString rentorStr = rentorPtr->getValueAsVariant().toString();
+                ui->renter->setText(rentorStr);
+                ui->renter->setProperty("rentor", rentorStr);
+            }
 
             BaseMetadataPtr statusPtr = room->getMetadata("status");
             if(statusPtr)
             {
-                QString status = statusPtr->getValueAsVariant().toString();
-                if(status == QString::fromUtf8("Свободно"))
+                QString statusStr = statusPtr->getValueAsVariant().toString();
+                if(statusStr == QString::fromUtf8("Свободно"))
                     ui->status->setCurrentText(QString::fromUtf8("Свободно"));
-                else if(status == QString::fromUtf8("В аренде"))
+                else if(statusStr == QString::fromUtf8("В аренде"))
                     ui->status->setCurrentText(QString::fromUtf8("В аренде"));
                 else
                     ui->status->setCurrentText(QString::fromUtf8("Недоступно"));
+
+                ui->status->setProperty("status", statusStr);
             }
 
             BaseMetadataPtr commentPtr = room->getMetadata("comment");
             if(commentPtr)
-                ui->description->setText(commentPtr->getValueAsVariant().toString());
+            {
+                QString commentStr = commentPtr->getValueAsVariant().toString();
+                ui->description->setText(commentStr);
+                ui->description->setProperty("comment", commentStr);
+            }
         }
         ui->roomWidget->show();
         break;
     }
     }
+    reloadTasks(area);
 
+    QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath");
+    if(regionBizInitJson_Path.isValid())
+    {
+         QString destPath = regionBizInitJson_Path.toString() + QDir::separator() + QString::number(_id);
+         QDir dir(destPath);
+         QStringList list = dir.entryList(QDir::Files);
+         foreach(QString fileName,list)
+         {
+             fileName.prepend(destPath + QDir::separator());
+             QPixmap pm(fileName);
+             if(pm.isNull() == false)
+                 _listWidget->addItem(pm);
+         }
+    }
+}
+
+void InfoForm::reloadTasks(regionbiz::BaseAreaPtr area)
+{
+    ui->marksTreeWidget->clear();
     QString facility, floor;
     switch( area->getType() )
     {
@@ -259,6 +297,7 @@ void InfoForm::loadTasks(const QString &facilityName, const QString &floorName, 
         list << QString();
 
     QTreeWidgetItem * item = new QTreeWidgetItem(ui->marksTreeWidget, list);
+    item->setData( 0, Qt::UserRole, (qulonglong)(ptr->getId()) );
 }
 
 void InfoForm::slotLoadImage()
@@ -269,44 +308,86 @@ void InfoForm::slotLoadImage()
         QPixmap pm(name);
         if(pm.isNull() == false)
         {
-//            _pixmaps.append(pm);
-//            _listWidget->addItem(pm);
+            _pixmaps.append(pm);
+            _listWidget->addItem(pm);
         }
     }
 }
 
 void InfoForm::slotApply()
 {
-//    MarkPtr ptr = RegionBizManager::instance()->getMark(_id);
-//    if(ptr)
-//    {
-//        QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath");
-//        if(regionBizInitJson_Path.isValid())
-//        {
-//            QString destPath = regionBizInitJson_Path.toString();
-//            QDir dir(destPath);
-//            dir.mkdir(QString::number(_id));
-//            destPath = destPath + QDir::separator() + QString::number(_id) + QDir::separator();
-//            int N(0);
-//            foreach(QPixmap pm, _pixmaps)
-//                pm.save(destPath + QString::number(QDateTime::currentMSecsSinceEpoch()) + QString("_") + QString::number(++N) + ".tiff");
-//        }
+    BaseAreaPtr area = RegionBizManager::instance()->getBaseArea(_id);
+    if( ! area ) return;
 
-//        ptr->setName( ui->defect->text());
-//        ptr->addMetadata("string", "worker", ui->responsible->text());
-//        ptr->setDesription( ui->description->toPlainText());
-//        QString dataStr = ui->dateEdit->date().toString("dd.MM.yy");
-//        bool res = ptr->addMetadata("string", "date", dataStr);
-//        ptr->addMetadata("string", "priority", ui->importance->currentText());
-//        ptr->addMetadata("string", "category", ui->category->currentText());
-//        if(moveToArchive)
-//            ptr->addMetadata("string", "status", QString::fromUtf8("в архиве"));
-//        else
-//            ptr->addMetadata("string", "status", ui->status->currentText());
+    RoomPtr room = BaseArea::convert< Room >( area );
+    if(room)
+    {
+        bool needCommit(false);
 
-//        bool commitRes = ptr->commit();
-//        qDebug() << _id << ", dataStr:" << dataStr << res << ", commitRes:" << commitRes;
-//    }
+        BaseMetadataPtr areaPtr = room->getMetadata("area");
+        if(areaPtr)
+        {
+            double square = ui->square->value();
+            QString squareStr = QString::number(square, 'f', 1);
+            if(squareStr != ui->square->property("area").toString())
+            {
+                room->addMetadata("double", "area", square);
+                needCommit = true;
+            }
+        }
+
+        BaseMetadataPtr rentorPtr = room->getMetadata("rentor");
+        if(rentorPtr)
+        {
+            QString rentorStr = ui->renter->text();
+            if(rentorStr != ui->renter->property("rentor").toString())
+            {
+                room->addMetadata("string", "rentor", rentorStr);
+                needCommit = true;
+            }
+        }
+
+        BaseMetadataPtr statusPtr = room->getMetadata("status");
+        if(statusPtr)
+        {
+            QString statusStr = ui->status->currentText();
+            if(statusStr != ui->status->property("status").toString())
+            {
+                room->addMetadata("string", "status", statusStr);
+                needCommit = true;
+            }
+        }
+
+        BaseMetadataPtr commentPtr = room->getMetadata("comment");
+        if(commentPtr)
+        {
+            QString commentStr = ui->description->toPlainText();
+            if(commentStr != ui->description->property("comment").toString())
+            {
+                room->addMetadata("string", "comment", commentStr);
+                needCommit = true;
+            }
+        }
+
+        if(needCommit)
+            room->commit();
+    }
+
+    if(_pixmaps.isEmpty() == false)
+    {
+        QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath");
+        if(regionBizInitJson_Path.isValid())
+        {
+            QString destPath = regionBizInitJson_Path.toString();
+            QDir dir(destPath);
+            dir.mkdir(QString::number(_id));
+            destPath = destPath + QDir::separator() + QString::number(_id) + QDir::separator();
+            int N(0);
+            foreach(QPixmap pm, _pixmaps)
+                pm.save(destPath + QString::number(QDateTime::currentMSecsSinceEpoch()) + QString("_") + QString::number(++N) + ".tiff");
+        }
+    }
+
     emit signalCloseWindow();
 }
 
@@ -336,24 +417,18 @@ QString InfoForm::recursiveGetName(regionbiz::BaseAreaPtr area)
     {
     case BaseArea::AT_LOCATION:
     case BaseArea::AT_FACILITY:
-    {
         name = area->getDescription();
         break;
-    }
     case BaseArea::AT_REGION:
     case BaseArea::AT_FLOOR:
     case BaseArea::AT_ROOMS_GROUP:
     case BaseArea::AT_ROOM:
-    {
         name = area->getName();
         break;
-    }
     }
 
     if( BaseArea::AT_REGION == area->getType() )
         return name;
-//    if( BaseArea::AT_FLOOR == area->getType() )
-//        name = '\n' + name;
 
     QString that_name = recursiveGetName( area->getParent() ) + " / " + name;
     return  that_name;
@@ -364,9 +439,25 @@ void InfoForm::slotHeaderSectionClicked(int index)
     ui->marksTreeWidget->sortByColumn(index);
 }
 
-void InfoForm::slotDoubleClickOnMark(QTreeWidgetItem *, int)
+void InfoForm::slotDoubleClickOnMark(QTreeWidgetItem *item, int)
 {
+    if(item)
+    {
+        quint64 id = item->data(0, Qt::UserRole).toULongLong();
+        emit signalShowMarkInfoWidget(id);
 
-
-
+        BaseAreaPtr area = RegionBizManager::instance()->getBaseArea(_id);
+        if(area)
+            reloadTasks(area);
+    }
 }
+
+
+
+
+
+
+
+
+
+

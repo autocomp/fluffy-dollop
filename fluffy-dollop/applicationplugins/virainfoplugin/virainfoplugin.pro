@@ -26,7 +26,8 @@ HEADERS += \
     virastatusbar.h \
     markform.h \
     data_getter.h \
-    infoform.h
+    infoform.h \
+    pixmaplistwidget.h
 
 SOURCES += \
     virainfoplugin.cpp \
@@ -34,7 +35,8 @@ SOURCES += \
     virastatusbar.cpp \
     markform.cpp \
     data_getter.cpp \
-    infoform.cpp
+    infoform.cpp \
+    pixmaplistwidget.cpp
 
 RESOURCES += \
     virainfopluginres.qrc

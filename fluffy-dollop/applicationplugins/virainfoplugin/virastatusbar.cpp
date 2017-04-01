@@ -606,6 +606,7 @@ void ViraStatusBar::showMoreInfo(quint64 id)
     {
         _infoForm = new InfoForm;
         connect(_infoForm, SIGNAL(signalCloseWindow()), this, SLOT(slotCloseMoreInfoForm()));
+        connect(_infoForm, SIGNAL(signalShowMarkInfoWidget(quint64)), this, SLOT(showMarkInfoWidgwt(quint64)));
         _infoForm->showWidget(id);
 
         _ifaceInfoWidget = new EmbIFaceNotifier(_infoForm);
@@ -641,7 +642,7 @@ void ViraStatusBar::slotCloseMoreInfoForm()
     ewApp()->setVisible(_ifaceInfoWidget->id(), false);
 }
 
-void ViraStatusBar::showMarkInfoWidgwt(qulonglong id)
+void ViraStatusBar::showMarkInfoWidgwt(quint64 id)
 {
     if( !_ifaceInfoMarkWidget )
     {

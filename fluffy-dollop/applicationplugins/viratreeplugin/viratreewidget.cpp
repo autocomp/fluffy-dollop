@@ -389,51 +389,96 @@ void ViraTreeWidget::slotSaveItemToDb(const QModelIndex &index)
 void ViraTreeWidget::slotObjectChanged(uint64_t id)
 {
     MarkPtr markPtr = RegionBizManager::instance()->getMark(id);
-    if(! markPtr) return;
-    BaseAreaPtr parentPtr = RegionBizManager::instance()->getBaseArea(markPtr->getParentId());
-    if(! parentPtr) return;
-
-    QTreeWidgetItem * item(0);
-    auto it = _items.find(parentPtr->getId());
-    if(it != _items.end())
-        item = it.value();
-
-    RoomPtr room = BaseArea::convert< Room >( parentPtr );
-    if(room && item)
+    if(markPtr)
     {
-        int tasks_new(0);
-        int tasks_in_work(0);
-        int tasks_for_check(0);
-        MarkPtrs marks_of_room = room->getMarks();
-        for( MarkPtr mark: marks_of_room )
+        BaseAreaPtr parentPtr = RegionBizManager::instance()->getBaseArea(markPtr->getParentId());
+        if(! parentPtr) return;
+
+        QTreeWidgetItem * item(0);
+        auto it = _items.find(parentPtr->getId());
+        if(it != _items.end())
+            item = it.value();
+
+        RoomPtr room = BaseArea::convert< Room >( parentPtr );
+        if(room && item)
         {
-            BaseMetadataPtr status = mark->getMetadata("status");
-            if(status)
+            int tasks_new(0);
+            int tasks_in_work(0);
+            int tasks_for_check(0);
+            MarkPtrs marks_of_room = room->getMarks();
+            for( MarkPtr mark: marks_of_room )
             {
-                QString statusStr = status->getValueAsString();
-                if(statusStr == QString::fromUtf8("новый"))
-                    ++tasks_new;
-                else if(statusStr == QString::fromUtf8("в работе"))
-                    ++tasks_in_work;
-                else if(statusStr == QString::fromUtf8("на проверку"))
-                    ++tasks_for_check;
+                BaseMetadataPtr status = mark->getMetadata("status");
+                if(status)
+                {
+                    QString statusStr = status->getValueAsString();
+                    if(statusStr == QString::fromUtf8("новый"))
+                        ++tasks_new;
+                    else if(statusStr == QString::fromUtf8("в работе"))
+                        ++tasks_in_work;
+                    else if(statusStr == QString::fromUtf8("на проверку"))
+                        ++tasks_for_check;
+                }
             }
-        }
-        item->setData(4, TASKS_NEW, tasks_new);
-        item->setData(4, TASKS_IN_WORK, tasks_in_work);
-        item->setData(4, TASKS_FOR_CHECK, tasks_for_check);
+            item->setData(4, TASKS_NEW, tasks_new);
+            item->setData(4, TASKS_IN_WORK, tasks_in_work);
+            item->setData(4, TASKS_FOR_CHECK, tasks_for_check);
 
-        int itemType = item->data(0, TYPE).toInt();
-        while(itemType != ItemTypeFacility)
+            int itemType = item->data(0, TYPE).toInt();
+            while(itemType != ItemTypeFacility)
+            {
+                item = item->parent();
+                if( ! item)
+                    break;
+                itemType = item->data(0, TYPE).toInt();
+            }
+
+            if(item)
+                recalcTasksInFacility(item);
+        }
+    }
+    else
+    {
+        QTreeWidgetItem * item(0);
+        auto it = _items.find(id);
+        if(it != _items.end())
+            item = it.value();
+
+        RoomPtr room = BaseArea::convert< Room >( RegionBizManager::instance()->getBaseArea(id) );
+        if(room && item)
         {
-            item = item->parent();
-            if( ! item)
-                break;
-            itemType = item->data(0, TYPE).toInt();
-        }
+            item->setText(0, room->getName());
+            if( !room->getDescription().isEmpty() )
+                item->setToolTip( 0, room->getDescription() );
+            item->setText(6, QString::number(id));
 
-        if(item)
-            recalcTasksInFacility(item);
+            BaseMetadataPtr areaPtr = room->getMetadata("area");
+            if(areaPtr)
+            {
+                double area = areaPtr->getValueAsVariant().toDouble();
+                item->setText(1, QString::number(area, 'f', 1));
+            }
+
+            BaseMetadataPtr rentorPtr = room->getMetadata("rentor");
+            if(rentorPtr)
+                item->setText(3, rentorPtr->getValueAsVariant().toString());
+
+            BaseMetadataPtr statusPtr = room->getMetadata("status");
+            if(statusPtr)
+            {
+                QString status = statusPtr->getValueAsVariant().toString();
+                if(status == QString::fromUtf8("Свободно"))
+                    item->setText(2, status);
+                else if(status == QString::fromUtf8("В аренде"))
+                    item->setText(2, status);
+                else
+                    item->setText(2, QString::fromUtf8("Недоступно"));
+            }
+
+            BaseMetadataPtr commentPtr = room->getMetadata("comment");
+            if(commentPtr)
+                item->setText(5, commentPtr->getValueAsVariant().toString());
+        }
     }
 }
 

@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QListWidget>
 #include <QPixmap>
+#include "pixmaplistwidget.h"
 
 namespace Ui {
 class MarkForm;
@@ -18,7 +19,6 @@ class MarkForm : public QWidget
 public:
     explicit MarkForm(QWidget *parent = 0);
     ~MarkForm();
-
     void showWidget(quint64 id);
 
 signals:
@@ -35,22 +35,9 @@ private slots:
 private:
     Ui::MarkForm *ui;
     quint64 _id;
-    MarkFormListWidget * _listWidget;
+    PixmapListWidget * _listWidget;
     QList<QPixmap> _pixmaps;
 };
 
-class MarkFormListWidget : public QListWidget
-{
-public:
-    MarkFormListWidget();
-    void addItem(const QPixmap& pm);
-
-protected:
-    virtual void resizeEvent(QResizeEvent * e);
-
-private:
-    QSize _iconSize;
-    double _coef = 1;
-};
 
 #endif // MARKFORM_H
