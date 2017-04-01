@@ -56,49 +56,79 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
 {
     reset();
 
-    if(curr_id == 0)
+    // WARNING check id for 0. MATSUBADZU
+    if( curr_id == 0 )
         return;
 
-    MarkPtr markPtr = RegionBizManager::instance()->getMark(curr_id);
-    if(markPtr)
+    // get entity
+    BaseEntityPtr entity = RegionBizManager::instance()->getBaseEntity(curr_id);
+    if( !entity )
+        return;
+
+    switch( entity->getEntityType() )
     {
-        return;
-    }
-
-    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(curr_id);
-    if(! ptr)
-        return;
-
-    auto data = DataGetter::getData( curr_id );
-
-    switch( ptr->getType() ) {
-    case BaseArea::AT_FLOOR:
-    case BaseArea::AT_REGION:
-    case BaseArea::AT_LOCATION:
-    case BaseArea::AT_FACILITY:
+    // process marks
+    case BaseEntity::ET_MARK:
     {
-        showAddres( ptr );
-        showTasks( data );
-        showArendators( data, false );
-        showAreas( data, false );
-        //showDebt( data );
+        MarkPtr markPtr = entity->convert< Mark >();
+        if( !markPtr )
+            return;
 
-        ui->moreInfo->show();
+        showMarkName( markPtr->getName() );
+
+        MetadataByName values = markPtr->getMetadataMap();
+        if( markPtr->isMetadataPresent( "status" ))
+            showMarkStatus( values.at("status")->getValueAsVariant().toString() );
+        if( markPtr->isMetadataPresent( "priority" ))
+            showMarkPriority( values.at("priority")->getValueAsVariant().toString() );
+        if( markPtr->isMetadataPresent( "worker" ))
+            showMarkWorker( values.at("worker")->getValueAsVariant().toString() );
+        if( markPtr->isMetadataPresent( "category" ))
+            showMarkCategory( values.at("category")->getValueAsVariant().toString() );
+
         break;
     }
-    case BaseArea::AT_ROOMS_GROUP:
-    case BaseArea::AT_ROOM:
-    {
-        showName( ptr );
-        showAreas( data, true );
-        showArendators( data, true );
-        showTasks( data );
 
-        ui->editObject->show();
-        ui->moreInfo->show();
-        ui->addMark->show();
-        ui->editObject->setToolTip(QString::fromUtf8("Редактировать контуры комнаты"));
-        break;
+    // process areas
+    case BaseEntity::ET_AREA:
+    {
+        BaseAreaPtr ptr = entity->convert< BaseArea >();
+        if(! ptr)
+            return;
+
+        auto data = DataGetter::getData( curr_id );
+
+        switch( ptr->getType() ) {
+        case BaseArea::AT_FLOOR:
+        case BaseArea::AT_REGION:
+        case BaseArea::AT_LOCATION:
+        case BaseArea::AT_FACILITY:
+        {
+            showAddres( ptr );
+            showTasks( data );
+            showArendators( data, false );
+            showAreas( data, false );
+            //showDebt( data );
+
+            ui->moreInfo->show();
+            break;
+        }
+
+        case BaseArea::AT_ROOMS_GROUP:
+        case BaseArea::AT_ROOM:
+        {
+            showName( ptr );
+            showAreas( data, true );
+            showArendators( data, true );
+            showTasks( data );
+
+            ui->editObject->show();
+            ui->moreInfo->show();
+            ui->addMark->show();
+            ui->editObject->setToolTip(QString::fromUtf8("Редактировать контуры комнаты"));
+            break;
+        }
+        }
     }
     }
 }
@@ -283,42 +313,14 @@ void ViraStatusBar::showAreas( AreaData data, bool one )
 
 void ViraStatusBar::showAddres(BaseAreaPtr ptr)
 {
-    QString addr = "";
-
-    switch( ptr->getType() )
-    {
-    case BaseArea::AT_REGION:
-        addr = BaseArea::convert< Region >( ptr )->getDescription();
-        break;
-    case BaseArea::AT_LOCATION:
-        addr = BaseArea::convert< Location >( ptr )->getAddress();
-        break;
-    case BaseArea::AT_FACILITY:
-        addr = BaseArea::convert< Facility >( ptr )->getAddress();
-        break;
-    case BaseArea::AT_FLOOR:
-        addr = BaseArea::convert< Facility >( ptr->getParent() )->getAddress();
-        break;
-    }
-
+    QString addr = recursiveGetName( ptr );
     ui->name->setText( addr );
     ui->name->setToolTip( QString::fromUtf8( "Адрес" ));
 }
 
 void ViraStatusBar::showName(BaseAreaPtr ptr)
 {
-    QString name = "";
-
-    switch( ptr->getType() )
-    {
-    case BaseArea::AT_ROOMS_GROUP:
-        name = BaseArea::convert< RoomsGroup >( ptr )->getCadastralNumber();
-        break;
-    case BaseArea::AT_ROOM:
-        name = BaseArea::convert< Room >( ptr )->getName();
-        break;
-    }
-
+    QString name = recursiveGetName( ptr );
     ui->name->setText( name );
     ui->name->setToolTip( QString::fromUtf8( "Название" ));
 }
@@ -337,6 +339,12 @@ void ViraStatusBar::showDebt(AreaData data)
 
     ui->horizontalLayout_widgets->addWidget( debt );
     ui->horizontalLayout_widgets->addStretch();
+}
+
+void ViraStatusBar::showMarkName(QString name)
+{
+    ui->name->setText( name );
+    ui->name->setToolTip( QString::fromUtf8( "Имя" ));
 }
 
 QLabel *ViraStatusBar::getArendator(ArendatorType type )
@@ -444,6 +452,101 @@ QLabel *ViraStatusBar::getArea(ViraStatusBar::AreaType type, AreaData data)
     return area;
 }
 
+void ViraStatusBar::showMarkStatus(QString status)
+{
+    QString color;
+    if( QString::fromUtf8( "на проверку" ) == status )
+        color = "#3CE63C";
+    else if( QString::fromUtf8( "в работе" ) == status )
+        color = "#F0E68C";
+    else if( QString::fromUtf8( "новый" ) == status )
+        color = "#FF8C00";
+
+    QLabel* task = new QLabel;
+    task->setStyleSheet( "background-color: " + color + ";"
+                         "border-color: rgb(255, 255, 255);"
+                         "border-radius: 10px;"
+                         "color: rgb(0, 0, 0);"
+                         "border-width: 2px;"
+                         "border-style: solid;"
+                         );
+    task->setText( status );
+    task->setToolTip( QString::fromUtf8( "Статус" ));
+
+    ui->horizontalLayout_widgets->addWidget( task );
+    ui->horizontalLayout_widgets->addStretch();
+}
+
+void ViraStatusBar::showMarkWorker(QString worker)
+{
+    QLabel* task = new QLabel;
+    task->setText( worker );
+    task->setToolTip( QString::fromUtf8( "Ответственный" ));
+
+    ui->horizontalLayout_widgets->addWidget( task );
+    ui->horizontalLayout_widgets->addStretch();
+}
+
+void ViraStatusBar::showMarkCategory(QString category)
+{
+    QLabel* task = new QLabel;
+    task->setText( category );
+    task->setToolTip( QString::fromUtf8( "Категория" ));
+    task->setStyleSheet( "border-color: rgb(255, 255, 255);"
+                         "border-width: 1px;"
+                         "border-style: solid;"
+                         );
+
+    ui->horizontalLayout_widgets->addWidget( task );
+    ui->horizontalLayout_widgets->addStretch();
+}
+
+void ViraStatusBar::showMarkPriority(QString priority)
+{
+    QLabel* task = new QLabel;
+    task->setText( priority );
+    task->setToolTip( QString::fromUtf8( "Приоритет" ));
+    task->setStyleSheet( "border-color: rgb(255, 255, 255);"
+                         "border-width: 1px;"
+                         "border-style: solid;"
+                         );
+
+    ui->horizontalLayout_widgets->addWidget( task );
+    ui->horizontalLayout_widgets->addStretch();
+}
+
+QString ViraStatusBar::recursiveGetName(BaseAreaPtr area)
+{
+    QString name;
+    switch( area->getType() )
+    {
+    case BaseArea::AT_LOCATION:
+    case BaseArea::AT_FACILITY:
+    {
+        name = area->getDescription();
+        break;
+    }
+
+    case BaseArea::AT_REGION:
+    case BaseArea::AT_FLOOR:
+    case BaseArea::AT_ROOMS_GROUP:
+    case BaseArea::AT_ROOM:
+    {
+        name = area->getName();
+        break;
+    }
+
+    }
+
+    if( BaseArea::AT_REGION == area->getType() )
+        return name;
+    if( BaseArea::AT_FLOOR == area->getType() )
+        name = '\n' + name;
+
+    QString that_name = recursiveGetName( area->getParent() ) + " / " + name;
+    return  that_name;
+}
+
 void ViraStatusBar::slotShowMoreInfo(bool on_off)
 {
     quint64 id = RegionBizManager::instance()->getSelectedEntity();
@@ -547,19 +650,3 @@ void ViraStatusBar::slotUpdateMark(quint64 id)
 {
     CommonMessageNotifier::send( (uint)visualize_system::BusTags::UpdateMark, QVariant(id), QString("visualize_system"));
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

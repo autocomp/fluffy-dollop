@@ -34,6 +34,11 @@ bool RegionBizManager::init(QString &config_path)
     return load_plugins && load_translators;
 }
 
+BaseEntityPtr RegionBizManager::getBaseEntity(uint64_t id)
+{
+    return BaseEntity::getEntity( id );
+}
+
 BaseAreaPtr RegionBizManager::getBaseArea( uint64_t id )
 {
     auto entity = BaseEntity::getEntity( id );

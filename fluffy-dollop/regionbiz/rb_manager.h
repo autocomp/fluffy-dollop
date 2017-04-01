@@ -28,6 +28,9 @@ public:
     static RegionBizManagerPtr instance();
     bool init( QString& config_path );
 
+    // get entity
+    BaseEntityPtr getBaseEntity( uint64_t id );
+
     // locations
     // getters
     BaseAreaPtr getBaseArea( uint64_t id );

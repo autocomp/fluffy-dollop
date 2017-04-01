@@ -63,7 +63,14 @@ protected:
     void showAddres( regionbiz::BaseAreaPtr ptr );
     void showName( regionbiz::BaseAreaPtr ptr );
     void showDebt( AreaData data );
+    void showMarkName( QString name );
     void showMarkInfoWidgwt(bool isEditMode, qulonglong id);
+    void showMarkStatus( QString status );
+    void showMarkWorker(QString worker );
+    void showMarkCategory(QString category );
+    void showMarkPriority(QString priority );
+
+    QString recursiveGetName(regionbiz::BaseAreaPtr area );
 
     QLabel* getArendator(ArendatorType type);
     QLabel* getTask( TaskType type, AreaData data );
