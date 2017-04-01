@@ -614,7 +614,6 @@ void ViraStatusBar::showMarkInfoWidgwt(bool isEditMode, qulonglong id)
     {
         _markForm = new MarkForm;
         connect(_markForm, SIGNAL(signalCloseWindow()), this, SLOT(slotCloseMarkWindow()));
-        connect(_markForm, SIGNAL(signalUpdateMark(quint64)), this, SLOT(slotUpdateMark(quint64)));
         _markForm->showWidget(id);
 
         _ifaceInfoMarkWidget = new EmbIFaceNotifier(_markForm);
@@ -646,7 +645,3 @@ void ViraStatusBar::showMarkInfoWidgwt(bool isEditMode, qulonglong id)
     }
 }
 
-void ViraStatusBar::slotUpdateMark(quint64 id)
-{
-    CommonMessageNotifier::send( (uint)visualize_system::BusTags::UpdateMark, QVariant(id), QString("visualize_system"));
-}

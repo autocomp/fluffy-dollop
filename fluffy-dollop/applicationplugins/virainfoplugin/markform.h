@@ -23,11 +23,14 @@ public:
 
 signals:
     void signalCloseWindow();
-    void signalUpdateMark(quint64 id);
+
+protected:
+    void closeAndCommit(bool moveToArchive);
 
 private slots:
     void slotLoadImage();
     void slotApply();
+    void slotToArchieve();
 
 private:
     Ui::MarkForm *ui;
