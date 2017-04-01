@@ -601,6 +601,9 @@ border-right-color:#7c7c7c;
 border-bottom-color:#dcdcdc;
 margin:1px 0 0  0px;  }
 
+QTreeWidget::item {
+border:1px #111;
+}
 QTreeView::item:selected {
 background: #0d577c;
 padding: 0;
@@ -723,6 +726,14 @@ QCheckBox#AttributeBoolWidget_checkBox:disabled{
 
 QGraphicsView {border : 0 px; }
 
+QTreeWidget::item {
+border-bottom: 1px dotted #999;
+border-right: 1px solid #BBB;
+}
 
+QTreeView QHeaderView:section
+{
+border-right: 1px solid #BBB;
+}
 
 

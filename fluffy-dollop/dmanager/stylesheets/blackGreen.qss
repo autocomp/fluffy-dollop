@@ -264,3 +264,8 @@ QProgressBar::chunk {
 QMenu::separator {
 	background: #353535;
 }
+
+QTreeWidget::item {
+border-bottom: 1px dotted #999;
+border-right: 1px solid #BBB;
+}
