@@ -15,12 +15,12 @@ protected slots:
     void slotItemSelectionChanged();
     void slotItemDoubleClicked(QTreeWidgetItem*,int);
     void slotObjectSelectionChanged(uint64_t prev_id, uint64_t curr_id);
+    void slotObjectChanged(uint64_t id);
     void slotHeaderSectionClicked(int index);
     void slotBlockGUI(QVariant var);
     void slotEditModeFinish(QVariant var);
     void slotResaclArea(const QModelIndex &index);
     void slotSaveItemToDb(const QModelIndex &index);
-    void slotUpdateMark(QVariant var);
 
 protected:
     void recalcAreaInFacility(QTreeWidgetItem * facilityItem);

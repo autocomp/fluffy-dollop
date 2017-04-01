@@ -24,10 +24,6 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
                                       qMetaTypeId< quint64 >(),
                                       QString("visualize_system") );
 
-    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::UpdateMark, this, SLOT(slotUpdateMark(QVariant)),
-                                      qMetaTypeId< quint64 >(),
-                                      QString("visualize_system") );
-
     setExpandsOnDoubleClick(false);
     setSelectionMode(QAbstractItemView::SingleSelection);
     setColumnCount(6);
@@ -50,7 +46,6 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
     connect(lineEditDelegate, SIGNAL(saveItemToDb(QModelIndex)), this, SLOT(slotSaveItemToDb(QModelIndex)));
     setItemDelegateForColumn(0, lineEditDelegate);
     setItemDelegateForColumn(3, lineEditDelegate);
-    //setItemDelegateForColumn(4, lineEditDelegate);
     setItemDelegateForColumn(5, lineEditDelegate);
 
     SpinBoxDelegate * spinBoxDelegate = new SpinBoxDelegate(this);
@@ -71,13 +66,15 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
 
     auto mngr = RegionBizManager::instance();
     mngr->subscribeOnSelect(this, SLOT(slotObjectSelectionChanged(uint64_t,uint64_t)));
+    mngr->subscribeOnChangeEntity(this, SLOT(slotObjectChanged(uint64_t)));
+
     std::vector<RegionPtr> regions = mngr->getRegions();
     for( RegionPtr regionPtr: regions )
     {
         QTreeWidgetItem * regionItem = new QTreeWidgetItem(this);
         regionItem->setText(0, regionPtr->getDescription());
         const qulonglong id(regionPtr->getId());
-//        regionItem->setText(5, QString::number(id));
+        regionItem->setText(6, QString::number(id));
         for(int i(0); i<6; ++i) regionItem->setData(i, ID, id);
         for(int i(0); i<6; ++i) regionItem->setData(i, TYPE, (int)ItemTypeOther);
         _items.insert(id, regionItem);
@@ -92,7 +89,6 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
                 locationItem->setText(0, locationPtr->getDescription());
                 const qulonglong id(locationPtr->getId());
                 locationItem->setText(6, QString::number(id));
-//                locationItem->setText(5, QString::number(id));
                 for(int i(0); i<6; ++i) locationItem->setData(i, ID, id);
                 for(int i(0); i<6; ++i) locationItem->setData(i, TYPE, (int)ItemTypeOther);
                 _items.insert(id, locationItem);
@@ -192,6 +188,15 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
                                     if(status)
                                     {
                                         QString statusStr = status->getValueAsString();
+
+                                        //!!! ВРЕМЕННЫЙ КОД !!!
+                                        if(statusStr == QString::fromUtf8("в архиве"))
+                                        {
+                                            mark->addMetadata("string", "status", QString::fromUtf8("на проверку"));
+                                            mark->commit();
+                                            statusStr = QString::fromUtf8("на проверку");
+                                        }
+
                                         if(statusStr == QString::fromUtf8("новый"))
                                             ++tasks_new;
                                         else if(statusStr == QString::fromUtf8("в работе"))
@@ -269,7 +274,7 @@ void ViraTreeWidget::recalcTasksInFacility(QTreeWidgetItem * facilityItem)
             QTreeWidgetItem * roomItem = floorItem->child(i);
             floor_tasks_new += roomItem->data(4, TASKS_NEW).toInt();
             floor_tasks_in_work += roomItem->data(4, TASKS_IN_WORK).toInt();
-            facility_tasks_for_check += roomItem->data(4, TASKS_FOR_CHECK).toInt();
+            floor_tasks_for_check += roomItem->data(4, TASKS_FOR_CHECK).toInt();
         }
         floorItem->setData(4, TASKS_NEW, floor_tasks_new);
         floorItem->setData(4, TASKS_IN_WORK, floor_tasks_in_work);
@@ -381,9 +386,9 @@ void ViraTreeWidget::slotSaveItemToDb(const QModelIndex &index)
     qDebug() << "===================================";
 }
 
-void ViraTreeWidget::slotUpdateMark(QVariant var)
+void ViraTreeWidget::slotObjectChanged(uint64_t id)
 {
-    MarkPtr markPtr = RegionBizManager::instance()->getMark(var.toUInt());
+    MarkPtr markPtr = RegionBizManager::instance()->getMark(id);
     if(! markPtr) return;
     BaseAreaPtr parentPtr = RegionBizManager::instance()->getBaseArea(markPtr->getParentId());
     if(! parentPtr) return;
