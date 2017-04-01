@@ -118,8 +118,8 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
                         for(int i(0); i<6; ++i) floorItem->setData(i, ID, id);
                         for(int i(0); i<6; ++i) floorItem->setData(i, TYPE, (int)ItemTypeFloor);
                         floorItem->setTextAlignment(1, Qt::AlignCenter);
-                        floorItem->setData(1, RENTED_AREA, 234.4);
-                        floorItem->setData(1, TOTAL_AREA, 373.6);
+//                        floorItem->setData(1, RENTED_AREA, 234.4);
+//                        floorItem->setData(1, TOTAL_AREA, 373.6);
                         _items.insert(id, floorItem);
 
                         BaseAreaPtrs rooms = floorPtr->getChilds( Floor::FCF_ALL_ROOMS );
