@@ -8,17 +8,21 @@ class LocationItem : public QObject, public QGraphicsPixmapItem
 {
     Q_OBJECT
 public:
-    explicit LocationItem(int minZoom, QRectF bSceneRect, const QList<QGraphicsItem*>& items, QGraphicsScene* scene);
+    explicit LocationItem(qulonglong id, int minZoom, QRectF bSceneRect, const QList<QGraphicsItem*>& items, QGraphicsScene* scene);
     ~LocationItem();
     void zoomChanged(int zoom);
+    void setItemselected(bool on_off);
 
 signals:
     void setViewport(QRectF);
+    void signalSelectItem(qulonglong id, bool centerOnEntity);
 
 protected:
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
 
 private:
+    const qulonglong _id;
     bool _isVisible = true;
     int _minZoom;
     QRectF _bSceneRect;

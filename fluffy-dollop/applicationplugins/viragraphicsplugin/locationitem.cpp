@@ -3,8 +3,9 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QDebug>
 
-LocationItem::LocationItem(int minZoom, QRectF bSceneRect, const QList<QGraphicsItem*>& items, QGraphicsScene* scene)
-    : _minZoom(minZoom)
+LocationItem::LocationItem(qulonglong id, int minZoom, QRectF bSceneRect, const QList<QGraphicsItem*>& items, QGraphicsScene* scene)
+    : _id(id)
+    , _minZoom(minZoom)
     , _bSceneRect(bSceneRect)
     , _items(items)
 {
@@ -47,6 +48,16 @@ void LocationItem::zoomChanged(int zoom)
             _isVisible = false;
         }
     }
+}
+
+void LocationItem::setItemselected(bool on_off)
+{
+    setPixmap(on_off ? QPixmap(":/img/mark_on_map_selected.png") : QPixmap(":/img/mark_on_map.png"));
+}
+
+void LocationItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    emit signalSelectItem(_id, false);
 }
 
 void LocationItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)

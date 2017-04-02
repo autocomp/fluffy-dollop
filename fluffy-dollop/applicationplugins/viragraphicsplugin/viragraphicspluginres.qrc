@@ -19,5 +19,6 @@
         <file>img/mark_tr.png</file>
         <file>img/down.png</file>
         <file>img/up.png</file>
+        <file>img/mark_on_map_selected.png</file>
     </qresource>
 </RCC>

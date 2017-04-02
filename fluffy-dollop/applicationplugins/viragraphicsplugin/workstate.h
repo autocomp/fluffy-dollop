@@ -38,10 +38,10 @@ protected slots:
 
 private:
     QMap<qulonglong, AreaGraphicsItem*> _items;
-    QList<LocationItem *> _locationItems;
+    QMap<uint64_t, LocationItem *> _locationItems;
 
     QMap<qulonglong, QString> _itemId_facilityFolder;
-    qulonglong _prevSelectedFacilityId = 0;
+    qulonglong _prevSelectedFacilityId = 0, _prevSelectedLocationId = 0;
     //uint64_t _editObjectGeometry = 0;
     bool _blockGUI = false;
 };
