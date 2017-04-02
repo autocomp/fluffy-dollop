@@ -176,6 +176,9 @@ void InfoForm::showWidget(quint64 id)
 
 void InfoForm::reloadTasks(regionbiz::BaseAreaPtr area)
 {
+    _tasks_new = 0;
+    _tasks_in_work = 0;
+    _tasks_for_check = 0;
     ui->marksTreeWidget->clear();
     QString facility, floor;
     switch( area->getType() )
