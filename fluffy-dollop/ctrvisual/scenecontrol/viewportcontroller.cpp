@@ -149,7 +149,7 @@ bool ViewPortController::getVisibleCells(int zoom, QRectF viewportRect, QList<Ce
     int64_t MAX_WIDTH(m_SceneController->tilesCount().width()*POW);
     int64_t MAX_HEIGHT(m_SceneController->tilesCount().height()*POW);
 
-    const uint AddTileOnViewport(zoom < 3 ? 3 : m_SceneController->addTileOnViewport());
+    const uint AddTileOnViewport(1);//zoom < 3 ? 3 : m_SceneController->addTileOnViewport());
     int64_t leftX = (viewportRect.topLeft().x() - AddTileOnViewport*tileWidthOnView) / tileWidthOnView;
     if(leftX < 0)
         leftX = 0;
@@ -286,46 +286,46 @@ bool ViewPortController::getVisibleCells(int zoom, QRectF viewportRect, QList<Ce
 
     m_zoom = zoom;
 
-    {
-        //! код для загрузки тайлов для минимапа и формирования подложки на основной сцене.
-        switch(zoom)
-        {
-        case 0:
-        case 1: zoom = 2; break;
-        case 2: zoom = 1; break;
-        case 3: zoom = 1; break;
-        case 4: zoom = 1; break;
-        default:zoom -= 4;
-        }
+//    {
+//        //! код для загрузки тайлов для минимапа и формирования подложки на основной сцене.
+//        switch(zoom)
+//        {
+//        case 0:
+//        case 1: zoom = 2; break;
+//        case 2: zoom = 1; break;
+//        case 3: zoom = 1; break;
+//        case 4: zoom = 1; break;
+//        default:zoom -= 4;
+//        }
 
-        POW = (pow(2,zoom-1));
-        tileWidthOnView = (m_SceneController->tileSize().width() / POW);
-        tileHeightOnView = (m_SceneController->tileSize().height() / POW);
-        MAX_WIDTH = (m_SceneController->tilesCount().width()*POW);
-        MAX_HEIGHT = (m_SceneController->tilesCount().height()*POW);
+//        POW = (pow(2,zoom-1));
+//        tileWidthOnView = (m_SceneController->tileSize().width() / POW);
+//        tileHeightOnView = (m_SceneController->tileSize().height() / POW);
+//        MAX_WIDTH = (m_SceneController->tilesCount().width()*POW);
+//        MAX_HEIGHT = (m_SceneController->tilesCount().height()*POW);
 
-        leftX = viewportRect.topLeft().x() / tileWidthOnView;
-        rightX = (viewportRect.topLeft().x() + viewportRect.width()) / tileWidthOnView;
-        topY = viewportRect.topLeft().y() / tileHeightOnView;
-        bottomY = (viewportRect.topLeft().y() + viewportRect.height()) / tileHeightOnView;
+//        leftX = viewportRect.topLeft().x() / tileWidthOnView;
+//        rightX = (viewportRect.topLeft().x() + viewportRect.width()) / tileWidthOnView;
+//        topY = viewportRect.topLeft().y() / tileHeightOnView;
+//        bottomY = (viewportRect.topLeft().y() + viewportRect.height()) / tileHeightOnView;
 
-        if(leftX > 0)
-            --leftX;
-        if(rightX < MAX_WIDTH)
-            ++rightX;
-        if(topY > 0)
-            --topY;
-        if(bottomY < MAX_HEIGHT)
-            ++bottomY;
+//        if(leftX > 0)
+//            --leftX;
+//        if(rightX < MAX_WIDTH)
+//            ++rightX;
+//        if(topY > 0)
+//            --topY;
+//        if(bottomY < MAX_HEIGHT)
+//            ++bottomY;
 
-        for(int x(leftX); x <= rightX && x < MAX_WIDTH; ++x)
-            for(int y(topY); y <= bottomY && y < MAX_HEIGHT; ++y)
-            {
-                Cell cell(zoom,x,y);
-                cell.isMainCover = false;
-                cellList.append(cell);
-            }
-    }
+//        for(int x(leftX); x <= rightX && x < MAX_WIDTH; ++x)
+//            for(int y(topY); y <= bottomY && y < MAX_HEIGHT; ++y)
+//            {
+//                Cell cell(zoom,x,y);
+//                cell.isMainCover = false;
+//                cellList.append(cell);
+//            }
+//    }
 
     return true;
 }

@@ -9,17 +9,25 @@ TileLoaderPool::TileLoaderPool()
     : _sourcesIdCounter(0)
     //, _loadersTimeoutTimer(this)
     , _worldSizeInTiles(2,1)
-    , _timeoutOpenProviderSec(3)
-    , _totalLoaders(16)
-    , _debugMode(false)
+    //, _timeoutOpenProviderSec(3)
+    //, _totalLoaders(16)
+    //, _debugMode(false)
 {
     //connect(&_roundRobin, SIGNAL(signal_exceptionFromQueue(uint,uint)), this, SLOT(slot_exceptionFromQueue(uint,uint)));
-    connect(&_roundRobin, SIGNAL(signal_exceptionFromQueue(QString,uint)), this, SLOT(slot_exceptionFromQueue(QString,uint)));
-    connect(&_roundRobin, SIGNAL(signal_showLog()), this, SLOT(slot_showLog()));
-    connect(&_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(slot_finished(QNetworkReply*)));
+    //connect(&_roundRobin, SIGNAL(signal_exceptionFromQueue(QString,uint)), this, SLOT(slot_exceptionFromQueue(QString,uint)));
+    //connect(&_roundRobin, SIGNAL(signal_showLog()), this, SLOT(slot_showLog()));
+    //connect(&_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(slot_finished(QNetworkReply*)));
     //connect(&_loadersTimeoutTimer, SIGNAL(timeout()), this, SLOT(slot_checkLoadersTimeout()));
 
-    init();
+    _proxyNetworkManager = new ProxyNetworkManager();
+    connect(_proxyNetworkManager, SIGNAL(finishRequest(QString,int,bool,QByteArray)),
+            this, SLOT(finishRequest(QString,int,bool,QByteArray)), Qt::QueuedConnection);
+    connect(this, SIGNAL(signal_setRequest(QString,int)),
+            _proxyNetworkManager, SLOT(setRequest(QString,int)), Qt::QueuedConnection);
+    connect(this, SIGNAL(signal_abortRequest(QString,int)),
+            _proxyNetworkManager, SLOT(abortRequest(QString,int)), Qt::QueuedConnection);
+
+    //init();
     //_loadersTimeoutTimer.start(1000);
 }
 
@@ -30,25 +38,25 @@ QString TileLoaderPool::settingsPath()const
 
 uint TileLoaderPool::totalLoaders()const
 {
-    return _totalLoaders; //_loaders.count();
+    return 4; //_totalLoaders; //_loaders.count();
 }
 
 void TileLoaderPool::setSettingsPath(const QString& settingsPath)
 {
-    _settingsPath = settingsPath;
-    QSettings settings(_settingsPath, QSettings::NativeFormat);
+//    _settingsPath = settingsPath;
+//    QSettings settings(_settingsPath, QSettings::NativeFormat);
 
-    QVariant tmsMax2DQueueSize = settings.value("Pool_Max2dQueueSize");
-    if(tmsMax2DQueueSize.isValid() == false)
-        settings.setValue("Pool_Max2dQueueSize", _maxQueue2DSize);
-    else
-        _maxQueue2DSize = tmsMax2DQueueSize.toUInt();
+//    QVariant tmsMax2DQueueSize = settings.value("Pool_Max2dQueueSize");
+//    if(tmsMax2DQueueSize.isValid() == false)
+//        settings.setValue("Pool_Max2dQueueSize", _maxQueue2DSize);
+//    else
+//        _maxQueue2DSize = tmsMax2DQueueSize.toUInt();
 
-    QVariant tmsMax3DQueueSize = settings.value("Pool_Max3dQueueSize");
-    if(tmsMax3DQueueSize.isValid() == false)
-        settings.setValue("Pool_Max3dQueueSize", _maxQueue3DSize);
-    else
-        _maxQueue3DSize = tmsMax3DQueueSize.toUInt();
+//    QVariant tmsMax3DQueueSize = settings.value("Pool_Max3dQueueSize");
+//    if(tmsMax3DQueueSize.isValid() == false)
+//        settings.setValue("Pool_Max3dQueueSize", _maxQueue3DSize);
+//    else
+//        _maxQueue3DSize = tmsMax3DQueueSize.toUInt();
 
 //    QVariant tmsLoadersCount = settings.value("Pool_LoadersCount");
 //    if(tmsLoadersCount.isValid() == false || tmsLoadersCount.toUInt() == 0)
@@ -56,53 +64,53 @@ void TileLoaderPool::setSettingsPath(const QString& settingsPath)
 //        tmsLoadersCount = 16;
 //        settings.setValue("Pool_LoadersCount", QString("16"));
 //    }
-    QVariant tmsLoadersCount = settings.value("Pool_LoadersCount");
-    if(tmsLoadersCount.isValid() == false || tmsLoadersCount.toUInt() == 0)
-        settings.setValue("Pool_LoadersCount", _totalLoaders);
-    else
-        _totalLoaders = tmsLoadersCount.toUInt();
+//    QVariant tmsLoadersCount = settings.value("Pool_LoadersCount");
+//    if(tmsLoadersCount.isValid() == false || tmsLoadersCount.toUInt() == 0)
+//        settings.setValue("Pool_LoadersCount", _totalLoaders);
+//    else
+//        _totalLoaders = tmsLoadersCount.toUInt();
 
-    QVariant tmsDefaultPort = settings.value("Pool_DefaultPort");
-    if(tmsDefaultPort.isValid() == false)
-    {
-        tmsDefaultPort = 80;
-        settings.setValue("Pool_DefaultPort", tmsDefaultPort);
-    }
+//    QVariant tmsDefaultPort = settings.value("Pool_DefaultPort");
+//    if(tmsDefaultPort.isValid() == false)
+//    {
+//        tmsDefaultPort = 80;
+//        settings.setValue("Pool_DefaultPort", tmsDefaultPort);
+//    }
 
-    QVariant timeoutOpenProviderSecVar = settings.value("Pool_TimeoutOpenProviderSec");
-    if(timeoutOpenProviderSecVar.isValid())
-    {
-        _timeoutOpenProviderSec = timeoutOpenProviderSecVar.toUInt();
-        if(_timeoutOpenProviderSec > 60)
-        {
-            _timeoutOpenProviderSec = 3;
-            settings.setValue("Pool_TimeoutOpenProviderSec", _timeoutOpenProviderSec);
-        }
-    }
-    else
-        settings.setValue("Pool_TimeoutOpenProviderSec", _timeoutOpenProviderSec);
+//    QVariant timeoutOpenProviderSecVar = settings.value("Pool_TimeoutOpenProviderSec");
+//    if(timeoutOpenProviderSecVar.isValid())
+//    {
+//        _timeoutOpenProviderSec = timeoutOpenProviderSecVar.toUInt();
+//        if(_timeoutOpenProviderSec > 60)
+//        {
+//            _timeoutOpenProviderSec = 3;
+//            settings.setValue("Pool_TimeoutOpenProviderSec", _timeoutOpenProviderSec);
+//        }
+//    }
+//    else
+//        settings.setValue("Pool_TimeoutOpenProviderSec", _timeoutOpenProviderSec);
 
-    QVariant tmsDebugMode = settings.value("Pool_DebugMode");
-    if(tmsDebugMode.isValid() && tmsDebugMode.toBool())
-        setDebugMode();
-    else
-        settings.setValue("Pool_DebugMode", false);
+//    QVariant tmsDebugMode = settings.value("Pool_DebugMode");
+//    if(tmsDebugMode.isValid() && tmsDebugMode.toBool())
+//        setDebugMode();
+//    else
+//        settings.setValue("Pool_DebugMode", false);
 }
 
 void TileLoaderPool::init(uint totalLoaders, int defaultPort, uint maxQueue2DSize, uint maxQueue3DSize)
 {
-    _maxQueue2DSize = maxQueue2DSize;
-    _maxQueue3DSize = maxQueue3DSize;
-    _roundRobin.setMaxQueueSize(maxQueue2DSize, maxQueue3DSize);
-    _totalLoaders = totalLoaders;
+//    _maxQueue2DSize = maxQueue2DSize;
+//    _maxQueue3DSize = maxQueue3DSize;
+//    _roundRobin.setMaxQueueSize(3000,3000); // maxQueue2DSize, maxQueue3DSize);
+//    _totalLoaders = totalLoaders;
 
-    for(auto it = _map_Url_Reply.begin(); it != _map_Url_Reply.end(); ++it)
-    {
-        Reply reply = it.value();
-        reply.reply->abort();
-        delete reply.reply;
-    }
-    _map_Url_Reply.clear();
+//    for(auto it = _map_Url_Reply.begin(); it != _map_Url_Reply.end(); ++it)
+//    {
+//        Reply reply = it.value();
+//        reply.reply->abort();
+//        delete reply.reply;
+//    }
+//    _map_Url_Reply.clear();
 
     /*
     foreach(TileLoader* tileLoader, _loaders)
@@ -127,13 +135,13 @@ void TileLoaderPool::init(uint totalLoaders, int defaultPort, uint maxQueue2DSiz
 
 void TileLoaderPool::setDebugMode()
 {
-    _debugMode = true;
-    _roundRobin.setDebugMode(_totalLoaders); //_loaders.size());
+//    _debugMode = true;
+//    _roundRobin.setDebugMode(_totalLoaders); //_loaders.size());
 }
 
 bool TileLoaderPool::isDebugMode()
 {
-    return _debugMode;
+    return false;//_debugMode;
 }
 
 void TileLoaderPool::serWorldSizeInTiles(QSize worldSizeInTiles)
@@ -148,35 +156,35 @@ QSize TileLoaderPool::worldSizeInTiles()const
 
 void TileLoaderPool::setTimeoutOpenProviderSec(uint _timeoutOpenProviderSec_)
 {
-    _timeoutOpenProviderSec = _timeoutOpenProviderSec_;
+    //_timeoutOpenProviderSec = _timeoutOpenProviderSec_;
 }
 
 uint TileLoaderPool::timeoutOpenProviderSec()const
 {
-    return _timeoutOpenProviderSec;
+    return 3; // _timeoutOpenProviderSec;
 }
 
 uint TileLoaderPool::registerSource(const TmsBaseAdapter * const tmsAdapter, TileDataProvider::TmsTaskSender taskSender)
 {
     uint sourceId(++_sourcesIdCounter);
-    _roundRobin.registerSource(sourceId, tmsAdapter, taskSender);
+    //_roundRobin.registerSource(sourceId, tmsAdapter, taskSender);
     return sourceId;
 }
 
 bool TileLoaderPool::unregisterSource(uint sourceId)
 {
-    return _roundRobin.unregisterSource(sourceId);
+    return true; //return _roundRobin.unregisterSource(sourceId);
 }
 
 TileLoaderPool::~TileLoaderPool()
 {
-    for(auto it = _map_Url_Reply.begin(); it != _map_Url_Reply.end(); ++it)
-    {
-        Reply reply = it.value();
-        reply.reply->abort();
-        delete reply.reply;
-    }
-    _map_Url_Reply.clear();
+//    for(auto it = _map_Url_Reply.begin(); it != _map_Url_Reply.end(); ++it)
+//    {
+//        Reply reply = it.value();
+//        reply.reply->abort();
+//        delete reply.reply;
+//    }
+//    _map_Url_Reply.clear();
 
 //    foreach(TileLoader* tileLoader, _loaders)
 //    {
@@ -202,55 +210,60 @@ void TileLoaderPool::slot_exceptionFromQueue(QString url, uint sourceId)
 
 void TileLoaderPool::setRequest(const QString& url, uint sourceId)
 {
-    if(_map_Url_Reply.size() > _totalLoaders)
-    {
-        _roundRobin.addTask(url, sourceId);
-        //qDebug() << "setRequest, queueOutsideTask.size :" << _queueOutsideTask.size();
-    }
-    else
-    {
-        QNetworkRequest request(url);
-        request.setRawHeader("User-Agent", "Mozilla/5.0 (PC; U; Intel; Linux; en) AppleWebKit/420+ (KHTML, like Gecko)");
-        QNetworkReply* networkReply = _manager.get(request);
-        Reply reply(networkReply, sourceId);
-        _map_Url_Reply.insert(url, reply);
+    emit signal_setRequest(url, sourceId);
 
-        _roundRobin.setLog(url);
-        _roundRobin.loadersInWork(_map_Url_Reply.size());
-    }
+//    if(_map_Url_Reply.size() > _totalLoaders)
+//    {
+//        _roundRobin.addTask(url, sourceId);
+//        //qDebug() << "setRequest, queueOutsideTask.size :" << _queueOutsideTask.size();
+//    }
+//    else
+//    {
+//        QNetworkRequest request(url);
+//        request.setRawHeader("User-Agent", "Mozilla/5.0 (PC; U; Intel; Linux; en) AppleWebKit/420+ (KHTML, like Gecko)");
+//        QNetworkReply* networkReply = _manager.get(request);
+//        Reply reply(networkReply, sourceId);
+//        _map_Url_Reply.insert(url, reply);
+
+//        _roundRobin.setLog(url);
+//        _roundRobin.loadersInWork(_map_Url_Reply.size());
+//    }
 }
 
 void TileLoaderPool::abortTaskFromSource(QString url, uint sourceId)
 {
-    auto it = _map_Url_Reply.find(url);
-    if(it != _map_Url_Reply.end())
-    {
-        Reply reply = it.value();
-        reply.reply->abort();
-        delete reply.reply;
-        _map_Url_Reply.erase(it);
+    emit signal_abortRequest(url, sourceId);
 
-        // если есть невыполненные задачи - отдаем загрузчику первую из очереди невыполненных задач.
-        QString _url;
-        uint _source;
-        bool success = _roundRobin.getTask(_url, _source);
-        if(success)
-        {
-            QNetworkRequest request(_url);
-            request.setRawHeader("User-Agent", "Mozilla/5.0 (PC; U; Intel; Linux; en) AppleWebKit/420+ (KHTML, like Gecko)");
-            QNetworkReply* networkReply = _manager.get(request);
-            Reply reply(networkReply, sourceId);
-            _map_Url_Reply.insert(_url, reply);
-        }
-        _roundRobin.loadersInWork(_map_Url_Reply.size());
-    }
-    else
-    {
-        // раз задачи нет в мапе - значит она еще не загружается и находится в очереди на загрузку.
-        _roundRobin.excludeTask(url, sourceId);
-    }
+//    auto it = _map_Url_Reply.find(url);
+//    if(it != _map_Url_Reply.end())
+//    {
+//        Reply reply = it.value();
+//        reply.reply->abort();
+//        delete reply.reply;
+//        _map_Url_Reply.erase(it);
+
+//        // если есть невыполненные задачи - отдаем загрузчику первую из очереди невыполненных задач.
+//        QString _url;
+//        uint _source;
+//        bool success = _roundRobin.getTask(_url, _source);
+//        if(success)
+//        {
+//            QNetworkRequest request(_url);
+//            request.setRawHeader("User-Agent", "Mozilla/5.0 (PC; U; Intel; Linux; en) AppleWebKit/420+ (KHTML, like Gecko)");
+//            QNetworkReply* networkReply = _manager.get(request);
+//            Reply reply(networkReply, sourceId);
+//            _map_Url_Reply.insert(_url, reply);
+//        }
+//        _roundRobin.loadersInWork(_map_Url_Reply.size());
+//    }
+//    else
+//    {
+//        // раз задачи нет в мапе - значит она еще не загружается и находится в очереди на загрузку.
+//        _roundRobin.excludeTask(url, sourceId);
+//    }
 }
 
+/*
 void TileLoaderPool::slot_finished(QNetworkReply* networkReply)
 {
     const QString URL(networkReply->request().url().toString());
@@ -288,7 +301,16 @@ void TileLoaderPool::slot_finished(QNetworkReply* networkReply)
         _roundRobin.loadersInWork(_map_Url_Reply.size());
     }
 //    else
-//        qDebug() << "TileLoaderPool::slot_finished, no url in map ! URL:" << URL << ", totalLoaders:" << _totalLoaders;
+    //        qDebug() << "TileLoaderPool::slot_finished, no url in map ! URL:" << URL << ", totalLoaders:" << _totalLoaders;
+}
+*/
+
+void TileLoaderPool::finishRequest(QString url, int sourceId, bool res, QByteArray src)
+{
+    if(res)
+        emit signal_requestFinished(url, sourceId, &src, TileDataProvider::Loaded);
+    else
+        emit signal_requestFinished(url, sourceId, 0, TileDataProvider::NotFound);
 }
 
 void TileLoaderPool::emit_reload()
@@ -323,7 +345,7 @@ void TileLoaderPool::abortAllTaskFromSource(uint sourceId)
 //    foreach(QString url, urlForDeleting)
 //        _map_Url_Reply.remove(url);
 
-    _roundRobin.loadersInWork(_map_Url_Reply.size());
+//    _roundRobin.loadersInWork(_map_Url_Reply.size());
 
 ///------------------------------------------------------------------------
 

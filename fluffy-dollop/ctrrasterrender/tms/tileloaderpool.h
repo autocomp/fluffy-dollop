@@ -4,12 +4,10 @@
 #include <QObject>
 #include <QQueue>
 #include <QMap>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
 #include <QTimer>
 #include "roundrobin.h"
+#include "proxynetworkmanager.h"
 #include <ctrcore/provider/tiledataprovider.h>
-//#include "tileloader.h"
 
 class TmsBaseAdapter;
 
@@ -24,21 +22,21 @@ class TileLoaderPool : public QObject
 {
     Q_OBJECT
 
-    struct LoadedTask
-    {
-        LoadedTask(uint _providerTaskId) : times(0) {providerTaskId = _providerTaskId;}
-        uint times, providerTaskId;
-    };
+//    struct LoadedTask
+//    {
+//        LoadedTask(uint _providerTaskId) : times(0) {providerTaskId = _providerTaskId;}
+//        uint times, providerTaskId;
+//    };
 
 public:
-    struct Reply
-    {
-        Reply(QNetworkReply* _reply, uint _sourceId = 0)
-            : reply(_reply), sourceId(_sourceId), startTime(QDateTime::currentMSecsSinceEpoch()) {}
-        QNetworkReply* reply;
-        uint sourceId;
-        qint64 startTime;
-    };
+//    struct Reply
+//    {
+//        Reply(QNetworkReply* _reply, uint _sourceId = 0)
+//            : reply(_reply), sourceId(_sourceId), startTime(QDateTime::currentMSecsSinceEpoch()) {}
+//        QNetworkReply* reply;
+//        uint sourceId;
+//        qint64 startTime;
+//    };
 
     static TileLoaderPool* instance()
     {
@@ -73,20 +71,21 @@ private:
     TileLoaderPool();
 
     static TileLoaderPool* m_Instance;
-    uint _sourcesIdCounter, _timeoutOpenProviderSec;
+    uint _sourcesIdCounter;//, _timeoutOpenProviderSec;
     //QList<TileLoader*> _loaders;
 
-    RoundRobin _roundRobin;
+    ProxyNetworkManager * _proxyNetworkManager;
+    //RoundRobin _roundRobin;
     //QQueue<TileLoader*> _queueLoaders;
 
     //QMap<int, LoadedTask> _map_HttpTaskId_loadedTask;
-    uint _maxQueue2DSize, _maxQueue3DSize, _totalLoaders;
+    //uint _maxQueue2DSize, _maxQueue3DSize, _totalLoaders;
     QString _settingsPath, _dirForTempFiles;
     //QTimer _loadersTimeoutTimer;
     QSize _worldSizeInTiles;
-    QNetworkAccessManager _manager;
-    QMap<QString, Reply> _map_Url_Reply;
-    bool _debugMode;
+    //QNetworkAccessManager _manager;
+    //QMap<QString, Reply> _map_Url_Reply;
+    //bool _debugMode;
 
 private slots:
 //    void slot_requestFinished(int taskId, QByteArray * src);
@@ -94,12 +93,16 @@ private slots:
     void slot_exceptionFromQueue(QString url, uint sourceId);
     void slot_checkLoadersTimeout();
     void slot_showLog();
-    void slot_finished(QNetworkReply*networkReply);
+    //void slot_finished(QNetworkReply*networkReply);
+
+    void finishRequest(QString,int,bool,QByteArray);
 
 signals:
     //void signal_requestFinished(int taskId, uint sourceId, QByteArray * src, TileDataProvider::Result result);
     void signal_requestFinished(QString url, uint sourceId, QByteArray * src, TileDataProvider::Result result);
     void signal_reload();
+    void signal_setRequest( QString url, int source_id );
+    void signal_abortRequest( QString url, int source_id );
 };
 
 #endif // TILELOADERPOOL_H

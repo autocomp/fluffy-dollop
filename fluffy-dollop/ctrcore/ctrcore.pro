@@ -25,7 +25,7 @@ SOURCES +=     \
     $$files(ctrcore/*.cpp) \
     $$files(bus/*.cpp) \
     $$files(undoactions/*.cpp) \
-    $$files(tempinputdata/*.cpp) \
+    $$files(tempinputdata/*.cpp)
 
 HEADERS += \
     $$files(provider/*.h) \
