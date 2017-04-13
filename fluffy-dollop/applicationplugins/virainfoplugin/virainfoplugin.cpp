@@ -5,6 +5,9 @@
 #include <ctrcore/visual/datainterface.h>
 #include <ctrcore/visual/visualizermanager.h>
 
+#include "slide_window.h"
+#include "filter_form.h"
+
 void ViraInfoPlugin::init(uint visualizerId, quint64 visualizerWindowId)
 {
     // init
@@ -15,6 +18,14 @@ void ViraInfoPlugin::init(uint visualizerId, quint64 visualizerWindowId)
             visualize_system::VisualizerManager::instance()->getViewInterface(visualizerId);
     _viraStatusBar = new ViraStatusBar( visualizerWindowId );
     viewInterface->addWidgetToStatusBar( _viraStatusBar );
+
+    // add panel to visual
+    SlideWindow* sw = SlideWindow::mainInstance();
+    sw->setHolder( viewInterface->widget() );
+
+    // init widget of filter
+    FilterForm& ff = FilterForm::instance();
+    ff.registrateToSlideWindow();
 }
 
 ViraInfoPlugin::~ViraInfoPlugin()
