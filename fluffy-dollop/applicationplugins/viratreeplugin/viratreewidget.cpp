@@ -268,11 +268,10 @@ void ViraTreeWidget::recalcAreaInFacility(QTreeWidgetItem * facilityItem)
             if(baseRentOk)
             {
                 double rent = baseRent * area;
+                floorPossibleRent += rent;
                 roomItem->setText((int)ColumnTitle::CALC_RENT, QString::number(rent, 'f', 2));
                 if(rented)
                     floorRealRent += rent;
-                else
-                    floorPossibleRent += rent;
             }
         }
         floorItem->setData((int)ColumnTitle::SQUARE, RENTED_AREA, floorRentedArea);
