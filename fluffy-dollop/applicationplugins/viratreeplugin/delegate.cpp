@@ -13,88 +13,166 @@ SpinBoxDelegate::SpinBoxDelegate(QObject *parent)
 void SpinBoxDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     int itemType = index.model()->data(index, TYPE).toInt();
-    if(itemType == ItemTypeFloor || itemType == ItemTypeFacility)
+    if(index.column() == (int)ColumnTitle::CALC_RENT)
     {
-        double total = index.model()->data(index, TOTAL_AREA).toDouble();
-        double rented = index.model()->data(index, RENTED_AREA).toDouble();
-        // QString text = QString::number(total, 'f', 1) + QString("   ") + QString::number(rented, 'f', 1);
-        painter->save();
-        painter->setPen(Qt::NoPen);
-        QRect leftRect(option.rect.left(), option.rect.top(), option.rect.width()/2, option.rect.height());
-        painter->setBrush(QBrush(Qt::gray));
-        painter->drawRect(leftRect);
+        if(itemType == (int)ItemType::ItemTypeFloor || itemType == (int)ItemType::ItemTypeFacility)
+        {
+            double real_rent = index.model()->data(index, REAL_RENT).toDouble();
+            double possible_rent = index.model()->data(index, POSSIBLE_RENT).toDouble();
 
-        painter->setBrush(QBrush(Qt::NoBrush));
-        painter->setPen(Qt::white);
-        painter->drawText(leftRect, Qt::AlignCenter, QString::number(total, 'f', 1));
+            painter->save();
+            painter->setPen(Qt::NoPen);
+            QRect leftRect(option.rect.left(), option.rect.top(), option.rect.width()/2, option.rect.height());
+            painter->setBrush(QBrush(Qt::gray));
+            painter->drawRect(leftRect);
 
-        QRect rightRect(option.rect.left() + option.rect.width()/2, option.rect.top(), option.rect.width()/2, option.rect.height());
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(QBrush(QColor(226,224,111)));
-        painter->drawRect(rightRect);
+            painter->setBrush(QBrush(Qt::NoBrush));
+            painter->setPen(Qt::white);
+            painter->drawText(leftRect, Qt::AlignCenter, QString::number(possible_rent, 'f', 2));
 
-        painter->setBrush(QBrush(Qt::NoBrush));
-        painter->setPen(Qt::white);
-        painter->drawText(rightRect, Qt::AlignCenter, QString::number(rented, 'f', 1));
+            QRect rightRect(option.rect.left() + option.rect.width()/2, option.rect.top(), option.rect.width()/2, option.rect.height());
+            painter->setPen(Qt::NoPen);
+            painter->setBrush(QBrush(QColor(226,224,111)));
+            painter->drawRect(rightRect);
 
-        painter->restore();
+            painter->setBrush(QBrush(Qt::NoBrush));
+            painter->setPen(Qt::white);
+            painter->drawText(rightRect, Qt::AlignCenter, QString::number(real_rent, 'f', 2));
+
+            painter->restore();
+
+            return;
+        }
     }
-    else
+    else if(index.column() == (int)ColumnTitle::SQUARE)
     {
-        QStyledItemDelegate::paint(painter, option, index);
+        if(itemType == (int)ItemType::ItemTypeFloor || itemType == (int)ItemType::ItemTypeFacility)
+        {
+            double total = index.model()->data(index, TOTAL_AREA).toDouble();
+            double rented = index.model()->data(index, RENTED_AREA).toDouble();
+            // QString text = QString::number(total, 'f', 1) + QString("   ") + QString::number(rented, 'f', 1);
+            painter->save();
+            painter->setPen(Qt::NoPen);
+            QRect leftRect(option.rect.left(), option.rect.top(), option.rect.width()/2, option.rect.height());
+            painter->setBrush(QBrush(Qt::gray));
+            painter->drawRect(leftRect);
+
+            painter->setBrush(QBrush(Qt::NoBrush));
+            painter->setPen(Qt::white);
+            painter->drawText(leftRect, Qt::AlignCenter, QString::number(total, 'f', 1));
+
+            QRect rightRect(option.rect.left() + option.rect.width()/2, option.rect.top(), option.rect.width()/2, option.rect.height());
+            painter->setPen(Qt::NoPen);
+            painter->setBrush(QBrush(QColor(226,224,111)));
+            painter->drawRect(rightRect);
+
+            painter->setBrush(QBrush(Qt::NoBrush));
+            painter->setPen(Qt::white);
+            painter->drawText(rightRect, Qt::AlignCenter, QString::number(rented, 'f', 1));
+
+            painter->restore();
+
+            return;
+        }
     }
+
+    QStyledItemDelegate::paint(painter, option, index);
 }
 
 QWidget *SpinBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &/* option */, const QModelIndex & index) const
 {
-    qulonglong id = index.model()->data(index, ID).toULongLong();
     int itemType = index.model()->data(index, TYPE).toInt();
-    qDebug() << "SpinBoxDelegate::createEditor col:" << index.column() << ", row:" << index.row() << ", TYPE:" << itemType << ", ID:" << id;
-
-    if(itemType == ItemTypeRoom || itemType == ItemTypeFloor || itemType == ItemTypeFacility)
+    if(index.column() == (int)ColumnTitle::BASE_RENT)
     {
-        QDoubleSpinBox *editor = new QDoubleSpinBox(parent);
-        editor->setFrame(false);
-        editor->setDecimals(1);
-        editor->setSingleStep(1);
-        editor->setMinimum(0);
-        editor->setMaximum(100000);
-        return editor;
+        if(itemType == (int)ItemType::ItemTypeRoom)
+        {
+            QDoubleSpinBox *editor = new QDoubleSpinBox(parent);
+            editor->setFrame(false);
+            editor->setDecimals(2);
+            editor->setSingleStep(1);
+            editor->setMinimum(0);
+            editor->setMaximum(1000000);
+            return editor;
+        }
     }
-    else
-        return nullptr;
+    else if(index.column() == (int)ColumnTitle::SQUARE)
+    {
+        if(itemType == (int)ItemType::ItemTypeRoom || itemType == (int)ItemType::ItemTypeFloor || itemType == (int)ItemType::ItemTypeFacility)
+        {
+            QDoubleSpinBox *editor = new QDoubleSpinBox(parent);
+            editor->setFrame(false);
+            editor->setDecimals(1);
+            editor->setSingleStep(1);
+            editor->setMinimum(0);
+            editor->setMaximum(100000);
+            return editor;
+        }
+    }
+
+    return nullptr;
 }
 
 void SpinBoxDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
     int itemType = index.model()->data(index, TYPE).toInt();
-    double value;
-    if(itemType == ItemTypeRoom)
-        value = index.model()->data(index, Qt::EditRole).toDouble();
-    else
-        value = index.model()->data(index, TOTAL_AREA).toDouble();
+    if(index.column() == (int)ColumnTitle::BASE_RENT)
+    {
+        double value;
+        if(itemType == (int)ItemType::ItemTypeRoom)
+            value = index.model()->data(index, Qt::EditRole).toDouble();
 
-    QDoubleSpinBox *spinBox = static_cast<QDoubleSpinBox*>(editor);
-    spinBox->setProperty("original_value", QString::number(value, 'f', 1));
-    spinBox->setValue(value);
+        QDoubleSpinBox *spinBox = static_cast<QDoubleSpinBox*>(editor);
+        spinBox->setProperty("original_value", QString::number(value, 'f', 2));
+        spinBox->setValue(value);
+    }
+    else if(index.column() == (int)ColumnTitle::SQUARE)
+    {
+        double value;
+        if(itemType == (int)ItemType::ItemTypeRoom)
+            value = index.model()->data(index, Qt::EditRole).toDouble();
+        else
+            value = index.model()->data(index, TOTAL_AREA).toDouble();
+
+        QDoubleSpinBox *spinBox = static_cast<QDoubleSpinBox*>(editor);
+        spinBox->setProperty("original_value", QString::number(value, 'f', 1));
+        spinBox->setValue(value);
+    }
 }
 
 void SpinBoxDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
 {
-    QDoubleSpinBox *spinBox = static_cast<QDoubleSpinBox*>(editor);
-    spinBox->interpretText();
-    double value = spinBox->value();
-    QString original_value = spinBox->property("original_value").toString();
-    if(original_value != QString::number(value, 'f', 1))
+    int itemType = index.model()->data(index, TYPE).toInt();
+    if(index.column() == (int)ColumnTitle::BASE_RENT)
     {
-        int itemType = index.model()->data(index, TYPE).toInt();
-        if(itemType == ItemTypeRoom)
-            model->setData(index, value, Qt::EditRole);
-        else
-            model->setData(index, value, TOTAL_AREA);
+        QDoubleSpinBox *spinBox = static_cast<QDoubleSpinBox*>(editor);
+        spinBox->interpretText();
+        double value = spinBox->value();
+        QString original_value = spinBox->property("original_value").toString();
+        if(original_value != QString::number(value, 'f', 2))
+        {
+            if(itemType == (int)ItemType::ItemTypeRoom)
+                model->setData(index, value, Qt::EditRole);
 
-        emit resaclArea(index);
-        emit saveItemToDb(index);
+            emit resaclArea(index);
+            emit saveItemToDb(index);
+        }
+    }
+    else if(index.column() == (int)ColumnTitle::SQUARE)
+    {
+        QDoubleSpinBox *spinBox = static_cast<QDoubleSpinBox*>(editor);
+        spinBox->interpretText();
+        double value = spinBox->value();
+        QString original_value = spinBox->property("original_value").toString();
+        if(original_value != QString::number(value, 'f', 1))
+        {
+            if(itemType == (int)ItemType::ItemTypeRoom)
+                model->setData(index, value, Qt::EditRole);
+            else
+                model->setData(index, value, TOTAL_AREA);
+
+            emit resaclArea(index);
+            emit saveItemToDb(index);
+        }
     }
 }
 
@@ -158,7 +236,7 @@ QWidget *ComboBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     int itemType = index.model()->data(index, TYPE).toInt();
     qDebug() << "ComboBoxDelegate::createEditor col:" << index.column() << ", row:" << index.row() << ", TYPE:" << itemType << ", ID:" << id;
 
-    if(itemType != ItemTypeRoom)
+    if(itemType != (int)ItemType::ItemTypeRoom)
         return nullptr;
 
     QStringList list;
@@ -207,10 +285,10 @@ QWidget *LineEditDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
 {
     int itemType = index.model()->data(index, TYPE).toInt();
 
-    if(index.column() == 4)
+    if(index.column() == (int)ColumnTitle::CALC_RENT)
         return nullptr;
 
-    if(itemType != ItemTypeRoom && (index.column() == 3 || index.column() == 4 || index.column() == 5))
+    if(itemType != (int)ItemType::ItemTypeRoom && (index.column() == (int)ColumnTitle::NAME || index.column() == (int)ColumnTitle::RENTER || index.column() == (int)ColumnTitle::COMMENT))
         return nullptr;
 
     QLineEdit *editor = new QLineEdit(parent);
@@ -252,7 +330,7 @@ StatusDelegate::StatusDelegate(QObject *parent)
 void StatusDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     int itemType = index.model()->data(index, TYPE).toInt();
-    if(itemType == ItemTypeRoom || itemType == ItemTypeFloor || itemType == ItemTypeFacility)
+    if(itemType == (int)ItemType::ItemTypeRoom || itemType == (int)ItemType::ItemTypeFloor || itemType == (int)ItemType::ItemTypeFacility)
     {
         int tasks_new = index.model()->data(index, TASKS_NEW).toInt();
         int tasks_in_work = index.model()->data(index, TASKS_IN_WORK).toInt();

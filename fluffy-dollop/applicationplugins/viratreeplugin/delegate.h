@@ -3,7 +3,8 @@
 
 #include <QStyledItemDelegate>
 
-enum ItemType{ItemTypeRoom = 1, ItemTypeFloor = 2, ItemTypeFacility = 3, ItemTypeOther = 4};
+enum class ColumnTitle {NAME = 0, SQUARE, BASE_RENT, CALC_RENT, STATUS, RENTER, TASKS, COMMENT, ID};
+enum class ItemType {ItemTypeRoom = 1, ItemTypeFloor = 2, ItemTypeFacility = 3, ItemTypeOther = 4};
 const int ID = Qt::UserRole + 1;
 const int TYPE = Qt::UserRole + 2;
 const int RENTED_AREA = Qt::UserRole + 3;
@@ -12,6 +13,8 @@ const int CALC_TOTAL_AREA_AUTOMATIC = Qt::UserRole + 5;
 const int TASKS_NEW = Qt::UserRole + 6;
 const int TASKS_IN_WORK = Qt::UserRole + 7;
 const int TASKS_FOR_CHECK = Qt::UserRole + 8;
+const int REAL_RENT = Qt::UserRole + 9;
+const int POSSIBLE_RENT = Qt::UserRole + 10;
 
 class ViraDelegate : public QStyledItemDelegate
 {

@@ -23,6 +23,8 @@ protected slots:
     void slotSaveItemToDb(const QModelIndex &index);
 
 protected:
+    const int ColumnCount = 8;
+
     void recalcAreaInFacility(QTreeWidgetItem * facilityItem);
     void recalcTasksInFacility(QTreeWidgetItem * facilityItem);
 
