@@ -11,6 +11,8 @@ void SelectionManager::selectNewEntity( uint64_t new_id )
 {
     uint64_t prev_id = _selected_entity_id;
     _selected_entity_id = new_id;
+    _selected_set.clear();
+    _selected_set.insert( new_id );
 
     Q_EMIT selectBaseEntity( prev_id, new_id );
 }
@@ -18,6 +20,31 @@ void SelectionManager::selectNewEntity( uint64_t new_id )
 void SelectionManager::centerOnNewEntity( uint64_t id )
 {
     Q_EMIT centerOnNewEntity( id );
+}
+
+void SelectionManager::clearSelect()
+{
+    _selected_set.clear();
+
+    if( _selected_entity_id )
+    {
+        uint64_t prev_id = _selected_entity_id;
+        _selected_entity_id = 0;
+        Q_EMIT selectBaseEntity( prev_id, 0 );
+    }
+
+    Q_EMIT selectClear();
+}
+
+void SelectionManager::appendToSeletedSet(uint64_t id)
+{
+    _selected_entity_id = 0;
+
+    if( !_selected_set.count( id ))
+    {
+        _selected_set.insert( id );
+        Q_EMIT selectedSet( _selected_set );
+    }
 }
 
 ChangeEntitysWatcher::ChangeEntitysWatcher()

@@ -454,6 +454,11 @@ uint64_t RegionBizManager::getSelectedEntity()
     return _select_manager._selected_entity_id;
 }
 
+std::set<uint64_t>& RegionBizManager::getSelectedSet()
+{
+    return _select_manager._selected_set;
+}
+
 void RegionBizManager::selectEntity(uint64_t id)
 {
     _select_manager.selectNewEntity( id );
@@ -465,6 +470,16 @@ void RegionBizManager::subscribeOnSelect(QObject *obj, const char *slot, bool qu
                       obj, slot, ( queue ? Qt::QueuedConnection : Qt::DirectConnection ));
 }
 
+void RegionBizManager::clearSelect()
+{
+    _select_manager.clearSelect();
+}
+
+void RegionBizManager::appendToSelectedSet(uint64_t id)
+{
+    _select_manager.appendToSeletedSet( id );
+}
+
 void RegionBizManager::centerOnEntity(uint64_t id)
 {
     _select_manager.centerOnBaseEntity( id );
@@ -473,6 +488,18 @@ void RegionBizManager::centerOnEntity(uint64_t id)
 void RegionBizManager::subscribeCenterOn(QObject *obj, const char *slot, bool queue)
 {
     QObject::connect( &_select_manager, SIGNAL( centerOnBaseEntity( uint64_t )),
+                      obj, slot, ( queue ? Qt::QueuedConnection : Qt::DirectConnection ));
+}
+
+void RegionBizManager::subscribeSelectedSet(QObject *obj, const char *slot, bool queue)
+{
+    QObject::connect( &_select_manager, SIGNAL( selectedSet( std::set< uint64_t > )),
+                      obj, slot, ( queue ? Qt::QueuedConnection : Qt::DirectConnection ));
+}
+
+void RegionBizManager::subscribeClearSelect(QObject *obj, const char *slot, bool queue)
+{
+    QObject::connect( &_select_manager, SIGNAL( selectClear() ),
                       obj, slot, ( queue ? Qt::QueuedConnection : Qt::DirectConnection ));
 }
 

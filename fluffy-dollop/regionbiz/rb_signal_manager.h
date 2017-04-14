@@ -2,6 +2,7 @@
 #define RB_SIGNAL_MANAGER_H
 
 #include <QObject>
+#include <set>
 
 namespace regionbiz {
 
@@ -16,14 +17,19 @@ class SelectionManager: public QObject
 Q_SIGNALS:
     void selectBaseEntity( uint64_t old_id,
                            uint64_t new_id );
+    void selectedSet( std::set< uint64_t > ids );
+    void selectClear();
     void centerOnBaseEntity( uint64_t id );
 
 private:
     SelectionManager();
     void selectNewEntity( uint64_t new_id );
     void centerOnNewEntity(uint64_t id );
+    void clearSelect();
+    void appendToSeletedSet( uint64_t id );
 
     uint64_t _selected_entity_id = 0;
+    std::set< uint64_t > _selected_set;
 };
 
 class ChangeEntitysWatcher: public QObject

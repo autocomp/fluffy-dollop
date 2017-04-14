@@ -103,14 +103,24 @@ public:
 
     // selection managment
     uint64_t getSelectedEntity();
+    std::set<uint64_t> &getSelectedSet();
     void selectEntity( uint64_t id );
     void subscribeOnSelect( QObject* obj,
                             const char *slot,
                             bool queue = false );
+    void clearSelect();
+    void appendToSelectedSet( uint64_t id );
+    void subscribeSelectedSet( QObject* obj,
+                               const char *slot,
+                               bool queue = false );
+    void subscribeClearSelect( QObject* obj,
+                               const char *slot,
+                               bool queue = false );
     void centerOnEntity( uint64_t id );
     void subscribeCenterOn( QObject* obj,
                             const char *slot,
                             bool queue = false );
+
     // other signals
     void subscribeOnChangeEntity( QObject* obj,
                                   const char *slot,
