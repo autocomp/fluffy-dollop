@@ -26,7 +26,7 @@ void loadXlsx()
     }
     qDebug() << "All deleted";
 
-    mngr->selectArea( facility->getId() );
+    mngr->selectEntity( facility->getId() );
 
     // load translator
     BaseTranslatorPtr ptr = mngr->getTranslatorByName( "xlsx" );
@@ -57,8 +57,7 @@ void loadXlsx()
     }
     qDebug() << "All commited";
 }
-
-int main()
+void bigExample()
 {
     using namespace regionbiz;
 
@@ -147,11 +146,11 @@ int main()
     //! Selection test
     TestReciver recv;
     mngr->subscribeOnSelect( &recv, SLOT(onSelection(uint64_t,uint64_t)) );
-    mngr->selectArea( 4 );
-    mngr->selectArea( 5 );
+    mngr->selectEntity( 4 );
+    mngr->selectEntity( 5 );
 
     mngr->subscribeCenterOn( &recv, SLOT(onCenterOn(uint64_t)) );
-    mngr->centerOnArea( 6 );
+    mngr->centerOnEntity( 6 );
 
     //! test of metadate
     auto area = mngr->getBaseArea( 13 );
@@ -238,7 +237,47 @@ int main()
     qDebug() << "We have" << marks.size() << "marks again after commit-delete";
     // clear
     mngr->deleteArea( room_ptr );
+}
+
+void selectManagment()
+{
+    using namespace regionbiz;
+
+    //! init
+    auto mngr = RegionBizManager::instance();
+    QString str = "contour_ng\\regionbiz_sqlite.json";
+    bool inited = mngr->init( str );
+
+    // subscribes
+    TestReciver rcv;
+    mngr->subscribeOnSelect( &rcv, SLOT( onSelection(uint64_t ,uint64_t )) );
+    mngr->subscribeClearSelect( &rcv, SLOT( onClearSelect() ));
+    mngr->subscribeSelectedSet( &rcv, SLOT( onSelectedSet(std::set<uint64_t> )));
+
+    // check select
+    mngr->selectEntity( 13 );
+    // check repeat append
+    mngr->appendToSelectedSet( 18 );
+    mngr->appendToSelectedSet( 18 );
+    mngr->appendToSelectedSet( 18 );
+    // and append again
+    mngr->appendToSelectedSet( 18 );
+    // check clear
+    mngr->clearSelect();
+
+    // if select and clear. Select 0 and clear signals:
+    mngr->selectEntity( 13 );
+    mngr->clearSelect();
+}
+
+int main()
+{
+    //! old exmple
+    // bigExample();
 
     //! load xlsx
-    //loadXlsx();
+    // loadXlsx();
+
+    //! select managment
+    selectManagment();
 }
