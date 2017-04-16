@@ -117,8 +117,17 @@ void WorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom
             {
 //                if(locationPtr->getId() == 5022)
 //                {
+//                    PlanKeeper::PlanParams planParams;
+//                    planParams.x = 298.4673898270;
+//                    planParams.y = 148.0499342829;
+//                    planParams.scale_w = 0.0000073504;
+//                    planParams.scale_h = 0.0000073504;
+//                    planParams.rotate = 0;
+//                    locationPtr->setPlanParams(planParams);
+//                    locationPtr->setPlanPath("0.tiff");
+
 //                    QPolygonF pol;
-//                    pol.append(QPointF(298.46780396, 148.05408478));
+//                    pol.append(QPointF(298.46761322, 148.05406952));
 //                    locationPtr->setCoords(pol);
 //                    locationPtr->commit();
 //                }
@@ -155,7 +164,7 @@ void WorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom
 //                    if(facilityPtr->getId() == 5023)
 //                    {
 //                        QPolygonF pol;
-//                        pol.append(QPointF(298.46929932, 148.05238342));
+//                        pol.append(QPointF(298.46937561, 148.05240631));
 //                        facilityPtr->setCoords(pol);
 //                        facilityPtr->commit();
 //                    }

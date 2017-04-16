@@ -21,6 +21,10 @@ using namespace regionbiz;
 
 ViraEditorView::ViraEditorView()
 {
+    setRenderHint(QPainter::Antialiasing, true);
+    setRenderHint(QPainter::HighQualityAntialiasing, true);
+    setRenderHint(QPainter::SmoothPixmapTransform, true);
+
     setMouseTracking(true);
     setDragMode(QGraphicsView::NoDrag);
     setCursor(QCursor(Qt::ArrowCursor));

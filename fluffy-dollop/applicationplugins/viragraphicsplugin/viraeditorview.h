@@ -19,7 +19,10 @@ public:
     {}
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR)
     {
-        //painter->setRenderHint(QPainter::SmoothPixmapTransform);
+        painter->setRenderHint(QPainter::Antialiasing, true);
+        painter->setRenderHint(QPainter::HighQualityAntialiasing, true);
+        painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
+
         QGraphicsPixmapItem::paint(painter, option, widget);
     }
 };
