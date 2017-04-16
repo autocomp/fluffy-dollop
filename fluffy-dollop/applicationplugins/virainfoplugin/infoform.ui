@@ -139,7 +139,14 @@
     </layout>
    </item>
    <item>
-    <widget class="QTextEdit" name="description"/>
+    <widget class="QTextEdit" name="description">
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>100</height>
+      </size>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="Line" name="line_3">
@@ -428,8 +435,6 @@ border-color: rgb(255, 255, 255);</string>
   <zorder>line_3</zorder>
   <zorder>roomWidget</zorder>
   <zorder>name</zorder>
-  <zorder></zorder>
-  <zorder>layoutWidget</zorder>
   <zorder>line_4</zorder>
   <zorder>description</zorder>
  </widget>

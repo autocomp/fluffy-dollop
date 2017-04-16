@@ -5,16 +5,18 @@
 
 class PixmapListWidget : public QListWidget
 {
+    Q_OBJECT
 public:
     PixmapListWidget();
     void addItem(const QPixmap& pm);
 
-protected:
-    virtual void resizeEvent(QResizeEvent * e);
+protected slots:
+    void slotItemDoubleClicked(QListWidgetItem* item);
 
-private:
-    QSize _iconSize;
-    double _coef = 1;
+protected:
+    QList<QPixmap> _pixmaps;
+
+
 };
 
 #endif // PIXMAPLISTWIDGET_H

@@ -29,7 +29,8 @@ HEADERS += \
     infoform.h \
     pixmaplistwidget.h \
     slide_window.h \
-    filter_form.h
+    filter_form.h \
+    imageviewer.h
 
 SOURCES += \
     virainfoplugin.cpp \
@@ -40,7 +41,8 @@ SOURCES += \
     infoform.cpp \
     pixmaplistwidget.cpp \
     slide_window.cpp \
-    filter_form.cpp
+    filter_form.cpp \
+    imageviewer.cpp
 
 RESOURCES += \
     virainfopluginres.qrc

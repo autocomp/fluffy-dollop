@@ -10,5 +10,11 @@
         <file>img/garbg.png</file>
         <file>img/delete_filter.png</file>
         <file>img/filter.png</file>
+        <file>img/img_icon.png</file>
+        <file>img/left.png</file>
+        <file>img/right.png</file>
+        <file>img/icons_minus.png</file>
+        <file>img/icons_plus.png</file>
+        <file>img/image_perf_size.png</file>
     </qresource>
 </RCC>
