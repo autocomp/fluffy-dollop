@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QHeaderView>
 #include <regionbiz/rb_manager.h>
+#include <regionbiz/rb_entity_filter.h>
 #include <iostream>
 #include <ctrcore/tempinputdata/tempdatatypies.h>
 #include <ctrcore/tempinputdata/tempdatacontroller.h>
@@ -73,7 +74,22 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
     mngr->subscribeOnSelect(this, SLOT(slotObjectSelectionChanged(uint64_t,uint64_t)));
     mngr->subscribeOnChangeEntity(this, SLOT(slotObjectChanged(uint64_t)));
 
-    std::vector<RegionPtr> regions = mngr->getRegions();
+    regionbiz::EntityFilter::subscribeOnFilterChacnge(this, SLOT(reinit()));
+
+    connect(header(), SIGNAL(sectionClicked(int)), this, SLOT(slotHeaderSectionClicked(int)));
+    header()->setSortIndicatorShown(true);
+    setSortingEnabled(true);
+    sortByColumn(0, Qt::AscendingOrder);
+
+    reinit();
+}
+
+
+void ViraTreeWidget::reinit()
+{
+    clear();
+
+    std::vector<RegionPtr> regions = RegionBizManager::instance()->getRegions();
     for( RegionPtr regionPtr: regions )
     {
         QTreeWidgetItem * regionItem = new QTreeWidgetItem(this);
@@ -233,11 +249,6 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
         }
         regionItem->setExpanded(true);
     }
-
-    connect(header(), SIGNAL(sectionClicked(int)), this, SLOT(slotHeaderSectionClicked(int)));
-    header()->setSortIndicatorShown(true);
-    setSortingEnabled(true);
-    sortByColumn(0, Qt::AscendingOrder);
 }
 
 void ViraTreeWidget::recalcAreaInFacility(QTreeWidgetItem * facilityItem)

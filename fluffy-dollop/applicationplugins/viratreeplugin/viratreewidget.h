@@ -21,6 +21,7 @@ protected slots:
     void slotEditModeFinish(QVariant var);
     void slotResaclArea(const QModelIndex &index);
     void slotSaveItemToDb(const QModelIndex &index);
+    void reinit();
 
 protected:
     const int ColumnCount = 8;
