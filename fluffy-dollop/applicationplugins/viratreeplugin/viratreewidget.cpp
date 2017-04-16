@@ -87,6 +87,7 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
 
 void ViraTreeWidget::reinit()
 {
+    _items.clear();
     clear();
 
     std::vector<RegionPtr> regions = RegionBizManager::instance()->getRegions();
