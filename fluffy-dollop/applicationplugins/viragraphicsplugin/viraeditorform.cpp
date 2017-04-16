@@ -14,6 +14,7 @@
 #include <regionbiz/rb_manager.h>
 #include <ctrcore/bus/common_message_notifier.h>
 #include <ctrcore/bus/bustags.h>
+#include <regionbiz/rb_entity_filter.h>
 
 using namespace regionbiz;
 
@@ -28,10 +29,6 @@ ViraEditorForm::ViraEditorForm(QWidget *parent) :
 
     ui->topLayout->addWidget(_sceneViraWidget);
 
-//    _viraPagesListWidget = new ViraPagesListWidget;
-//    connect(_viraPagesListWidget, SIGNAL(setFloor(qulonglong)), this, SLOT(slotSetFloor(qulonglong)));
-//    ui->downLayout->addWidget(_viraPagesListWidget);
-
     _scene.setBackgroundBrush(QBrush(Qt::black));
     _view = new ViraEditorView();
     _view->setScene(&_scene);
@@ -41,6 +38,8 @@ ViraEditorForm::ViraEditorForm(QWidget *parent) :
     mngr->subscribeCenterOn(this, SLOT(slotCenterOn(uint64_t)));
     mngr->subscribeOnSelect(this, SLOT(slotSelectionItemsChanged(uint64_t,uint64_t)));
 
+    regionbiz::EntityFilter::subscribeOnFilterChacnge(this, SLOT(reinit()));
+
     CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::BlockGUI, this, SLOT(slotBlockGUI(QVariant)),
                                       qMetaTypeId< bool >(),
                                       QString("visualize_system") );
@@ -49,8 +48,18 @@ ViraEditorForm::ViraEditorForm(QWidget *parent) :
 ViraEditorForm::~ViraEditorForm()
 {
     delete _sceneViraWidget;
-//    delete _viraPagesListWidget;
     delete ui;
+}
+
+void ViraEditorForm::reinit()
+{
+    slotSwitchOnMap();
+
+    if(_view)
+    {
+        _currFacilityId = 0;
+        _view->reinit(0);
+    }
 }
 
 void ViraEditorForm::slotBlockGUI(QVariant var)

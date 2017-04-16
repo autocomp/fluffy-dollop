@@ -34,6 +34,7 @@ private slots:
 //    void finishRun();
     void slotSetFloor(qulonglong);
     void slotBlockGUI(QVariant var);
+    void reinit();
 
 private:
 //    void run(QString pdfFilePath, QString savePath);
@@ -41,7 +42,6 @@ private:
 
     Ui::ViraEditorForm *ui;
     SceneViraWidget * _sceneViraWidget;
-//    ViraPagesListWidget * _viraPagesListWidget;
     QFutureWatcher<void>* _futureWatcher;
     QGraphicsScene _scene;
     ViraEditorView * _view;

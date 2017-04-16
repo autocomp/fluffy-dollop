@@ -3,6 +3,7 @@
 #include "areagraphicsitem.h"
 #include "locationitem.h"
 #include "types.h"
+#include <regionbiz/rb_entity_filter.h>
 #include <regionbiz/rb_manager.h>
 #include <ctrcore/ctrcore/ctrconfig.h>
 #include <ctrcore/bus/common_message_notifier.h>
@@ -49,9 +50,28 @@ void WorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom
     ScrollBaseState::init(scene, view, zoom, scale, frameCoef, visualizerId);
     setActiveForScene(true);
 
+    regionbiz::EntityFilter::subscribeOnFilterChacnge(this, SLOT(reinit()));
+
     CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::BlockGUI, this, SLOT(slotBlockGUI(QVariant)),
                                       qMetaTypeId< bool >(),
                                       QString("visualize_system") );
+
+    reinit();
+}
+
+void WorkState::reinit()
+{
+    _prevSelectedFacilityId = 0;
+    _prevSelectedLocationId = 0;
+    _itemId_facilityFolder.clear();
+
+    foreach(AreaGraphicsItem * areaGraphicsItem, _items.values())
+        delete areaGraphicsItem;
+    _items.clear();
+
+    foreach(LocationItem * locationItem, _locationItems.values())
+        delete locationItem;
+    _locationItems.clear();
 
     AreaInitData regionInitData;
     regionInitData.zValue = 100;

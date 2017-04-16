@@ -90,17 +90,20 @@ void ViraEditorView::reinit(qulonglong facilityId)
     _downButton->setDisabled(true);
     _currentFacility->clear();
 
-    // find first floor
-    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(facilityId, BaseArea::AT_FACILITY);
-    FacilityPtr facilityPtr = BaseArea::convert< Facility >(ptr);
-    if(facilityPtr)
+    if(facilityId != 0)
     {
-        FloorPtrs floors = facilityPtr->getChilds();
-        for( FloorPtr floorPtr: floors )
-            _floorsMap.insert(floorPtr->getId(), floorPtr->getName());
+        // find first floor
+        BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(facilityId, BaseArea::AT_FACILITY);
+        FacilityPtr facilityPtr = BaseArea::convert< Facility >(ptr);
+        if(facilityPtr)
+        {
+            FloorPtrs floors = facilityPtr->getChilds();
+            for( FloorPtr floorPtr: floors )
+                _floorsMap.insert(floorPtr->getId(), floorPtr->getName());
 
-        if(_floorsMap.isEmpty() == false)
-            setFloor(_floorsMap.begin().key());
+            if(_floorsMap.isEmpty() == false)
+                setFloor(_floorsMap.begin().key());
+        }
     }
 }
 

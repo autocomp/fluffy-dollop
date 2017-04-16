@@ -35,6 +35,7 @@ protected slots:
     void slotCenterOn(uint64_t);
     void slotSelectItem(qulonglong id, bool centerOnEntity);
     void slotBlockGUI(QVariant var);
+    void reinit();
 
 private:
     QMap<qulonglong, AreaGraphicsItem*> _items;

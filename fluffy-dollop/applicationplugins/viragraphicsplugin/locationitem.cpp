@@ -22,8 +22,8 @@ LocationItem::LocationItem(qulonglong id, int minZoom, QRectF bSceneRect, const 
 
 LocationItem::~LocationItem()
 {
-    foreach(QGraphicsItem * item, _items)
-        delete item;
+//    foreach(QGraphicsItem * item, _items)
+//        item;
 }
 
 void LocationItem::zoomChanged(int zoom)
