@@ -2480,9 +2480,11 @@ quint64 EmbeddedApp::createWidgetPrivate(const ew::EmbeddedWidgetStruct & str, q
 
 
         QDialog *dlg = dynamic_cast<QDialog *>(str.iface->getWidget());
-        connect(dlg, SIGNAL(accepted()), privWidgetStruct->embWidgetPtr, SLOT(accept()));
-        connect(dlg, SIGNAL(rejected()), privWidgetStruct->embWidgetPtr, SLOT(reject()));
-        connect(dlg, SIGNAL(finished(int)), privWidgetStruct->embWidgetPtr, SLOT(close()));
+        {
+            connect(dlg, SIGNAL(accepted()), privWidgetStruct->embWidgetPtr, SLOT(accept()));
+            connect(dlg, SIGNAL(rejected()), privWidgetStruct->embWidgetPtr, SLOT(reject()));
+            connect(dlg, SIGNAL(finished(int)), privWidgetStruct->embWidgetPtr, SLOT(close()));
+        }
 
         ewApp()->embWidgetChanged(id);
 
