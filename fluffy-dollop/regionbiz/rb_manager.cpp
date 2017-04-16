@@ -56,6 +56,8 @@ BaseAreaPtr RegionBizManager::getBaseArea( uint64_t id,
                                            BaseArea::AreaType type )
 {
     BaseAreaPtr loc = getBaseArea( id );
+    if( !loc )
+        return nullptr;
     if( loc->getType() != type )
         return nullptr;
 
