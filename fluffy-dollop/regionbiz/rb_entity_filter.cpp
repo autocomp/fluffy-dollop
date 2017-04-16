@@ -28,6 +28,9 @@ bool BaseFilterParam::isFiltered(BaseEntityPtr entity)
     // if not - check all childs
     else
     {
+        // WARNING optimize - return in parent filter
+        //return true;
+
         BaseAreaPtrs childs = area->getChilds();
         bool filtered = childs.size();
 
@@ -185,6 +188,9 @@ EntityFilter& EntityFilter::instance()
 
 void EntityFilter::emitFilterChanged()
 {
+    auto mngr = RegionBizManager::instance();
+    mngr->clearSelect();
+
     Q_EMIT filterChanged();
 }
 
