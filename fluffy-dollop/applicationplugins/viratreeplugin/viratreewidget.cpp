@@ -287,8 +287,8 @@ void ViraTreeWidget::recalcAreaInFacility(QTreeWidgetItem * facilityItem)
     facilityItem->setData((int)ColumnTitle::SQUARE, RENTED_AREA, facilityRentedArea);
     facilityItem->setData((int)ColumnTitle::SQUARE, TOTAL_AREA, facilityTotalArea);
 
-    facilityItem->setData((int)ColumnTitle::SQUARE, REAL_RENT, facilityRealRent);
-    facilityItem->setData((int)ColumnTitle::SQUARE, POSSIBLE_RENT, facilityPossibleRent);
+    facilityItem->setData((int)ColumnTitle::CALC_RENT, REAL_RENT, facilityRealRent);
+    facilityItem->setData((int)ColumnTitle::CALC_RENT, POSSIBLE_RENT, facilityPossibleRent);
 }
 
 void ViraTreeWidget::recalcTasksInFacility(QTreeWidgetItem * facilityItem)
