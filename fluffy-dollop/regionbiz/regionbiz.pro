@@ -20,7 +20,8 @@ SOURCES  += \
     rb_metadata.cpp \
     rb_base_entity.cpp \
     rb_marks.cpp \
-    rb_signal_manager.cpp
+    rb_signal_manager.cpp \
+    rb_entity_filter.cpp
 HEADERS  += \
     rb_manager.h \
     rb_locations.h \
@@ -30,4 +31,5 @@ HEADERS  += \
     rb_metadata.h \
     rb_base_entity.h \
     rb_marks.h \
-    rb_signal_manager.h
+    rb_signal_manager.h \
+    rb_entity_filter.h

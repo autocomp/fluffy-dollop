@@ -20,6 +20,9 @@ public:
     SlideWindow();
     static SlideWindow* mainInstance();
 
+    // init
+    void initGeometry();
+
     // make type
     void setType( SlideType type );
 

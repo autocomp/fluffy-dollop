@@ -16,6 +16,17 @@ SlideWindow *SlideWindow::mainInstance()
     return sw;
 }
 
+void SlideWindow::initGeometry()
+{
+    setSmallSize( QSize( 10, 80 ));
+    setBigSize( QSize( 60, 110 ));
+    updateGeometry();
+    setType( SlideWindow::ST_RIGHT );
+    setDuration( 150 );
+    setViewProportionsl( 0.1 );
+    show();
+}
+
 void SlideWindow::setType( SlideWindow::SlideType type )
 {
     _type = type;

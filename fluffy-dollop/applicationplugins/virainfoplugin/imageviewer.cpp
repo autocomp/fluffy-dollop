@@ -3,6 +3,7 @@
 #include <dmanager/embeddedapp.h>
 #include <QDebug>
 #include <QHBoxLayout>
+#include <QResizeEvent>
 
 ImageViewer::ImageViewer(const QList<QPixmap> &pixmaps, int currIndex)
     : _pixmaps(pixmaps)

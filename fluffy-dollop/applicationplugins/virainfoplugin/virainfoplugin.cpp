@@ -22,9 +22,11 @@ void ViraInfoPlugin::init(uint visualizerId, quint64 visualizerWindowId)
     // add panel to visual
     SlideWindow* sw = SlideWindow::mainInstance();
     sw->setHolder( viewInterface->widget() );
+    sw->initGeometry();
 
     // init widget of filter
     FilterForm& ff = FilterForm::instance();
+    ff.setParentId( visualizerWindowId );
     ff.registrateToSlideWindow();
 }
 

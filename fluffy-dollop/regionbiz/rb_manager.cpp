@@ -11,6 +11,8 @@
 #include <QDebug>
 #include <QDir>
 
+#include "rb_entity_filter.h"
+
 using namespace regionbiz;
 
 RegionBizManagerPtr RegionBizManager::instance()
@@ -36,13 +38,16 @@ bool RegionBizManager::init(QString &config_path)
 
 BaseEntityPtr RegionBizManager::getBaseEntity(uint64_t id)
 {
-    return BaseEntity::getEntity( id );
+    auto entity = BaseEntity::getEntity( id );
+    if( EntityFilter::isFiltered( entity ))
+        return entity;
+    return nullptr;
 }
 
 BaseAreaPtr RegionBizManager::getBaseArea( uint64_t id )
 {
     auto entity = BaseEntity::getEntity( id );
-    // TODO think about static and dynamic cast
+
     BaseAreaPtr loc = BaseEntity::convert< BaseArea >( entity );
     return loc;
 }
@@ -50,69 +55,9 @@ BaseAreaPtr RegionBizManager::getBaseArea( uint64_t id )
 BaseAreaPtr RegionBizManager::getBaseArea( uint64_t id,
                                            BaseArea::AreaType type )
 {
-    BaseAreaPtr loc;
-
-    std::function< bool( BaseAreaPtr ) > check_id =
-            [ id ]( BaseAreaPtr al ){ return id == al->getId(); };
-
-    switch (type) {
-    case BaseArea::AT_REGION:
-    {
-        auto iter = FIND_IF( _regions, check_id );
-        if( iter != _regions.end() )
-            loc = *iter;
-
-        break;
-    }
-
-    case BaseArea::AT_LOCATION:
-    {
-        auto iter = FIND_IF( _locations, check_id );
-        if( iter != _locations.end() )
-            loc = *iter;
-
-        break;
-    }
-
-    case BaseArea::AT_FACILITY:
-    {
-        auto iter = FIND_IF( _facilitys, check_id );
-        if( iter != _facilitys.end() )
-            loc = *iter;
-
-        break;
-    }
-
-    case BaseArea::AT_FLOOR:
-    {
-        auto iter = FIND_IF( _floors, check_id );
-        if( iter != _floors.end() )
-            loc = *iter;
-
-        break;
-    }
-
-    case BaseArea::AT_ROOMS_GROUP:
-    {
-        auto iter = FIND_IF( _rooms_groups, check_id );
-        if( iter != _rooms_groups.end() )
-            loc = *iter;
-
-        break;
-    }
-
-    case BaseArea::AT_ROOM:
-    {
-        auto iter = FIND_IF( _rooms, check_id );
-        if( iter != _rooms.end() )
-            loc = *iter;
-
-        break;
-    }
-
-    default:
-        break;
-    }
+    BaseAreaPtr loc = getBaseArea( id );
+    if( loc->getType() != type )
+        return nullptr;
 
     return loc;
 }
@@ -131,7 +76,12 @@ BaseAreaPtrs RegionBizManager::getAreaChildsByParent( uint64_t id )
             continue;
 
         if( id == area_ch->getParentId() )
-            childs.push_back( area_ch );
+        {
+            // WARNING filtered child
+            bool filtered = EntityFilter::isFiltered( ent_ch );
+            if( filtered )
+                childs.push_back( area_ch );
+        }
     }
 
     return childs;
@@ -862,9 +812,14 @@ std::vector< LocTypePtr > RegionBizManager::getBaseLocationsByParent( uint64_t p
     std::function< bool( BaseAreaPtr ) > check_parent_id =
             [ parent_id ]( BaseAreaPtr bl ){ return parent_id == bl->getParentId(); };
 
+    // WARNING filtered
+    std::function< bool( BaseAreaPtr ) > check_filter =
+            []( BaseAreaPtr bl ){ return EntityFilter::isFiltered( bl ); };
+
     std::vector< LocTypePtr > loc_childs;
     for( LocTypePtr ptr: vector )
-        if( check_parent_id( ptr) )
+        if( check_parent_id( ptr )
+                && check_filter( ptr ))
             loc_childs.push_back( ptr );
 
     return loc_childs;
