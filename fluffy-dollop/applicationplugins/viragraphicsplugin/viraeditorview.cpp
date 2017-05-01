@@ -15,6 +15,8 @@
 #include "viragraphicsitem.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QMenu>
+#include <QAction>
 
 using namespace regionbiz;
 
@@ -40,6 +42,14 @@ ViraEditorView::ViraEditorView()
     auto mngr = RegionBizManager::instance();
     mngr->subscribeOnChangeEntity(this, SLOT(slotObjectChanged(uint64_t)));
 
+
+    _layersMenu = new LayersMenu();
+    connect(_layersMenu, SIGNAL(rastersVisibleChanged()), this, SLOT(slotRastersVisibleChanged()));
+    connect(_layersMenu, SIGNAL(getNeedVisibleRasters(bool&,bool&,bool&)), this, SLOT(slotGetNeedVisibleRasters(bool&,bool&,bool&)));
+    _layersMenu->setAlignment(Qt::AlignCenter);
+    _layersMenu->setStyleSheet("border-radius:4;border-color: rgb(255, 255, 255);");
+    _layersMenu->setMinimumSize(150, 30);
+
     _upButton = new QToolButton();
     _upButton->setIcon(QIcon(":/img/up.png"));
     _upButton->setFixedSize(32,32);
@@ -49,7 +59,7 @@ ViraEditorView::ViraEditorView()
     _currentFacility = new QLabel;
     _currentFacility->setAlignment(Qt::AlignCenter);
     _currentFacility->setStyleSheet("border-radius:4;border-color: rgb(255, 255, 255);");
-    _currentFacility->setMinimumSize( 100, 30 );
+    _currentFacility->setMinimumSize(100, 30);
 
     _downButton = new QToolButton();
     _downButton->setIcon(QIcon(":/img/down.png"));
@@ -58,6 +68,12 @@ ViraEditorView::ViraEditorView()
     connect(_downButton, SIGNAL(clicked(bool)), this, SLOT(slotFacilityDown()));
 
     QHBoxLayout* hLayout = new QHBoxLayout;
+
+
+    hLayout->addWidget(_layersMenu);
+    hLayout->setAlignment(_layersMenu, Qt::AlignTop);
+    //hLayout->addSpacerItem(new QSpacerItem(20, 0, QSizePolicy::Fixed, QSizePolicy::Fixed));
+
     hLayout->addStretch();
     hLayout->addWidget(_upButton);
     hLayout->setAlignment( _upButton, Qt::AlignTop );
@@ -76,9 +92,15 @@ ViraEditorView::~ViraEditorView()
 
 void ViraEditorView::reinit(qulonglong facilityId)
 {
-    foreach(GraphicsPixmapItem * item, _owerViews)
-        delete item;
-    _owerViews.clear();
+//    foreach(GraphicsPixmapItem * item, _owerViews)
+//        delete item;
+//    _owerViews.clear();
+    delete _baseRasterItem;
+    _baseRasterItem = nullptr;
+    delete _axisRasterItem;
+    _axisRasterItem = nullptr;
+    delete _sizesRasterItem;
+    _sizesRasterItem = nullptr;
 
     foreach(QGraphicsItem * item, _itemsOnFloor)
         delete item;
@@ -116,9 +138,15 @@ void ViraEditorView::setFloor(qulonglong floorId)
 
     clearTempItems();
 
-    foreach(GraphicsPixmapItem * item, _owerViews)
-        delete item;
-    _owerViews.clear();
+//    foreach(GraphicsPixmapItem * item, _owerViews)
+//        delete item;
+//    _owerViews.clear();
+    delete _baseRasterItem;
+    _baseRasterItem = nullptr;
+    delete _axisRasterItem;
+    _axisRasterItem = nullptr;
+    delete _sizesRasterItem;
+    _sizesRasterItem = nullptr;
 
     foreach(QGraphicsItem * item, _itemsOnFloor.values())
         delete item;
@@ -150,12 +178,40 @@ void ViraEditorView::setFloor(qulonglong floorId)
             ++i;
         }
 
-        QString pixmapPath = destPath + QString::number(floorId) + QDir::separator() + QString("area.tiff"); // floorPtr->getPlanPath();
-        QPixmap pm(pixmapPath);
-        GraphicsPixmapItem* item = new GraphicsPixmapItem(pm);
-        scene()->addItem(item);
-        setSceneRect(0, 0, pm.width(), pm.height());
-        _owerViews.append(item);
+//        QString pixmapPath = destPath + QString::number(floorId) + QDir::separator() + QString("area.tiff"); // floorPtr->getPlanPath();
+//        QPixmap pm(pixmapPath);
+//        GraphicsPixmapItem* item = new GraphicsPixmapItem(pm);
+//        scene()->addItem(item);
+//        setSceneRect(0, 0, pm.width(), pm.height());
+//        _owerViews.append(item);
+        QString path = destPath + QString::number(floorId) + QDir::separator();
+        {
+            QString filePath;
+            if(QFile::exists(path + QString("area.tiff")))
+                filePath = path + QString("area.tiff");
+            else if(QFile::exists(path + QString("base.tiff")))
+                filePath = path + QString("base.tiff");
+
+            if(filePath.isEmpty() == false)
+            {
+                QPixmap pm(filePath);
+                _baseRasterItem = new GraphicsPixmapItem(pm);
+                scene()->addItem(_baseRasterItem);
+                setSceneRect(0, 0, pm.width(), pm.height());
+            }
+        }
+        if(QFile::exists(path + QString("axis.tiff")))
+        {
+            QPixmap pm(path + QString("axis.tiff"));
+            _axisRasterItem = new GraphicsPixmapItem(pm);
+            scene()->addItem(_axisRasterItem);
+        }
+        if(QFile::exists(path + QString("sizes.tiff")))
+        {
+            QPixmap pm(path + QString("sizes.tiff"));
+            _sizesRasterItem = new GraphicsPixmapItem(pm);
+            scene()->addItem(_sizesRasterItem);
+        }
 
         //MarkPtrs marks_of_floor = floorPtr->getMarks();
 
@@ -206,6 +262,7 @@ void ViraEditorView::setFloor(qulonglong floorId)
         }
     }
 
+    slotRastersVisibleChanged();
 
     /*
     reinit();
@@ -360,6 +417,10 @@ void ViraEditorView::slotSetMarkPosition(QVariant var)
             _editObjectExtend = room->getCoords();
             setCursor(QCursor(QPixmap(":/img/cursor_mark.png"), 0, 0));
             _mode = EditMarkMode;
+        }
+        else
+        {
+            _editObjectGeometry = 0;
         }
     }
     else
@@ -756,3 +817,140 @@ void ViraEditorView::zoomOut()
 //        _owerViews.at(index)->setVisible(true);
 //    }
 //}
+
+void ViraEditorView::slotRastersVisibleChanged()
+{
+    if(_baseRasterItem)
+    {
+        QVariant baseRasterVisible = CtrConfig::getValueByName("application_settings.baseRasterVisible", true, true);
+        _baseRasterItem->setVisible(baseRasterVisible.toBool());
+    }
+
+    if(_axisRasterItem)
+    {
+        QVariant axisRasterVisible = CtrConfig::getValueByName("application_settings.axisRasterVisible", true, true);
+        _axisRasterItem->setVisible(axisRasterVisible.toBool());
+    }
+
+    if(_sizesRasterItem)
+    {
+        QVariant sizesRasterVisible = CtrConfig::getValueByName("application_settings.sizesRasterVisible", true, true);
+        _sizesRasterItem->setVisible(sizesRasterVisible.toBool());
+    }
+
+    QVariant defectsRasterVisible = CtrConfig::getValueByName("application_settings.defectsRasterVisible", true, true);
+    bool visibleDefects = defectsRasterVisible.toBool();
+    foreach(QGraphicsItem * item, _itemsOnFloor.values())
+    {
+        MarkGraphicsItem * markGraphicsItem = dynamic_cast<MarkGraphicsItem*>(item);
+        if(markGraphicsItem)
+            markGraphicsItem->setVisible(visibleDefects);
+    }
+}
+
+void ViraEditorView::slotGetNeedVisibleRasters(bool &base, bool &axis, bool &sizes)
+{
+    base = (_baseRasterItem != nullptr);
+    axis = (_sizesRasterItem != nullptr);
+    sizes = (_sizesRasterItem != nullptr);
+}
+
+///----------------------------------------------------------------------------------------------
+
+LayersMenu::LayersMenu()
+    : QLabel(QString::fromUtf8("Отображать слои"))
+{
+}
+
+void LayersMenu::mousePressEvent(QMouseEvent *)
+{
+    QMenu menu(this);
+
+    bool base, axis, sizes;
+    emit getNeedVisibleRasters(base, axis, sizes);
+
+    QAction * allAct = menu.addAction(QString::fromUtf8("все слои"));
+    allAct->setCheckable(true);
+    allAct->setChecked(true);
+    menu.addSeparator();
+
+    QAction * baseAct = nullptr;
+    if(base)
+    {
+        baseAct = menu.addAction(QString::fromUtf8("базовый"));
+        baseAct->setCheckable(true);
+        QVariant baseRasterVisible = CtrConfig::getValueByName("application_settings.baseRasterVisible", true, true);
+        baseAct->setChecked(baseRasterVisible.toBool());
+        if(baseRasterVisible.toBool() == false)
+            allAct->setChecked(false);
+    }
+
+    QAction * axisAct = nullptr;
+    if(axis)
+    {
+        axisAct = menu.addAction(QString::fromUtf8("оси"));
+        axisAct->setCheckable(true);
+        QVariant axisRasterVisible = CtrConfig::getValueByName("application_settings.axisRasterVisible", true, true);
+        axisAct->setChecked(axisRasterVisible.toBool());
+        if(axisRasterVisible.toBool() == false)
+            allAct->setChecked(false);
+    }
+
+    QAction * sizesAct = nullptr;
+    if(sizes)
+    {
+        sizesAct = menu.addAction(QString::fromUtf8("размер"));
+        sizesAct->setCheckable(true);
+        QVariant sizesRasterVisible = CtrConfig::getValueByName("application_settings.sizesRasterVisible", true, true);
+        sizesAct->setChecked(sizesRasterVisible.toBool());
+        if(sizesRasterVisible.toBool() == false)
+            allAct->setChecked(false);
+    }
+
+    QAction * defectsAct = menu.addAction(QString::fromUtf8("дефекты"));
+    defectsAct->setCheckable(true);
+    QVariant defectsRasterVisible = CtrConfig::getValueByName("application_settings.defectsRasterVisible", true, true);
+    defectsAct->setChecked(defectsRasterVisible.toBool());
+    if(defectsRasterVisible.toBool() == false)
+        allAct->setChecked(false);
+
+    if(allAct->isChecked())
+        allAct->setDisabled(true);
+
+    QPoint globalPos = mapToGlobal(pos());
+    QAction * act = menu.exec(QPoint(globalPos.x(), globalPos.y() + 22));
+    if( ! act )
+        return;
+
+    if(act == allAct)
+    {
+        if(base)
+            CtrConfig::setValueByName("application_settings.baseRasterVisible", true);
+        if(axis)
+            CtrConfig::setValueByName("application_settings.axisRasterVisible", true);
+        if(sizes)
+            CtrConfig::setValueByName("application_settings.sizesRasterVisible", true);
+        CtrConfig::setValueByName("application_settings.defectsRasterVisible", true);
+    }
+    else if(act == baseAct)
+        CtrConfig::setValueByName("application_settings.baseRasterVisible", act->isChecked());
+    else if(act == axisAct)
+        CtrConfig::setValueByName("application_settings.axisRasterVisible", act->isChecked());
+    else if(act == sizesAct)
+        CtrConfig::setValueByName("application_settings.sizesRasterVisible", act->isChecked());
+    else if(act == defectsAct)
+        CtrConfig::setValueByName("application_settings.defectsRasterVisible", act->isChecked());
+
+    emit rastersVisibleChanged();
+}
+
+
+
+
+
+
+
+
+
+
+

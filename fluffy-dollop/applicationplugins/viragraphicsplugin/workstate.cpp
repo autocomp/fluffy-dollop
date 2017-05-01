@@ -56,6 +56,10 @@ void WorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom
                                       qMetaTypeId< bool >(),
                                       QString("visualize_system") );
 
+    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::SetMarkPosition, this, SLOT(slotSetMarkPosition(QVariant)),
+                                      qMetaTypeId< quint64 >(),
+                                      QString("visualize_system") );
+
     reinit();
 }
 
@@ -213,6 +217,27 @@ void WorkState::reinit()
 void WorkState::slotBlockGUI(QVariant var)
 {
     _blockGUI = var.toBool();
+}
+
+void WorkState::slotSetMarkPosition(QVariant var)
+{
+    uint id = var.toUInt();
+    if(id > 0)
+    {
+        auto it = _items.find(id);
+        if(it != _items.end())
+        {
+            it.value()->setItemselected(true);
+            QPolygonF pol = it.value()->polygon();
+            centerViewOn(pol.boundingRect().center());
+
+            emit setMarkOnMap(id);
+        }
+    }
+    else
+    {
+        emit setMarkOnMap(0);
+    }
 }
 
 void WorkState::slotSelectItem(qulonglong id, bool centerOnEntity)

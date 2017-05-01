@@ -29,7 +29,7 @@ ViraEditorForm::ViraEditorForm(QWidget *parent) :
 
     ui->topLayout->addWidget(_sceneViraWidget);
 
-    _scene.setBackgroundBrush(QBrush(Qt::black));
+    _scene.setBackgroundBrush(QBrush(Qt::white)); //black));
     _view = new ViraEditorView();
     _view->setScene(&_scene);
     _sceneViraWidget->setMainViewWidget(_view);

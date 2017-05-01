@@ -25,6 +25,7 @@ signals:
     void switchOnMap();
     void switchOnEditor();
     void centerEditorOn(qulonglong id);
+    void setMarkOnMap(qulonglong id);
 
 protected:
     void centerViewOn(QPointF pos);
@@ -35,6 +36,7 @@ protected slots:
     void slotCenterOn(uint64_t);
     void slotSelectItem(qulonglong id, bool centerOnEntity);
     void slotBlockGUI(QVariant var);
+    void slotSetMarkPosition(QVariant var);
     void reinit();
 
 private:

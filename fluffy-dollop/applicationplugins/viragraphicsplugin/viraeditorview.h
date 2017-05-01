@@ -5,11 +5,14 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsPolygonItem>
 #include <QGraphicsLineItem>
+#include <QComboBox>
 #include <QPainter>
 #include "types.h"
 #include "roomgraphicstem.h"
 #include <QToolButton>
 #include <QLabel>
+
+class LayersMenu;
 
 class GraphicsPixmapItem : public QGraphicsPixmapItem
 {
@@ -51,6 +54,8 @@ public slots:
     void slotObjectChanged(uint64_t id);
     void slotFacilityUp();
     void slotFacilityDown();
+    void slotRastersVisibleChanged();
+    void slotGetNeedVisibleRasters(bool & base, bool & axis, bool & sizes);
 
 protected:
     virtual void wheelEvent(QWheelEvent* e);
@@ -71,15 +76,32 @@ private:
     double _scale = 1;
     bool _recalcZoom = true;
     uint64_t _currFloor_id = 0;
-    QList<GraphicsPixmapItem *> _owerViews;
+    //QList<GraphicsPixmapItem *> _owerViews;
+    GraphicsPixmapItem * _baseRasterItem = nullptr;
+    GraphicsPixmapItem * _axisRasterItem = nullptr;
+    GraphicsPixmapItem * _sizesRasterItem = nullptr;
+
     QMap<qulonglong, QGraphicsItem *> _itemsOnFloor;
     uint64_t _editObjectGeometry = 0;
     QPolygonF _editObjectExtend;
     QToolButton* _upButton, *_downButton;
     QLabel * _currentFacility;
+    LayersMenu * _layersMenu;
     QMap<uint64_t, QString> _floorsMap;
 
     QList<QGraphicsLineItem *> _lines;
+};
+
+class LayersMenu : public QLabel
+{
+    Q_OBJECT
+public:
+    LayersMenu();
+signals:
+    void getNeedVisibleRasters(bool & base, bool & axis, bool & sizes);
+    void rastersVisibleChanged();
+protected:
+    virtual void mousePressEvent(QMouseEvent* e);
 };
 
 #endif // PDFEDITORVIEW_H

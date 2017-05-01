@@ -4,6 +4,8 @@
 #include <ctrcore/plugin/embifacenotifier.h>
 #include "viraeditorform.h"
 #include "workstate.h"
+#include "setimagestate.h"
+#include <ctrvisual/state/choiceareastate.h>
 
 class QStackedWidget;
 
@@ -23,12 +25,17 @@ private slots:
     void showFacility(qulonglong id);
     void switchOnMap();
     void switchOnEditor();
+    void setMarkOnMap(qulonglong id);
+    void defectStateChoiced(QPolygonF);
+    void defectStateAborted();
 
 private:
     bool _showFirstBaseCover = true;
 
     ViraEditorForm * _pdfEditorForm;
     QSharedPointer<WorkState> _workState;
+    QSharedPointer<SetImageState> _setImageState;
+    QSharedPointer<ChoiceAreaState> _setDefectState;
     QStackedWidget * _stackedWidget = nullptr;
 };
 

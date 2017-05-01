@@ -42,6 +42,7 @@ void ViraGraphicsPlugin::launchWorkState()
     connect(_workState.data(), SIGNAL(showFacility(qulonglong)), this, SLOT(showFacility(qulonglong)));
     connect(_workState.data(), SIGNAL(switchOnMap()), this, SLOT(switchOnMap()));
     connect(_workState.data(), SIGNAL(switchOnEditor()), this, SLOT(switchOnEditor()));
+    connect(_workState.data(), SIGNAL(setMarkOnMap(qulonglong)), this, SLOT(setMarkOnMap(qulonglong)));
     visualize_system::VisualizerManager::instance()->getStateInterface(getVisualizerId())->setVisualizerState(_workState);
 
     _pdfEditorForm = new ViraEditorForm;
@@ -68,6 +69,41 @@ void ViraGraphicsPlugin::switchOnMap()
 void ViraGraphicsPlugin::switchOnEditor()
 {
     _stackedWidget->setCurrentIndex(_stackedWidget->property("pdfEditorFormIndex").toInt());
+}
+
+void ViraGraphicsPlugin::setMarkOnMap(qulonglong id)
+{
+    if(id > 0)
+    {
+        _stackedWidget->setCurrentIndex(_stackedWidget->property("visualizerIndex").toInt());
+
+        _setDefectState = QSharedPointer<ChoiceAreaState>(new ChoiceAreaState(ChoiceAreaState::POINT, QCursor(QPixmap(":/img/cursor_mark.png"), 0, 0)));
+        visualize_system::VisualizerManager::instance()->getStateInterface(getVisualizerId())->setVisualizerState(_setDefectState);
+        connect(_setDefectState.data(), SIGNAL(signalAreaChoiced(QPolygonF)), this, SLOT(defectStateChoiced(QPolygonF)));
+        connect(_setDefectState.data(), SIGNAL(signalAbort()), this, SLOT(defectStateAborted()));
+    }
+    else
+    {
+        defectStateAborted();
+    }
+
+//    _setImageState = QSharedPointer<SetImageState>(new SetImageState());
+//    visualize_system::VisualizerManager::instance()->getStateInterface(getVisualizerId())->setVisualizerState(_setImageState);
+}
+
+void ViraGraphicsPlugin::defectStateChoiced(QPolygonF pol)
+{
+    // create or change mark !
+    defectStateAborted();
+}
+
+void ViraGraphicsPlugin::defectStateAborted()
+{
+    if(_setDefectState)
+    {
+        _setDefectState->emit_closeState();
+        _setDefectState.clear();
+    }
 }
 
 QList<InitPluginData> ViraGraphicsPlugin::getInitPluginData()
