@@ -11,7 +11,8 @@ public:
     {
         POINT,
         POLYLINE,
-        POLYGON
+        POLYGON,
+        POINT_OR_POLYGON
     };
 
     ChoiceAreaState(AreaType areaType, QCursor cursor = QCursor(Qt::ArrowCursor));

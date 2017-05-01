@@ -18,6 +18,7 @@ ChoiceAreaState::ChoiceAreaState(AreaType areaType, QCursor cursor)
 
 ChoiceAreaState::~ChoiceAreaState()
 {
+    _view->setCursor(Qt::ArrowCursor);
     foreach(QGraphicsLineItem* item, _lineItems)
         delete item;
 }
@@ -164,23 +165,14 @@ bool ChoiceAreaState::keyPressEvent(QKeyEvent * e)
 
 void ChoiceAreaState::finishChoice()
 {
-    if( ( _polygon.isClosed() && (_polygon.count() > 3) ) ||
-            ( !_polygon.isClosed() && (_polygon.count() > 2) ) )
-    {
-        QPolygonF polygonInNativeCoords;
-        foreach(QPointF p, _polygon)
-        {
-            convertSceneToNative(p);
-            polygonInNativeCoords.append(p);
-        }
+    QPolygonF polygonInNativeCoords(_polygon);
 
-        foreach(QGraphicsLineItem* item, _lineItems)
-            delete item;
-        _lineItems.clear();
-        _polygon.clear();
+    foreach(QGraphicsLineItem* item, _lineItems)
+        delete item;
+    _lineItems.clear();
+    _polygon.clear();
 
-        emit signalAreaChoiced(polygonInNativeCoords);
-    }
+    emit signalAreaChoiced(polygonInNativeCoords);
 }
 
 QGraphicsLineItem* ChoiceAreaState::createItem(QPointF p1, QPointF p2)
