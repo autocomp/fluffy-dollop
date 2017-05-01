@@ -100,10 +100,12 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
         auto data = DataGetter::getData( curr_id );
 
         switch( ptr->getType() ) {
-        case BaseArea::AT_FLOOR:
-        case BaseArea::AT_REGION:
         case BaseArea::AT_LOCATION:
         case BaseArea::AT_FACILITY:
+            ui->addMark->show();
+            //! without break !!!
+        case BaseArea::AT_FLOOR:
+        case BaseArea::AT_REGION:
         {
             showAddres( ptr );
             showTasks( data );

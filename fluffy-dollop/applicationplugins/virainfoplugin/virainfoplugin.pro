@@ -30,7 +30,7 @@ HEADERS += \
     pixmaplistwidget.h \
     slide_window.h \
     filter_form.h \
-    imageviewer.h
+    imageviewer.h \
 
 SOURCES += \
     virainfoplugin.cpp \
