@@ -6,7 +6,6 @@ using namespace regionbiz;
 
 typedef BaseArea::AreaType LocationType;
 typedef Region::RegionChildFilter RegionChildFilter;
-typedef PlanKeeper::PlanParams PlanParams;
 
 BaseArea::BaseArea(uint64_t id):
     BaseEntity( id )
@@ -48,7 +47,7 @@ BaseAreaPtr BaseArea::getParent()
     return parent;
 }
 
-BaseAreaPtrs BaseArea::getChilds()
+BaseAreaPtrs BaseArea::getBaseAreaChilds()
 {
     auto mngr = RegionBizManager::instance();
     auto childs = mngr->getAreaChildsByParent( _id );
@@ -273,35 +272,6 @@ std::vector<FacilityPtr> Location::getChilds()
     return facilitys;
 }
 
-QString PlanKeeper::getPlanPath()
-{
-    return _plan_path;
-}
-
-void PlanKeeper::setPlanPath(QString path)
-{
-    _plan_path = path;
-}
-
-QFilePtr PlanKeeper::getPlanFile()
-{
-    QFile* file = new QFile( _plan_path );
-    if( file->exists() )
-        return QFilePtr( file );
-    else
-        return QFilePtr();
-}
-
-void PlanKeeper::setPlanParams( PlanParams params )
-{
-    _params = params;
-}
-
-PlanParams PlanKeeper::getPlanParams()
-{
-    return _params;
-}
-
 Facility::Facility(uint64_t id):
     BizRelationKepper( id )
 {}
@@ -377,85 +347,7 @@ void Floor::setNumber(uint16_t number)
         addMetadata( "int", "number", number );
 }
 
-BaseAreaPtrs Floor::getChilds(Floor::FloorChildFilter filter)
-{
-    auto mngr = RegionBizManager::instance();
-    std::vector<BaseAreaPtr> childs;
-
-    if( FCF_ALL == filter ||
-            FCF_GROUPS == filter )
-    {
-        std::vector< RoomsGroupPtr > groups = mngr->getRoomsGroupsByParent( _id );
-        for( RoomsGroupPtr rg: groups )
-            childs.push_back( rg );
-    }
-
-    if( FCF_ALL == filter
-            || FCF_ROOMS == filter
-            || FCF_ALL_ROOMS == filter )
-    {
-        std::vector<RoomPtr> rooms = mngr->getRoomsByParent( _id );
-        for( RoomPtr roo: rooms )
-            childs.push_back( roo );
-    }
-
-    if( FCF_ALL_ROOMS == filter )
-    {
-        std::vector< RoomsGroupPtr > groups = mngr->getRoomsGroupsByParent( _id );
-        for( RoomsGroupPtr rg: groups )
-        {
-            std::vector<RoomPtr> rooms = mngr->getRoomsByParent( rg->getId() );
-            for( RoomPtr roo: rooms )
-                childs.push_back( roo );
-        }
-    }
-
-    return childs;
-}
-
-RoomsGroup::RoomsGroup(uint64_t id):
-    BizRelationKepper( id )
-{}
-
-BaseArea::AreaType RoomsGroup::getType()
-{
-    return AT_ROOMS_GROUP;
-}
-
-
-QString RoomsGroup::getAddress()
-{
-    if( isMetadataPresent( "adress" ))
-        return getMetadataValue( "adress" ).toString();
-
-    return "";
-}
-
-void RoomsGroup::setAddress(QString address)
-{
-    if( isMetadataPresent( "address" ))
-        setMetadataValue( "address", address );
-    else
-        addMetadata( "string", "address", address );
-}
-
-QString RoomsGroup::getCadastralNumber()
-{
-    if( isMetadataPresent( "cadastral_number" ))
-        return getMetadataValue( "cadastral_number" ).toString();
-
-    return "";
-}
-
-void RoomsGroup::setCadastralNumber(QString number)
-{
-    if( isMetadataPresent( "cadastral_number" ))
-        setMetadataValue( "cadastral_number", number );
-    else
-        addMetadata( "string", "cadastral_number", number );
-}
-
-std::vector< RoomPtr > RoomsGroup::getChilds()
+RoomPtrs Floor::getChilds()
 {
     auto mngr = RegionBizManager::instance();
     std::vector<RoomPtr> rooms = mngr->getRoomsByParent( _id );

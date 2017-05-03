@@ -5,6 +5,7 @@
 #include <memory>
 #include <iostream>
 #include "rb_metadata.h"
+#include "rb_files.h"
 
 namespace regionbiz {
 
@@ -38,7 +39,6 @@ public:
     // some technick functions
     static bool isEntityExist( uint64_t id );
     static uint64_t getMaxId();
-    static BaseEntityPtr getEntity( uint64_t id );
 
     // metadata
     bool isMetadataPresent( QString name );
@@ -48,6 +48,10 @@ public:
     bool setMetadataValue( QString name , QVariant val );
     bool addMetadata( QString type, QString name, QVariant val = QVariant() );
     bool addMetadata( BaseMetadataPtr data );
+
+    // files
+    BaseFileKeeperPtrs getFiles();
+    BaseFileKeeperPtrs getFilesByType( BaseFileKeeper::FileType type );
 
     // create new entity
     template< typename Type >
@@ -69,6 +73,8 @@ public:
     }
 
 protected:
+    // private technick functions
+    static BaseEntityPtr getEntity( uint64_t id );
     static bool deleteEntity( BaseEntityPtr ent );
     static bool deleteEntity( uint64_t id );
 
@@ -82,6 +88,11 @@ protected:
 
 private:
     static std::map< uint64_t, BaseEntityPtr >& getEntitys();
+
+    template< typename Type >
+    static std::vector< std::shared_ptr< Type >>
+    getEntitysByType( BaseEntity::EntityType type );
+
     static uint64_t _max_id;
 };
 
@@ -104,6 +115,25 @@ std::shared_ptr< Type > BaseEntity::createWithId( uint64_t id )
                   << " already exists" << std::endl;
         return nullptr;
     }
+}
+
+template<typename Type>
+std::vector<std::shared_ptr< Type >>
+BaseEntity::getEntitysByType( BaseEntity::EntityType type )
+{
+    std::vector< std::shared_ptr< Type >> entitys;
+    for( auto pair: getEntitys() )
+    {
+        BaseEntityPtr entity = pair.second;
+        if( type == entity->getEntityType() )
+        {
+            std::shared_ptr< Type > entity_typed =
+                    BaseEntity::convert< Type >( entity );
+            if( entity_typed )
+                entitys.push_back( entity_typed );
+        }
+    }
+    return std::move( entitys );
 }
 
 }

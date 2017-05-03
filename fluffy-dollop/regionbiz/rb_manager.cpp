@@ -13,13 +13,24 @@
 
 #include "rb_entity_filter.h"
 
+#ifdef STACKWALKER
+#include "StackWalker/StackWalker.h"
+#endif
+
 using namespace regionbiz;
 
 RegionBizManagerPtr RegionBizManager::instance()
 {
+
+#ifdef STACKWALKER
+    SetUnhandledExceptionFilter(TopLevelFilter);
+#endif
+
     static RegionBizManagerPtr instance_ptr = nullptr;
     if( !instance_ptr )
+    {
         instance_ptr = RegionBizManagerPtr( new RegionBizManager() );
+    }
     return instance_ptr;
 }
 
@@ -91,32 +102,27 @@ BaseAreaPtrs RegionBizManager::getAreaChildsByParent( uint64_t id )
 
 std::vector<RegionPtr> RegionBizManager::getRegions()
 {
-    return _regions;
+    return getBaseAreasByParent< Region >( 0 );
 }
 
 std::vector<LocationPtr> RegionBizManager::getLocationsByParent(uint64_t parent_id)
 {
-    return getBaseLocationsByParent< LocationPtr >( parent_id, _locations );
+    return getBaseAreasByParent< Location >( parent_id );
 }
 
 std::vector<FacilityPtr> RegionBizManager::getFacilitysByParent(uint64_t parent_id)
 {
-    return getBaseLocationsByParent< FacilityPtr >( parent_id, _facilitys );
+    return getBaseAreasByParent< Facility >( parent_id );
 }
 
 std::vector<FloorPtr> RegionBizManager::getFloorsByParent( uint64_t parent_id )
 {
-    return getBaseLocationsByParent< FloorPtr >( parent_id, _floors );
-}
-
-std::vector<RoomsGroupPtr> RegionBizManager::getRoomsGroupsByParent(uint64_t parent_id)
-{
-    return getBaseLocationsByParent< RoomsGroupPtr >( parent_id, _rooms_groups );
+    return getBaseAreasByParent< Floor >( parent_id );
 }
 
 std::vector<RoomPtr> RegionBizManager::getRoomsByParent(uint64_t parent_id)
 {
-    return getBaseLocationsByParent< RoomPtr >( parent_id, _rooms );
+    return getBaseAreasByParent< Room >( parent_id );
 }
 
 BaseAreaPtr RegionBizManager::addArea( BaseArea::AreaType type,
@@ -133,8 +139,6 @@ BaseAreaPtr RegionBizManager::addArea( BaseArea::AreaType type,
         add_area = addArea< Facility >( parent_id );
     case BaseArea::AT_FLOOR:
         add_area = addArea< Floor >( parent_id );
-    case BaseArea::AT_ROOMS_GROUP:
-        add_area = addArea< RoomsGroup >( parent_id );
     case BaseArea::AT_ROOM:
         add_area = addArea< Room >( parent_id );
     default:
@@ -144,10 +148,20 @@ BaseAreaPtr RegionBizManager::addArea( BaseArea::AreaType type,
     return add_area;
 }
 
+BaseAreaPtr RegionBizManager::addArea( BaseArea::AreaType type,
+                                       BaseAreaPtr parent )
+{
+    if( !parent )
+        return nullptr;
+
+    BaseAreaPtr add_area = addArea( type, parent->getId() );
+    return add_area;
+}
+
 bool RegionBizManager::deleteArea(BaseAreaPtr area)
 {
     // delete childs recursive
-    auto childs = area->getChilds();
+    auto childs = area->getBaseAreaChilds();
     for( BaseAreaPtr child: childs )
         deleteArea( child );
 
@@ -161,7 +175,7 @@ bool RegionBizManager::deleteArea(BaseAreaPtr area)
     }
 
     // delete this one
-    bool del = _translator->deleteArea( area );
+    bool del = _data_translator->deleteArea( area );
     if( del )
     {
         // emit signal
@@ -178,7 +192,7 @@ bool RegionBizManager::deleteArea(uint64_t id)
 
 bool RegionBizManager::commitArea( BaseAreaPtr area )
 {
-    bool com = _translator->commitArea( area );
+    bool com = _data_translator->commitArea( area );
     if( com )
     {
         // emit signal
@@ -205,30 +219,20 @@ BaseBizRelationPtrs RegionBizManager::getBizRelationByArea(uint64_t id)
 }
 
 BaseBizRelationPtrs RegionBizManager::getBizRelationByArea( uint64_t id,
-                                                            BaseBizRelation::RelationType type)
+                                                            BaseBizRelation::RelationType type )
 {
     BaseBizRelationPtrs relations;
 
-    switch( type )
+    auto relations_ptrs =
+            BaseEntity::getEntitysByType< BaseBizRelation >( BaseEntity::ET_RELATION );
+
+    for( BaseBizRelationPtr rel: relations_ptrs )
     {
-    case BaseBizRelation::RT_PROPERTY:
-    {
-        for( PropertyPtr prop: _propertys )
-            if( id == prop->getAreaId() )
-                relations.push_back( prop );
-
-        break;
-    }
-
-    case BaseBizRelation::RT_RENT:
-    {
-        for( RentPtr rent: _rents )
-            if( id == rent->getAreaId() )
-                relations.push_back( rent );
-
-        break;
-    }
-
+        if( type == rel->getType()
+                && id == rel->getAreaId() )
+        {
+            relations.push_back( rel );
+        }
     }
 
     return relations;
@@ -239,7 +243,7 @@ BaseMetadataPtr RegionBizManager::getMetadata( uint64_t id, QString name )
     if( isMetadataPresent( id, name ))
         return _metadata[id][name];
 
-    return nullptr;
+    return EmptyMetadata::instance();
 }
 
 QVariant RegionBizManager::getMetadataValue(uint64_t id, QString name)
@@ -315,8 +319,11 @@ MarkPtrs RegionBizManager::getMarksByParent( uint64_t id )
     std::function< bool( MarkPtr ) > check_id =
             [ id ]( MarkPtr mark ){ return id == mark->getParentId(); };
 
+    // get marks from entitys
+    auto marks_ptrs = BaseEntity::getEntitysByType< Mark >( BaseEntity::ET_MARK );
+
     MarkPtrs marks;
-    for( MarkPtr mark: _marks )
+    for( MarkPtr mark: marks_ptrs )
     {
         if( check_id( mark ))
             marks.push_back( mark );
@@ -332,7 +339,10 @@ MarkPtrs RegionBizManager::getMarksByParent(MarksHolderPtr parent)
 
 MarkPtrs RegionBizManager::getMarks()
 {
-    return _marks;
+    // get marks from entitys
+    auto marks_ptrs = BaseEntity::getEntitysByType< Mark >( BaseEntity::ET_MARK );
+
+    return marks_ptrs;
 }
 
 MarkPtr RegionBizManager::addMark( uint64_t parent_id,
@@ -346,7 +356,6 @@ MarkPtr RegionBizManager::addMark( uint64_t parent_id,
     mark = BaseEntity::createWithId< Mark >( BaseEntity::getMaxId() + 1 );
     if( mark )
     {
-        _marks.push_back( mark );
         mark->setCenter( center );
         mark->setParentId( parent_id );
 
@@ -366,7 +375,7 @@ bool RegionBizManager::commitMark(uint64_t id)
 
 bool RegionBizManager::commitMark(MarkPtr mark)
 {
-    bool comm = _translator->commitMark( mark );
+    bool comm = _data_translator->commitMark( mark );
     if( comm )
     {
         // emit signal
@@ -385,13 +394,81 @@ bool RegionBizManager::deleteMark(uint64_t id)
 
 bool RegionBizManager::deleteMark(MarkPtr mark)
 {
-    bool del = _translator->deleteMark( mark );
+    bool del = _data_translator->deleteMark( mark );
     if( del )
     {
         // emit signal
         _change_watcher.deleteEntity( mark->getId() );
     }
     return del;
+}
+
+BaseFileKeeperPtrs RegionBizManager::getFilesByEntity(uint64_t id)
+{
+    auto& files = BaseFileKeeper::getFiles();
+    if( files.find( id ) != files.end() )
+        return files[ id ];
+
+    return BaseFileKeeperPtrs();
+}
+
+BaseFileKeeperPtrs RegionBizManager::getFilesByEntity(BaseEntityPtr ptr)
+{
+    return getFilesByEntity( ptr->getId() );
+}
+
+BaseFileKeeperPtrs RegionBizManager::getFilesByEntity(uint64_t id, BaseFileKeeper::FileType type)
+{
+    BaseFileKeeperPtrs files_res;
+
+    auto files = getFilesByEntity( id );
+    for( BaseFileKeeperPtr file: files )
+        if( file->getType() == type )
+            files_res.push_back( file );
+
+    return files_res;
+}
+
+BaseFileKeeperPtrs RegionBizManager::getFilesByEntity(BaseEntityPtr ptr, BaseFileKeeper::FileType type)
+{
+    return getFilesByEntity( ptr->getId(), type );
+}
+
+BaseFileKeeperPtr RegionBizManager::addFile( QString file_path,
+                                             BaseFileKeeper::FileType type,
+                                             uint64_t entity_id )
+{
+    BaseFileKeeperPtr file =
+            _files_translator->addFile( file_path, type, entity_id );
+    BaseFileKeeper::getFiles()[ entity_id ].push_back( file );
+}
+
+QFilePtr RegionBizManager::getLocalFile(BaseFileKeeperPtr file)
+{
+    QFilePtr qfile = _files_translator->getFile( file );
+    return qfile;
+}
+
+BaseFileKeeper::FileState RegionBizManager::getFileState(BaseFileKeeperPtr file)
+{
+    auto state = _files_translator->getFileState( file );
+    return state;
+}
+
+BaseFileKeeper::FileState RegionBizManager::syncFile(BaseFileKeeperPtr file)
+{
+    auto state = _files_translator->syncFile( file );
+    return state;
+}
+
+void RegionBizManager::subscribeFileSynced(QObject *obj, const char *slot)
+{
+    _files_translator->subscribeFileSynced( obj, slot );
+}
+
+void RegionBizManager::subscribeFileAdded(QObject *obj, const char *slot)
+{
+    _files_translator->subscribeFileAdded( obj, slot );
 }
 
 BaseTranslatorPtr RegionBizManager::getTranslatorByName(QString name)
@@ -597,23 +674,56 @@ bool RegionBizManager::processTranslators(QVariantMap settings)
         }
     }
 
-    QString error_text = "";
-    if( settings.contains( "main_translator" ))
+    if( settings.contains( "main_translators" ))
     {
-        QString name = settings[ "main_translator" ].toString();
-        _translator = getTranslatorByName( name );
-        if( _translator->checkTranslator( BaseTranslator::CT_READ, error_text ))
+        QVariantMap translators = settings[ "main_translators" ].toMap();
+
+        if( translators.contains( "data" ))
         {
-            loadDataByTranslator();
+            QString name_data_translator = translators[ "data" ].toString();
+            BaseTranslatorPtr base_trans = getTranslatorByName( name_data_translator );
+            if( base_trans )
+                _data_translator = BaseTranslator::convert< BaseDataTranslator >( base_trans );
+            if( !_data_translator )
+            {
+                std::cerr << "Main Data Translator not fonud" << std::endl;
+                no_error = false;
+            }
+            else
+            {
+                QString error_text = "";
+                if( _data_translator->checkTranslator( BaseDataTranslator::CT_READ, error_text ))
+                {
+                    loadDataByTranslator();
+                }
+                else
+                {
+                    std::cerr << "Error with data Translator:\n" << error_text.toUtf8().data() << std::endl;
+                    _data_translator = nullptr;
+
+                    no_error = false;
+                }
+            }
         }
         else
-        {
-            std::cerr << "Error with Translator:\n" << error_text.toUtf8().data() << std::endl;
-            _translator = nullptr;
-
             no_error = false;
+
+        if( translators.contains( "files" ))
+        {
+            QString name_files_translator = translators[ "files" ].toString();
+            BaseTranslatorPtr base_trans = getTranslatorByName( name_files_translator );
+            if( base_trans )
+                _files_translator = BaseTranslator::convert< BaseFilesTranslator >( base_trans );
+            if( !_files_translator )
+            {
+                std::cerr << "Main Files Translator not fonud" << std::endl;
+                no_error = false;
+            }
         }
+        else
+            no_error = false;
     }
+    else no_error = false;
 
     return no_error;
 }
@@ -659,170 +769,86 @@ bool RegionBizManager::loadPlugins( QString plugins_path, bool load_all,
 
 void RegionBizManager::loadDataByTranslator()
 {
-    if( !_translator )
+    if( !_data_translator )
         return;
 
     clearCurrentData();
 
     // regions
-    _translator->loadRegions();
+    _data_translator->loadRegions();
     // locations
-    _translator->loadLocations();
+    _data_translator->loadLocations();
     // facilitys
-    _translator->loadFacilitys();
+    _data_translator->loadFacilitys();
     // floors
-    _translator->loadFloors();
-    // rooms groups
-    _translator->loadRoomsGroups();
+    _data_translator->loadFloors();
     // rooms
-    _translator->loadRooms();
+    _data_translator->loadRooms();
 
     // TODO load rents and propertys
 //    // propertys
-//    auto prop_vec = _translator->loadPropertys();
+//    auto prop_vec = _data_translator->loadPropertys();
 //    for( PropertyPtr prop: prop_vec )
 //        _propertys.push_back( prop );
 
 //    // rents
-//    auto rent_vec = _translator->loadRents();
+//    auto rent_vec = _data_translator->loadRents();
 //    for( RentPtr rent: rent_vec )
 //        _rents.push_back( rent );
 
-    // metadate
-    _translator->loadMetadata();
+    // metadata
+    _data_translator->loadMetadata();
 
     // marks
-    _translator->loadMarks();
+    _data_translator->loadMarks();
+
+    // files
+    _data_translator->loadFiles();
 }
 
 void RegionBizManager::clearCurrentData( bool clear_entitys )
 {
-    // areas
-    _regions.clear();
-    _locations.clear();
-    _facilitys.clear();
-    _floors.clear();
-    _rooms_groups.clear();
-    _rooms.clear();
-
-    // relations
-    _rents.clear();
-    _propertys.clear();
-
     //data
     _metadata.clear();
-    _marks.clear();
 
     // entitys
     if( clear_entitys )
         BaseEntity::getEntitys().clear();
 }
 
-void RegionBizManager::appendArea( BaseAreaPtr area )
+template<typename LocType>
+std::vector< std::shared_ptr< LocType >>
+RegionBizManager::getBaseAreasByParent( uint64_t parent_id )
 {
-    switch ( area->getType() ) {
-    case BaseArea::AT_REGION:
-        _regions.push_back( BaseArea::convert< Region >( area ));
-        break;
-    case BaseArea::AT_LOCATION:
-        _locations.push_back( BaseArea::convert< Location >( area ));
-        break;
-    case BaseArea::AT_FACILITY:
-        _facilitys.push_back( BaseArea::convert< Facility >( area ));
-        break;
-    case BaseArea::AT_FLOOR:
-        _floors.push_back( BaseArea::convert< Floor >( area ));
-        break;
-    case BaseArea::AT_ROOMS_GROUP:
-        _rooms_groups.push_back( BaseArea::convert< RoomsGroup >( area ));
-        break;
-    case BaseArea::AT_ROOM:
-        _rooms.push_back( BaseArea::convert< Room >( area ));
-        break;
-    default:
-        break;
-    }
-}
-
-void RegionBizManager::removeArea(BaseAreaPtr area)
-{
-    std::function< bool( BaseAreaPtr ) > check_id =
-            [ area ]( BaseAreaPtr ba ){ return area->getId() == ba->getId(); };
-
-    switch ( area->getType() ) {
-    case BaseArea::AT_REGION:
-    {
-        auto iter = FIND_IF( _regions, check_id );
-        if( iter != _regions.end() )
-            _regions.erase( iter );
-        break;
-    }
-    case BaseArea::AT_LOCATION:
-    {
-        auto iter = FIND_IF( _locations, check_id );
-        if( iter != _locations.end() )
-            _locations.erase( iter );
-        break;
-    }
-    case BaseArea::AT_FACILITY:
-    {
-        auto iter = FIND_IF( _facilitys, check_id );
-        if( iter != _facilitys.end() )
-            _facilitys.erase( iter );
-        break;
-    }
-    case BaseArea::AT_FLOOR:
-    {
-        auto iter = FIND_IF( _floors, check_id );
-        if( iter != _floors.end() )
-            _floors.erase( iter );
-        break;
-    }
-    case BaseArea::AT_ROOMS_GROUP:
-    {
-        auto iter = FIND_IF( _rooms_groups, check_id );
-        if( iter != _rooms_groups.end() )
-            _rooms_groups.erase( iter );
-        break;
-    }
-    case BaseArea::AT_ROOM:
-    {
-        auto iter = FIND_IF( _rooms, check_id );
-        if( iter != _rooms.end() )
-            _rooms.erase( iter );
-        break;
-    }
-    default:
-        break;
-    }
-}
-
-void RegionBizManager::removeMark( MarkPtr mark )
-{
-    std::function< bool( MarkPtr ) > check_id =
-            [ mark ]( MarkPtr m ){ return mark->getId() == m->getId(); };
-
-    auto iter = FIND_IF( _marks, check_id );
-    if( iter != _marks.end() )
-        _marks.erase( iter );
-}
-
-template<typename LocTypePtr>
-std::vector< LocTypePtr > RegionBizManager::getBaseLocationsByParent( uint64_t parent_id,
-                                                                      std::vector< LocTypePtr >& vector )
-{
+    // check parent id
     std::function< bool( BaseAreaPtr ) > check_parent_id =
-            [ parent_id ]( BaseAreaPtr bl ){ return parent_id == bl->getParentId(); };
+            [ parent_id ]( BaseAreaPtr bl )
+    {
+        // if region - return true
+        if( typeid( LocType ) == typeid( Region ))
+            return true;
+        return parent_id == bl->getParentId();
+    };
 
     // WARNING filtered
     std::function< bool( BaseAreaPtr ) > check_filter =
             []( BaseAreaPtr bl ){ return EntityFilter::isFiltered( bl ); };
 
-    std::vector< LocTypePtr > loc_childs;
-    for( LocTypePtr ptr: vector )
+    // get areas
+    BaseAreaPtrs areas = BaseEntity::getEntitysByType< BaseArea >( BaseEntity::ET_AREA );
+
+    // check all areas
+    std::vector< std::shared_ptr< LocType >> loc_childs;
+    for( BaseAreaPtr ptr: areas )
+    {
+        std::shared_ptr< LocType > loc_ptr = BaseArea::convert< LocType >( ptr );
+        if( !loc_ptr )
+            continue;
+
         if( check_parent_id( ptr )
                 && check_filter( ptr ))
-            loc_childs.push_back( ptr );
+            loc_childs.push_back( loc_ptr );
+    }
 
     return loc_childs;
 }

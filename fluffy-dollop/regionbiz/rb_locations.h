@@ -21,7 +21,7 @@ class RegionBizManager;
 
 class BaseArea: public BaseEntity
 {
-    friend class BaseTranslator;
+    friend class BaseDataTranslator;
     friend class RegionBizManager;
 
 public:
@@ -31,7 +31,6 @@ public:
         AT_LOCATION,
         AT_FACILITY,
         AT_FLOOR,
-        AT_ROOMS_GROUP,
         AT_ROOM
     };
 
@@ -48,7 +47,7 @@ public:
     uint64_t getParentId();
     BaseAreaPtr getParent( AreaType parent_type );
     BaseAreaPtr getParent();
-    BaseAreaPtrs getChilds();
+    BaseAreaPtrs getBaseAreaChilds();
 
     // commit
     bool commit();
@@ -75,38 +74,6 @@ private:
     // private, because we need protect it
     void setParent( uint64_t id );
 };
-
-//----------------------------------------
-
-typedef std::shared_ptr< QFile > QFilePtr;
-class PlanKeeper
-{
-public:
-    struct PlanParams
-    {
-        double scale_w = 1;
-        double scale_h = 1;
-        double rotate = 0;
-        double x = 0;
-        double y = 0;
-    };
-
-    PlanKeeper(){}
-    virtual ~PlanKeeper(){}
-
-    QString getPlanPath();
-    void setPlanPath( QString path );
-    QFilePtr getPlanFile();
-    PlanParams getPlanParams();
-    void setPlanParams( PlanParams params );
-
-    // TODO file db
-
-private:
-    QString _plan_path = "";
-    PlanParams _params;
-};
-typedef std::shared_ptr< PlanKeeper > PlanKeeperPtr;
 
 //----------------------------------------------
 
@@ -169,7 +136,7 @@ typedef std::vector< RegionPtr > RegionPtrs;
 class Facility;
 typedef std::shared_ptr< Facility > FacilityPtr;
 
-class Location: public BaseArea, public PlanKeeper, public MarksHolder
+class Location: public BaseArea, public MarksHolder
 {
 public:
     Location( uint64_t id );
@@ -211,17 +178,12 @@ typedef std::vector< FacilityPtr > FacilityPtrs;
 
 //----------------------------------------------
 
-class Floor: public BizRelationKepper, public PlanKeeper, public MarksHolder
+class Room;
+typedef std::shared_ptr< Room > RoomPtr;
+
+class Floor: public BizRelationKepper, public MarksHolder
 {
 public:
-    enum FloorChildFilter
-    {
-        FCF_ALL,
-        FCF_GROUPS,
-        FCF_ROOMS,
-        FCF_ALL_ROOMS
-    };
-
     Floor( uint64_t id );
     virtual ~Floor(){}
     AreaType getType() override;
@@ -231,7 +193,7 @@ public:
     void setNumber( uint16_t number );
 
     // getters
-    BaseAreaPtrs getChilds( FloorChildFilter filter = FCF_ALL );
+    std::vector< RoomPtr > getChilds();
 
 private:
 };
@@ -239,31 +201,7 @@ typedef std::vector< FloorPtr > FloorPtrs;
 
 //-----------------------------------------------
 
-class Room;
-typedef std::shared_ptr< Room > RoomPtr;
-
-class RoomsGroup: public BizRelationKepper, public PlanKeeper
-{
-public:
-    RoomsGroup( uint64_t id );
-    virtual ~RoomsGroup(){}
-    AreaType getType() override;
-
-    // params
-    QString getAddress();
-    void setAddress( QString address );
-    QString getCadastralNumber();
-    void setCadastralNumber( QString number );
-
-    // getters
-    std::vector< RoomPtr > getChilds();
-};
-typedef std::shared_ptr< RoomsGroup > RoomsGroupPtr;
-typedef std::vector< RoomsGroupPtr > RoomsGroupPtrs;
-
-//-------------------------------------------------
-
-class Room: public BizRelationKepper, public PlanKeeper, public MarksHolder
+class Room: public BizRelationKepper, public MarksHolder
 {
 public:
     Room( uint64_t id );

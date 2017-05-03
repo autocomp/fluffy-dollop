@@ -16,7 +16,7 @@ bool BaseFilterParam::isFiltered(BaseEntityPtr entity)
     if( !area )
         return false;
 
-    // if room - check metadate
+    // if room - check metadata
     if( BaseArea::AT_ROOM == area->getType() )
     {
         if( !entity->isMetadataPresent( _name ))
@@ -31,7 +31,7 @@ bool BaseFilterParam::isFiltered(BaseEntityPtr entity)
         // WARNING optimize - return in parent filter
         //return true;
 
-        BaseAreaPtrs childs = area->getChilds();
+        BaseAreaPtrs childs = area->getBaseAreaChilds();
         bool filtered = childs.size();
 
         return filtered;

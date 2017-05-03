@@ -5,7 +5,8 @@
 #include <list>
 
 #include "rb_locations.h"
-#include "rb_translator.h"
+#include "rb_data_translator.h"
+#include "rb_files_translator.h"
 #include "rb_signal_manager.h"
 #include "rb_metadata.h"
 #include "rb_marks.h"
@@ -19,7 +20,7 @@ typedef std::shared_ptr< RegionBizManager > RegionBizManagerPtr;
 
 class RegionBizManager
 {
-    friend class BaseTranslator;
+    friend class BaseDataTranslator;
 
 public:
     virtual ~RegionBizManager(){}
@@ -42,7 +43,6 @@ public:
     std::vector< LocationPtr > getLocationsByParent( uint64_t parent_id );
     std::vector< FacilityPtr > getFacilitysByParent( uint64_t parent_id );
     std::vector< FloorPtr > getFloorsByParent( uint64_t parent_id );
-    std::vector< RoomsGroupPtr > getRoomsGroupsByParent( uint64_t parent_id );
     std::vector< RoomPtr > getRoomsByParent( uint64_t parent_id );
 
     // add
@@ -56,12 +56,22 @@ public:
         if( area )
         {
             area->setParent( parent_id );
-            appendArea( area );
 
             // emit signal
             _change_watcher.addEntity( area->getId() );
         }
         return area;
+    }
+    BaseAreaPtr addArea( BaseArea::AreaType type,
+                         BaseAreaPtr parent );
+    template< typename Type >
+    BaseAreaPtr addArea( BaseAreaPtr parent )
+    {
+        if( !parent )
+            return nullptr;
+
+        BaseAreaPtr add_area = addArea< Type >( parent->getId() );
+        return add_area;
     }
 
     // delete
@@ -98,6 +108,25 @@ public:
     bool deleteMark( uint64_t id );
     bool deleteMark( MarkPtr mark );
 
+    // files
+    BaseFileKeeperPtrs getFilesByEntity( uint64_t id );
+    BaseFileKeeperPtrs getFilesByEntity( BaseEntityPtr ptr );
+    BaseFileKeeperPtrs getFilesByEntity( uint64_t id, BaseFileKeeper::FileType type );
+    BaseFileKeeperPtrs getFilesByEntity( BaseEntityPtr ptr, BaseFileKeeper::FileType type );
+    BaseFileKeeperPtr addFile( QString file_path ,
+                               BaseFileKeeper::FileType type,
+                               uint64_t entity_id );
+
+    // through tranlator
+    QFilePtr getLocalFile( BaseFileKeeperPtr file );
+    BaseFileKeeper::FileState getFileState( BaseFileKeeperPtr file );
+    BaseFileKeeper::FileState syncFile( BaseFileKeeperPtr file );
+
+    // signals of file processing subscribe
+    void subscribeFileSynced( QObject* obj,
+                              const char *slot );
+    void subscribeFileAdded( QObject* obj,
+                             const char *slot );
     // tranlators
     BaseTranslatorPtr getTranslatorByName( QString name );
 
@@ -143,34 +172,30 @@ private:
                       QStringList plugins = QStringList() );
     void loadDataByTranslator();
     void clearCurrentData(bool clear_entitys = true );
-    void appendArea( BaseAreaPtr area );
-    void removeArea( BaseAreaPtr area );
-    void removeMark( MarkPtr mark );
 
-    template< typename LocTypePtr >
-    std::vector< LocTypePtr > getBaseLocationsByParent( uint64_t parent_id,
-                                                        std::vector< LocTypePtr >& vector  );
+    template< typename LocType >
+    std::vector< std::shared_ptr< LocType >>
+    getBaseAreasByParent( uint64_t parent_id );
 
-    static RegionBizManagerPtr _regionbiz_mngr;
-    BaseTranslatorPtr _translator = nullptr;
+    BaseDataTranslatorPtr _data_translator = nullptr;
+    BaseFilesTranslatorPtr _files_translator = nullptr;
 
     // data locations
-    std::vector< RegionPtr > _regions;
-    std::vector< LocationPtr > _locations;
-    std::vector< FacilityPtr > _facilitys;
-    std::vector< FloorPtr > _floors;
-    std::vector< RoomsGroupPtr > _rooms_groups;
-    std::vector< RoomPtr > _rooms;
+    //    std::vector< RegionPtr > _regions;
+    //    std::vector< LocationPtr > _locations;
+    //    std::vector< FacilityPtr > _facilitys;
+    //    std::vector< FloorPtr > _floors;
+    //    std::vector< RoomsGroupPtr > _rooms_groups;
 
     // data relations
-    std::vector< PropertyPtr > _propertys;
-    std::vector< RentPtr > _rents;
+    //    std::vector< PropertyPtr > _propertys;
+    //    std::vector< RentPtr > _rents;
 
     // metadata
     MetadataById _metadata;
 
     // marks
-    MarkPtrs _marks;
+    //MarkPtrs _marks;
 
     // signals
     SelectionManager _select_manager;

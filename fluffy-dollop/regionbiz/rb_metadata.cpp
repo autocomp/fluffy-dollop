@@ -1,10 +1,17 @@
 #include "rb_metadata.h"
 
+#include <iostream>
+
 using namespace regionbiz;
 
 BaseMetadata::BaseMetadata(uint64_t parent_id):
     _parent_id( parent_id )
 {}
+
+bool BaseMetadata::isEmpty()
+{
+    return false;
+}
 
 uint64_t BaseMetadata::getParentId()
 {
@@ -149,4 +156,48 @@ BaseMetadataPtr MetadataFabric::createMetadata( QString type,
         return StringMetadataPtr( new StringMetadata( parent_id ));
 
     return nullptr;
+}
+
+EmptyMetadata::EmptyMetadata():
+    BaseMetadata( 0 )
+{}
+
+EmptyMetadataPtr EmptyMetadata::instance()
+{
+    static EmptyMetadata empty;
+    return EmptyMetadataPtr( &empty );
+}
+
+QString EmptyMetadata::getType()
+{
+    return "";
+}
+
+QString EmptyMetadata::getValueAsString()
+{
+    return "";
+}
+
+void EmptyMetadata::setValueByString(QString val)
+{
+    std::cerr << "Set value for empty metadata: "
+              << val.toUtf8().data() << std::endl;
+    static_assert( true, "Set value for empty metadata" );
+}
+
+QVariant EmptyMetadata::getValueAsVariant()
+{
+    return QVariant();
+}
+
+void EmptyMetadata::setValueByVariant(QVariant val)
+{
+    std::cerr << "Set value for empty metadata: "
+              << val.toString().toUtf8().data() << std::endl;
+    static_assert( true, "Set value for empty metadata" );
+}
+
+bool EmptyMetadata::isEmpty()
+{
+    return true;
 }

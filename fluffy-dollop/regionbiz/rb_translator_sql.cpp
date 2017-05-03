@@ -9,6 +9,7 @@
 #include <QSqlDriver>
 
 #include "rb_manager.h"
+#include "rb_files.h"
 
 using namespace regionbiz;
 
@@ -23,7 +24,6 @@ void SqlTranslator::loadFunctions()
     _load_locations = std::bind( &SqlTranslator::loadLocations, this );
     _load_facilitys = std::bind( &SqlTranslator::loadFacilitys, this );
     _load_floors = std::bind( &SqlTranslator::loadFloors, this );
-    _load_rooms_groups = std::bind( &SqlTranslator::loadRoomsGroups, this );
     _load_rooms = std::bind( &SqlTranslator::loadRooms, this );
 
     // delete locations
@@ -43,59 +43,53 @@ void SqlTranslator::loadFunctions()
     _load_marks = std::bind( &SqlTranslator::loadMarks, this );
     _commit_mark = std::bind( &SqlTranslator::commitMark, this, std::placeholders::_1 );
     _delete_mark = std::bind( &SqlTranslator::deleteMark, this, std::placeholders::_1 );
+
+    // files
+    _load_files = std::bind( &SqlTranslator::loadFiles, this );
 }
 
 std::vector< RegionPtr > SqlTranslator::loadRegions()
 {
-    return loadBaseAreas< Region >( "regions" );
+    return loadBaseAreas< Region >( "region" );
 }
 
 std::vector<LocationPtr> SqlTranslator::loadLocations()
 {
-    return loadBaseAreas< Location >( "locations" );
+    return loadBaseAreas< Location >( "location" );
 }
 
 std::vector<FacilityPtr> SqlTranslator::loadFacilitys()
 {
-    return loadBaseAreas< Facility >( "facilitys" );
+    return loadBaseAreas< Facility >( "facility" );
 }
 
 std::vector<FloorPtr> SqlTranslator::loadFloors()
 {
-    return loadBaseAreas< Floor >( "floors" );
-}
-
-std::vector<RoomsGroupPtr> SqlTranslator::loadRoomsGroups()
-{
-    return loadBaseAreas< RoomsGroup >( "rooms_groups" );
+    return loadBaseAreas< Floor >( "floor" );
 }
 
 std::vector<RoomPtr> SqlTranslator::loadRooms()
 {
-    return loadBaseAreas< Room >( "rooms" );
+    return loadBaseAreas< Room >( "room" );
 }
 
 #define tryQuery( string ) \
     if( !query.exec( string )) \
     { \
+        qDebug() << query.lastError(); \
         db.rollback(); \
         return false; \
     } \
 
 bool SqlTranslator::deleteArea(BaseAreaPtr area)
 {
-    // find a type
-    QString type = getStringType( area->getType() );
-    if( type.isEmpty() )
-        return false;
-
     // lock database
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
     db.transaction();
     QSqlQuery query( db );
 
     // delete all data
-    QString delete_metadata = "DELETE FROM metadate "
+    QString delete_metadata = "DELETE FROM metadata "
                               "WHERE entity_id = " + QString::number( area->getId() );
     tryQuery( delete_metadata );
 
@@ -103,11 +97,16 @@ bool SqlTranslator::deleteArea(BaseAreaPtr area)
                             "WHERE id = " + QString::number( area->getId() );
     tryQuery( delete_coords );
 
-    QString delete_area = "DELETE FROM " + type +
+    QString delete_entity = "DELETE FROM entitys "
+                          " WHERE id = " + QString::number( area->getId() );
+    tryQuery( delete_entity );
+
+    QString delete_area = "DELETE FROM areas "
                           " WHERE id = " + QString::number( area->getId() );
     tryQuery( delete_area );
 
     // TODO delete relations
+    // TODO delete files
 
     // unlock
     db.commit();
@@ -116,36 +115,32 @@ bool SqlTranslator::deleteArea(BaseAreaPtr area)
 
 bool SqlTranslator::commitArea( BaseAreaPtr area )
 {
-    // find a type
-    QString type = getStringType( area->getType() );
-    if( type.isEmpty() )
-        return false;
-
     // lock base
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
     db.transaction();
 
     // check exist
-    QString select = "SELECT id, parent, name, description FROM " + type +
+    QString select = "SELECT id, parent_id, name, description FROM entitys "
                      " WHERE id = " + QString::number( area->getId() );
     QSqlQuery query( db );
     query.setForwardOnly( true );
     query.exec( select );
+    bool has_area = query.first();
 
     QString insert_update;
 
     // room
-    if( query.first() )
+    if( has_area )
     {
         // update
-        insert_update = "UPDATE " + type +
-                        " SET id = ?, parent = ?, name = ?, description = ? "
+        insert_update = "UPDATE entitys "
+                        "SET id = ?, parent_id = ?, name = ?, description = ? "
                         "WHERE id = " + QString::number( area->getId() );
     }
     else
     {
         // insert
-        insert_update = "INSERT INTO " + type + " (id, parent, name, description ) "
+        insert_update = "INSERT INTO entitys (id, parent_id, name, description) "
                         "VALUES (?, ?, ?, ?);";
     }
 
@@ -154,7 +149,23 @@ bool SqlTranslator::commitArea( BaseAreaPtr area )
     query.addBindValue( (qulonglong) area->getParentId() );
     query.addBindValue( area->getName() );
     query.addBindValue( area->getDescription() );
-    tryQuery()
+
+    tryQuery();
+
+    if( !has_area )
+    {
+        // find a type
+        QString type = getStringType( area->getType() );
+        if( type.isEmpty() )
+            return false;
+
+        QString insert_area = "INSERT INTO areas (id, type)"
+                              "VALUES (?, ?)";
+        query.prepare( insert_area );
+        query.addBindValue( (qulonglong) area->getId() );
+        query.addBindValue( type );
+        tryQuery()
+    }
 
     // coordinates
     if( !commitCoordinates( area ))
@@ -163,8 +174,15 @@ bool SqlTranslator::commitArea( BaseAreaPtr area )
         return false;
     }
 
-    // commit metadate
+    // commit metadata
     if( !commitMetadate( area ))
+    {
+        db.rollback();
+        return false;
+    }
+
+    // commit files
+    if( !commitFiles( area ))
     {
         db.rollback();
         return false;
@@ -241,7 +259,7 @@ BaseMetadataPtrs SqlTranslator::loadMetadata()
     BaseMetadataPtrs metadata;
 
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
-    QString select = "SELECT entity_id, type, name, value FROM metadate";
+    QString select = "SELECT entity_id, type, name, value FROM metadata";
     QSqlQuery query( db );
     bool res = query.exec( select );
     if( res )
@@ -318,8 +336,15 @@ bool SqlTranslator::commitMark( MarkPtr mark )
     query.addBindValue( mark->getDescription() );
     tryQuery();
 
-    // commit metadate
+    // commit metadata
     if( !commitMetadate( mark ))
+    {
+        db.rollback();
+        return false;
+    }
+
+    // commit files
+    if( !commitFiles( mark ))
     {
         db.rollback();
         return false;
@@ -342,10 +367,12 @@ bool SqlTranslator::deleteMark( MarkPtr mark )
     QSqlQuery query( db );
     tryQuery( delete_mark );
 
-    // metadate
-    QString delete_coords = "DELETE FROM metadate "
+    // metadata
+    QString delete_coords = "DELETE FROM metadata "
                             "WHERE entity_id = " + QString::number( mark->getId() );
     tryQuery( delete_coords );
+
+    // TODO delete files
 
     // unlock base
     db.commit();
@@ -387,12 +414,12 @@ bool SqlTranslator::commitMetadate(BaseEntityPtr area)
 {
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
     QSqlQuery query( db );
-    QString delete_coords = "DELETE FROM metadate "
+    QString delete_coords = "DELETE FROM metadata "
                             "WHERE entity_id = " + QString::number( area->getId() );
     if( !query.exec( delete_coords ))
         return false;
 
-    QString insert_coords = "INSERT INTO metadate ( entity_id, type, name, value ) "
+    QString insert_coords = "INSERT INTO metadata ( entity_id, type, name, value ) "
                             "VALUES ( ?, ?, ?, ? );";
     query.prepare( insert_coords );
     // prepare data
@@ -415,6 +442,65 @@ bool SqlTranslator::commitMetadate(BaseEntityPtr area)
     return query.execBatch();
 }
 
+bool SqlTranslator::commitFiles(BaseEntityPtr entity)
+{
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    QSqlQuery query( db );
+    QString delete_files = "DELETE FROM files "
+                           "WHERE entity_id = " + QString::number( entity->getId() );
+    if( !query.exec( delete_files ))
+        return false;
+
+    // insert all files
+    QString insert_files = "INSERT INTO files( entity_id, path, type ) VALUES ( ?, ?, ? );";
+    query.prepare( insert_files );
+    // prepare data
+    QVariantList ids, paths, types;
+    for( auto file: entity->getFiles() )
+    {
+        ids.push_back( (qulonglong) entity->getId() );
+        paths.push_back( file->getPath() );
+        types.push_back( getStringFileType( file->getType() ));
+    }
+    // bind data
+    query.addBindValue( ids );
+    query.addBindValue( paths );
+    query.addBindValue( types );
+
+    if ( !query.execBatch() )
+        return false;
+
+    // insert plans
+    QString insert_plans = "INSERT INTO plans( path, scale_w, scale_h, angle, x, y) VALUES ( ?, ?, ?, ?, ?, ? );";
+    query.prepare( insert_plans );
+    // prepare data
+    QVariantList plan_paths, scales_w, scales_h,
+            angles, xs, ys;
+    for( auto file: entity->getFiles() )
+    {
+        PlanFileKeeperPtr plan = BaseFileKeeper::convert< PlanFileKeeper >( file );
+        if( !plan )
+            continue;
+
+        PlanFileKeeper::PlanParams params = plan->getPlanParams();
+        plan_paths.push_back( file->getPath() );
+        scales_w.push_back( params.scale_w );
+        scales_h.push_back( params.scale_h );
+        angles.push_back( params.rotate );
+        xs.push_back( params.x );
+        ys.push_back( params.y );
+    }
+    // bind data
+    query.addBindValue( plan_paths );
+    query.addBindValue( scales_w );
+    query.addBindValue( scales_h );
+    query.addBindValue( angles );
+    query.addBindValue( xs );
+    query.addBindValue( ys );
+
+    return query.execBatch();
+}
+
 //------------------------------------------------------
 
 template<typename LocType>
@@ -424,12 +510,10 @@ std::vector< std::shared_ptr< LocType >> SqlTranslator::loadBaseAreas( QString t
     std::vector< LocTypePtr > areas;
 
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
-    QString select;
-    // region hasn't parent
-    if( typeid( LocType ) == typeid( Region ))
-        select = "SELECT id, name, description FROM " + type_name;
-    else
-        select = "SELECT id, name, description, parent FROM " + type_name;
+    QString select = "SELECT name, e.id, description, parent_id "
+                     "FROM entitys as e JOIN areas as a "
+                     "on (a.id = e.id AND a.type = \'" + type_name + "\')";
+
     QSqlQuery query( db );
 
     bool plan_keeper = false;
@@ -442,9 +526,7 @@ std::vector< std::shared_ptr< LocType >> SqlTranslator::loadBaseAreas( QString t
         for( query.first(); query.isValid(); query.next() )
         {
             uint64_t id = query.value( "id" ).toLongLong();
-            uint64_t parent_id = 0;
-            if( query.record().contains( "parent" ))
-                parent_id = query.value( "parent" ).toLongLong();
+            uint64_t parent_id = query.value( "parent_id" ).toLongLong();
             QString name = query.value( "name" ).toString();
             QString descr = query.value( "description" ).toString();
 
@@ -456,31 +538,24 @@ std::vector< std::shared_ptr< LocType >> SqlTranslator::loadBaseAreas( QString t
             area_ptr->setName( name );
             area_ptr->setDesription( descr );
 
-            PlanKeeperPtr plan_keeper_ptr = BaseArea::convert< PlanKeeper >( area_ptr );
-            if( plan_keeper_ptr )
-                plan_keeper = true;
-
             areas.push_back( area_ptr );
         }
     }
 
-    if( plan_keeper )
-        loadPlans< LocTypePtr >( areas );
-    loadCoordinate< LocTypePtr >( areas, type_name );
+    loadCoordinate< LocTypePtr >( areas );
 
     return areas;
 }
 
 template<typename LocTypePtr>
-bool SqlTranslator::loadCoordinate( std::vector< LocTypePtr > &vector,
-                                       QString name )
+bool SqlTranslator::loadCoordinate( std::vector< LocTypePtr > &vector )
 {
     std::map< uint64_t, QPolygonF > coords;
 
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
     QSqlQuery query( db );
-    QString select_coords = "SELECT c.id, c.x, c.y, c.number FROM " + name + " as n JOIN coords as c "
-                            "ON n.id = c.id ORDER by c.id, c.number";
+    QString select_coords = "SELECT c.id, c.x, c.y, c.number FROM entitys as e JOIN coords as c "
+                            "ON e.id = c.id ORDER by c.id, c.number";
     // boost speed of query
     query.setForwardOnly( true );
     bool res = query.exec( select_coords );
@@ -504,49 +579,63 @@ bool SqlTranslator::loadCoordinate( std::vector< LocTypePtr > &vector,
     return res;
 }
 
-template< typename LocTypePtr >
-bool SqlTranslator::loadPlans( std::vector< LocTypePtr >& areas )
+BaseFileKeeperPtrs SqlTranslator::loadFiles()
 {
+    BaseFileKeeperPtrs files;
+
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
     QSqlQuery query( db );
     // boost speed
     query.setForwardOnly( true );
-    QString select_plans = "SELECT parent, path, scale_w, scale_h, angle, x, y FROM plans ";
-    bool res = query.exec( select_plans );
+
+    std::map< QString, PlanFileKeeper::PlanParams > plan_params;
+    QString select_plans = "SELECT path, scale_w, scale_h, angle, x, y FROM plans ";
+    bool res_plans = query.exec( select_plans );
+    if( res_plans )
+    {
+        for( query.first(); query.isValid(); query.next() )
+        {
+            QString path = query.value( 0 ).toString();
+
+            PlanFileKeeper::PlanParams params;
+            params.scale_w = query.value( 1 ).toDouble();
+            params.scale_h = query.value( 2 ).toDouble();
+            params.rotate = query.value( 3 ).toDouble();
+            params.x = query.value( 4 ).toDouble();
+            params.y = query.value( 5 ).toDouble();
+
+            plan_params[ path ] = params;
+        }
+    }
+
+    QString select_files = "SELECT entity_id, path, type FROM files";
+    bool res = query.exec( select_files );
     if( res )
     {
         for( query.first(); query.isValid(); query.next() )
         {
             uint64_t parent_id = query.value( 0 ).toLongLong();
-            std::function< bool( BaseAreaPtr ) > check_id =
-                    [ parent_id ]( BaseAreaPtr ba ){ return parent_id == ba->getId(); };
+            QString path = query.value( 1 ).toString();
+            QString type_str = query.value( 2 ).toString();
+            BaseFileKeeper::FileType type = getFileTypeByString( type_str );
 
-            BaseAreaPtr area;
-            auto iter = FIND_IF( areas, check_id );
-            if( iter != areas.end() )
-                area = *iter;
+            BaseFileKeeperPtr file_ptr = FileKeeperFabric::createFile( path, parent_id, type );
 
-            std::shared_ptr< PlanKeeper > keeper = BaseArea::convert< PlanKeeper >( area );
-            if( keeper )
+            if( BaseFileKeeper::FT_PLAN == type )
             {
-                QString path = query.value( 1 ).toString();
+                auto plan = BaseFileKeeper::convert< PlanFileKeeper >( file_ptr );
+                if( !res_plans
+                        || !plan )
+                    continue;
 
-                PlanKeeper::PlanParams params;
-                params.scale_w = query.value( 2 ).toDouble();
-                params.scale_h = query.value( 3 ).toDouble();
-                params.rotate = query.value( 4 ).toDouble();
-                params.x = query.value( 5 ).toDouble();
-                params.y = query.value( 6 ).toDouble();
-
-                keeper->setPlanParams( params );
-                keeper->setPlanPath( path );
+                plan->setPlanParams( plan_params[ path ] );
             }
+
+            files.push_back( file_ptr );
         }
     }
-    else
-        return false;
 
-    return true;
+    return files;
 }
 
 bool SqlTranslator::loadDocuments( BaseBizRelationPtr /*relation*/ )
@@ -566,26 +655,57 @@ QString SqlTranslator::getStringType(BaseArea::AreaType area_type)
     QString type = "";
     switch ( area_type ) {
     case BaseArea::AT_REGION:
-        type = "regions";
+        type = "region";
         break;
     case BaseArea::AT_LOCATION:
-        type = "locations";
+        type = "location";
         break;
     case BaseArea::AT_FACILITY:
-        type = "facilitys";
+        type = "facility";
         break;
     case BaseArea::AT_FLOOR:
-        type = "floors";
-        break;
-    case BaseArea::AT_ROOMS_GROUP:
-        type = "rooms_groups";
+        type = "floor";
         break;
     case BaseArea::AT_ROOM:
-        type = "rooms";
+        type = "room";
         break;
     }
 
     return type;
+}
+
+QString SqlTranslator::getStringFileType(BaseFileKeeper::FileType type)
+{
+    QString type_str;
+    switch( type )
+    {
+    case BaseFileKeeper::FT_PLAN:
+    {
+        type_str = "plan";
+        break;
+    }
+
+    case BaseFileKeeper::FT_DOCUMENT:
+    {
+        type_str = "document";
+        break;
+    }
+
+    case BaseFileKeeper::FT_IMAGE:
+    {
+        type_str = "image";
+        break;
+    }
+
+    }
+
+    return type_str;
+}
+
+BaseFileKeeper::FileType SqlTranslator::getFileTypeByString(QString type)
+{
+    if( "plan" == type )
+        return BaseFileKeeper::FT_PLAN;
 }
 
 bool SqliteTranslator::initBySettings(QVariantMap settings)

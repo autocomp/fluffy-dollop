@@ -123,6 +123,18 @@ bool BaseEntity::addMetadata(BaseMetadataPtr data)
     return false;
 }
 
+BaseFileKeeperPtrs BaseEntity::getFiles()
+{
+    auto mngr = RegionBizManager::instance();
+    return mngr->getFilesByEntity( _id );
+}
+
+BaseFileKeeperPtrs BaseEntity::getFilesByType(BaseFileKeeper::FileType type)
+{
+    auto mngr = RegionBizManager::instance();
+    return mngr->getFilesByEntity( _id, type );
+}
+
 bool BaseEntity::deleteEntity(BaseEntityPtr ent)
 {
     return deleteEntity( ent->getId() );
@@ -137,3 +149,4 @@ BaseEntityPtr BaseEntity::getItself()
 {
     return getEntitys()[ _id ];
 }
+

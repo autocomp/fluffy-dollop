@@ -27,7 +27,7 @@ typedef std::shared_ptr< BaseBizRelation > BaseBizRelationPtr;
 
 class BaseBizRelation
 {
-    friend class BaseTranslator;
+    friend class BaseDataTranslator;
 
 public:
     enum RelationType

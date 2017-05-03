@@ -27,6 +27,7 @@ public:
     virtual void setValueByString( QString val ) = 0;
     virtual QVariant getValueAsVariant() = 0;
     virtual void setValueByVariant( QVariant val ) = 0;
+    virtual bool isEmpty();
 
     // getters
     uint64_t getParentId();
@@ -120,6 +121,29 @@ typedef std::vector< IntegerMetadataPtr > IntegerMetadataPtrs;
 
 //--------------------------------------------------
 
+class EmptyMetadata;
+typedef std::shared_ptr< EmptyMetadata > EmptyMetadataPtr;
+
+class EmptyMetadata: public BaseMetadata
+{
+public:
+    static EmptyMetadataPtr instance();
+
+    // type
+    QString getType() override;
+
+    // value
+    QString getValueAsString() override;
+    void setValueByString(QString) override;
+    QVariant getValueAsVariant() override;
+    void setValueByVariant( QVariant val ) override;
+    bool isEmpty() override;
+
+private:
+    EmptyMetadata();
+};
+
+//--------------------------------------------------
 class MetadataFabric
 {
 public:
