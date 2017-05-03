@@ -13,7 +13,7 @@ LONG WINAPI TopLevelFilter(struct _EXCEPTION_POINTERS* pExceptionInfo)
 {
     LONG result = EXCEPTION_CONTINUE_SEARCH;    // finalize process in standart way by default
     HMODULE hDll = NULL;
-    MINIDUMP_EXCEPTION_INFORMATION exInfo = { 0 };
+    MINIDUMP_EXCEPTION_INFORMATION exInfo = { 0, 0, 0 };
     BOOL isOK = FALSE;
     MINIDUMPWRITEDUMP pfnDump = NULL;
     HANDLE hFile = NULL;
