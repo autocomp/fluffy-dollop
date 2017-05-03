@@ -1,13 +1,14 @@
 #ifndef RBP_XLSX_TRANSLATOR_H
 #define RBP_XLSX_TRANSLATOR_H
 
-#include <regionbiz/rb_translator.h>
+#include <regionbiz/rb_data_translator.h>
+#include <regionbiz/rb_plugin_register.h>
 
 namespace regionbiz {
 
 REGISTER_PLUGIN( xlsx_tranlator )
 
-class XlsxTranlsator: public QObject, public BaseTranslator
+class XlsxTranlsator: public QObject, public BaseDataTranslator
 {
     Q_OBJECT
 public:

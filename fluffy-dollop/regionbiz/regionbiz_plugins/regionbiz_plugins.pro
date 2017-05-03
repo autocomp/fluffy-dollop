@@ -2,4 +2,5 @@ TEMPLATE = subdirs
 CONFIG   += ordered
 
 SUBDIRS = \
-    xlsx_translator
+    xlsx_translator \
+    files_translator_ftp \
