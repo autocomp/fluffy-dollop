@@ -22,4 +22,5 @@ LIBS += -L$${INSTALL_PATH_LIB} \
         -lregionbiz
 
 HEADERS += \
-    test_reciver.h
+    test_reciver.h \
+    ftp_checker.h

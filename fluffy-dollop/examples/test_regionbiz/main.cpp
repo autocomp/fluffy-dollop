@@ -1,9 +1,13 @@
 #include <QDebug>
 #include <QDir>
+#include <QCoreApplication>
 
 #include <regionbiz/rb_manager.h>
+#include <regionbiz/rb_entity_filter.h>
+#include <regionbiz/rb_files_translator.h>
 
 #include "test_reciver.h"
+#include "ftp_checker.h"
 
 void loadXlsx()
 {
@@ -11,7 +15,7 @@ void loadXlsx()
     auto mngr = RegionBizManager::instance();
 
     // select facility
-    BaseAreaPtr facility = mngr->getBaseArea( 21 )->convert< Facility >();
+    FacilityPtr facility = mngr->getBaseArea( 21 )->convert< Facility >();
     if( !facility )
     {
         qDebug() << "It's not facility";
@@ -29,12 +33,13 @@ void loadXlsx()
     mngr->selectEntity( facility->getId() );
 
     // load translator
-    BaseTranslatorPtr ptr = mngr->getTranslatorByName( "xlsx" );
+    BaseDataTranslatorPtr ptr = BaseTranslator::convert< BaseDataTranslator >(
+                mngr->getTranslatorByName( "xlsx" ));
     // set settings of path
     QVariantMap settings = {{ "file_path", "./data/гостиница Россия.xlsx" }};
     ptr->init( settings );
     QString err = "";
-    bool try_check_all_load = ptr->checkTranslator( BaseTranslator::CT_READ, err );
+    bool try_check_all_load = ptr->checkTranslator( BaseDataTranslator::CT_READ, err );
     if( !try_check_all_load )
         qDebug() << "Yes, some wrong" << err;
 
@@ -84,12 +89,7 @@ void bigExample()
     for( BaseAreaPtr ptr: locations )
     {
         LocationPtr loc = BaseArea::convert< Location >( ptr );
-        qDebug() << " New location: " << loc->getAddress() << ", " << loc->getDescription()
-                  << " (" << loc->getPlanPath() << ")";
-
-        PlanKeeper::PlanParams params = loc->getPlanParams();
-        qDebug() << "  Params of plan: " << params.scale_h << "x" << params.scale_w
-                  << ", " << params.rotate << ", " << params.x << "x" << params.y;
+        qDebug() << " New location: " << loc->getAddress() << ", " << loc->getDescription();
 
         for( QPointF coord: loc->getCoords() )
             qDebug() << "   Location Point: " << coord.x() << "x" << coord.y();
@@ -131,7 +131,7 @@ void bigExample()
                       << ( flo->getCoords().length() ? "have coords" : "don't have coords" );
 
             //! process rooms
-            BaseAreaPtrs rooms = flo->getChilds( Floor::FCF_ALL_ROOMS );
+            RoomPtrs rooms = flo->getChilds(  );
             for( BaseAreaPtr room_ptr: rooms )
             {
                 RoomPtr room = BaseArea::convert< Room >( room_ptr );
@@ -152,7 +152,7 @@ void bigExample()
     mngr->subscribeCenterOn( &recv, SLOT(onCenterOn(uint64_t)) );
     mngr->centerOnEntity( 6 );
 
-    //! test of metadate
+    //! test of metadata
     auto area = mngr->getBaseArea( 13 );
     // create some metadata
     area->addMetadata( "double", "area", 25 );
@@ -176,7 +176,7 @@ void bigExample()
     }
     BaseMetadataPtr data = area->getMetadata( "area" );
     qDebug() << " Data square:" << ( data ? data->getValueAsString() : "NONE" );
-    // commit metadate (change base)
+    // commit metadata (change base)
     // area->commit();
 
     //! test of entitys
@@ -215,7 +215,7 @@ void bigExample()
     {
         // add metadata
         MarkPtr mark = marks.at( 0 );
-        qDebug() << "Add metadate to mark"
+        qDebug() << "Add metadata to mark"
                  << mark->addMetadata( "string", "check", "Test" );
         // commit-delete
         qDebug() << "  Commit mark" << mark->commit();
@@ -270,8 +270,148 @@ void selectManagment()
     mngr->clearSelect();
 }
 
-int main()
+void filterCheck()
 {
+    using namespace regionbiz;
+
+    //! init
+    auto mngr = RegionBizManager::instance();
+    QString str = "contour_ng\\regionbiz_psql.json";
+    bool inited = mngr->init( str );
+
+    // make filter
+    BaseFilterParamPtrs filters;
+
+    auto area_filter = BaseFilterParamFabric::createFilter< DoubleFilterParam >( "area" );
+    area_filter->setMax( 20 );
+    area_filter->setMin( 10 );
+    area_filter->setGetEmptyMetadate( false );
+    filters.push_back( area_filter );
+
+    auto status_filter = BaseFilterParamFabric::createFilter< StringFilterParam >( "status" );
+    status_filter->setRegExp( QString::fromUtf8( "Свободно" ));
+    //filters.push_back( status_filter );
+
+    auto rentor_filter = BaseFilterParamFabric::createFilter< StringFilterParam >( "rentor" );
+    rentor_filter->setRegExp( QString::fromUtf8( "*АО*" ));
+    filters.push_back( rentor_filter );
+
+    EntityFilter::setFilters( filters );
+
+    // load all locations
+    std::vector< RegionPtr > regions = mngr->getRegions();
+    RegionPtr reg = regions.front();
+
+    // metade empty check
+    qDebug() << "Meta Data:" << reg->getMetadata( "test" )->getName() <<
+                                reg->getMetadata( "test" )->getValueAsString();
+    reg->getMetadata( "test" )->setValueByString( "some" );
+
+    // print facilitys info
+    std::vector< BaseAreaPtr > facilitys = reg->getChilds( Region::RCF_ALL_FACILITYS );
+    for( BaseAreaPtr fac_ptr: facilitys )
+    {
+        FacilityPtr fac = BaseArea::convert< Facility >( fac_ptr );
+        qDebug() << " Facility: " << fac->getDescription();
+    }
+
+    // process floors
+    for( BaseAreaPtr fac_ptr: facilitys )
+    {
+        // load floors
+        FacilityPtr fac = BaseArea::convert< Facility >( fac_ptr );
+        FloorPtrs floors = fac->getChilds();
+
+        for( FloorPtr flo: floors )
+        {
+            // print info
+            qDebug() << "  Floor info: " << flo->getNumber() << " - " << flo->getName();
+
+            // process rooms
+            RoomPtrs rooms = flo->getChilds();
+            for( BaseAreaPtr room_ptr: rooms )
+            {
+                RoomPtr room = BaseArea::convert< Room >( room_ptr );
+
+                // print info
+                qDebug() << "    Room: " << room->getName();
+                QString data_info = "     Data:";
+                if( room->isMetadataPresent( "area" ))
+                    data_info += " Area: " + room->getMetadataValue( "area" ).toString();
+                if( room->isMetadataPresent( "status" ))
+                    data_info += " Status: " + room->getMetadataValue( "status" ).toString();
+                if( room->isMetadataPresent( "rentor" ))
+                    data_info += " Rentor: " + room->getMetadataValue( "rentor" ).toString();
+                qDebug() << "" << data_info;
+            }
+        }
+    }
+}
+
+void checkCommitAndDelete()
+{
+    using namespace regionbiz;
+
+    //! init
+    auto mngr = RegionBizManager::instance();
+    QString str = "contour_ng\\regionbiz_psql.json";
+    bool inited = mngr->init( str );
+
+    // get region
+    std::vector< RegionPtr > regions = mngr->getRegions();
+    RegionPtr reg = regions.front();
+
+    // make area
+    auto loc = mngr->addArea< Location >( reg );
+    loc->addMetadata( "double", "test_field", 12 );
+    loc->setCoords( QPolygonF() << QPointF( 10, 20 ) <<  QPointF( 15, 16 ));
+    loc->setName( QString::fromUtf8( "Тестовая локация" ));
+
+    QTime time;
+
+    time.restart();
+    bool comm = loc->commit();
+    std::cout << "Location " << loc->getId() << " was commited: " << comm << time.elapsed() << std::endl;
+
+    // create and commit childs
+    time.restart();
+    bool comm_ch = true;
+    for( int i = 0; i < 100; ++i )
+    {
+        auto fac = mngr->addArea< Facility >( loc );
+        fac->addMetadata( "double", "test_field", 12 );
+        fac->addMetadata( "double", "test_field2", 25 );
+        fac->setCoords( QPolygonF() << QPointF( 10, 20 ) <<  QPointF( 15, 16 )
+                        << QPointF( 100, 200 ) <<  QPointF( 150, 160 ));
+        fac->setName( QString::fromUtf8( "Тестовое здание" ));
+        comm_ch = comm_ch && fac->commit();
+    }
+    qDebug() << "Child commited:" << comm_ch << time.elapsed();
+
+    time.restart();
+    bool del = mngr->deleteArea( loc );
+    std::cout << "Location " << loc->getId() << " was deleted: " << del << time.elapsed() << std::endl;
+}
+
+void init()
+{
+    using namespace regionbiz;
+
+    //! init
+    auto mngr = RegionBizManager::instance();
+    QString str = "contour_ng\\regionbiz_psql.json";
+    bool inited = mngr->init( str );
+}
+
+void checkFtp()
+{
+    FtpChecker* ftp_check = new FtpChecker();
+}
+
+int main( int argc, char** argv )
+{
+    QCoreApplication app( argc, argv );
+
     //! old exmple
     // bigExample();
 
@@ -279,5 +419,19 @@ int main()
     // loadXlsx();
 
     //! select managment
-    selectManagment();
+    //selectManagment();
+
+    //! filter checker
+    // filterCheck();
+
+    //! check commit and delete
+    //checkCommitAndDelete();
+
+    //! init
+    init();
+
+    //! check ftp
+    checkFtp();
+
+    return app.exec();
 }
