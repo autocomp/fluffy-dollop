@@ -230,6 +230,15 @@ void FilesTranslatorFtp::ftpCommandFinished( int id, bool error )
         }
     }
 
+    case QFtp::Remove:
+    case QFtp::Mkdir:
+    case QFtp::Rmdir:
+    case QFtp::Rename:
+    {
+        // TODO add this Ftp options
+        break;
+    }
+
     }
 
     // if somth wrong - reconnect
@@ -441,7 +450,12 @@ QString FilesTranslatorFtp::getFileCategoryByType(BaseFileKeeper::FileType type)
         return "plans";
     case BaseFileKeeper::FT_IMAGE:
         return "images";
+    case BaseFileKeeper::FT_DOCUMENT:
+        return "documents";
+    case BaseFileKeeper::FT_NONE:
+        return "";
     }
+    return "";
 }
 
 QString FilesTranslatorFtp::getFileCategoryByType(BaseFileKeeperPtr file)

@@ -516,8 +516,6 @@ std::vector< std::shared_ptr< LocType >> SqlTranslator::loadBaseAreas( QString t
 
     QSqlQuery query( db );
 
-    bool plan_keeper = false;
-
     // boost speed
     query.setForwardOnly( true );
     bool res = query.exec( select );
@@ -696,7 +694,8 @@ QString SqlTranslator::getStringFileType(BaseFileKeeper::FileType type)
         type_str = "image";
         break;
     }
-
+    case BaseFileKeeper::FT_NONE:
+        break;
     }
 
     return type_str;
@@ -706,6 +705,12 @@ BaseFileKeeper::FileType SqlTranslator::getFileTypeByString(QString type)
 {
     if( "plan" == type )
         return BaseFileKeeper::FT_PLAN;
+    if( "document" == type )
+        return BaseFileKeeper::FT_DOCUMENT;
+    if( "image" == type )
+        return BaseFileKeeper::FT_IMAGE;
+
+    return BaseFileKeeper::FT_NONE;
 }
 
 bool SqliteTranslator::initBySettings(QVariantMap settings)

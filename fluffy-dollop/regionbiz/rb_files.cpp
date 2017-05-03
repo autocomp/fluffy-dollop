@@ -64,8 +64,15 @@ BaseFileKeeperPtr FileKeeperFabric::createFile(QString path, uint64_t entity_id,
     {
     case BaseFileKeeper::FT_PLAN:
         return BaseFileKeeperPtr( new PlanFileKeeper( path, entity_id ));
-
+    case BaseFileKeeper::FT_DOCUMENT:
+        return BaseFileKeeperPtr( new DocumentFileKeeper( path, entity_id ));
+    case BaseFileKeeper::FT_IMAGE:
+        return BaseFileKeeperPtr( new ImageFileKeeper( path, entity_id ));
+    case BaseFileKeeper::FT_NONE:
+        return nullptr;
     }
+
+    return nullptr;
 }
 
 //----------------------------------------------------
@@ -76,7 +83,7 @@ PlanFileKeeper::PlanFileKeeper(QString path, uint64_t entity_id ):
 
 BaseFileKeeper::FileType PlanFileKeeper::getType()
 {
-    return BaseFileKeeper::FT_PLAN;
+    return FT_PLAN;
 }
 
 PlanFileKeeper::PlanParams PlanFileKeeper::getPlanParams()
@@ -87,4 +94,26 @@ PlanFileKeeper::PlanParams PlanFileKeeper::getPlanParams()
 void PlanFileKeeper::setPlanParams(PlanParams params)
 {
     _params = params;
+}
+
+//------------------------------------------------------
+
+DocumentFileKeeper::DocumentFileKeeper(QString path, uint64_t entity_id):
+    BaseFileKeeper( path, entity_id )
+{}
+
+BaseFileKeeper::FileType DocumentFileKeeper::getType()
+{
+    return FT_DOCUMENT;
+}
+
+//------------------------------------------------------
+
+ImageFileKeeper::ImageFileKeeper(QString path, uint64_t entity_id):
+    BaseFileKeeper( path, entity_id )
+{}
+
+BaseFileKeeper::FileType ImageFileKeeper::getType()
+{
+    return FT_IMAGE;
 }

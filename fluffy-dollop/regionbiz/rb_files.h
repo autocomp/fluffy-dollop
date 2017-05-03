@@ -21,6 +21,7 @@ class BaseFileKeeper
 public:
     enum FileType
     {
+        FT_NONE,
         FT_PLAN,
         FT_IMAGE,
         FT_DOCUMENT
@@ -93,6 +94,26 @@ private:
     PlanParams _params;
 };
 typedef std::shared_ptr< PlanFileKeeper > PlanFileKeeperPtr;
+
+//----------------------------------------------------------
+
+class DocumentFileKeeper: public BaseFileKeeper
+{
+public:
+    DocumentFileKeeper(QString path , uint64_t entity_id);
+    FileType getType() override;
+};
+typedef std::shared_ptr< DocumentFileKeeper > DocumentFileKeeperPtr;
+
+//----------------------------------------------------------
+
+class ImageFileKeeper: public BaseFileKeeper
+{
+public:
+    ImageFileKeeper(QString path , uint64_t entity_id);
+    FileType getType() override;
+};
+typedef std::shared_ptr< DocumentFileKeeper > DocumentFileKeeperPtr;
 
 }
 

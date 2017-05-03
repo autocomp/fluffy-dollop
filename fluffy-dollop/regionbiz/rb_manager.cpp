@@ -441,6 +441,8 @@ BaseFileKeeperPtr RegionBizManager::addFile( QString file_path,
     BaseFileKeeperPtr file =
             _files_translator->addFile( file_path, type, entity_id );
     BaseFileKeeper::getFiles()[ entity_id ].push_back( file );
+
+    return file;
 }
 
 QFilePtr RegionBizManager::getLocalFile(BaseFileKeeperPtr file)
