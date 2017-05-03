@@ -1,30 +1,41 @@
 {
-    "main_translator":"psql",
+    "main_translators":{
+		"data":"psql",
+		"files":"ftp"
+	},
     "translators":[
 	{
-	    "name":"psql",
+		"name":"psql",
 	    "params":{
-		"host":"217.148.208.59",
-		"db_name":"vira",
-		"user":"vira",
-		"pass":"zaebobr"
+			"host":"217.148.208.59",
+			"db_name":"vira",
+			"user":"vira",
+			"pass":"zaebobr"
 	    }
 	},
 	{
 	    "name":"xlsx",
 	    "params":{
-		"template":{
-		    "first_row":"7",
-		    "columns":"floor:1;room_name:3;room_descr:4;room_area:5;room_arend:6"
-		}
+		    "template":{
+		        "first_row":"7",
+		        "columns":"floor:1;room_name:3;room_descr:4;room_area:5;room_arend:6"
+		    }
+	    }
+	},
+	{
+	    "name":"ftp",
+	    "params":{
+		    "url":"ftp://vira:zaebobr@217.148.208.59",
+			"cache_dir":"ftp_cache",
+			"update_delay":"60000"
 	    }
 	}
     ],
     "plugins":{
-	"plugins_path":"./plugins/regionbiz",
-	"plugins_load":"all",
-	"plugins_list":[
-	    "libxlsx_translator.so"
-	]
+		"plugins_path":"./plugins/regionbiz",
+		"plugins_load":"all",
+		"plugins_list":[
+			"libxlsx_translator.so"
+		]
     }
 }
