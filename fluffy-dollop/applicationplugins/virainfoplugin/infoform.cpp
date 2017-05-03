@@ -108,7 +108,6 @@ void InfoForm::showWidget(quint64 id)
     case BaseArea::AT_FLOOR:
         ui->roomWidget->hide();
         break;
-    case BaseArea::AT_ROOMS_GROUP:
     case BaseArea::AT_ROOM:
     {
         RoomPtr room = BaseArea::convert< Room >( area );
@@ -203,7 +202,6 @@ void InfoForm::reloadTasks(regionbiz::BaseAreaPtr area)
         loadTasks(facility, area->getName(), area);
         break;
 
-    case BaseArea::AT_ROOMS_GROUP:
     case BaseArea::AT_ROOM:
         getRoomFullName(facility, floor, area);
         loadTasks(facility, floor, area);
@@ -232,7 +230,7 @@ void InfoForm::loadTasks(const QString &facilityName, const QString &floorName, 
     case BaseArea::AT_FLOOR:{
         FloorPtr floorPtr = BaseArea::convert< Floor >( area );
         if( ! floorPtr) return;
-        BaseAreaPtrs rooms = floorPtr->getChilds( Floor::FCF_ALL_ROOMS );
+        auto rooms = floorPtr->getChilds();
         for( BaseAreaPtr room_ptr: rooms )
         {
             RoomPtr room = BaseArea::convert< Room >( room_ptr );
@@ -241,7 +239,6 @@ void InfoForm::loadTasks(const QString &facilityName, const QString &floorName, 
         }
     }break;
 
-    case BaseArea::AT_ROOMS_GROUP:
     case BaseArea::AT_ROOM:{
         RoomPtr room = BaseArea::convert< Room >( area );
         if(room)
@@ -424,7 +421,6 @@ QString InfoForm::recursiveGetName(regionbiz::BaseAreaPtr area)
         break;
     case BaseArea::AT_REGION:
     case BaseArea::AT_FLOOR:
-    case BaseArea::AT_ROOMS_GROUP:
     case BaseArea::AT_ROOM:
         name = area->getName();
         break;

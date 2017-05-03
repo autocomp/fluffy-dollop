@@ -79,7 +79,7 @@ AreaData DataGetter::getData(uint64_t id)
     else
     {
         // many rooms
-        auto childs = area->getChilds();
+        auto childs = area->getBaseAreaChilds();
         for( BaseAreaPtr ch_area: childs )
         {
             AreaData ch_data = DataGetter::getData( ch_area->getId() );

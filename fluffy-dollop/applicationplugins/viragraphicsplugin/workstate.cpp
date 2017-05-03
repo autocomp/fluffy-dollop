@@ -158,12 +158,22 @@ void WorkState::reinit()
 
                 QList<QGraphicsItem*> graphicsItems;
 
-                QString planPath = locationPtr->getPlanPath();
+                QString planPath = "";
+                auto plans = locationPtr->getFilesByType( BaseFileKeeper::FT_PLAN );
+                if( plans.size() )
+                {
+                    BaseFileKeeperPtr plan = plans.at( 0 );
+                    QFileInfo info( *( plan->getLocalFile().get() ));
+                    planPath = info.filePath();
+                }
                 if(planPath.isEmpty() == false)
                 {
                     planPath = destPath + QString::number(locationPtr->getId()) + QDir::separator() + planPath;
                     QGraphicsPixmapItem * pixmapItem = new QGraphicsPixmapItem(QPixmap(planPath));
-                    PlanKeeper::PlanParams planParams = locationPtr->getPlanParams();
+
+                    BaseFileKeeperPtr base_plan = plans.at( 0 );
+                    PlanFileKeeperPtr plan = BaseFileKeeper::convert< PlanFileKeeper >( base_plan );
+                    PlanFileKeeper::PlanParams planParams = plan->getPlanParams();
                     pixmapItem->setTransform(QTransform().scale(planParams.scale_w, planParams.scale_h));
                     pixmapItem->setPos(planParams.x, planParams.y);
                     pixmapItem->setZValue(100);
@@ -316,7 +326,6 @@ void WorkState::slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_id)
         }break;
 
         case BaseArea::AT_FLOOR :
-        case BaseArea::AT_ROOMS_GROUP :
         case BaseArea::AT_ROOM :
         {
             BaseAreaPtr parentPtr = ptr->getParent();
@@ -397,7 +406,6 @@ void WorkState::slotCenterOn(uint64_t id)
     }break;
 
     case BaseArea::AT_FLOOR :
-    case BaseArea::AT_ROOMS_GROUP :
     case BaseArea::AT_ROOM :
     {
         BaseAreaPtr parentPtr = ptr->getParent();

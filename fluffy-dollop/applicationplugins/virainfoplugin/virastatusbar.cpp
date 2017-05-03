@@ -117,7 +117,6 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
             break;
         }
 
-        case BaseArea::AT_ROOMS_GROUP:
         case BaseArea::AT_ROOM:
         {
             showName( ptr );
@@ -533,7 +532,6 @@ QString ViraStatusBar::recursiveGetName(BaseAreaPtr area)
 
     case BaseArea::AT_REGION:
     case BaseArea::AT_FLOOR:
-    case BaseArea::AT_ROOMS_GROUP:
     case BaseArea::AT_ROOM:
     {
         name = area->getName();

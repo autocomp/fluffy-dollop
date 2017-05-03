@@ -215,7 +215,7 @@ void ViraEditorView::setFloor(qulonglong floorId)
 
         //MarkPtrs marks_of_floor = floorPtr->getMarks();
 
-        BaseAreaPtrs rooms = floorPtr->getChilds( Floor::FCF_ALL_ROOMS );
+        RoomPtrs rooms = floorPtr->getChilds();
         for( BaseAreaPtr room_ptr: rooms )
         {
             RoomPtr room = BaseArea::convert< Room >( room_ptr );

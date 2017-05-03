@@ -93,7 +93,6 @@ void ViraEditorForm::slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_i
             }break;
 
             case BaseArea::AT_FLOOR :
-            case BaseArea::AT_ROOMS_GROUP :
             case BaseArea::AT_ROOM :
             {
                 BaseAreaPtr parentPtr = ptr->getParent();

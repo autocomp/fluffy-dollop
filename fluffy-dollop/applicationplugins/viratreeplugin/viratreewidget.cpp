@@ -142,7 +142,7 @@ void ViraTreeWidget::reinit()
                         floorItem->setTextAlignment(1, Qt::AlignCenter);
                         _items.insert(id, floorItem);
 
-                        BaseAreaPtrs rooms = floorPtr->getChilds( Floor::FCF_ALL_ROOMS );
+                        RoomPtrs rooms = floorPtr->getChilds();
                         for( BaseAreaPtr room_ptr: rooms )
                         {
                             RoomPtr room = BaseArea::convert< Room >( room_ptr );
