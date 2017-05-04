@@ -40,8 +40,12 @@ enum class BusTags
     EditModeFinish,
     //! , параметр - bool (true - старт работы потока, false - окончание).
     BlockGUI,
+    //!
     UpdateMark,
 
+    //! from ViraInfoPlugin to ViraStatusBar
+    //! параметр - QVariantList -> size==0 (abort) or size==3 : list[0] - type (defect=1, foto=2, foto360=3); list[1] - QPolygonF (possible size : 1(Point) or N(Area) ); list[2] - double (direction, for foto360 only !).
+    MarkCreated,
 
 
 };
