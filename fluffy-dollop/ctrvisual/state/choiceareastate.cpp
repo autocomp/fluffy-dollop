@@ -49,7 +49,8 @@ bool ChoiceAreaState::mouseMoveEvent(QMouseEvent*, QPointF scenePos)
             _lineItems.last()->setLine( QLineF( _lineItems.last()->line().p1(), scenePos) );
         }
     }break;
-    case POLYGON :{
+    case POLYGON :
+    case POINT_OR_POLYGON :{
         if(_lineItems.size() != 0)
         {
             _lineItems.first()->setPen(_pen);
@@ -83,7 +84,8 @@ bool ChoiceAreaState::mousePressEvent(QMouseEvent* e, QPointF scenePos)
         case POLYLINE :{
             _lineItems.append(createItem(scenePos, scenePos));
         }break;
-        case POLYGON :{
+        case POLYGON :
+        case POINT_OR_POLYGON :{
             if(_polygon.size() == 0 || _polygon.size() == 1)
             {
                 _lineItems.append(createItem(scenePos, scenePos));
@@ -109,7 +111,8 @@ bool ChoiceAreaState::mouseDoubleClickEvent(QMouseEvent *e, QPointF scenePos)
         switch(_areaType)
         {
         case POLYLINE :
-        case POLYGON :{
+        case POLYGON :
+        case POINT_OR_POLYGON :{
             finishChoice();
         }break;
         };
@@ -139,7 +142,8 @@ bool ChoiceAreaState::keyPressEvent(QKeyEvent * e)
             mouseMoveEvent(0, _lastMousePos);
         }break;
 
-        case POLYGON  :{
+        case POLYGON  :
+        case POINT_OR_POLYGON :{
             _polygon.pop_back();
             delete _lineItems.last();
             _lineItems.pop_back();
@@ -156,6 +160,7 @@ bool ChoiceAreaState::keyPressEvent(QKeyEvent * e)
     }return false;
 
     case Qt::Key_Return:
+    case Qt::Key_Space:
         finishChoice();
         return false;
     }
@@ -165,13 +170,17 @@ bool ChoiceAreaState::keyPressEvent(QKeyEvent * e)
 
 void ChoiceAreaState::finishChoice()
 {
-    QPolygonF polygonInNativeCoords(_polygon);
+    if(_areaType == POLYGON && _polygon.size() < 3)
+        return;
 
+    if(_areaType == POINT_OR_POLYGON && _polygon.size() == 2)
+        return;
+
+    QPolygonF polygonInNativeCoords(_polygon);
     foreach(QGraphicsLineItem* item, _lineItems)
         delete item;
     _lineItems.clear();
     _polygon.clear();
-
     emit signalAreaChoiced(polygonInNativeCoords);
 }
 
