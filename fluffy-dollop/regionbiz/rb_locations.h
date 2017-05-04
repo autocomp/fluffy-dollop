@@ -98,6 +98,7 @@ public:
     MarkPtrs getMarks();
 
     MarkPtr addMark( QPointF center = QPointF() );
+    MarkPtr addMark( QPolygonF coords );
     bool commitMarks();
     bool deleteMarks();
 

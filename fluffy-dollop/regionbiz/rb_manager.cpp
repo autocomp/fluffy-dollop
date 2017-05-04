@@ -348,6 +348,11 @@ MarkPtrs RegionBizManager::getMarks()
 MarkPtr RegionBizManager::addMark( uint64_t parent_id,
                                    QPointF center )
 {
+    return addMark( parent_id, QPolygonF( { center } ));
+}
+
+MarkPtr RegionBizManager::addMark(uint64_t parent_id, QPolygonF coords)
+{
     MarkPtr mark;
     BaseAreaPtr parent = getBaseArea( parent_id );
     if( !( parent->BaseEntity::convert< MarksHolder >() ))
@@ -356,7 +361,7 @@ MarkPtr RegionBizManager::addMark( uint64_t parent_id,
     mark = BaseEntity::createWithId< Mark >( BaseEntity::getMaxId() + 1 );
     if( mark )
     {
-        mark->setCenter( center );
+        mark->setCoords( coords );
         mark->setParentId( parent_id );
 
         // emit signal

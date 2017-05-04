@@ -136,10 +136,15 @@ MarkPtrs MarksHolder::getMarks()
 
 MarkPtr MarksHolder::addMark( QPointF center )
 {
+    return addMark( QPolygonF( { center } ));
+}
+
+MarkPtr MarksHolder::addMark( QPolygonF coords )
+{
     if( checkHolderId() )
     {
         auto mngr = RegionBizManager::instance();
-        return mngr->addMark( _holder_id, center );
+        return mngr->addMark( _holder_id, coords );
     }
 
     return MarkPtr();

@@ -103,6 +103,8 @@ public:
     MarkPtrs getMarks();
     MarkPtr addMark( uint64_t parent_id,
                      QPointF center = QPointF() );
+    MarkPtr addMark( uint64_t parent_id,
+                     QPolygonF coords );
     bool commitMark( uint64_t id );
     bool commitMark( MarkPtr mark );
     bool deleteMark( uint64_t id );
