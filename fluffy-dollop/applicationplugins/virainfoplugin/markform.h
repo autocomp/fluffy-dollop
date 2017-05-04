@@ -20,6 +20,7 @@ public:
     explicit MarkForm(QWidget *parent = 0);
     ~MarkForm();
     void showWidget(quint64 id);
+    void showWidgetAndCreateMark(quint64 parentId, QPolygonF markArea);
 
 signals:
     void signalCloseWindow();
@@ -34,7 +35,8 @@ private slots:
 
 private:
     Ui::MarkForm *ui;
-    quint64 _id;
+    quint64 _id, _parentId;
+    QPolygonF _markArea;
     PixmapListWidget * _listWidget;
     QList<QPixmap> _pixmaps;
 };

@@ -38,9 +38,26 @@ MarkForm::~MarkForm()
     delete ui;
 }
 
+void MarkForm::showWidgetAndCreateMark(quint64 parentId, QPolygonF markArea)
+{
+    _id = 0;
+    _parentId = parentId;
+    _markArea = markArea;
+    ui->defect->clear();
+    ui->responsible->clear();
+    ui->description->clear();
+    //ui->dateEdit->setMinimumDate(QDate::currentDate());
+    ui->dateEdit->setDate(QDate::currentDate());
+    _pixmaps.clear();
+    _listWidget->clear();
+    ui->status->setCurrentText(QString::fromUtf8("новый"));
+}
+
 void MarkForm::showWidget(quint64 id)
 {
     _id = id;
+    _parentId = 0;
+    _markArea.clear();
     ui->defect->clear();
     ui->responsible->clear();
     ui->description->clear();
@@ -120,8 +137,51 @@ void MarkForm::slotToArchieve()
 
 void MarkForm::closeAndCommit(bool moveToArchive)
 {
-    MarkPtr ptr = RegionBizManager::instance()->getMark(_id);
-    if(ptr)
+    MarkPtr markPtr;
+    if(_id == 0)
+    {
+        auto areaPtr = RegionBizManager::instance()->getBaseArea(_parentId);
+        switch(areaPtr->getType())
+        {
+        case BaseArea::AT_LOCATION :
+        {
+            auto location = BaseArea::convert<Location>(areaPtr);
+            markPtr = location->addMark();
+        }break;
+        case BaseArea::AT_FACILITY :
+        {
+//            auto facility = BaseArea::convert<Facility>(areaPtr);
+//            markPtr = facility->addMark();
+        }break;
+        case BaseArea::AT_FLOOR :
+        {
+            auto floor = BaseArea::convert<Floor>(areaPtr);
+            markPtr = floor->addMark();
+        }break;
+        case BaseArea::AT_ROOM :
+        {
+            auto room = BaseArea::convert<Room>(areaPtr);
+            markPtr = room->addMark();
+        }break;
+        }
+
+        if(markPtr)
+        {
+            _id = markPtr->getId();
+            if(_markArea.size() == 1)
+                markPtr->setCenter(_markArea.first());
+            else
+                markPtr->setCoords(_markArea);
+            markPtr->setName(QString::fromUtf8("дефект"));
+            bool res = markPtr->commit();
+            qDebug() << "commit mark :" << res;
+        }
+    }
+
+    if( ! markPtr)
+        markPtr = RegionBizManager::instance()->getMark(_id);
+
+    if(markPtr)
     {
         if(_pixmaps.isEmpty() == false)
         {
@@ -138,19 +198,19 @@ void MarkForm::closeAndCommit(bool moveToArchive)
             }
         }
 
-        ptr->setName( ui->defect->text());
-        ptr->addMetadata("string", "worker", ui->responsible->text());
-        ptr->setDesription( ui->description->toPlainText());
+        markPtr->setName( ui->defect->text());
+        markPtr->addMetadata("string", "worker", ui->responsible->text());
+        markPtr->setDesription( ui->description->toPlainText());
         QString dataStr = ui->dateEdit->date().toString("dd.MM.yy");
-        bool res = ptr->addMetadata("string", "date", dataStr);
-        ptr->addMetadata("string", "priority", ui->importance->currentText());
-        ptr->addMetadata("string", "category", ui->category->currentText());
+        bool res = markPtr->addMetadata("string", "date", dataStr);
+        markPtr->addMetadata("string", "priority", ui->importance->currentText());
+        markPtr->addMetadata("string", "category", ui->category->currentText());
         if(moveToArchive)
-            ptr->addMetadata("string", "status", QString::fromUtf8("в архиве"));
+            markPtr->addMetadata("string", "status", QString::fromUtf8("в архиве"));
         else
-            ptr->addMetadata("string", "status", ui->status->currentText());
+            markPtr->addMetadata("string", "status", ui->status->currentText());
 
-        bool commitRes = ptr->commit();
+        bool commitRes = markPtr->commit();
         qDebug() << _id << ", dataStr:" << dataStr << res << ", commitRes:" << commitRes;
     }
     emit signalCloseWindow();

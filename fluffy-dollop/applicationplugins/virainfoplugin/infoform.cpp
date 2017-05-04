@@ -230,6 +230,11 @@ void InfoForm::loadTasks(const QString &facilityName, const QString &floorName, 
     case BaseArea::AT_FLOOR:{
         FloorPtr floorPtr = BaseArea::convert< Floor >( area );
         if( ! floorPtr) return;
+
+        MarkPtrs marks_of_floor = floorPtr->getMarks();
+        for( MarkPtr mark: marks_of_floor )
+            loadTasks(facilityName, floorName, "", mark);
+
         auto rooms = floorPtr->getChilds();
         for( BaseAreaPtr room_ptr: rooms )
         {
