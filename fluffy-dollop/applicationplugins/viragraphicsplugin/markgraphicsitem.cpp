@@ -21,6 +21,12 @@ MarkGraphicsItem::MarkGraphicsItem(qulonglong id)
     reinit();
 }
 
+MarkGraphicsItem::~MarkGraphicsItem()
+{
+    if(_area)
+        delete _area;
+}
+
 void MarkGraphicsItem::setItemselected(bool on_off)
 {
     //setPixmap(on_off ? QPixmap(":/img/selected_mark.png") : QPixmap(":/img/mark.png"));
@@ -92,6 +98,8 @@ void MarkGraphicsItem::reinit()
     MarkPtr ptr = RegionBizManager::instance()->getMark(_id);
     if( ! ptr)
         return;
+
+    setPos(ptr->getCenter());
 
     QString annotation = ptr->getName();
     if( annotation.isEmpty() )

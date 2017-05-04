@@ -13,6 +13,7 @@ class MarkGraphicsItem : public ViraGraphicsItem, public QGraphicsPixmapItem
 
 public:
     MarkGraphicsItem(qulonglong id);
+    ~MarkGraphicsItem();
     void setItemselected(bool on_off);
     void centerOnItem();
     quint64 getId();

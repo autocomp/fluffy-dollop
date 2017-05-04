@@ -41,7 +41,8 @@ ViraEditorView::ViraEditorView()
 
     auto mngr = RegionBizManager::instance();
     mngr->subscribeOnChangeEntity(this, SLOT(slotObjectChanged(uint64_t)));
-
+    mngr->subscribeOnAddEntity(this, SLOT(slotAddObject(uint64_t)));
+    mngr->subscribeOnDeleteEntity(this, SLOT(slotDeleteObject(uint64_t)));
 
     _layersMenu = new LayersMenu();
     connect(_layersMenu, SIGNAL(rastersVisibleChanged()), this, SLOT(slotRastersVisibleChanged()));
@@ -500,6 +501,57 @@ void ViraEditorView::slotObjectChanged(uint64_t id)
 
                 markItem->reinit();
             }
+        }
+    }
+}
+
+void ViraEditorView::slotAddObject(uint64_t id)
+{
+    MarkPtr markPtr = RegionBizManager::instance()->getMark(id);
+    if( ! markPtr)
+        return;
+
+    BaseAreaPtr baseAreaPtr = RegionBizManager::instance()->getBaseArea(markPtr->getParentId());
+    if( ! baseAreaPtr)
+        return;
+
+    bool addMark(false);
+    switch(baseAreaPtr->getType())
+    {
+    case BaseArea::AT_FLOOR :
+    {
+        if(_currFloor_id == baseAreaPtr->getId())
+            addMark = true;
+    }break;
+    case BaseArea::AT_ROOM :
+    {
+        if(_currFloor_id == baseAreaPtr->getParentId())
+            addMark = true;
+    }break;
+    }
+
+    if(addMark)
+    {
+        QPointF center = markPtr->getCenter();
+        MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(markPtr->getId());
+        _markGraphicsItem->setPos(center);
+
+        scene()->addItem(_markGraphicsItem);
+        connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+        _itemsOnFloor.insert(markPtr->getId(), _markGraphicsItem);
+    }
+}
+
+void ViraEditorView::slotDeleteObject(uint64_t id)
+{
+    auto it = _itemsOnFloor.find(id);
+    if(it != _itemsOnFloor.end())
+    {
+        MarkGraphicsItem * markItem = dynamic_cast<MarkGraphicsItem*>(it.value());
+        if(markItem)
+        {
+            delete markItem;
+            _itemsOnFloor.erase(it);
         }
     }
 }

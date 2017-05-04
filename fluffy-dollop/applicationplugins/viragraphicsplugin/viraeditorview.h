@@ -52,6 +52,8 @@ public slots:
     void slotEditAreaGeometry(QVariant var);
     void slotSetMarkPosition(QVariant var);
     void slotObjectChanged(uint64_t id);
+    void slotAddObject(uint64_t id);
+    void slotDeleteObject(uint64_t id);
     void slotFloorUp();
     void slotFloorDown();
     void slotRastersVisibleChanged();
