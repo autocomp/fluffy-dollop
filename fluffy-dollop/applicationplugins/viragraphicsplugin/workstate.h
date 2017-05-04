@@ -15,7 +15,7 @@ public:
     ~WorkState();
     virtual QString stateName() {return QString("WorkState");}
     virtual void statePushedToStack() {}
-    virtual void statePoppedFromStack() {}
+    virtual void statePoppedFromStack();
     virtual bool mousePressEvent(QMouseEvent* e, QPointF scenePos);
     virtual void init(QGraphicsScene * scene, QGraphicsView * view, const int * zoom, const double * scale, double frameCoef, uint visualizerId);
     virtual void zoomChanged();

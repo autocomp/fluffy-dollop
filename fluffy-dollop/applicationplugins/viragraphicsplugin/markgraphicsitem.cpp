@@ -33,15 +33,38 @@ void MarkGraphicsItem::setItemselected(bool on_off)
                 view->centerOn(this);
         }
 
-        _preview = new QGraphicsPixmapItem(_pixmap, this);
-        _preview->setFlag(QGraphicsItem::ItemIsSelectable, false);
-        _preview->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
-        _preview->setFlag(QGraphicsItem::ItemStacksBehindParent, true);
-        _preview->setAcceptHoverEvents(true);
+        _preview = new MarkPreviewItem(_pixmap, this);
         _preview->setPos(-6, - (40 + _pixmap.height())); // -6, -43
+
+        MarkPtr ptr = RegionBizManager::instance()->getMark(_id);
+        if(ptr)
+        {
+            QPolygonF pol = ptr->getCoords();
+            if(pol.size() > 1)
+            {
+
+                QPen pen(Qt::blue);
+                pen.setWidth(2);
+                pen.setColor(true);
+
+                _area = new QGraphicsPolygonItem(pol);
+                _area->setFlag(QGraphicsItem::ItemIsSelectable, false);
+                _area->setPen(pen);
+                _area->setBrush(QBrush(QColor(0,255,0,30)));
+                _area->setZValue(99999);
+                scene()->addItem(_area);
+                setOpacity(0.25);
+                connect(_preview, SIGNAL(hoverEnterEvent(bool)), this, SLOT(hoverEnterEventInPreview(bool)));
+            }
+        }
     }
     else
     {
+        setOpacity(1);
+
+        delete _area;
+        _area = nullptr;;
+
         delete _preview;
         _preview = nullptr;
     }
@@ -242,13 +265,19 @@ void MarkGraphicsItem::reinit()
     if(_preview)
     {
         delete _preview;
-        _preview = new QGraphicsPixmapItem(_pixmap, this);
-        _preview->setFlag(QGraphicsItem::ItemIsSelectable, false);
-        _preview->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
-        _preview->setFlag(QGraphicsItem::ItemStacksBehindParent, true);
-        _preview->setAcceptHoverEvents(true);
-        _preview->setPos(-6, - (40 + _pixmap.height()));
+        _preview = nullptr;
+        if(_area)
+        {
+            delete _area;
+            _area = nullptr;
+        }
+        setItemselected(true);
     }
+}
+
+void MarkGraphicsItem::hoverEnterEventInPreview(bool on_off)
+{
+    setOpacity(on_off ? 1 : 0.25);
 }
 
 void MarkGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -283,3 +312,42 @@ void MarkGraphicsItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 //    }
 //    QGraphicsPolygonItem::hoverLeaveEvent(event);
 }
+
+//----------------------------------------------------------------------------
+
+MarkPreviewItem::MarkPreviewItem(QPixmap pixmap, QGraphicsItem *parent)
+    : QGraphicsPixmapItem(pixmap, parent)
+{
+    setFlag(QGraphicsItem::ItemIsSelectable, false);
+    setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
+    setFlag(QGraphicsItem::ItemStacksBehindParent, true);
+    setAcceptHoverEvents(true);
+}
+
+void MarkPreviewItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
+{
+    QGraphicsPixmapItem::hoverEnterEvent(event);
+    emit hoverEnterEvent(true);
+}
+
+void MarkPreviewItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+{
+    QGraphicsPixmapItem::hoverLeaveEvent(event);
+    emit hoverEnterEvent(false);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

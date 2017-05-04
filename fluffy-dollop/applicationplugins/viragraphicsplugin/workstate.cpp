@@ -45,6 +45,11 @@ WorkState::~WorkState()
         delete it.value();
 }
 
+void WorkState::statePoppedFromStack()
+{
+    setActiveForScene(true);
+}
+
 void WorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom, const double *scale, double frameCoef, uint visualizerId)
 {
     ScrollBaseState::init(scene, view, zoom, scale, frameCoef, visualizerId);

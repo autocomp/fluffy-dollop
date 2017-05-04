@@ -77,14 +77,18 @@ void ViraGraphicsPlugin::setMarkOnMap(qulonglong id)
     {
         _stackedWidget->setCurrentIndex(_stackedWidget->property("visualizerIndex").toInt());
 
-        _setDefectState = QSharedPointer<ChoiceAreaState>(new ChoiceAreaState(ChoiceAreaState::POINT, QCursor(QPixmap(":/img/cursor_mark.png"), 0, 0)));
+        _setDefectState = QSharedPointer<ChoiceAreaState>(new ChoiceAreaState(ChoiceAreaState::POINT_OR_POLYGON, QCursor(QPixmap(":/img/cursor_mark.png"), 0, 0)));
         visualize_system::VisualizerManager::instance()->getStateInterface(getVisualizerId())->setVisualizerState(_setDefectState);
         connect(_setDefectState.data(), SIGNAL(signalAreaChoiced(QPolygonF)), this, SLOT(defectStateChoiced(QPolygonF)));
         connect(_setDefectState.data(), SIGNAL(signalAbort()), this, SLOT(defectStateAborted()));
     }
     else
     {
-        defectStateAborted();
+        if(_setDefectState)
+        {
+            _setDefectState->emit_closeState();
+            _setDefectState.clear();
+        }
     }
 
 //    _setImageState = QSharedPointer<SetImageState>(new SetImageState());
@@ -94,7 +98,21 @@ void ViraGraphicsPlugin::setMarkOnMap(qulonglong id)
 void ViraGraphicsPlugin::defectStateChoiced(QPolygonF pol)
 {
     // create or change mark !
-    defectStateAborted();
+    if(_setDefectState)
+    {
+        _setDefectState->emit_closeState();
+        _setDefectState.clear();
+    }
+    QList<QVariant>list;
+
+    QVariant type(1);
+    list.append(type);
+
+    QVariant polygon;
+    polygon.setValue(pol);
+    list.append(polygon);
+
+    CommonMessageNotifier::send( (uint)visualize_system::BusTags::MarkCreated, list, QString("visualize_system"));
 }
 
 void ViraGraphicsPlugin::defectStateAborted()
@@ -104,6 +122,8 @@ void ViraGraphicsPlugin::defectStateAborted()
         _setDefectState->emit_closeState();
         _setDefectState.clear();
     }
+    QList<QVariant>list;
+    CommonMessageNotifier::send( (uint)visualize_system::BusTags::MarkCreated, list, QString("visualize_system"));
 }
 
 QList<InitPluginData> ViraGraphicsPlugin::getInitPluginData()

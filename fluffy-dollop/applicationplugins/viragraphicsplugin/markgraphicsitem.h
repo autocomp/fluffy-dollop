@@ -3,6 +3,9 @@
 
 #include "viragraphicsitem.h"
 #include <QGraphicsPixmapItem>
+#include <QGraphicsPolygonItem>
+
+class MarkPreviewItem;
 
 class MarkGraphicsItem : public ViraGraphicsItem, public QGraphicsPixmapItem
 {
@@ -15,6 +18,9 @@ public:
     quint64 getId();
     void reinit();
 
+protected slots:
+    void hoverEnterEventInPreview(bool on_off);
+
 protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
@@ -23,7 +29,23 @@ protected:
 
     const qulonglong _id;
     QPixmap _pixmap;
-    QGraphicsPixmapItem * _preview = nullptr;
+    MarkPreviewItem * _preview = nullptr;
+    QGraphicsPolygonItem * _area = nullptr;
+};
+
+class MarkPreviewItem : public QObject, public QGraphicsPixmapItem
+{
+    Q_OBJECT
+
+public:
+    MarkPreviewItem(QPixmap pixmap, QGraphicsItem * parent);
+
+signals:
+    void hoverEnterEvent(bool on_off);
+
+protected:
+    virtual void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
+    virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
 };
 
 #endif // MARKGRAPHICSITEM_H

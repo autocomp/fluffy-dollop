@@ -45,16 +45,16 @@ ViraEditorView::ViraEditorView()
 
     _layersMenu = new LayersMenu();
     connect(_layersMenu, SIGNAL(rastersVisibleChanged()), this, SLOT(slotRastersVisibleChanged()));
-    connect(_layersMenu, SIGNAL(getNeedVisibleRasters(bool&,bool&,bool&)), this, SLOT(slotGetNeedVisibleRasters(bool&,bool&,bool&)));
+    connect(_layersMenu, SIGNAL(getNeedVisibleRasters(bool&,bool&)), this, SLOT(slotGetNeedVisibleRasters(bool&,bool&)));
     _layersMenu->setAlignment(Qt::AlignCenter);
     _layersMenu->setStyleSheet("border-radius:4;border-color: rgb(255, 255, 255);");
-    _layersMenu->setMinimumSize(150, 30);
+    _layersMenu->setMinimumSize(75, 30);
 
     _upButton = new QToolButton();
     _upButton->setIcon(QIcon(":/img/up.png"));
     _upButton->setFixedSize(32,32);
     _upButton->setStyleSheet("border-radius:4;border-color: rgb(255, 255, 255);");
-    connect(_upButton, SIGNAL(clicked(bool)), this, SLOT(slotFacilityUp()));
+    connect(_upButton, SIGNAL(clicked(bool)), this, SLOT(slotFloorUp()));
 
     _currentFacility = new QLabel;
     _currentFacility->setAlignment(Qt::AlignCenter);
@@ -65,7 +65,7 @@ ViraEditorView::ViraEditorView()
     _downButton->setIcon(QIcon(":/img/down.png"));
     _downButton->setFixedSize(32,32);
     _downButton->setStyleSheet("border-radius:4;border-color: rgb(255, 255, 255);");
-    connect(_downButton, SIGNAL(clicked(bool)), this, SLOT(slotFacilityDown()));
+    connect(_downButton, SIGNAL(clicked(bool)), this, SLOT(slotFloorDown()));
 
     QHBoxLayout* hLayout = new QHBoxLayout;
 
@@ -213,7 +213,17 @@ void ViraEditorView::setFloor(qulonglong floorId)
             scene()->addItem(_sizesRasterItem);
         }
 
-        //MarkPtrs marks_of_floor = floorPtr->getMarks();
+        MarkPtrs marks_of_floor = floorPtr->getMarks();
+        for( MarkPtr mark: marks_of_floor )
+        {
+            QPointF center = mark->getCenter();
+            MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(mark->getId());
+            _markGraphicsItem->setPos(center);
+
+            scene()->addItem(_markGraphicsItem);
+            connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+            _itemsOnFloor.insert(mark->getId(), _markGraphicsItem);
+        }
 
         RoomPtrs rooms = floorPtr->getChilds();
         for( BaseAreaPtr room_ptr: rooms )
@@ -410,17 +420,26 @@ void ViraEditorView::slotSetMarkPosition(QVariant var)
     _editObjectGeometry = var.toUInt();
     if(_editObjectGeometry > 0)
     {
-        auto room_ptr = RegionBizManager::instance()->getBaseArea( _editObjectGeometry );
-        auto room = BaseArea::convert<Room>(room_ptr);
-        if(room)
+        if(_editObjectGeometry == _currFloor_id)
         {
-            _editObjectExtend = room->getCoords();
+            _editObjectExtend.clear();
             setCursor(QCursor(QPixmap(":/img/cursor_mark.png"), 0, 0));
             _mode = EditMarkMode;
         }
         else
         {
-            _editObjectGeometry = 0;
+            auto room_ptr = RegionBizManager::instance()->getBaseArea( _editObjectGeometry );
+            auto room = BaseArea::convert<Room>(room_ptr);
+            if(room)
+            {
+                _editObjectExtend = room->getCoords();
+                setCursor(QCursor(QPixmap(":/img/cursor_mark.png"), 0, 0));
+                _mode = EditMarkMode;
+            }
+            else
+            {
+                _editObjectGeometry = 0;
+            }
         }
     }
     else
@@ -485,7 +504,7 @@ void ViraEditorView::slotObjectChanged(uint64_t id)
     }
 }
 
-void ViraEditorView::slotFacilityUp()
+void ViraEditorView::slotFloorUp()
 {
     if(_mode != ScrollMode)
         return;
@@ -504,7 +523,7 @@ void ViraEditorView::slotFacilityUp()
     }
 }
 
-void ViraEditorView::slotFacilityDown()
+void ViraEditorView::slotFloorDown()
 {
     if(_mode != ScrollMode)
         return;
@@ -535,6 +554,7 @@ void ViraEditorView::wheelEvent(QWheelEvent *e)
 
 void ViraEditorView::mouseMoveEvent(QMouseEvent* e)
 {
+    QPointF scenePos = mapToScene(e->pos());
     if(_mode == EditAreaMode)
     {
         if(_lines.size() >= 2)
@@ -546,13 +566,20 @@ void ViraEditorView::mouseMoveEvent(QMouseEvent* e)
     }
     else if(_mode == EditMarkMode)
     {
-        QPointF scenePos = mapToScene(e->pos());
-        if(_editObjectExtend.containsPoint(scenePos, Qt::OddEvenFill))
-            setCursor(QCursor(Qt::ArrowCursor)); //
+
+        if(_editObjectExtend.isEmpty() || _editObjectExtend.containsPoint(scenePos, Qt::OddEvenFill))
+            setCursor(QCursor(QPixmap(":/img/cursor_mark.png"), 0, 0)); // setCursor(QCursor(Qt::ArrowCursor));
         else
             setCursor(QCursor(Qt::ForbiddenCursor));
-    }
 
+        if(_lines.size() >= 2)
+        {
+            QPointF scenePos = mapToScene(e->pos());
+            _lines.first()->setLine(QLineF(scenePos, _lines.first()->line().p2()));
+            _lines.last()->setLine(QLineF(_lines.last()->line().p1(), scenePos));
+        }
+    }
+    _lastMouseScenePos = scenePos;
     QGraphicsView::mouseMoveEvent(e);
 }
 
@@ -595,27 +622,57 @@ void ViraEditorView::mousePressEvent(QMouseEvent *e)
         }
         else if(_mode == EditMarkMode)
         {
-            if(_editObjectExtend.containsPoint(scenePos, Qt::OddEvenFill))
+            if(_editObjectExtend.isEmpty() || _editObjectExtend.containsPoint(scenePos, Qt::OddEvenFill))
             {
-                auto room_ptr = RegionBizManager::instance()->getBaseArea( _editObjectGeometry );
-                auto room = BaseArea::convert<Room>(room_ptr);
-                MarkPtr markPtr = room->addMark( scenePos );
-                markPtr->setName(QString::fromUtf8("дефект"));
-                bool res = markPtr->commit();
+                QPen pen(Qt::blue);
+                pen.setCosmetic(true);
+                pen.setWidth(1);
+                if(_lines.isEmpty())
+                {
+                    QGraphicsLineItem * line = new QGraphicsLineItem();
+                    scene()->addItem(line);
+                    line->setZValue(1000);
+                    line->setPen(pen);
+                    line->setLine(QLineF(scenePos, scenePos));
+                    _lines.append(line);
 
-                MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(markPtr->getId());
-                _markGraphicsItem->setPos(scenePos);
-                scene()->addItem(_markGraphicsItem);
-                connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
-                _itemsOnFloor.insert(markPtr->getId(), _markGraphicsItem);
+                    line = new QGraphicsLineItem();
+                    scene()->addItem(line);
+                    line->setZValue(1000);
+                    line->setPen(pen);
+                    line->setLine(QLineF(scenePos, scenePos));
+                    _lines.append(line);
+                }
+                else
+                {
+                    QGraphicsLineItem * line = new QGraphicsLineItem();
+                    scene()->addItem(line);
+                    line->setZValue(1000);
+                    line->setPen(pen);
+                    line->setLine(QLineF(scenePos, scenePos));
+                    _lines.append(line);
+                }
 
-                _editObjectExtend.clear();
-                _editObjectGeometry = 0;
-                _mode = ScrollMode;
-                setCursor(QCursor(Qt::ArrowCursor));
 
-                quint64 markId(markPtr->getId());
-                CommonMessageNotifier::send( (uint)visualize_system::BusTags::EditModeFinish, QVariant(markId), QString("visualize_system"));
+//                auto room_ptr = RegionBizManager::instance()->getBaseArea( _editObjectGeometry );
+//                auto room = BaseArea::convert<Room>(room_ptr);
+//                MarkPtr markPtr = room->addMark( scenePos );
+//                markPtr->setName(QString::fromUtf8("дефект"));
+//                bool res = markPtr->commit();
+
+//                MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(markPtr->getId());
+//                _markGraphicsItem->setPos(scenePos);
+//                scene()->addItem(_markGraphicsItem);
+//                connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+//                _itemsOnFloor.insert(markPtr->getId(), _markGraphicsItem);
+
+//                _editObjectExtend.clear();
+//                _editObjectGeometry = 0;
+//                _mode = ScrollMode;
+//                setCursor(QCursor(Qt::ArrowCursor));
+
+//                quint64 markId(markPtr->getId());
+//                CommonMessageNotifier::send( (uint)visualize_system::BusTags::EditModeFinish, QVariant(markId), QString("visualize_system"));
             }
         }
         else
@@ -658,75 +715,151 @@ void ViraEditorView::mouseReleaseEvent(QMouseEvent *e)
 
 void ViraEditorView::mouseDoubleClickEvent(QMouseEvent *e)
 {
-    if(_mode == EditAreaMode)
+    if(e->button() & Qt::LeftButton)
     {
-        if(_lines.size() > 2)
+        QPointF scenePos = mapToScene(e->pos());
+        if(_mode == EditAreaMode)
         {
-            QPolygonF pol;
-            for(int i(0); i < _lines.size()-1; ++i)
+            if(_lines.size() > 2)
             {
-                QGraphicsLineItem * item = _lines.at(i);
-                QLineF line = item->line();
-                pol.append(line.p1());
-            }
-
-            BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(_editObjectGeometry, BaseArea::AT_ROOM);
-            RoomPtr room = BaseArea::convert< Room >(ptr);
-            if(room)
-            {
-                room->setCoords(pol);
-                room->commit();
-
-                QColor roomColor(Qt::gray);
-                BaseMetadataPtr statusPtr = room->getMetadata("status");
-                if(statusPtr)
+                QPolygonF pol;
+                for(int i(0); i < _lines.size()-1; ++i)
                 {
-                    QString status = statusPtr->getValueAsVariant().toString();
-                    if(status == QString::fromUtf8("Свободно"))
-                        roomColor = QColor(86,206,18);
-                    else if(status == QString::fromUtf8("В аренде"))
-                        roomColor = QColor(226,224,111);
-                    else
-                        roomColor = QColor(Qt::gray);
+                    QGraphicsLineItem * item = _lines.at(i);
+                    QLineF line = item->line();
+                    pol.append(line.p1());
                 }
-                AreaInitData roomInitData(true, 10000, roomColor);
 
-                AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(pol);
-                areaGraphicsItem->setAcceptHoverEvents(true);
-                roomInitData.id = room->getId();
-                areaGraphicsItem->init(roomInitData);
-                scene()->addItem(areaGraphicsItem);
-                connect(areaGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
-                _itemsOnFloor.insert(room->getId(), areaGraphicsItem);
+                BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(_editObjectGeometry, BaseArea::AT_ROOM);
+                RoomPtr room = BaseArea::convert< Room >(ptr);
+                if(room)
+                {
+                    room->setCoords(pol);
+                    room->commit();
 
-                areaGraphicsItem->setItemselected(true);
+                    QColor roomColor(Qt::gray);
+                    BaseMetadataPtr statusPtr = room->getMetadata("status");
+                    if(statusPtr)
+                    {
+                        QString status = statusPtr->getValueAsVariant().toString();
+                        if(status == QString::fromUtf8("Свободно"))
+                            roomColor = QColor(86,206,18);
+                        else if(status == QString::fromUtf8("В аренде"))
+                            roomColor = QColor(226,224,111);
+                        else
+                            roomColor = QColor(Qt::gray);
+                    }
+                    AreaInitData roomInitData(true, 10000, roomColor);
 
-                _editObjectGeometry = 0;
-                _mode = ScrollMode;
-                setCursor(QCursor(Qt::ArrowCursor));
+                    AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(pol);
+                    areaGraphicsItem->setAcceptHoverEvents(true);
+                    roomInitData.id = room->getId();
+                    areaGraphicsItem->init(roomInitData);
+                    scene()->addItem(areaGraphicsItem);
+                    connect(areaGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                    _itemsOnFloor.insert(room->getId(), areaGraphicsItem);
 
-                quint64 roomId(room->getId());
-                CommonMessageNotifier::send( (uint)visualize_system::BusTags::EditModeFinish, QVariant(roomId), QString("visualize_system"));
+                    areaGraphicsItem->setItemselected(true);
+
+                    _editObjectGeometry = 0;
+                    _mode = ScrollMode;
+                    setCursor(QCursor(Qt::ArrowCursor));
+
+                    quint64 roomId(room->getId());
+                    CommonMessageNotifier::send( (uint)visualize_system::BusTags::EditModeFinish, QVariant(roomId), QString("visualize_system"));
+                }
+
+                clearTempItems();
+            }
+        }
+        else if(_mode == EditMarkMode)
+        {
+            if(_editObjectExtend.isEmpty() || _editObjectExtend.containsPoint(scenePos, Qt::OddEvenFill))
+            {
+                finishCreateMark();
+            }
+        }
+        else
+        {
+            QList<QGraphicsItem*> _items = items(e->pos());
+            foreach(QGraphicsItem* item, _items)
+            {
+                ViraGraphicsItem * viraGraphicsItem = dynamic_cast<ViraGraphicsItem*>(item);
+                if(viraGraphicsItem)
+                {
+                    regionbiz::RegionBizManager::instance()->centerOnEntity(viraGraphicsItem->getId());
+                    return;
+                }
             }
 
-            clearTempItems();
+            regionbiz::RegionBizManager::instance()->selectEntity(_currFloor_id); //0);
+            QGraphicsView::mouseReleaseEvent(e);
         }
     }
-    else
+}
+
+void ViraEditorView::removeLastPointInMarkArea()
+{
+    if(_lines.size() == 2)
     {
-        QList<QGraphicsItem*> _items = items(e->pos());
-        foreach(QGraphicsItem* item, _items)
+        clearTempItems();
+    }
+    else if(_lines.size() > 2)
+    {
+        delete _lines.last();
+        _lines.removeLast();
+
+        if(_lines.size() >= 2)
         {
-            ViraGraphicsItem * viraGraphicsItem = dynamic_cast<ViraGraphicsItem*>(item);
-            if(viraGraphicsItem)
-            {
-                regionbiz::RegionBizManager::instance()->centerOnEntity(viraGraphicsItem->getId());
-                return;
-            }
+            _lines.first()->setLine(QLineF(_lastMouseScenePos, _lines.first()->line().p2()));
+            _lines.last()->setLine(QLineF(_lines.last()->line().p1(), _lastMouseScenePos));
+        }
+    }
+}
+
+void ViraEditorView::abortCreateMark()
+{
+    _editObjectGeometry = 0;
+    _mode = ScrollMode;
+    setCursor(QCursor(Qt::ArrowCursor));
+
+    clearTempItems();
+
+    QList<QVariant>list;
+    CommonMessageNotifier::send( (uint)visualize_system::BusTags::MarkCreated, list, QString("visualize_system"));
+}
+
+void ViraEditorView::finishCreateMark()
+{
+    if(_lines.size() == 2 || _lines.size() > 3)
+    {
+        QPolygonF pol;
+        for(int i(0); i < _lines.size()-1; ++i)
+        {
+            QGraphicsLineItem * item = _lines.at(i);
+            QLineF line = item->line();
+            pol.append(line.p1());
         }
 
-        regionbiz::RegionBizManager::instance()->selectEntity(0);
-        QGraphicsView::mouseReleaseEvent(e);
+        _editObjectGeometry = 0;
+        _mode = ScrollMode;
+        setCursor(QCursor(Qt::ArrowCursor));
+
+        qDebug() << pol.size() << ", pol :" << pol;
+
+
+        clearTempItems();
+
+        QList<QVariant>list;
+
+        QVariant type(1);
+        list.append(type);
+
+        QVariant polygon;
+        polygon.setValue(pol);
+        list.append(polygon);
+
+        CommonMessageNotifier::send( (uint)visualize_system::BusTags::MarkCreated, list, QString("visualize_system"));
     }
 }
 
@@ -741,10 +874,20 @@ void ViraEditorView::keyPressEvent(QKeyEvent *event)
 {
     if(event->key() == Qt::Key_Escape)
     {
-        clearTempItems();
+        if(_mode == EditAreaMode)
+            clearTempItems();
+        else if(_mode == EditMarkMode)
+            abortCreateMark();
     }
-    else if(event->key() == Qt::Key_Space)
+    else if(event->key() == Qt::Key_Space || event->key() == Qt::Key_Return)
     {
+        if(_mode == EditMarkMode)
+            finishCreateMark();
+    }
+    else if(event->key() == Qt::Key_Backspace)
+    {
+        if(_mode == EditMarkMode)
+            removeLastPointInMarkArea();
     }
 
     QGraphicsView::keyPressEvent(event);
@@ -820,12 +963,6 @@ void ViraEditorView::zoomOut()
 
 void ViraEditorView::slotRastersVisibleChanged()
 {
-    if(_baseRasterItem)
-    {
-        QVariant baseRasterVisible = CtrConfig::getValueByName("application_settings.baseRasterVisible", true, true);
-        _baseRasterItem->setVisible(baseRasterVisible.toBool());
-    }
-
     if(_axisRasterItem)
     {
         QVariant axisRasterVisible = CtrConfig::getValueByName("application_settings.axisRasterVisible", true, true);
@@ -848,9 +985,8 @@ void ViraEditorView::slotRastersVisibleChanged()
     }
 }
 
-void ViraEditorView::slotGetNeedVisibleRasters(bool &base, bool &axis, bool &sizes)
+void ViraEditorView::slotGetNeedVisibleRasters(bool &axis, bool &sizes)
 {
-    base = (_baseRasterItem != nullptr);
     axis = (_sizesRasterItem != nullptr);
     sizes = (_sizesRasterItem != nullptr);
 }
@@ -858,7 +994,7 @@ void ViraEditorView::slotGetNeedVisibleRasters(bool &base, bool &axis, bool &siz
 ///----------------------------------------------------------------------------------------------
 
 LayersMenu::LayersMenu()
-    : QLabel(QString::fromUtf8("Отображать слои"))
+    : QLabel(QString::fromUtf8("Слои"))
 {
 }
 
@@ -866,24 +1002,13 @@ void LayersMenu::mousePressEvent(QMouseEvent *)
 {
     QMenu menu(this);
 
-    bool base, axis, sizes;
-    emit getNeedVisibleRasters(base, axis, sizes);
+    bool axis, sizes;
+    emit getNeedVisibleRasters(axis, sizes);
 
     QAction * allAct = menu.addAction(QString::fromUtf8("все слои"));
     allAct->setCheckable(true);
     allAct->setChecked(true);
-    menu.addSeparator();
-
-    QAction * baseAct = nullptr;
-    if(base)
-    {
-        baseAct = menu.addAction(QString::fromUtf8("базовый"));
-        baseAct->setCheckable(true);
-        QVariant baseRasterVisible = CtrConfig::getValueByName("application_settings.baseRasterVisible", true, true);
-        baseAct->setChecked(baseRasterVisible.toBool());
-        if(baseRasterVisible.toBool() == false)
-            allAct->setChecked(false);
-    }
+    QAction * separator = menu.addSeparator();
 
     QAction * axisAct = nullptr;
     if(axis)
@@ -906,16 +1031,27 @@ void LayersMenu::mousePressEvent(QMouseEvent *)
         if(sizesRasterVisible.toBool() == false)
             allAct->setChecked(false);
     }
+    if( ! axisAct && ! sizesAct)
+    {
+        menu.removeAction(allAct);
+        allAct = nullptr;
+
+        menu.removeAction(separator);
+        separator = nullptr;
+    }
 
     QAction * defectsAct = menu.addAction(QString::fromUtf8("дефекты"));
     defectsAct->setCheckable(true);
     QVariant defectsRasterVisible = CtrConfig::getValueByName("application_settings.defectsRasterVisible", true, true);
     defectsAct->setChecked(defectsRasterVisible.toBool());
-    if(defectsRasterVisible.toBool() == false)
-        allAct->setChecked(false);
 
-    if(allAct->isChecked())
-        allAct->setDisabled(true);
+    if(allAct)
+    {
+        if(defectsRasterVisible.toBool() == false)
+            allAct->setChecked(false);
+        if(allAct->isChecked())
+            allAct->setDisabled(true);
+    }
 
     QPoint globalPos = mapToGlobal(pos());
     QAction * act = menu.exec(QPoint(globalPos.x(), globalPos.y() + 22));
@@ -924,16 +1060,12 @@ void LayersMenu::mousePressEvent(QMouseEvent *)
 
     if(act == allAct)
     {
-        if(base)
-            CtrConfig::setValueByName("application_settings.baseRasterVisible", true);
         if(axis)
             CtrConfig::setValueByName("application_settings.axisRasterVisible", true);
         if(sizes)
             CtrConfig::setValueByName("application_settings.sizesRasterVisible", true);
         CtrConfig::setValueByName("application_settings.defectsRasterVisible", true);
     }
-    else if(act == baseAct)
-        CtrConfig::setValueByName("application_settings.baseRasterVisible", act->isChecked());
     else if(act == axisAct)
         CtrConfig::setValueByName("application_settings.axisRasterVisible", act->isChecked());
     else if(act == sizesAct)

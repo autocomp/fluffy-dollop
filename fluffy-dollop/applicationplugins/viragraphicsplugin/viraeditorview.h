@@ -52,10 +52,10 @@ public slots:
     void slotEditAreaGeometry(QVariant var);
     void slotSetMarkPosition(QVariant var);
     void slotObjectChanged(uint64_t id);
-    void slotFacilityUp();
-    void slotFacilityDown();
+    void slotFloorUp();
+    void slotFloorDown();
     void slotRastersVisibleChanged();
-    void slotGetNeedVisibleRasters(bool & base, bool & axis, bool & sizes);
+    void slotGetNeedVisibleRasters(bool & axis, bool & sizes);
 
 protected:
     virtual void wheelEvent(QWheelEvent* e);
@@ -65,6 +65,9 @@ protected:
     virtual void keyPressEvent(QKeyEvent *event);
     virtual void mouseDoubleClickEvent(QMouseEvent *event);
     void clearTempItems();
+    void finishCreateMark();
+    void abortCreateMark();
+    void removeLastPointInMarkArea();
 
 private:
     enum Mode {ScrollMode, EditAreaMode, EditMarkMode};
@@ -80,7 +83,7 @@ private:
     GraphicsPixmapItem * _baseRasterItem = nullptr;
     GraphicsPixmapItem * _axisRasterItem = nullptr;
     GraphicsPixmapItem * _sizesRasterItem = nullptr;
-
+    QPointF _lastMouseScenePos;
     QMap<qulonglong, QGraphicsItem *> _itemsOnFloor;
     uint64_t _editObjectGeometry = 0;
     QPolygonF _editObjectExtend;
@@ -98,7 +101,7 @@ class LayersMenu : public QLabel
 public:
     LayersMenu();
 signals:
-    void getNeedVisibleRasters(bool & base, bool & axis, bool & sizes);
+    void getNeedVisibleRasters(bool & axis, bool & sizes);
     void rastersVisibleChanged();
 protected:
     virtual void mousePressEvent(QMouseEvent* e);
