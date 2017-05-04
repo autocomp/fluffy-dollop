@@ -25,7 +25,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,0,5,0,0,0">
+  <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,0,5,0,0,0,0">
    <property name="spacing">
     <number>3</number>
    </property>
@@ -60,6 +60,32 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_widgets"/>
+   </item>
+   <item>
+    <widget class="QPushButton" name="deleteObject">
+     <property name="minimumSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
+     <property name="toolTip">
+      <string>Удалить метку</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border-radius:4;
+border-color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QPushButton" name="addMark">

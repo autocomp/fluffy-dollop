@@ -57,6 +57,7 @@ protected slots:
     void slotCloseMoreInfoForm();
     void showMarkInfoWidgwt(quint64 id);
     void slotMarkCreated(QVariant var);
+    void slotDeleteObject();
 
 protected:
     void reset();

@@ -24,10 +24,12 @@ ViraStatusBar::ViraStatusBar( quint64 parentWidgetId, QWidget *parent ):
     ui->editObject->setIcon(QIcon(":/img/edit_mode"));
     ui->moreInfo->setIcon(QIcon(":/img/info_button"));
     ui->addMark->setIcon(QIcon(":/img/mark_button"));
+    ui->deleteObject->setIcon(QIcon(":/img/garbg"));
 
     connect(ui->moreInfo, SIGNAL(clicked()), this, SLOT(slotShowMoreInfo()));
     connect(ui->editObject, SIGNAL(clicked(bool)), this, SLOT(slotEditAreaGeometry(bool)));
     connect(ui->addMark, SIGNAL(clicked(bool)), this, SLOT(slotAddMark(bool)));
+    connect(ui->deleteObject, SIGNAL(clicked()), this, SLOT(slotDeleteObject()));
     reset();
 
     auto mngr = RegionBizManager::instance();
@@ -79,6 +81,8 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
         MarkPtr markPtr = entity->convert< Mark >();
         if( !markPtr )
             return;
+
+        ui->deleteObject->show();
 
         showMarkName( markPtr->getName() );
 
@@ -137,6 +141,19 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
         }
         }
     }
+    }
+}
+
+void ViraStatusBar::slotDeleteObject()
+{
+    uint64_t id = RegionBizManager::instance()->getSelectedEntity();
+    if(id > 0)
+    {
+        if(QMessageBox::Ok == QMessageBox::warning(this, QString::fromUtf8("Внимание"), QString::fromUtf8("Вы хотите удалить метку ?")))
+        {
+            RegionBizManager::instance()->deleteMark(id);
+            reset();
+        }
     }
 }
 
@@ -202,6 +219,7 @@ void ViraStatusBar::reset()
     ui->moreInfo->hide();
     ui->addMark->hide();
     ui->editObject->hide();
+    ui->deleteObject->hide();
 }
 
 void ViraStatusBar::showTasks( AreaData data )
