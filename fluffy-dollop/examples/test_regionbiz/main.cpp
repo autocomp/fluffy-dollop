@@ -1,6 +1,8 @@
 #include <QDebug>
 #include <QDir>
 #include <QCoreApplication>
+#include <QPointF>
+#include <QPolygonF>
 
 #include <regionbiz/rb_manager.h>
 #include <regionbiz/rb_entity_filter.h>
@@ -408,6 +410,21 @@ void checkFtp()
     FtpChecker* ftp_check = new FtpChecker();
 }
 
+void checkMarksCoords()
+{
+    using namespace regionbiz;
+
+    auto mngr = RegionBizManager::instance();
+    std::vector< RegionPtr > regions = mngr->getRegions();
+    RegionPtr reg = regions.front();
+    auto locs = reg->getChilds( Region::RCF_LOCATIONS );
+    LocationPtr location = locs[ 0 ]->convert< Location >();
+    auto mark = location->addMark();
+    mark->setCoords( QPolygonF() << QPointF( 10, 10 ) << QPointF( 20, 20 ) << QPointF( 30, 15 ));
+    qDebug () << "Commit mark:" << mark->commit();
+    qDebug () << "Delete mark:" << mngr->deleteMark( mark );
+}
+
 int main( int argc, char** argv )
 {
     QCoreApplication app( argc, argv );
@@ -431,7 +448,10 @@ int main( int argc, char** argv )
     init();
 
     //! check ftp
-    checkFtp();
+    //checkFtp();
+
+    //! check marks coords
+    checkMarksCoords();
 
     return app.exec();
 }

@@ -25,7 +25,6 @@ QMAKE_CXXFLAGS += -D_GLIBCXX_USE_NANOSLEEP # Для spdlog
 
 CONFIG += debug
 
-
 build_mode = $$find(TEMPLATE, lib)
 count(build_mode, 1){
     DESTDIR = $$INSTALL_PATH_LIB

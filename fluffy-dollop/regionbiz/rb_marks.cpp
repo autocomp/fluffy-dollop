@@ -15,12 +15,27 @@ BaseEntity::EntityType Mark::getEntityType()
 
 QPointF Mark::getCenter()
 {
-    return _center;
+    QRectF bound = _coords.boundingRect();
+    QPointF tl = { bound.x(), bound.y() };
+    QPointF rb = { bound.x() + bound.width(), bound.y() + bound.height() };
+
+    QPointF center = ( tl + rb ) * 0.5;
+    return center;
 }
 
-void Mark::setCenter( QPointF center )
+QPolygonF Mark::getCoords()
 {
-    _center = center;
+    return _coords;
+}
+
+void Mark::setCenter(QPointF center)
+{
+    _coords = QPolygonF( { center } );
+}
+
+void Mark::setCoords(QPolygonF coords)
+{
+    _coords = coords;
 }
 
 uint64_t Mark::getParentId()

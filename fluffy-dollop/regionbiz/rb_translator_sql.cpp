@@ -284,28 +284,47 @@ BaseMetadataPtrs SqlTranslator::loadMetadata()
 MarkPtrs SqlTranslator::loadMarks()
 {
     MarkPtrs marks;
+    std::map< uint64_t, QPolygonF > coords;
 
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
-    QString select = "SELECT id, x, y, parent_id, name, description FROM marks";
     QSqlQuery query( db );
-    bool res = query.exec( select );
+    // select coords of marks
+    QString select_coords = "SELECT c.id, c.x, c.y, c.number FROM marks as m JOIN coords as c "
+                            "ON m.id = c.id ORDER by c.id, c.number";
+    // boost speed of query
+    query.setForwardOnly( true );
+    bool res = query.exec( select_coords );
     if( res )
+    {
         for( query.first(); query.isValid(); query.next() )
         {
             uint64_t id = query.value( 0 ).toLongLong();
             double x = query.value( 1 ).toDouble();
             double y = query.value( 2 ).toDouble();
-            uint64_t parent_id = query.value( 3 ).toLongLong();
-            QString name = query.value( 4 ).toString();
-            QString descr = query.value( 5 ).toString();
+
+            coords[ id ].push_back( QPointF( x, y ));
+        }
+    }
+
+    // select marks
+    QString select = "SELECT id, parent_id, name, description FROM marks";
+    res = query.exec( select );
+    if( res )
+        for( query.first(); query.isValid(); query.next() )
+        {
+            uint64_t id = query.value( 0 ).toLongLong();
+            uint64_t parent_id = query.value( 1 ).toLongLong();
+            QString name = query.value( 2 ).toString();
+            QString descr = query.value( 3 ).toString();
 
             MarkPtr mark = BaseEntity::createWithId< Mark >( id );
             if( !mark )
                 continue;
-            mark->setCenter( QPointF( x, y ));
+
             mark->setParentId( parent_id );
             mark->setName( name );
             mark->setDesription( descr );
+            mark->setCoords( coords[ id ] );
 
             marks.push_back( mark );
         }
@@ -325,12 +344,10 @@ bool SqlTranslator::commitMark( MarkPtr mark )
     QSqlQuery query( db );
     tryQuery( delete_mark );
 
-    QString insert_update = "INSERT INTO marks( id, x, y, parent_id, name, description ) "
-                            "VALUES (?, ?, ?, ?, ?, ?)";
+    QString insert_update = "INSERT INTO marks( id, parent_id, name, description ) "
+                            "VALUES (?, ?, ?, ?)";
     query.prepare( insert_update );
     query.addBindValue( (qulonglong) mark->getId() );
-    query.addBindValue( mark->getCenter().x() );
-    query.addBindValue( mark->getCenter().y() );
     query.addBindValue( (qulonglong) mark->getParentId() );
     query.addBindValue( mark->getName() );
     query.addBindValue( mark->getDescription() );
@@ -345,6 +362,13 @@ bool SqlTranslator::commitMark( MarkPtr mark )
 
     // commit files
     if( !commitFiles( mark ))
+    {
+        db.rollback();
+        return false;
+    }
+
+    // commit coordinates
+    if( !commitCoordinates( mark ))
     {
         db.rollback();
         return false;
@@ -368,8 +392,13 @@ bool SqlTranslator::deleteMark( MarkPtr mark )
     tryQuery( delete_mark );
 
     // metadata
-    QString delete_coords = "DELETE FROM metadata "
-                            "WHERE entity_id = " + QString::number( mark->getId() );
+    QString delete_meta = "DELETE FROM metadata "
+                          "WHERE entity_id = " + QString::number( mark->getId() );
+    tryQuery( delete_meta );
+
+    // coords
+    QString delete_coords = "DELETE FROM coords "
+                            "WHERE id = " + QString::number( mark->getId() );
     tryQuery( delete_coords );
 
     // TODO delete files
@@ -379,7 +408,8 @@ bool SqlTranslator::deleteMark( MarkPtr mark )
     return true;
 }
 
-bool SqlTranslator::commitCoordinates(BaseAreaPtr area)
+template< typename EntType >
+bool SqlTranslator::commitCoordinates(EntType area)
 {
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
     QSqlQuery query( db );

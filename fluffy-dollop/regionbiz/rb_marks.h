@@ -2,6 +2,7 @@
 #define RB_MARKS_H
 
 #include <QPointF>
+#include <QPolygonF>
 
 #include "rb_base_entity.h"
 
@@ -15,7 +16,9 @@ public:
 
     // center
     QPointF getCenter();
+    QPolygonF getCoords();
     void setCenter( QPointF center );
+    void setCoords( QPolygonF coords );
 
     // asociated object
     uint64_t getParentId();
@@ -25,7 +28,7 @@ public:
     bool commit();
 
 private:
-    QPointF _center;
+    QPolygonF _coords;
     uint64_t _parent_id;
 };
 

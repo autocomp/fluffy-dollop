@@ -50,7 +50,8 @@ private:
     bool loadCoordinate( std::vector< LocTypePtr >& vector );
     template< typename LocType >
     std::vector< std::shared_ptr< LocType >> loadBaseAreas( QString type_name );
-    bool commitCoordinates( BaseAreaPtr area );
+    template< typename EntType >
+    bool commitCoordinates( EntType area );
     bool commitMetadate(BaseEntityPtr area );
     bool commitFiles(BaseEntityPtr entity );
     bool loadDocuments( BaseBizRelationPtr relation );
