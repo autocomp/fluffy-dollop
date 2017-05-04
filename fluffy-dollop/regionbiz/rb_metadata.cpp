@@ -164,8 +164,8 @@ EmptyMetadata::EmptyMetadata():
 
 EmptyMetadataPtr EmptyMetadata::instance()
 {
-    static EmptyMetadata empty;
-    return EmptyMetadataPtr( &empty );
+    static EmptyMetadataPtr empty = EmptyMetadataPtr( new EmptyMetadata() );
+    return empty;
 }
 
 QString EmptyMetadata::getType()
