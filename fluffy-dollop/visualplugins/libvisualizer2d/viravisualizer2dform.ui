@@ -36,11 +36,14 @@
      </property>
      <item>
       <widget class="QSplitter" name="splitter">
+       <property name="lineWidth">
+        <number>1</number>
+       </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
        <property name="handleWidth">
-        <number>2</number>
+        <number>10</number>
        </property>
        <widget class="QWidget" name="verticalLayoutWidget">
         <layout class="QVBoxLayout" name="leftSplitterLayout">
