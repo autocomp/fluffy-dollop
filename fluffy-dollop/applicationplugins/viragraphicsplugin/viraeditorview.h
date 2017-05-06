@@ -73,6 +73,11 @@ protected:
 
 private:
     enum Mode {ScrollMode, EditAreaMode, EditMarkMode};
+    struct FloorInfo
+    {
+        QString name;
+        uint64_t id;
+    };
 
     Mode _mode = ScrollMode;
     int _zoom = 1;
@@ -92,7 +97,7 @@ private:
     QToolButton* _upButton, *_downButton;
     QLabel * _currentFacility;
     LayersMenu * _layersMenu;
-    QMap<uint64_t, QString> _floorsMap;
+    QMap<uint16_t, FloorInfo> _floorsMap;
     QColor _roomDefaultColor;
 
     QList<QGraphicsLineItem *> _lines;

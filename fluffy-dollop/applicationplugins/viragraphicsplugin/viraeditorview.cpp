@@ -134,11 +134,19 @@ void ViraEditorView::reinit(qulonglong facilityId)
         if(facilityPtr)
         {
             FloorPtrs floors = facilityPtr->getChilds();
+            qDebug() << "----------------";
             for( FloorPtr floorPtr: floors )
-                _floorsMap.insert(floorPtr->getId(), floorPtr->getName());
+            {
+                FloorInfo floorInfo;
+                floorInfo.name = floorPtr->getName();
+                floorInfo.id = floorPtr->getId();
 
+                qDebug() << "NAME" << floorPtr->getName() << "ID" << floorPtr->getId() << "NUMBER" << floorPtr->getNumber();
+                _floorsMap.insert(floorPtr->getNumber(), floorInfo);
+            }
+            qDebug() << "----------------";
             if(_floorsMap.isEmpty() == false)
-                setFloor(_floorsMap.begin().key());
+                setFloor(_floorsMap.begin().value().id);
         }
     }
 }
@@ -183,7 +191,7 @@ void ViraEditorView::setFloor(qulonglong floorId)
         int i(0);
         for(auto it = _floorsMap.begin(); it != _floorsMap.end(); ++it)
         {
-            if(it.key() == _currFloor_id)
+            if(it.value().id == _currFloor_id)
             {
                 _upButton->setDisabled(i == _floorsMap.size()-1);
                 _downButton->setDisabled(i == 0);
@@ -377,22 +385,43 @@ void ViraEditorView::selectionItemsChanged(uint64_t prev_id, uint64_t curr_id)
         }
         else
         {
-            auto it = _floorsMap.find(curr_id);
-            if(it != _floorsMap.end())
-            {
-                setFloor(curr_id);
-            }
-            else
+            bool found(false);
+            for(auto it = _floorsMap.begin(); it != _floorsMap.end(); ++it)
+                if(it.value().id == curr_id)
+                {
+                    setFloor(curr_id);
+                    found = true;
+                    break;
+                }
+            if( ! found)
             {
                 BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(curr_id, BaseArea::AT_ROOM);
                 RoomPtr roomPtr = BaseArea::convert< Room >(ptr);
                 if(roomPtr)
-                {
-                    auto it = _floorsMap.find(roomPtr->getParentId());
-                    if(it != _floorsMap.end())
-                        setFloor(it.key());
-                }
+                    for(auto it = _floorsMap.begin(); it != _floorsMap.end(); ++it)
+                        if(it.value().id == roomPtr->getParentId())
+                        {
+                            setFloor(roomPtr->getParentId());
+                            break;
+                        }
             }
+
+//            auto it = _floorsMap.find(curr_id);
+//            if(it != _floorsMap.end())
+//            {
+//                setFloor(curr_id);
+//            }
+//            else
+//            {
+//                BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(curr_id, BaseArea::AT_ROOM);
+//                RoomPtr roomPtr = BaseArea::convert< Room >(ptr);
+//                if(roomPtr)
+//                {
+//                    auto it = _floorsMap.find(roomPtr->getParentId());
+//                    if(it != _floorsMap.end())
+//                        setFloor(it.key());
+//                }
+//            }
         }
     }
 }
@@ -577,11 +606,11 @@ void ViraEditorView::slotFloorUp()
     int i(0);
     for(auto it = _floorsMap.begin(); it != _floorsMap.end(); ++it)
     {
-        if(it.key() == _currFloor_id)
+        if(it.value().id == _currFloor_id)
         {
             ++it;
             if(it != _floorsMap.end())
-                RegionBizManager::instance()->selectEntity(it.key());
+                RegionBizManager::instance()->selectEntity(it.value().id);
             break;
         }
         ++i;
@@ -596,12 +625,12 @@ void ViraEditorView::slotFloorDown()
     int i(0);
     for(auto it = _floorsMap.begin(); it != _floorsMap.end(); ++it)
     {
-        if(it.key() == _currFloor_id)
+        if(it.value().id == _currFloor_id)
         {
             if(it != _floorsMap.begin())
             {
                 --it;
-                RegionBizManager::instance()->selectEntity(it.key());
+                RegionBizManager::instance()->selectEntity(it.value().id);
             }
             break;
         }
