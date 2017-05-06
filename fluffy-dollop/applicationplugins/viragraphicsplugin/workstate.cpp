@@ -173,7 +173,6 @@ void WorkState::reinit()
                 }
                 if(planPath.isEmpty() == false)
                 {
-                    planPath = destPath + QString::number(locationPtr->getId()) + QDir::separator() + planPath;
                     QGraphicsPixmapItem * pixmapItem = new QGraphicsPixmapItem(QPixmap(planPath));
 
                     BaseFileKeeperPtr base_plan = plans.at( 0 );
