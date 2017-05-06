@@ -93,6 +93,7 @@ private:
     QLabel * _currentFacility;
     LayersMenu * _layersMenu;
     QMap<uint64_t, QString> _floorsMap;
+    QColor _roomDefaultColor;
 
     QList<QGraphicsLineItem *> _lines;
 };

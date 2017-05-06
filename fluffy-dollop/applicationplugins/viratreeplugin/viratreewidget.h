@@ -24,7 +24,7 @@ protected slots:
     void reinit();
 
 protected:
-    const int ColumnCount = 8;
+    const int ColumnCount = 4; //8;
 
     void recalcAreaInFacility(QTreeWidgetItem * facilityItem);
     void recalcTasksInFacility(QTreeWidgetItem * facilityItem);

@@ -11,6 +11,7 @@
 #include <ctrcore/tempinputdata/tempdatacontroller.h>
 #include <ctrcore/bus/common_message_notifier.h>
 #include <ctrcore/bus/bustags.h>
+#include <ctrcore/ctrcore/ctrconfig.h>
 #include "virainfowidget.h"
 
 using namespace regionbiz;
@@ -153,6 +154,21 @@ void ViraStatusBar::slotDeleteObject()
         {
             RegionBizManager::instance()->deleteMark(id);
             reset();
+
+            QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath");
+            if(regionBizInitJson_Path.isValid())
+            {
+                QString destPath = regionBizInitJson_Path.toString();
+                QDir dir(destPath);
+
+                destPath = destPath + QDir::separator() + QString::number(id);
+                QDir subdir(destPath);
+                QStringList fileList = subdir.entryList(QDir::Files);
+                foreach(QString fileName, fileList)
+                    QFile::remove(destPath + QDir::separator() + fileName);
+
+                dir.rmdir(QString::number(id));
+            }
         }
     }
 }

@@ -36,10 +36,10 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
 
     headerItem()->setText((int)ColumnTitle::NAME, QString::fromUtf8(""));
     headerItem()->setText((int)ColumnTitle::SQUARE, QString::fromUtf8("Площадь"));
-    headerItem()->setText((int)ColumnTitle::BASE_RENT, QString::fromUtf8("Арендная ставка"));
-    headerItem()->setText((int)ColumnTitle::CALC_RENT, QString::fromUtf8("Арендная плата"));
-    headerItem()->setText((int)ColumnTitle::STATUS, QString::fromUtf8("Статус"));
-    headerItem()->setText((int)ColumnTitle::RENTER, QString::fromUtf8("Арендатор"));
+//    headerItem()->setText((int)ColumnTitle::BASE_RENT, QString::fromUtf8("Арендная ставка"));
+//    headerItem()->setText((int)ColumnTitle::CALC_RENT, QString::fromUtf8("Арендная плата"));
+//    headerItem()->setText((int)ColumnTitle::STATUS, QString::fromUtf8("Статус"));
+//    headerItem()->setText((int)ColumnTitle::RENTER, QString::fromUtf8("Арендатор"));
     headerItem()->setText((int)ColumnTitle::TASKS, QString::fromUtf8("Задачи"));
     headerItem()->setText((int)ColumnTitle::COMMENT, QString::fromUtf8("Комментарий"));
     //headerItem()->setText((int)ColumnTitle::ID, QString::fromUtf8("ID"));

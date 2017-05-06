@@ -53,7 +53,7 @@ void SpinBoxDelegate::paint(QPainter *painter, const QStyleOptionViewItem &optio
             // QString text = QString::number(total, 'f', 1) + QString("   ") + QString::number(rented, 'f', 1);
             painter->save();
             painter->setPen(Qt::NoPen);
-            QRect leftRect(option.rect.left(), option.rect.top(), option.rect.width()/2, option.rect.height());
+            QRect leftRect(option.rect); //.left(), option.rect.top(), option.rect.width()/2, option.rect.height());
             painter->setBrush(QBrush(Qt::gray));
             painter->drawRect(leftRect);
 
@@ -61,14 +61,14 @@ void SpinBoxDelegate::paint(QPainter *painter, const QStyleOptionViewItem &optio
             painter->setPen(Qt::white);
             painter->drawText(leftRect, Qt::AlignCenter, QString::number(total, 'f', 1));
 
-            QRect rightRect(option.rect.left() + option.rect.width()/2, option.rect.top(), option.rect.width()/2, option.rect.height());
-            painter->setPen(Qt::NoPen);
-            painter->setBrush(QBrush(QColor(226,224,111)));
-            painter->drawRect(rightRect);
+//            QRect rightRect(option.rect.left() + option.rect.width()/2, option.rect.top(), option.rect.width()/2, option.rect.height());
+//            painter->setPen(Qt::NoPen);
+//            painter->setBrush(QBrush(QColor(226,224,111)));
+//            painter->drawRect(rightRect);
 
-            painter->setBrush(QBrush(Qt::NoBrush));
-            painter->setPen(Qt::white);
-            painter->drawText(rightRect, Qt::AlignCenter, QString::number(rented, 'f', 1));
+//            painter->setBrush(QBrush(Qt::NoBrush));
+//            painter->setPen(Qt::white);
+//            painter->drawText(rightRect, Qt::AlignCenter, QString::number(rented, 'f', 1));
 
             painter->restore();
 

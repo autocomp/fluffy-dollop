@@ -14,7 +14,7 @@ MarkGraphicsItem::MarkGraphicsItem(qulonglong id)
 {
     setFlag(QGraphicsItem::ItemIgnoresTransformations);
     setZValue(100000);
-    setPixmap(QPixmap(":/img/mark_tr.png"));
+    setPixmap(QPixmap(":/img/point_defect.png"));
     setOffset(-6, -43);
     setAcceptHoverEvents(true);
 
@@ -40,7 +40,8 @@ void MarkGraphicsItem::setItemselected(bool on_off)
         }
 
         _preview = new MarkPreviewItem(_pixmap, this);
-        _preview->setPos(-6, - (40 + _pixmap.height())); // -6, -43
+        //-18, -2
+
 
         MarkPtr ptr = RegionBizManager::instance()->getMark(_id);
         if(ptr)
@@ -48,19 +49,38 @@ void MarkGraphicsItem::setItemselected(bool on_off)
             QPolygonF pol = ptr->getCoords();
             if(pol.size() > 1)
             {
-
                 QPen pen(Qt::blue);
                 pen.setWidth(2);
                 pen.setColor(true);
 
-                _area = new QGraphicsPolygonItem(pol);
+                QColor brushColor(233,124,27);
+                BaseMetadataPtr status = ptr->getMetadata("status");
+                if(status)
+                {
+                    QString statusStr = status->getValueAsString();
+                    if(statusStr == QString::fromUtf8("новый"))
+                        brushColor = QColor(233,124,27);
+                    else if(statusStr == QString::fromUtf8("в работе"))
+                        brushColor = QColor(Qt::yellow);
+                    else if(statusStr == QString::fromUtf8("на проверку"))
+                        brushColor = QColor(Qt::green);
+                }
+                brushColor.setAlpha(30);
+
+                _area = new MarkAreaItem(pol);
                 _area->setFlag(QGraphicsItem::ItemIsSelectable, false);
                 _area->setPen(pen);
-                _area->setBrush(QBrush(QColor(0,255,0,30)));
+                _area->setBrush(QBrush(brushColor));
                 _area->setZValue(99999);
                 scene()->addItem(_area);
                 setOpacity(0.25);
                 connect(_preview, SIGNAL(hoverEnterEvent(bool)), this, SLOT(hoverEnterEventInPreview(bool)));
+
+                _preview->setPos(- (pixmap().width()/2. - 18) , - (2 + pixmap().height()/2. + _pixmap.height()));
+            }
+            else
+            {
+                _preview->setPos(-6, - (40 + _pixmap.height()));
             }
         }
     }
@@ -69,7 +89,7 @@ void MarkGraphicsItem::setItemselected(bool on_off)
         setOpacity(1);
 
         delete _area;
-        _area = nullptr;;
+        _area = nullptr;
 
         delete _preview;
         _preview = nullptr;
@@ -119,31 +139,50 @@ void MarkGraphicsItem::reinit()
     }
     setToolTip(toolotip);
 
-    QPixmap pmOrig(":/img/mark_tr.png");
+    QPixmap pmOrig(":/img/point_defect.png");
+    QPoint pixmapPos(0,0);
+    QPolygonF pixmapFillPolygon;
+    pixmapFillPolygon << QPointF(1,5) << QPointF(46,5) << QPointF(46,35) << QPointF(14,35) << QPointF(7,41) << QPointF(1,35);
+
+    setOffset(-offset().x(), -offset().y());
+    QPolygonF pol = ptr->getCoords();
+    if(pol.size() > 1)
+    {
+        pmOrig = QPixmap(":/img/polygon_defect.png");
+        setOffset(-pmOrig.width()/2., -pmOrig.height()/2.);
+        pixmapPos = QPoint(11, 3);
+        pixmapFillPolygon.clear();
+        pixmapFillPolygon << QPointF(19,0) << QPointF(50,0) << QPointF(67,26) << QPointF(50,52) << QPointF(19,52) << QPointF(1,26) << QPointF(19,0);
+    }
+    else
+    {
+        setOffset(-6, -43);
+    }
     BaseMetadataPtr category = ptr->getMetadata("category");
     if(category)
     {
+        QPainter pr(&pmOrig);
         QString categoryStr = category->getValueAsString();
         if(categoryStr == QString::fromUtf8("электроснабжение"))
-            pmOrig = QPixmap(":/img/lamp.png");
+            pr.drawPixmap(pixmapPos, QPixmap(":/img/lamp.png"));
         else if(categoryStr == QString::fromUtf8("водоснабжение"))
-            pmOrig = QPixmap(":/img/bathtube.png");
+            pr.drawPixmap(pixmapPos, QPixmap(":/img/bathtube.png"));
         else if(categoryStr == QString::fromUtf8("водоотведение"))
-            pmOrig = QPixmap(":/img/plumbing.png");
+            pr.drawPixmap(pixmapPos, QPixmap(":/img/plumbing.png"));
         else if(categoryStr == QString::fromUtf8("отопление"))
-            pmOrig = QPixmap(":/img/heater.png");
+            pr.drawPixmap(pixmapPos, QPixmap(":/img/heater.png"));
         else if(categoryStr == QString::fromUtf8("вентиляция"))
-            pmOrig = QPixmap(":/img/tiles.png");
+            pr.drawPixmap(pixmapPos, QPixmap(":/img/tiles.png"));
         else if(categoryStr == QString::fromUtf8("тепловые сети"))
-            pmOrig = QPixmap(":/img/balance-ruler.png");
+            pr.drawPixmap(pixmapPos, QPixmap(":/img/balance-ruler.png"));
         else if(categoryStr == QString::fromUtf8("слаботочные сети"))
-            pmOrig = QPixmap(":/img/electrical-plug.png");
+            pr.drawPixmap(pixmapPos, QPixmap(":/img/electrical-plug.png"));
         else if(categoryStr == QString::fromUtf8("газоснабжение"))
-            pmOrig = QPixmap(":/img/water-heater.png");
+            pr.drawPixmap(pixmapPos, QPixmap(":/img/water-heater.png"));
         else if(categoryStr == QString::fromUtf8("технологические решения"))
-            pmOrig = QPixmap(":/img/wrench.png");
+            pr.drawPixmap(pixmapPos, QPixmap(":/img/wrench.png"));
         else if(categoryStr == QString::fromUtf8("архитектурные решения"))
-            pmOrig = QPixmap(":/img/stairs.png");
+            pr.drawPixmap(pixmapPos, QPixmap(":/img/stairs.png"));
     }
     QColor color;
     BaseMetadataPtr status = ptr->getMetadata("status");
@@ -164,16 +203,13 @@ void MarkGraphicsItem::reinit()
         QPainter pr(&pm);
         pr.setPen(Qt::NoPen);
         pr.setBrush(QBrush(color));
-
-        QPolygonF pixmapFillPolygon;
-        pixmapFillPolygon << QPointF(1,5) << QPointF(46,5) << QPointF(46,35) << QPointF(14,35) << QPointF(7,41) << QPointF(1,35);
         pr.drawPolygon(pixmapFillPolygon);
         pr.drawPixmap(0, 0, pmOrig);
 
         setPixmap(pm);
     }
     else
-        setPixmap(QPixmap(":/img/mark_tr.png"));
+        setPixmap(QPixmap(":/img/point_defect.png"));
 
     QPixmap pixmap;
     QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath");
@@ -323,6 +359,17 @@ void MarkGraphicsItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 
 //----------------------------------------------------------------------------
 
+MarkAreaItem::MarkAreaItem(const QPolygonF &polygon)
+    : QGraphicsPolygonItem(polygon)
+{
+}
+
+void MarkAreaItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+    painter->setRenderHint(QPainter::Antialiasing);
+    QGraphicsPolygonItem::paint(painter, option, widget);
+}
+
 MarkPreviewItem::MarkPreviewItem(QPixmap pixmap, QGraphicsItem *parent)
     : QGraphicsPixmapItem(pixmap, parent)
 {
@@ -343,19 +390,5 @@ void MarkPreviewItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
     QGraphicsPixmapItem::hoverLeaveEvent(event);
     emit hoverEnterEvent(false);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

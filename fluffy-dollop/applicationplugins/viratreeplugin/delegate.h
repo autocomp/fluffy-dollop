@@ -3,7 +3,8 @@
 
 #include <QStyledItemDelegate>
 
-enum class ColumnTitle {NAME = 0, SQUARE, BASE_RENT, CALC_RENT, STATUS, RENTER, TASKS, COMMENT, ID};
+//enum class ColumnTitle {NAME = 0, SQUARE, BASE_RENT, CALC_RENT, STATUS, RENTER, TASKS, COMMENT, ID};
+enum class ColumnTitle {NAME = 0, SQUARE, TASKS, COMMENT, ID, BASE_RENT, CALC_RENT, STATUS, RENTER};
 enum class ItemType {ItemTypeRoom = 1, ItemTypeFloor = 2, ItemTypeFacility = 3, ItemTypeOther = 4};
 const int ID = Qt::UserRole + 1;
 const int TYPE = Qt::UserRole + 2;

@@ -84,6 +84,19 @@ ViraEditorView::ViraEditorView()
     hLayout->setAlignment( _downButton, Qt::AlignTop );
     hLayout->addStretch();
     setLayout(hLayout);
+
+    QVariant _selCol = CtrConfig::getValueByName(QString("styles.roomdefaultColor_RGB"));
+    if(!_selCol.isValid())
+    {
+        CtrConfig::setValueByName(QString("styles.roomdefaultColor_RGB"), "#A0A0A0");
+        _selCol = CtrConfig::getValueByName(QString("styles.roomdefaultColor_RGB"));
+    }
+    QString  strCol = _selCol.toString();
+    strCol = strCol.remove("#");
+    int r = strCol.mid(0,2).toInt(0,16);
+    int g = strCol.mid(2,2).toInt(0,16);
+    int b = strCol.mid(4,2).toInt(0,16);
+    _roomDefaultColor = QColor(r,g,b);
 }
 
 ViraEditorView::~ViraEditorView()
@@ -248,7 +261,7 @@ void ViraEditorView::setFloor(qulonglong floorId)
                     _itemsOnFloor.insert(mark->getId(), _markGraphicsItem);
                 }
 
-                QColor roomColor(Qt::gray);
+                QColor roomColor(_roomDefaultColor);
                 BaseMetadataPtr statusPtr = room->getMetadata("status");
                 if(statusPtr)
                 {
@@ -258,7 +271,7 @@ void ViraEditorView::setFloor(qulonglong floorId)
                     else if(status == QString::fromUtf8("В аренде"))
                         roomColor = QColor(226,224,111);
                     else
-                        roomColor = QColor(Qt::gray);
+                        roomColor = QColor(_roomDefaultColor);
                 }
                 AreaInitData roomInitData(true, 10000, roomColor);
 
@@ -462,7 +475,7 @@ void ViraEditorView::slotObjectChanged(uint64_t id)
             RoomPtr roomPtr = BaseArea::convert< Room >(ptr);
             if(roomPtr)
             {
-                QColor roomColor(Qt::gray);
+                QColor roomColor(_roomDefaultColor);
                 BaseMetadataPtr statusPtr = roomPtr->getMetadata("status");
                 if(statusPtr)
                 {
@@ -472,7 +485,7 @@ void ViraEditorView::slotObjectChanged(uint64_t id)
                     else if(status == QString::fromUtf8("В аренде"))
                         roomColor = QColor(226,224,111);
                     else
-                        roomColor = QColor(Qt::gray);
+                        roomColor = QColor(_roomDefaultColor);
 
                     areaItem->setColor(roomColor);
                 }
@@ -789,7 +802,7 @@ void ViraEditorView::mouseDoubleClickEvent(QMouseEvent *e)
                     room->setCoords(pol);
                     room->commit();
 
-                    QColor roomColor(Qt::gray);
+                    QColor roomColor(_roomDefaultColor);
                     BaseMetadataPtr statusPtr = room->getMetadata("status");
                     if(statusPtr)
                     {
@@ -799,7 +812,7 @@ void ViraEditorView::mouseDoubleClickEvent(QMouseEvent *e)
                         else if(status == QString::fromUtf8("В аренде"))
                             roomColor = QColor(226,224,111);
                         else
-                            roomColor = QColor(Qt::gray);
+                            roomColor = QColor(_roomDefaultColor);
                     }
                     AreaInitData roomInitData(true, 10000, roomColor);
 

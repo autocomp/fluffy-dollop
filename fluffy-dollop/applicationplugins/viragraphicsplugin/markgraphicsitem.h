@@ -5,6 +5,7 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsPolygonItem>
 
+class MarkAreaItem;
 class MarkPreviewItem;
 
 class MarkGraphicsItem : public ViraGraphicsItem, public QGraphicsPixmapItem
@@ -31,7 +32,14 @@ protected:
     const qulonglong _id;
     QPixmap _pixmap;
     MarkPreviewItem * _preview = nullptr;
-    QGraphicsPolygonItem * _area = nullptr;
+    MarkAreaItem * _area = nullptr;
+};
+
+class MarkAreaItem : public QGraphicsPolygonItem
+{
+public:
+    MarkAreaItem(const QPolygonF &polygon);
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR);
 };
 
 class MarkPreviewItem : public QObject, public QGraphicsPixmapItem
