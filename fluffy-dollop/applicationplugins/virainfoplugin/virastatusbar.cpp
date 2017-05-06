@@ -119,8 +119,10 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
         {
             showAddres( ptr );
             showTasks( data );
-            showArendators( data, false );
-            showAreas( data, false );
+            // WARNING don't show arenda's attrs
+            //showArendators( data, false );
+            // WARNING false -> true to show only one area
+            showAreas( data, true );
             //showDebt( data );
 
             ui->moreInfo->show();
@@ -315,30 +317,38 @@ void ViraStatusBar::showAreas( AreaData data, bool one )
     {
         QString status;
         QLabel* area;
-        if( data.area_free > 1e-5 )
-        {
-            area = getArea( AT_FREE, data );
-            status = QString::fromUtf8( "Свободно" );
-        }
-        else if( data.area_rent > 1e-5 )
-        {
-            area = getArea( AT_RENT, data );
-            status = QString::fromUtf8( "В аренде" );
-        }
-        else if( data.area_property > 1e-5)
-        {
-            area = getArea( AT_PROP, data );
-            status = QString::fromUtf8( "Собственность" );
-        }
-        else
-        {
-            area = getArea( AT_UNAVAILABLE, data );
-            status = QString::fromUtf8( "Недоступно" );
-        }
+//        if( data.area_free > 1e-5 )
+//        {
+//            area = getArea( AT_FREE, data );
+//            status = QString::fromUtf8( "Свободно" );
+//        }
+//        else if( data.area_rent > 1e-5 )
+//        {
+//            area = getArea( AT_RENT, data );
+//            status = QString::fromUtf8( "В аренде" );
+//        }
+//        else if( data.area_property > 1e-5)
+//        {
+//            area = getArea( AT_PROP, data );
+//            status = QString::fromUtf8( "Собственность" );
+//        }
+//        else
+//        {
+//            area = getArea( AT_UNAVAILABLE, data );
+//            status = QString::fromUtf8( "Недоступно" );
+//        }
+//        area->setToolTip( QString::fromUtf8( "Площадь" ));
+//        QLabel* status_lbl = new QLabel( status );
+//        status_lbl->setToolTip( QString::fromUtf8( "Статус" ));
+//        status_lbl->setStyleSheet( area->styleSheet() );
+
+        // WARNING commemts arenda's things
+        area = getArea( AT_ALL, data );
+        status = QString::fromUtf8( "Площадь" );
         area->setToolTip( QString::fromUtf8( "Площадь" ));
 
-        QLabel* status_lbl = new QLabel( status );
-        status_lbl->setToolTip( QString::fromUtf8( "Статус" ));
+        QLabel* status_lbl = new QLabel( QString::fromUtf8( "Площадь" ));
+        status_lbl->setToolTip( QString::fromUtf8( "Площадь" ));
         status_lbl->setStyleSheet( area->styleSheet() );
 
         ui->horizontalLayout_widgets->addWidget( area );
@@ -480,6 +490,13 @@ QLabel *ViraStatusBar::getArea(ViraStatusBar::AreaType type, AreaData data)
         color = "#666666";
         break;
     }
+    case AT_ALL:
+    {
+        area_cnt = data.area;
+        color = "#F0E68C";
+        break;
+    }
+
     }
 
     QLabel* area = new QLabel;
@@ -490,6 +507,7 @@ QLabel *ViraStatusBar::getArea(ViraStatusBar::AreaType type, AreaData data)
                          "border-width: 2px;"
                          "border-style: solid;"
                          );
+
     area->setText( QString::number( area_cnt ));
     return area;
 }

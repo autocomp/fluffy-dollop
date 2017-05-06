@@ -15,6 +15,7 @@ struct AreaData
     double area_free = 0;
     double area_property = 0;
     double area_unavailable = 0;
+    double area = 0;
 
     int task_work = 0;
     int task_check = 0;

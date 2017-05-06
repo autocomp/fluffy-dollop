@@ -53,6 +53,8 @@ AreaData DataGetter::getData(uint64_t id)
         else if( unavailable )
             data.area_unavailable = area;
 
+        data.area = area;
+
         // task
         MarkPtrs marks = room->getMarks();
         for( MarkPtr mark: marks )
@@ -88,6 +90,7 @@ AreaData DataGetter::getData(uint64_t id)
             data.area_free += ch_data.area_free;
             data.area_property += ch_data.area_property;
             data.area_rent += ch_data.area_rent;
+            data.area += ch_data.area;
 
             // task
             data.task_work += ch_data.task_work;

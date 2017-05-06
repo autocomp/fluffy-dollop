@@ -35,6 +35,7 @@ class ViraStatusBar : public QWidget
 
     enum AreaType
     {
+        AT_ALL,
         AT_RENT,
         AT_FREE,
         AT_PROP,
