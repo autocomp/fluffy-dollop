@@ -278,7 +278,8 @@ std::vector<FacilityPtr> Location::getChilds()
 }
 
 Facility::Facility(uint64_t id):
-    BizRelationKepper( id )
+    BizRelationKepper( id ),
+    MarksHolder( id )
 {}
 
 BaseArea::AreaType Facility::getType()
