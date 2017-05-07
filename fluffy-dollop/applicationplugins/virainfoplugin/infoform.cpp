@@ -2,6 +2,7 @@
 #include "ui_infoform.h"
 #include <ctrcore/ctrcore/ctrconfig.h>
 #include <QFileDialog>
+#include <QImageReader>
 
 using namespace regionbiz;
 
@@ -313,11 +314,29 @@ void InfoForm::slotLoadImage()
     foreach (QString name, list)
     {
         QPixmap pm(name);
-        if(pm.isNull() == false)
+        if(pm.isNull())
+            continue;
+
+        int rotate(0);
+        QImageReader imageReader(name);
+        switch(imageReader.transformation())
         {
-            _pixmaps.append(pm);
-            _listWidget->addItem(pm);
+        case QImageIOHandler::TransformationRotate90 :{
+            rotate = 90;
+        }break;
+        case QImageIOHandler::TransformationRotate180 :{
+            rotate = 180;
+        }break;
+        case QImageIOHandler::TransformationRotate270 :{
+            rotate = 270;
+        }break;
         }
+
+        if(rotate != 0)
+            pm = pm.transformed(QTransform().rotate(rotate));
+
+        _pixmaps.append(pm);
+        _listWidget->addItem(pm);
     }
 }
 
