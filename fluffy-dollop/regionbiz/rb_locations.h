@@ -159,7 +159,7 @@ typedef std::vector< LocationPtr > LocationPtrs;
 class Floor;
 typedef std::shared_ptr< Floor > FloorPtr;
 
-class Facility: public BizRelationKepper
+class Facility: public BizRelationKepper, public MarksHolder
 {
 public:
     Facility( uint64_t id );

@@ -372,7 +372,7 @@ BaseFileKeeperPtr FilesTranslatorFtp::addFile( QString local_path, QString inner
     auto file = FileKeeperFabric::createFile( inner_path, entity_id, type );
     if( file )
     {
-        appendFile( file );
+        //appendFile( file );
 
         bool local( true );
         QString inner_local_path = getFullPath( file, local );

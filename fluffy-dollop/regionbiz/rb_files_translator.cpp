@@ -89,6 +89,7 @@ void BaseFilesTranslator::onAddFile(BaseFileKeeperPtr file)
 void BaseFilesTranslator::appendFile(BaseFileKeeperPtr file)
 {
     auto& files = BaseFileKeeper::getFiles();
+    // TODO check path to uniq
     files[ file->getEntityId() ].push_back( file );
 }
 
