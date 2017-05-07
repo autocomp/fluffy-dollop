@@ -11,6 +11,7 @@
 #include "roomgraphicstem.h"
 #include <QToolButton>
 #include <QLabel>
+#include <regionbiz/rb_locations.h>
 
 class LayersMenu;
 
@@ -70,6 +71,7 @@ protected:
     void finishCreateMark();
     void abortCreateMark();
     void removeLastPointInMarkArea();
+    bool markInArchive(regionbiz::MarkPtr markPtr);
 
 private:
     enum Mode {ScrollMode, EditAreaMode, EditMarkMode};

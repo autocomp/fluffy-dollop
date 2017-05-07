@@ -9,7 +9,6 @@
 #include <QDebug>
 #include <ctrcore/ctrcore/ctrconfig.h>
 #include <regionbiz/rb_manager.h>
-#include <regionbiz/rb_locations.h>
 #include <ctrcore/bus/common_message_notifier.h>
 #include <ctrcore/bus/bustags.h>
 #include "viragraphicsitem.h"
@@ -237,15 +236,16 @@ void ViraEditorView::setFloor(qulonglong floorId)
 
         MarkPtrs marks_of_floor = floorPtr->getMarks();
         for( MarkPtr mark: marks_of_floor )
-        {
-            QPointF center = mark->getCenter();
-            MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(mark->getId());
-            _markGraphicsItem->setPos(center);
+            if(markInArchive(mark) == false)
+            {
+                QPointF center = mark->getCenter();
+                MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(mark->getId());
+                _markGraphicsItem->setPos(center);
 
-            scene()->addItem(_markGraphicsItem);
-            connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
-            _itemsOnFloor.insert(mark->getId(), _markGraphicsItem);
-        }
+                scene()->addItem(_markGraphicsItem);
+                connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                _itemsOnFloor.insert(mark->getId(), _markGraphicsItem);
+            }
 
         RoomPtrs rooms = floorPtr->getChilds();
         for( BaseAreaPtr room_ptr: rooms )
@@ -255,19 +255,20 @@ void ViraEditorView::setFloor(qulonglong floorId)
             {
                 MarkPtrs marks_of_room = room->getMarks();
                 for( MarkPtr mark: marks_of_room )
-                {
-//                    quint64 id = mark->getId();
-//                    bool res = RegionBizManager::instance()->deleteMark(id);
-//                    qDebug() << "===> mark" << id << "res" << res;
+                    if(markInArchive(mark) == false)
+                    {
+                        // quint64 id = mark->getId();
+                        // bool res = RegionBizManager::instance()->deleteMark(id);
+                        // qDebug() << "===> mark" << id << "res" << res;
 
-                    QPointF center = mark->getCenter();
-                    MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(mark->getId());
-                    _markGraphicsItem->setPos(center);
+                        QPointF center = mark->getCenter();
+                        MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(mark->getId());
+                        _markGraphicsItem->setPos(center);
 
-                    scene()->addItem(_markGraphicsItem);
-                    connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
-                    _itemsOnFloor.insert(mark->getId(), _markGraphicsItem);
-                }
+                        scene()->addItem(_markGraphicsItem);
+                        connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                        _itemsOnFloor.insert(mark->getId(), _markGraphicsItem);
+                    }
 
                 QColor roomColor(_roomDefaultColor);
                 BaseMetadataPtr statusPtr = room->getMetadata("status");
@@ -526,25 +527,32 @@ void ViraEditorView::slotObjectChanged(uint64_t id)
             if(markItem)
             {
                 MarkPtr markPtr = RegionBizManager::instance()->getMark(id);
-                if(markPtr)
+                if(markInArchive(markPtr))
                 {
-                    BaseMetadataPtr status = markPtr->getMetadata("status");
-                    if(status)
-                    {
-                        QString statusStr = status->getValueAsString();
-                        if(statusStr == QString::fromUtf8("в архиве"))
-                        {
-                            _itemsOnFloor.erase(it);
-                            delete markItem;
-                            return;
-                        }
-                    }
+                    _itemsOnFloor.erase(it);
+                    delete markItem;
+                    return;
                 }
-
                 markItem->reinit();
             }
         }
     }
+}
+
+bool ViraEditorView::markInArchive(regionbiz::MarkPtr markPtr)
+{
+    bool _markInArchive(false);
+    if(markPtr)
+    {
+        BaseMetadataPtr status = markPtr->getMetadata("status");
+        if(status)
+        {
+            QString statusStr = status->getValueAsString();
+            if(statusStr == QString::fromUtf8("в архиве"))
+                _markInArchive = true;
+        }
+    }
+    return _markInArchive;
 }
 
 void ViraEditorView::slotAddObject(uint64_t id)
