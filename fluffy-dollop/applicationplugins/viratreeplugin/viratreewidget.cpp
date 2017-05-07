@@ -249,12 +249,12 @@ void ViraTreeWidget::reinit()
                                         QString statusStr = status->getValueAsString();
 
                                         //!!! ВРЕМЕННЫЙ КОД !!!
-                                        if(statusStr == QString::fromUtf8("в архиве"))
-                                        {
-                                            mark->addMetadata("string", "status", QString::fromUtf8("на проверку"));
-                                            mark->commit();
-                                            statusStr = QString::fromUtf8("на проверку");
-                                        }
+//                                        if(statusStr == QString::fromUtf8("в архиве"))
+//                                        {
+//                                            mark->addMetadata("string", "status", QString::fromUtf8("на проверку"));
+//                                            mark->commit();
+//                                            statusStr = QString::fromUtf8("на проверку");
+//                                        }
 
                                         if(statusStr == QString::fromUtf8("новый"))
                                             ++tasks_new;
