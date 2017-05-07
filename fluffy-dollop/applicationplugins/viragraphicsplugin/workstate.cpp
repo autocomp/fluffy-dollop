@@ -3,6 +3,7 @@
 #include "areagraphicsitem.h"
 #include "locationitem.h"
 #include "types.h"
+#include "markgraphicsitem.h"
 #include <regionbiz/rb_entity_filter.h>
 #include <regionbiz/rb_manager.h>
 #include <ctrcore/ctrcore/ctrconfig.h>
@@ -65,6 +66,13 @@ void WorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom
                                       qMetaTypeId< quint64 >(),
                                       QString("visualize_system") );
 
+    auto mngr = RegionBizManager::instance();
+    mngr->subscribeOnSelect(this, SLOT(slotSelectionItemsChanged(uint64_t,uint64_t)));
+    mngr->subscribeCenterOn(this, SLOT(slotCenterOn(uint64_t)));
+    mngr->subscribeOnChangeEntity(this, SLOT(slotObjectChanged(uint64_t)));
+    mngr->subscribeOnAddEntity(this, SLOT(slotAddObject(uint64_t)));
+    mngr->subscribeOnDeleteEntity(this, SLOT(slotDeleteObject(uint64_t)));
+
     reinit();
 }
 
@@ -74,8 +82,8 @@ void WorkState::reinit()
     _prevSelectedLocationId = 0;
     _itemId_facilityFolder.clear();
 
-    foreach(AreaGraphicsItem * areaGraphicsItem, _items.values())
-        delete areaGraphicsItem;
+    foreach(ViraGraphicsItem * item, _items.values())
+        delete item;
     _items.clear();
 
     foreach(LocationItem * locationItem, _locationItems.values())
@@ -120,9 +128,6 @@ void WorkState::reinit()
     facInitData.brushHoverl.setColor(facBrushColor);
 
     auto mngr = RegionBizManager::instance();
-    mngr->subscribeOnSelect(this, SLOT(slotSelectionItemsChanged(uint64_t,uint64_t)));
-    mngr->subscribeCenterOn(this, SLOT(slotCenterOn(uint64_t)));
-
     std::vector<RegionPtr> regions = mngr->getRegions();
     for( RegionPtr regionPtr: regions )
     {
@@ -196,7 +201,7 @@ void WorkState::reinit()
                 areaGraphicsItem->hide();
                 graphicsItems.append(areaGraphicsItem);
 
-               std::vector< FacilityPtr > facilities = locationPtr->getChilds();
+                std::vector< FacilityPtr > facilities = locationPtr->getChilds();
                 for( FacilityPtr facilityPtr: facilities )
                 {
 //                    if(facilityPtr->getId() == 5023)
@@ -217,7 +222,23 @@ void WorkState::reinit()
                     graphicsItems.append(areaGraphicsItem);
                 }
 
-                LocationItem * locationItem = new LocationItem(locationPtr->getId(), 14, locationPtr->getCoords().boundingRect(), graphicsItems, _scene);
+                MarkPtrs marks_of_location = locationPtr->getMarks();
+                for( MarkPtr mark: marks_of_location )
+                    //if(markInArchive(mark) == false)
+                    {
+                        QPointF center = mark->getCenter();
+                        MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(mark->getId());
+                        _markGraphicsItem->setPos(center);
+
+                        _scene->addItem(_markGraphicsItem);
+                        connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                        _items.insert(mark->getId(), _markGraphicsItem);
+
+                        _markGraphicsItem->hide();
+                        graphicsItems.append(_markGraphicsItem);
+                    }
+
+                LocationItem * locationItem = new LocationItem(locationPtr->getId(), 16, locationPtr->getCoords().boundingRect(), graphicsItems, _scene);
                 connect(locationItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
                 locationItem->setToolTip(locationPtr->getDescription());
                 connect(locationItem, SIGNAL(setViewport(QRectF)), this, SIGNAL(signalSetPrefferZoomForSceneRect(QRectF)));
@@ -226,6 +247,21 @@ void WorkState::reinit()
             }
         }
     }
+}
+
+void WorkState::slotObjectChanged(uint64_t id)
+{
+
+}
+
+void WorkState::slotAddObject(uint64_t id)
+{
+
+}
+
+void WorkState::slotDeleteObject(uint64_t id)
+{
+
 }
 
 void WorkState::slotBlockGUI(QVariant var)
@@ -242,7 +278,7 @@ void WorkState::slotSetMarkPosition(QVariant var)
         if(it != _items.end())
         {
             it.value()->setItemselected(true);
-            QPolygonF pol = it.value()->polygon();
+            QPolygonF pol = it.value()->getPolygon();
             centerViewOn(pol.boundingRect().center());
 
             emit setMarkOnMap(id);
@@ -292,7 +328,13 @@ void WorkState::slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_id)
     {
         BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(curr_id);
         if( ! ptr)
+        {
+            auto it = _items.find(curr_id);
+            if(it != _items.end())
+                it.value()->setItemselected(true);
+
             return;
+        }
 
         uint64_t facilityId(0);
         switch(ptr->getType())
@@ -318,7 +360,7 @@ void WorkState::slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_id)
                 it2.value()->setItemselected(true);
                 if(ptr->getType() == BaseArea::AT_LOCATION)
                 {
-                    QPolygonF pol = it2.value()->polygon();
+                    QPolygonF pol = it2.value()->getPolygon();
                     centerViewOn(pol.boundingRect().center());
                 }
             }
@@ -352,7 +394,7 @@ void WorkState::slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_id)
             if(it != _items.end())
             {
                 it.value()->setItemselected(true);
-                QPolygonF pol = it.value()->polygon();
+                QPolygonF pol = it.value()->getPolygon();
                 centerViewOn(pol.boundingRect().center());
             }
         }
@@ -381,7 +423,7 @@ void WorkState::slotCenterOn(uint64_t id)
     {
         if(it != _items.end())
         {
-            QPolygonF pol = it.value()->polygon();
+            QPolygonF pol = it.value()->getPolygon();
             setPrefferZoomForSceneRect(pol.boundingRect());
             emit switchOnMap();
         }
@@ -398,12 +440,12 @@ void WorkState::slotCenterOn(uint64_t id)
                     auto parentIt = _items.find(parentPtr->getId());
                     if(parentIt != _items.end())
                     {
-                        QPolygonF pol = parentIt.value()->polygon();
+                        QPolygonF pol = parentIt.value()->getPolygon();
                         setPrefferZoomForSceneRect(pol.boundingRect());
                     }
                 }
 
-            QPolygonF pol = it.value()->polygon();
+            QPolygonF pol = it.value()->getPolygon();
             _view->centerOn(pol.boundingRect().center());
             facilityId = id;
         }
@@ -454,6 +496,12 @@ bool WorkState::mousePressEvent(QMouseEvent* e, QPointF scenePos)
 {
     qDebug() << "mousePressEvent :" << QString::number(scenePos.x(), 'f', 8) << QString::number(scenePos.y(), 'f', 8);
     return ScrollBaseState::mousePressEvent(e, scenePos);
+}
+
+bool WorkState::mouseDoubleClickEvent(QMouseEvent *e, QPointF scenePos)
+{
+    RegionBizManager::instance()->clearSelect();
+    return true;
 }
 
 //!    for second images :

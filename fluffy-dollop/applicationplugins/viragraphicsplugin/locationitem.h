@@ -12,6 +12,7 @@ public:
     ~LocationItem();
     void zoomChanged(int zoom);
     void setItemselected(bool on_off);
+    bool locationIsVisible();
 
 signals:
     void setViewport(QRectF);
@@ -24,6 +25,7 @@ protected:
 private:
     const qulonglong _id;
     bool _isVisible = true;
+    bool _selected = false;
     int _minZoom;
     QRectF _bSceneRect;
     QList<QGraphicsItem*> _items;

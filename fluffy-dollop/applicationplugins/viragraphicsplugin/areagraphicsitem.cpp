@@ -160,6 +160,11 @@ quint64 AreaGraphicsItem::getId()
     return _areaInitData.id;
 }
 
+QPolygonF AreaGraphicsItem::getPolygon()
+{
+    return polygon();
+}
+
 void AreaGraphicsItem::reinit()
 {
 

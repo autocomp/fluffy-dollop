@@ -36,6 +36,7 @@ public:
     void setItemselected(bool on_off);
     void centerOnItem();
     quint64 getId();
+    virtual QPolygonF getPolygon();
     void reinit();
 
 protected:

@@ -51,7 +51,7 @@ void MarkGraphicsItem::setItemselected(bool on_off)
             {
                 QPen pen(Qt::blue);
                 pen.setWidth(2);
-                pen.setColor(true);
+                pen.setCosmetic(true);
 
                 QColor brushColor(233,124,27);
                 BaseMetadataPtr status = ptr->getMetadata("status");

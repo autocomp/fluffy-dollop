@@ -2,6 +2,7 @@
 #define VIRAGRAPHICSITEM_H
 
 #include <QObject>
+#include <QPolygonF>
 
 class ViraGraphicsItem : public QObject
 {
@@ -14,6 +15,7 @@ public:
     virtual void centerOnItem() = 0;
     virtual quint64 getId() = 0;
     virtual void reinit() = 0;
+    virtual QPolygonF getPolygon() {return QPolygonF();}
 
 signals:
     void itemIsHover(qulonglong id, bool on_off);

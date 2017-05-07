@@ -127,23 +127,18 @@ void ViraEditorView::reinit(qulonglong facilityId)
 
     if(facilityId != 0)
     {
-        // find first floor
         BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(facilityId, BaseArea::AT_FACILITY);
         FacilityPtr facilityPtr = BaseArea::convert< Facility >(ptr);
         if(facilityPtr)
         {
             FloorPtrs floors = facilityPtr->getChilds();
-            qDebug() << "----------------";
             for( FloorPtr floorPtr: floors )
             {
                 FloorInfo floorInfo;
                 floorInfo.name = floorPtr->getName();
                 floorInfo.id = floorPtr->getId();
-
-                qDebug() << "NAME" << floorPtr->getName() << "ID" << floorPtr->getId() << "NUMBER" << floorPtr->getNumber();
                 _floorsMap.insert(floorPtr->getNumber(), floorInfo);
             }
-            qDebug() << "----------------";
             if(_floorsMap.isEmpty() == false)
                 setFloor(_floorsMap.begin().value().id);
         }

@@ -5,6 +5,7 @@
 
 class LocationItem;
 class AreaGraphicsItem;
+class ViraGraphicsItem;
 
 class WorkState : public ScrollBaseState
 {
@@ -17,6 +18,7 @@ public:
     virtual void statePushedToStack() {}
     virtual void statePoppedFromStack();
     virtual bool mousePressEvent(QMouseEvent* e, QPointF scenePos);
+    virtual bool mouseDoubleClickEvent(QMouseEvent *e, QPointF scenePos);
     virtual void init(QGraphicsScene * scene, QGraphicsView * view, const int * zoom, const double * scale, double frameCoef, uint visualizerId);
     virtual void zoomChanged();
 
@@ -38,9 +40,12 @@ protected slots:
     void slotBlockGUI(QVariant var);
     void slotSetMarkPosition(QVariant var);
     void reinit();
+    void slotObjectChanged(uint64_t id);
+    void slotAddObject(uint64_t id);
+    void slotDeleteObject(uint64_t id);
 
 private:
-    QMap<qulonglong, AreaGraphicsItem*> _items;
+    QMap<qulonglong, ViraGraphicsItem*> _items;
     QMap<uint64_t, LocationItem *> _locationItems;
 
     QMap<qulonglong, QString> _itemId_facilityFolder;

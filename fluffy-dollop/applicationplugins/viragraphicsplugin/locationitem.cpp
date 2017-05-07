@@ -52,7 +52,13 @@ void LocationItem::zoomChanged(int zoom)
 
 void LocationItem::setItemselected(bool on_off)
 {
-    setPixmap(on_off ? QPixmap(":/img/mark_on_map_selected.png") : QPixmap(":/img/mark_on_map.png"));
+    _selected = on_off;
+    setPixmap(_selected ? QPixmap(":/img/mark_on_map_selected.png") : QPixmap(":/img/mark_on_map.png"));
+}
+
+bool LocationItem::locationIsVisible()
+{
+    return _isVisible;
 }
 
 void LocationItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -62,6 +68,7 @@ void LocationItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void LocationItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
+    emit signalSelectItem(_id, true);
     emit setViewport(_bSceneRect);
 }
 
