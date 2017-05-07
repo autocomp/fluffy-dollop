@@ -30,6 +30,7 @@ void ViraTreePlugin::init(uint visualizerId, quint64 visualizerWindowId)
 
     visualize_system::ViewInterface * viewInterface = visualize_system::VisualizerManager::instance()->getViewInterface(visualizerId);
     _viraTreeWidget = new ViraTreeWidget();
+    _viraTreeWidget->reinit();
     viewInterface->addWidgetToSplitterLeftArea(_viraTreeWidget);
 }
 

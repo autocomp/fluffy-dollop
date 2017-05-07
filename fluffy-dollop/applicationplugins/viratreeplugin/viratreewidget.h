@@ -11,6 +11,9 @@ class ViraTreeWidget : public QTreeWidget
 public:
     ViraTreeWidget(QWidget *parent = Q_NULLPTR);
 
+public slots:
+    void reinit();
+
 protected slots:
     void slotItemSelectionChanged();
     void slotItemDoubleClicked(QTreeWidgetItem*,int);
@@ -21,7 +24,6 @@ protected slots:
     void slotEditModeFinish(QVariant var);
     void slotResaclArea(const QModelIndex &index);
     void slotSaveItemToDb(const QModelIndex &index);
-    void reinit();
 
 protected:
     const int ColumnCount = 4; //8;

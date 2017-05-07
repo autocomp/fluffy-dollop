@@ -24,11 +24,32 @@ AreaData DataGetter::getData(uint64_t id)
 
     AreaData data;
     data.id = id;
+
+    // get marks of floor and room
+    if( BaseArea::AT_FLOOR == area->getType()
+            || BaseArea::AT_ROOM == area->getType())
+    {
+        // task
+        MarkPtrs marks = area->convert< MarksHolder >()->getMarks();
+        for( MarkPtr mark: marks )
+        {
+            if( mark->isMetadataPresent( "status" ))
+            {
+                QString status = mark->getMetadataValue( "status" ).toString();
+                if( QString::fromUtf8( "новый" ) == status )
+                    data.task_new += 1;
+                else if( QString::fromUtf8( "в работе" ) == status )
+                    data.task_work += 1;
+                else if( QString::fromUtf8( "на проверку" ) == status )
+                    data.task_check += 1;
+            }
+        }
+    }
+
     if ( BaseArea::AT_ROOM == area->getType() )
     {
         // one room
         // area
-        int prob = rand() % 10;
         RoomPtr room = area->convert< Room >();
 
         double area = ( room->isMetadataPresent( "area" ) ?
@@ -52,24 +73,7 @@ AreaData DataGetter::getData(uint64_t id)
             data.area_rent = area;
         else if( unavailable )
             data.area_unavailable = area;
-
         data.area = area;
-
-        // task
-        MarkPtrs marks = room->getMarks();
-        for( MarkPtr mark: marks )
-        {
-            if( mark->isMetadataPresent( "status" ))
-            {
-                QString status = mark->getMetadataValue( "status" ).toString();
-                if( QString::fromUtf8( "новый" ) == status )
-                    data.task_new += 1;
-                else if( QString::fromUtf8( "в работе" ) == status )
-                    data.task_work += 1;
-                else if( QString::fromUtf8( "на проверку" ) == status )
-                    data.task_check += 1;
-            }
-        }
 
         // arendators
         if( !free )
