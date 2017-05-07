@@ -25,12 +25,12 @@ AreaData DataGetter::getData(uint64_t id)
     AreaData data;
     data.id = id;
 
-    // get marks of floor and room
-    if( BaseArea::AT_FLOOR == area->getType()
-            || BaseArea::AT_ROOM == area->getType())
+    // get marks of loc, facility, floor or room
+    MarksHolderPtr holder = area->convert< MarksHolder >();
+    if( holder )
     {
         // task
-        MarkPtrs marks = area->convert< MarksHolder >()->getMarks();
+        MarkPtrs marks = holder->getMarks();
         for( MarkPtr mark: marks )
         {
             if( mark->isMetadataPresent( "status" ))
