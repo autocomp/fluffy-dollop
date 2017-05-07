@@ -233,7 +233,8 @@ void InfoForm::loadTasks(const QString &facilityName, const QString &floorName, 
 
         MarkPtrs marks_of_floor = floorPtr->getMarks();
         for( MarkPtr mark: marks_of_floor )
-            loadTasks(facilityName, floorName, "", mark);
+            if(markInArchive(mark) == false)
+                loadTasks(facilityName, floorName, "", mark);
 
         auto rooms = floorPtr->getChilds();
         for( BaseAreaPtr room_ptr: rooms )
@@ -250,7 +251,8 @@ void InfoForm::loadTasks(const QString &facilityName, const QString &floorName, 
         {
             MarkPtrs marks_of_room = room->getMarks();
             for( MarkPtr mark: marks_of_room )
-                loadTasks(facilityName, floorName, room->getName(), mark);
+                if(markInArchive(mark) == false)
+                    loadTasks(facilityName, floorName, room->getName(), mark);
         }
     }break;
     }
@@ -456,7 +458,21 @@ void InfoForm::slotDoubleClickOnMark(QTreeWidgetItem *item, int)
     }
 }
 
-
+bool InfoForm::markInArchive(regionbiz::MarkPtr markPtr)
+{
+    bool _markInArchive(false);
+    if(markPtr)
+    {
+        BaseMetadataPtr status = markPtr->getMetadata("status");
+        if(status)
+        {
+            QString statusStr = status->getValueAsString();
+            if(statusStr == QString::fromUtf8("в архиве"))
+                _markInArchive = true;
+        }
+    }
+    return _markInArchive;
+}
 
 
 

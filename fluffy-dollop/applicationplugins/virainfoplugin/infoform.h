@@ -38,7 +38,7 @@ private:
     void reloadTasks(regionbiz::BaseAreaPtr area);
     void loadTasks(const QString &facilityName, const QString &floorName, regionbiz::BaseAreaPtr area);
     void loadTasks(const QString &facilityName, const QString &floorName, const QString &roomName, regionbiz::MarkPtr mark);
-
+    bool markInArchive(regionbiz::MarkPtr markPtr);
 
     Ui::InfoForm *ui;
     quint64 _id = 0;
