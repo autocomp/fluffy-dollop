@@ -187,17 +187,17 @@ void InfoForm::reloadTasks(regionbiz::BaseAreaPtr area)
         LocationPtr locationPtr = BaseArea::convert< Location >( area );
         if(locationPtr)
         {
-            loadTasks("", "", locationPtr);
+            loadTasks(QString::fromUtf8("Не определено"), QString::fromUtf8("Не определено"), locationPtr);
 
             std::vector< FacilityPtr > facilities = locationPtr->getChilds();
             for( FacilityPtr facilityPtr: facilities )
-                loadTasks(facilityPtr->getDescription(), "", facilityPtr);
+                loadTasks(facilityPtr->getDescription(), QString::fromUtf8("Не определено"), facilityPtr);
         }
         }break;
 
     case BaseArea::AT_FACILITY:
         facility = area->getDescription();
-        loadTasks(facility, "", area);
+        loadTasks(facility, QString::fromUtf8("Не определено"), area);
         break;
 
     case BaseArea::AT_FLOOR:
@@ -227,7 +227,7 @@ void InfoForm::loadTasks(const QString &facilityName, const QString &floorName, 
         MarkPtrs marks_of_location = locationPtr->getMarks();
         for( MarkPtr mark: marks_of_location )
             if(markInArchive(mark) == false)
-                loadTasks("", "", "", mark);
+                loadTasks(QString::fromUtf8("Не определено"), QString::fromUtf8("Не определено"), QString::fromUtf8("Не определено"), mark);
         }break;
 
     case BaseArea::AT_FACILITY:{
@@ -237,7 +237,7 @@ void InfoForm::loadTasks(const QString &facilityName, const QString &floorName, 
         MarkPtrs marks_of_facility = facilityPtr->getMarks();
         for( MarkPtr mark: marks_of_facility )
             if(markInArchive(mark) == false)
-                loadTasks(facilityName, "", "", mark);
+                loadTasks(facilityName, QString::fromUtf8("Не определено"), QString::fromUtf8("Не определено"), mark);
 
         FloorPtrs floors = facilityPtr->getChilds();
         for( FloorPtr floorPtr: floors )
@@ -251,7 +251,7 @@ void InfoForm::loadTasks(const QString &facilityName, const QString &floorName, 
         MarkPtrs marks_of_floor = floorPtr->getMarks();
         for( MarkPtr mark: marks_of_floor )
             if(markInArchive(mark) == false)
-                loadTasks(facilityName, floorName, "", mark);
+                loadTasks(facilityName, floorName, QString::fromUtf8("Не определено"), mark);
 
         auto rooms = floorPtr->getChilds();
         for( BaseAreaPtr room_ptr: rooms )
