@@ -13,6 +13,8 @@ public:
     void zoomChanged(int zoom);
     void setItemselected(bool on_off);
     bool locationIsVisible();
+    void addItem(QGraphicsItem* item);
+    void removeItem(QGraphicsItem* item);
 
 signals:
     void setViewport(QRectF);

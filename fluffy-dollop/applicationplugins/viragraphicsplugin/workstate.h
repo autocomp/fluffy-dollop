@@ -2,6 +2,7 @@
 #define WORKSTATE_H
 
 #include <ctrvisual/state/scrollbasestate.h>
+#include <regionbiz/rb_manager.h>
 
 class LocationItem;
 class AreaGraphicsItem;
@@ -31,6 +32,7 @@ signals:
 
 protected:
     void centerViewOn(QPointF pos);
+    bool markInArchive(regionbiz::MarkPtr markPtr);
 
 protected slots:
     void slotSetItemselect(qulonglong id, bool on_off);

@@ -5,7 +5,6 @@
 #include "types.h"
 #include "markgraphicsitem.h"
 #include <regionbiz/rb_entity_filter.h>
-#include <regionbiz/rb_manager.h>
 #include <ctrcore/ctrcore/ctrconfig.h>
 #include <ctrcore/bus/common_message_notifier.h>
 #include <ctrcore/bus/bustags.h>
@@ -149,23 +148,7 @@ void WorkState::reinit()
             LocationPtr locationPtr = BaseArea::convert< Location >( ptr );
             if(locationPtr)
             {
-//                if(locationPtr->getId() == 5022)
-//                {
-//                    PlanKeeper::PlanParams planParams;
-//                    planParams.x = 298.4673898270;
-//                    planParams.y = 148.0499342829;
-//                    planParams.scale_w = 0.0000073504;
-//                    planParams.scale_h = 0.0000073504;
-//                    planParams.rotate = 0;
-//                    locationPtr->setPlanParams(planParams);
-//                    locationPtr->setPlanPath("0.tiff");
-
-//                    QPolygonF pol;
-//                    pol.append(QPointF(298.46761322, 148.05406952));
-//                    locationPtr->setCoords(pol);
-//                    locationPtr->commit();
-//                }
-
+                const qulonglong locationId(locationPtr->getId());
                 QList<QGraphicsItem*> graphicsItems;
 
                 QString planPath = "";
@@ -204,14 +187,6 @@ void WorkState::reinit()
                 std::vector< FacilityPtr > facilities = locationPtr->getChilds();
                 for( FacilityPtr facilityPtr: facilities )
                 {
-//                    if(facilityPtr->getId() == 5023)
-//                    {
-//                        QPolygonF pol;
-//                        pol.append(QPointF(298.46937561, 148.05240631));
-//                        facilityPtr->setCoords(pol);
-//                        facilityPtr->commit();
-//                    }
-
                     AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(facilityPtr->getCoords());
                     connect(areaGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
                     facInitData.id = facilityPtr->getId();
@@ -220,14 +195,32 @@ void WorkState::reinit()
                     _items.insert(facilityPtr->getId(), areaGraphicsItem);
                     areaGraphicsItem->hide();
                     graphicsItems.append(areaGraphicsItem);
+
+                    MarkPtrs marks_of_facility = facilityPtr->getMarks();
+                    for( MarkPtr mark: marks_of_facility )
+                        if(markInArchive(mark) == false)
+                        {
+                            QPointF center = mark->getCenter();
+                            MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(mark->getId());
+                            _markGraphicsItem->setProperty("locationId", locationId);
+                            _markGraphicsItem->setPos(center);
+
+                            _scene->addItem(_markGraphicsItem);
+                            connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                            _items.insert(mark->getId(), _markGraphicsItem);
+
+                            _markGraphicsItem->hide();
+                            graphicsItems.append(_markGraphicsItem);
+                        }
                 }
 
                 MarkPtrs marks_of_location = locationPtr->getMarks();
                 for( MarkPtr mark: marks_of_location )
-                    //if(markInArchive(mark) == false)
+                    if(markInArchive(mark) == false)
                     {
                         QPointF center = mark->getCenter();
                         MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(mark->getId());
+                        _markGraphicsItem->setProperty("locationId", locationId);
                         _markGraphicsItem->setPos(center);
 
                         _scene->addItem(_markGraphicsItem);
@@ -251,17 +244,85 @@ void WorkState::reinit()
 
 void WorkState::slotObjectChanged(uint64_t id)
 {
-
+    MarkPtr markPtr = RegionBizManager::instance()->getMark(id);
+    if(markPtr)
+    {
+        if(markInArchive(markPtr))
+        {
+            slotDeleteObject(id);
+        }
+        else
+        {
+            auto markIt = _items.find(id);
+            if(markIt != _items.end())
+                markIt.value()->reinit();
+        }
+    }
 }
 
 void WorkState::slotAddObject(uint64_t id)
 {
+    MarkPtr markPtr = RegionBizManager::instance()->getMark(id);
+    if(markPtr)
+    {
+        BaseAreaPtr parentPtr = RegionBizManager::instance()->getBaseArea(markPtr->getParentId());
+        if(parentPtr)
+        {
+            LocationPtr locationPtr;
+            switch(parentPtr->getType())
+            {
+            case BaseArea::AT_LOCATION :
+            {
+                locationPtr = BaseArea::convert<Location>(parentPtr);
+            }break;
+            case BaseArea::AT_FACILITY :
+            {
+                auto facility = BaseArea::convert<Facility>(parentPtr);
+                locationPtr = BaseArea::convert<Location>(facility->getParent());
+            }break;
+            }
 
+            if(locationPtr)
+            {
+                const qulonglong locationId(locationPtr->getId());
+                LocationItem * locationItem = nullptr;
+                auto locationIt = _locationItems.find(locationId);
+                if(locationIt != _locationItems.end())
+                    locationItem = locationIt.value();
+                else
+                    return;
+
+                QPointF center = markPtr->getCenter();
+                MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(markPtr->getId());
+                _markGraphicsItem->setProperty("locationId", locationId);
+                _markGraphicsItem->setPos(center);
+
+                _scene->addItem(_markGraphicsItem);
+                connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                _items.insert(markPtr->getId(), _markGraphicsItem);
+
+                locationItem->addItem(_markGraphicsItem);
+            }
+        }
+    }
 }
 
 void WorkState::slotDeleteObject(uint64_t id)
 {
-
+    auto markIt = _items.find(id);
+    if(markIt != _items.end())
+    {
+        bool ok;
+        qulonglong locationId  = markIt.value()->property("locationId").toULongLong(&ok);
+        if(ok)
+        {
+            auto locationIt = _locationItems.find(locationId);
+            if(locationIt != _locationItems.end())
+                locationIt.value()->removeItem( dynamic_cast<QGraphicsItem*>(markIt.value()) );
+        }
+        delete markIt.value();
+        _items.erase(markIt);
+    }
 }
 
 void WorkState::slotBlockGUI(QVariant var)
@@ -504,14 +565,51 @@ bool WorkState::mouseDoubleClickEvent(QMouseEvent *e, QPointF scenePos)
     return true;
 }
 
+bool WorkState::markInArchive(regionbiz::MarkPtr markPtr)
+{
+    bool _markInArchive(false);
+    if(markPtr)
+    {
+        BaseMetadataPtr status = markPtr->getMetadata("status");
+        if(status)
+        {
+            QString statusStr = status->getValueAsString();
+            if(statusStr == QString::fromUtf8("в архиве"))
+                _markInArchive = true;
+        }
+    }
+    return _markInArchive;
+}
+
 //!    for second images :
 //    _scaleX = 0.00000382951662997968;
 //    _scaleY = 0.00000382951662997968;
 //    _pixmapItem->setPos(299.30530569955715236574, 148.83659651624239472767);
 
+//                if(locationPtr->getId() == 5022)
+//                {
+//                    PlanKeeper::PlanParams planParams;
+//                    planParams.x = 298.4673898270;
+//                    planParams.y = 148.0499342829;
+//                    planParams.scale_w = 0.0000073504;
+//                    planParams.scale_h = 0.0000073504;
+//                    planParams.rotate = 0;
+//                    locationPtr->setPlanParams(planParams);
+//                    locationPtr->setPlanPath("0.tiff");
 
+//                    QPolygonF pol;
+//                    pol.append(QPointF(298.46761322, 148.05406952));
+//                    locationPtr->setCoords(pol);
+//                    locationPtr->commit();
+//                }
 
-
+//                    if(facilityPtr->getId() == 5023)
+//                    {
+//                        QPolygonF pol;
+//                        pol.append(QPointF(298.46937561, 148.05240631));
+//                        facilityPtr->setCoords(pol);
+//                        facilityPtr->commit();
+//                    }
 
 
 

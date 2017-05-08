@@ -187,6 +187,8 @@ void InfoForm::reloadTasks(regionbiz::BaseAreaPtr area)
         LocationPtr locationPtr = BaseArea::convert< Location >( area );
         if(locationPtr)
         {
+            loadTasks("", "", locationPtr);
+
             std::vector< FacilityPtr > facilities = locationPtr->getChilds();
             for( FacilityPtr facilityPtr: facilities )
                 loadTasks(facilityPtr->getDescription(), "", facilityPtr);
@@ -218,14 +220,28 @@ void InfoForm::loadTasks(const QString &facilityName, const QString &floorName, 
 {
     switch( area->getType() )
     {
+    case BaseArea::AT_LOCATION:{
+        LocationPtr locationPtr = BaseArea::convert< Location >( area );
+        if( ! locationPtr) return;
+
+        MarkPtrs marks_of_location = locationPtr->getMarks();
+        for( MarkPtr mark: marks_of_location )
+            if(markInArchive(mark) == false)
+                loadTasks("", "", "", mark);
+        }break;
+
     case BaseArea::AT_FACILITY:{
         FacilityPtr facilityPtr = BaseArea::convert< Facility >( area );
         if( ! facilityPtr) return;
+
+        MarkPtrs marks_of_facility = facilityPtr->getMarks();
+        for( MarkPtr mark: marks_of_facility )
+            if(markInArchive(mark) == false)
+                loadTasks(facilityName, "", "", mark);
+
         FloorPtrs floors = facilityPtr->getChilds();
         for( FloorPtr floorPtr: floors )
-        {
             loadTasks(facilityName, floorPtr->getName(), floorPtr);
-        }
     }break;
 
     case BaseArea::AT_FLOOR:{

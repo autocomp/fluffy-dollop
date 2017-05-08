@@ -61,6 +61,22 @@ bool LocationItem::locationIsVisible()
     return _isVisible;
 }
 
+void LocationItem::addItem(QGraphicsItem *item)
+{
+    item->setVisible(_isVisible);
+    _items.append(item);
+}
+
+void LocationItem::removeItem(QGraphicsItem *item)
+{
+    for(auto it = _items.begin(); it != _items.end(); ++it)
+        if( (*it) == item)
+        {
+            _items.erase(it);
+            break;
+        }
+}
+
 void LocationItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     emit signalSelectItem(_id, false);
