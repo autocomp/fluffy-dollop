@@ -58,7 +58,7 @@ public slots:
     void slotFloorUp();
     void slotFloorDown();
     void slotRastersVisibleChanged();
-    void slotGetNeedVisibleRasters(bool & axis, bool & sizes);
+    void slotGetNeedVisibleRasters(bool & axis, bool & sizes, bool & waterDisposal, bool & waterSupply, bool & heating, bool & electricity, bool & doors);
 
 protected:
     virtual void wheelEvent(QWheelEvent* e);
@@ -92,6 +92,11 @@ private:
     GraphicsPixmapItem * _baseRasterItem = nullptr;
     GraphicsPixmapItem * _axisRasterItem = nullptr;
     GraphicsPixmapItem * _sizesRasterItem = nullptr;
+    GraphicsPixmapItem * _waterDisposalRasterItem = nullptr;
+    GraphicsPixmapItem * _waterSupplyRasterItem = nullptr;
+    GraphicsPixmapItem * _heatingRasterItem = nullptr;
+    GraphicsPixmapItem * _electricityRasterItem = nullptr;
+    GraphicsPixmapItem * _doorsRasterItem = nullptr;
     QPointF _lastMouseScenePos;
     QMap<qulonglong, QGraphicsItem *> _itemsOnFloor;
     uint64_t _editObjectGeometry = 0;
@@ -111,7 +116,7 @@ class LayersMenu : public QLabel
 public:
     LayersMenu();
 signals:
-    void getNeedVisibleRasters(bool & axis, bool & sizes);
+    void getNeedVisibleRasters(bool & axis, bool & sizes, bool & waterDisposal, bool & waterSupply, bool & heating, bool & electricity, bool & doors);
     void rastersVisibleChanged();
 protected:
     virtual void mousePressEvent(QMouseEvent* e);

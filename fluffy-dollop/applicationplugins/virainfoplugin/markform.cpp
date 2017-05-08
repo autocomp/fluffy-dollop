@@ -169,8 +169,8 @@ void MarkForm::closeAndCommit(bool moveToArchive)
         }break;
         case BaseArea::AT_FACILITY :
         {
-//            auto facility = BaseArea::convert<Facility>(areaPtr);
-//            markPtr = facility->addMark();
+            auto facility = BaseArea::convert<Facility>(areaPtr);
+            markPtr = facility->addMark();
         }break;
         case BaseArea::AT_FLOOR :
         {
