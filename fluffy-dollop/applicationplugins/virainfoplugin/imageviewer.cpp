@@ -92,8 +92,11 @@ ImageViewer::~ImageViewer()
     }
 }
 
-void ImageViewer::showImageViewer()
+void ImageViewer::showImageViewer(QString widgetTitle)
 {
+    if(widgetTitle.isEmpty())
+        widgetTitle = QString::fromUtf8("Просмотр изображений");
+
     if(_currIndex < 0 || _currIndex >= _pixmaps.size())
         return;
 
@@ -125,7 +128,7 @@ void ImageViewer::showImageViewer()
             headStr.hasMinMaxButton = true;
             headStr.hasCollapseButton = false;
             headStr.headerPixmap = ":/img/img_icon.png";
-            headStr.windowTitle = QString::fromUtf8("Просмотр изображений");
+            headStr.windowTitle = widgetTitle;
             struc.header = headStr;
             struc.iface = _ifaceInfoWidget;
             struc.widgetTag = tag;
@@ -137,6 +140,7 @@ void ImageViewer::showImageViewer()
     }
     else
     {
+        ewApp()->setWidgetTitle(_ifaceInfoWidget->id(), widgetTitle);
         ewApp()->setVisible(_ifaceInfoWidget->id(), true);
     }
 }

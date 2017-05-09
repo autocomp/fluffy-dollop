@@ -2,6 +2,7 @@
 #include "ui_virastatusbar.h"
 #include "markform.h"
 #include "infoform.h"
+#include "imageviewer.h"
 
 #include <QDebug>
 
@@ -732,39 +733,73 @@ void ViraStatusBar::slotCloseMoreInfoForm()
 
 void ViraStatusBar::showMarkInfoWidgwt(quint64 id)
 {
-    if( !_ifaceInfoMarkWidget )
-    {
-        _markForm = new MarkForm;
-        connect(_markForm, SIGNAL(signalCloseWindow()), this, SLOT(slotCloseMarkWindow()));
-        _markForm->showWidget(id);
+    MarkPtr ptr = RegionBizManager::instance()->getMark(id);
+    if( ! ptr ) return;
 
-        _ifaceInfoMarkWidget = new EmbIFaceNotifier(_markForm);
-        QString tag = QString("ViraStatusBar_MarkInfoWidget");
-        quint64 widgetId = ewApp()->restoreWidget(tag, _ifaceInfoMarkWidget);
-        if(0 == widgetId)
+    QString mark_type_str = QString::fromUtf8("дефект");
+    BaseMetadataPtr mark_type = ptr->getMetadata("mark_type");
+    if(mark_type)
+        mark_type_str = mark_type->getValueAsVariant().toString();
+
+    if(mark_type_str == QString::fromUtf8("дефект"))
+    {
+        if( !_ifaceInfoMarkWidget )
         {
-            ew::EmbeddedWidgetStruct struc;
-            ew::EmbeddedHeaderStruct headStr;
-            headStr.hasCloseButton = true;
-            headStr.hasMinMaxButton = false;
-            headStr.hasCollapseButton = false;
-            headStr.headerPixmap = ":/img/mark_button.png";
-            headStr.windowTitle = QString::fromUtf8("Информация о дефекте");
-            struc.header = headStr;
-            struc.iface = _ifaceInfoMarkWidget;
-            struc.widgetTag = tag;
-            struc.minSize = QSize(300,300);
-            struc.topOnHint = true;
-            struc.isModal = true;
-            ewApp()->createWidget(struc, _parentWidgetId);
+            _markForm = new MarkForm;
+            connect(_markForm, SIGNAL(signalCloseWindow()), this, SLOT(slotCloseMarkWindow()));
+            _markForm->showWidget(id);
+
+            _ifaceInfoMarkWidget = new EmbIFaceNotifier(_markForm);
+            QString tag = QString("ViraStatusBar_MarkInfoWidget");
+            quint64 widgetId = ewApp()->restoreWidget(tag, _ifaceInfoMarkWidget);
+            if(0 == widgetId)
+            {
+                ew::EmbeddedWidgetStruct struc;
+                ew::EmbeddedHeaderStruct headStr;
+                headStr.hasCloseButton = true;
+                headStr.hasMinMaxButton = false;
+                headStr.hasCollapseButton = false;
+                headStr.headerPixmap = ":/img/mark_button.png";
+                headStr.windowTitle = QString::fromUtf8("Информация о дефекте");
+                struc.header = headStr;
+                struc.iface = _ifaceInfoMarkWidget;
+                struc.widgetTag = tag;
+                struc.minSize = QSize(300,300);
+                struc.topOnHint = true;
+                struc.isModal = true;
+                ewApp()->createWidget(struc, _parentWidgetId);
+            }
+        }
+        else
+        {
+            _markForm->showWidget(id);
+            ewApp()->setWidgetTitle(_ifaceInfoMarkWidget->id(), QString::fromUtf8("Информация о дефекте"));
+            ewApp()->setWidgetIcon(_ifaceInfoMarkWidget->id(), ":/img/mark_button.png");
+            ewApp()->setVisible(_ifaceInfoMarkWidget->id(), true);
         }
     }
-    else
+    else if(mark_type_str == QString::fromUtf8("фотография"))
     {
-        _markForm->showWidget(id);
-//        ewApp()->setWidgetTitle(_ifaceInfoMarkWidget->id(), QString::fromUtf8("Информация о дефекте"));
-//        ewApp()->setWidgetIcon(_ifaceInfoMarkWidget->id(), ":/img/mark_button.png");
-        ewApp()->setVisible(_ifaceInfoMarkWidget->id(), true);
+        QList<QPixmap> pixmaps;
+        QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath");
+        if(regionBizInitJson_Path.isValid())
+        {
+             QString destPath = regionBizInitJson_Path.toString() + QDir::separator() + QString::number(id);
+             QDir dir(destPath);
+             QStringList list = dir.entryList(QDir::Files);
+             foreach(QString fileName,list)
+             {
+                 fileName.prepend(destPath + QDir::separator());
+                 QPixmap pm(fileName);
+                 if(pm.isNull() == false)
+                     pixmaps.append(pm);
+             }
+        }
+        if(pixmaps.isEmpty() == false)
+        {
+            ImageViewer imageViewer(pixmaps);
+            imageViewer.showImageViewer(ptr->getName());
+        }
     }
 }
 

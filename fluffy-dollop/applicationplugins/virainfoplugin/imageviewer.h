@@ -17,7 +17,7 @@ class ImageViewer : public QGraphicsView
 public:
     ImageViewer(const QList<QPixmap>& pixmaps, int currIndex = 0);
     ~ImageViewer();
-    void showImageViewer();
+    void showImageViewer(QString widgetTitle = QString());
 
 protected slots:
     void slotPrevImg();

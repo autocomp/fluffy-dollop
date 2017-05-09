@@ -22,8 +22,11 @@ protected:
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
 
     const qulonglong _id;
+    double _direction = -90;
+    QPixmap _pixmap;
     HandleDirectionItem * _directionItem = nullptr;
     QGraphicsLineItem * _line = nullptr;
+    QGraphicsPixmapItem * _preview = nullptr;
 };
 
 #endif // FOTOGRAPHICSITEM_H
