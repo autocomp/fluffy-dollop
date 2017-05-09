@@ -51,7 +51,9 @@ protected slots:
     void slotShowMoreInfo();
     void slotMoreInfoWidgetClosed();
     void slotEditAreaGeometry(bool on_off);
-    void slotAddMark(bool on_off);
+    void slotAddDefect(bool on_off);
+    void slotAddFoto(bool on_off);
+    void slotAddFoto360(bool on_off);
     void slotEditObjectGeometryFinish(QVariant var);
     void slotCloseMarkWindow();
     void slotObjectCenterOn(uint64_t id);

@@ -39,12 +39,14 @@ MarkForm::~MarkForm()
     delete ui;
 }
 
-void MarkForm::showWidgetAndCreateMark(quint64 parentId, QPolygonF markArea)
+void MarkForm::showWidgetAndCreateMark(MarkType markType, quint64 parentId, QPolygonF markArea, double direction)
 {
+    _markType = markType;
     _id = 0;
     _parentId = parentId;
     _markArea = markArea;
-    ui->defect->clear();
+    _direction = direction;
+    ui->markName->clear();
     ui->responsible->clear();
     ui->description->clear();
     //ui->dateEdit->setMinimumDate(QDate::currentDate());
@@ -52,14 +54,52 @@ void MarkForm::showWidgetAndCreateMark(quint64 parentId, QPolygonF markArea)
     _pixmaps.clear();
     _listWidget->clear();
     ui->status->setCurrentText(QString::fromUtf8("новый"));
+    actulize();
+}
+
+void MarkForm::actulize()
+{
+    switch(_markType)
+    {
+    case Defect :
+        ui->responsibleLabel->show();
+        ui->responsible->show();
+        ui->dateEditLabel->show();
+        ui->dateEdit->show();
+        ui->importanceLabel->show();
+        ui->importance->show();
+        ui->statusLabel->show();
+        ui->status->show();
+        ui->categoryLabel->show();
+        ui->category->show();
+        ui->toArchieve->show();
+        break;
+
+    case Foto :
+    case Foto360 :
+        ui->responsibleLabel->hide();
+        ui->responsible->hide();
+        ui->dateEditLabel->hide();
+        ui->dateEdit->hide();
+        ui->importanceLabel->hide();
+        ui->importance->hide();
+        ui->statusLabel->hide();
+        ui->status->hide();
+        ui->categoryLabel->hide();
+        ui->category->hide();
+        ui->toArchieve->hide();
+        break;
+    }
 }
 
 void MarkForm::showWidget(quint64 id)
 {
+    _markType = Defect;
     _id = id;
     _parentId = 0;
     _markArea.clear();
-    ui->defect->clear();
+    _direction = 0;
+    ui->markName->clear();
     ui->responsible->clear();
     ui->description->clear();
     //ui->dateEdit->setMinimumDate(QDate::currentDate());
@@ -71,28 +111,42 @@ void MarkForm::showWidget(quint64 id)
     MarkPtr ptr = RegionBizManager::instance()->getMark(_id);
     if(ptr)
     {
-        ui->defect->setText(ptr->getName());
+        BaseMetadataPtr mark_type = ptr->getMetadata("mark_type");
+        if(mark_type)
+        {
+            QString mark_type_str = mark_type->getValueAsVariant().toString();
+            if(mark_type_str == QString::fromUtf8("фотография"))
+                _markType = Foto;
+            else if(mark_type_str == QString::fromUtf8("панорамная фотография"))
+                _markType = Foto360;
+        }
+        actulize();
+
+        ui->markName->setText(ptr->getName());
         ui->description->setPlainText(ptr->getDescription());
 
-        BaseMetadataPtr worker = ptr->getMetadata("worker");
-        if(worker)
-            ui->responsible->setText(worker->getValueAsVariant().toString());
+        if(_markType == Defect)
+        {
+            BaseMetadataPtr worker = ptr->getMetadata("worker");
+            if(worker)
+                ui->responsible->setText(worker->getValueAsVariant().toString());
 
-        BaseMetadataPtr date = ptr->getMetadata("date");
-        if(date)
-            ui->dateEdit->setDate( QDate::fromString(date->getValueAsVariant().toString(), "dd.MM.yy") );
+            BaseMetadataPtr date = ptr->getMetadata("date");
+            if(date)
+                ui->dateEdit->setDate( QDate::fromString(date->getValueAsVariant().toString(), "dd.MM.yy") );
 
-        BaseMetadataPtr priority = ptr->getMetadata("priority");
-        if(priority)
-            ui->importance->setCurrentText(priority->getValueAsVariant().toString());
+            BaseMetadataPtr priority = ptr->getMetadata("priority");
+            if(priority)
+                ui->importance->setCurrentText(priority->getValueAsVariant().toString());
 
-        BaseMetadataPtr status = ptr->getMetadata("status");
-        if(status)
-            ui->status->setCurrentText(status->getValueAsVariant().toString());
+            BaseMetadataPtr status = ptr->getMetadata("status");
+            if(status)
+                ui->status->setCurrentText(status->getValueAsVariant().toString());
 
-        BaseMetadataPtr category = ptr->getMetadata("category");
-        if(category)
-            ui->category->setCurrentText(category->getValueAsVariant().toString());
+            BaseMetadataPtr category = ptr->getMetadata("category");
+            if(category)
+                ui->category->setCurrentText(category->getValueAsVariant().toString());
+        }
 
         QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath");
         if(regionBizInitJson_Path.isValid())
@@ -191,7 +245,7 @@ void MarkForm::closeAndCommit(bool moveToArchive)
                 markPtr->setCenter(_markArea.first());
             else
                 markPtr->setCoords(_markArea);
-            markPtr->setName(QString::fromUtf8("дефект"));
+            // markPtr->setName(QString::fromUtf8("дефект"));
             bool res = markPtr->commit();
             qDebug() << "commit mark :" << res;
         }
@@ -217,20 +271,33 @@ void MarkForm::closeAndCommit(bool moveToArchive)
             }
         }
 
-        markPtr->setName( ui->defect->text());
-        markPtr->addMetadata("string", "worker", ui->responsible->text());
+        markPtr->setName( ui->markName->text());
         markPtr->setDesription( ui->description->toPlainText());
-        QString dataStr = ui->dateEdit->date().toString("dd.MM.yy");
-        bool res = markPtr->addMetadata("string", "date", dataStr);
-        markPtr->addMetadata("string", "priority", ui->importance->currentText());
-        markPtr->addMetadata("string", "category", ui->category->currentText());
-        if(moveToArchive)
-            markPtr->addMetadata("string", "status", QString::fromUtf8("в архиве"));
-        else
-            markPtr->addMetadata("string", "status", ui->status->currentText());
+
+        if(_markType == Defect)
+        {
+            markPtr->addMetadata("string", "worker", ui->responsible->text());
+            QString dataStr = ui->dateEdit->date().toString("dd.MM.yy");
+            markPtr->addMetadata("string", "date", dataStr);
+            markPtr->addMetadata("string", "priority", ui->importance->currentText());
+            markPtr->addMetadata("string", "category", ui->category->currentText());
+            if(moveToArchive)
+                markPtr->addMetadata("string", "status", QString::fromUtf8("в архиве"));
+            else
+                markPtr->addMetadata("string", "status", ui->status->currentText());
+        }
+        else if(_markType == Foto)
+        {
+            markPtr->addMetadata("string", "mark_type", QString::fromUtf8("фотография"));
+            markPtr->addMetadata("double", "foto_direction", _direction);
+        }
+        else if(_markType == Foto360)
+        {
+            markPtr->addMetadata("string", "mark_type", QString::fromUtf8("панорамная фотография"));
+        }
 
         bool commitRes = markPtr->commit();
-        qDebug() << _id << ", dataStr:" << dataStr << res << ", commitRes:" << commitRes;
+        qDebug() << _id << ", commitRes:" << commitRes;
     }
     emit signalCloseWindow();
 }

@@ -33,9 +33,11 @@ HEADERS += \
     workstate.h \
     areagraphicsitem.h \
     locationitem.h \
-    markgraphicsitem.h \
+    defectgraphicsitem.h \
     viragraphicsitem.h \
     setimagestate.h \
+    fotographicsitem.h \
+    handledirectionitem.h
 
 SOURCES += \
     viragraphicsplugin.cpp \
@@ -49,8 +51,10 @@ SOURCES += \
     workstate.cpp \
     areagraphicsitem.cpp \
     locationitem.cpp \
-    markgraphicsitem.cpp \
+    defectgraphicsitem.cpp \
     setimagestate.cpp \
+    fotographicsitem.cpp \
+    handledirectionitem.cpp
 
 RESOURCES += \
     viragraphicspluginres.qrc

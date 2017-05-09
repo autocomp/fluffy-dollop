@@ -28,11 +28,12 @@ signals:
     void switchOnMap();
     void switchOnEditor();
     void centerEditorOn(qulonglong id);
-    void setMarkOnMap(qulonglong id);
+    void setMarkOnMap(qulonglong markType);
 
 protected:
     void centerViewOn(QPointF pos);
     bool markInArchive(regionbiz::MarkPtr markPtr);
+
 
 protected slots:
     void slotSetItemselect(qulonglong id, bool on_off);

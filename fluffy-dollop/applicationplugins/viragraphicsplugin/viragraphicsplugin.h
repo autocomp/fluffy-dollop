@@ -25,9 +25,10 @@ private slots:
     void showFacility(qulonglong id);
     void switchOnMap();
     void switchOnEditor();
-    void setMarkOnMap(qulonglong id);
+    void setMarkOnMap(qulonglong markType);
     void defectStateChoiced(QPolygonF);
-    void defectStateAborted();
+    void fotoCreared(QPointF pos, double direction);
+    void markCreatingAbort();
 
 private:
     bool _showFirstBaseCover = true;

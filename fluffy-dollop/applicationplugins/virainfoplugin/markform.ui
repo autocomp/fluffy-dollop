@@ -32,17 +32,17 @@
    <item>
     <layout class="QFormLayout" name="formLayout">
      <item row="0" column="0">
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="markNameLabel">
        <property name="text">
         <string>Название</string>
        </property>
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="defect"/>
+      <widget class="QLineEdit" name="markName"/>
      </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="responsibleLabel">
        <property name="text">
         <string>Ответственный</string>
        </property>
@@ -52,14 +52,14 @@
       <widget class="QLineEdit" name="responsible"/>
      </item>
      <item row="2" column="0">
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="dateEditLabel">
        <property name="text">
         <string>Выполнить до</string>
        </property>
       </widget>
      </item>
      <item row="3" column="0">
-      <widget class="QLabel" name="label_4">
+      <widget class="QLabel" name="importanceLabel">
        <property name="text">
         <string>Важность</string>
        </property>
@@ -90,7 +90,7 @@
       </widget>
      </item>
      <item row="4" column="0">
-      <widget class="QLabel" name="label_5">
+      <widget class="QLabel" name="statusLabel">
        <property name="text">
         <string>Статус</string>
        </property>
@@ -116,7 +116,7 @@
       </widget>
      </item>
      <item row="5" column="0">
-      <widget class="QLabel" name="label_6">
+      <widget class="QLabel" name="categoryLabel">
        <property name="text">
         <string>Категория</string>
        </property>

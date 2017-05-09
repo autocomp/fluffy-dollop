@@ -18,6 +18,7 @@ public:
     bool mousePressEvent(QMouseEvent* e, QPointF scenePos);
     bool mouseReleaseEvent(QMouseEvent *e, QPointF scenePos);
     bool mouseMoveEvent(QMouseEvent* e, QPointF scenePos);
+    bool mouseDoubleClickEvent(QMouseEvent *e, QPointF scenePos);
     //bool wheelEvent(QWheelEvent* e, QPointF scenePos);
     bool keyPressEvent(QKeyEvent * e);
     void statePushedToStack() {}
@@ -30,10 +31,12 @@ public slots:
     void handleDirectionReplaced(QPointF pos, double direction);
 
 signals:
-    void rasterReplaced();
+    void signalCreated(QPointF pos, double direction);
+    void signalAbort();
 
 protected:
     void createItem();
+    void finishCreatedItem();
 
     QPointF _pos;
     double _direction = 0;
@@ -54,24 +57,7 @@ public:
     //void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
 
 signals:
-    void rasterReplaced();
-
-protected:
-    QVariant itemChange(GraphicsItemChange change, const QVariant &value);
-
-};
-
-class HandleDirectionItem : public QObject, public QGraphicsPixmapItem
-{
-    Q_OBJECT
-
-public:
-    HandleDirectionItem(QGraphicsItem * parent, bool isMovable);
-    virtual ~HandleDirectionItem();
-    //void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
-
-signals:
-    void handleDirectionReplaced(QPointF pos, double direction);
+    //void rasterReplaced();
 
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);

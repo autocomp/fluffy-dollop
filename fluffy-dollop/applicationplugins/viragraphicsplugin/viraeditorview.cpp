@@ -1,6 +1,6 @@
 #include "viraeditorview.h"
 #include "areagraphicsitem.h"
-#include "markgraphicsitem.h"
+#include "defectgraphicsitem.h"
 #include <QWheelEvent>
 #include <QMouseEvent>
 #include <QDir>
@@ -286,12 +286,12 @@ void ViraEditorView::setFloor(qulonglong floorId)
             if(markInArchive(mark) == false)
             {
                 QPointF center = mark->getCenter();
-                MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(mark->getId());
-                _markGraphicsItem->setPos(center);
+                DefectGraphicsItem * _defectGraphicsItem = new DefectGraphicsItem(mark->getId());
+                _defectGraphicsItem->setPos(center);
 
-                scene()->addItem(_markGraphicsItem);
-                connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
-                _itemsOnFloor.insert(mark->getId(), _markGraphicsItem);
+                scene()->addItem(_defectGraphicsItem);
+                connect(_defectGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                _itemsOnFloor.insert(mark->getId(), _defectGraphicsItem);
             }
 
         RoomPtrs rooms = floorPtr->getChilds();
@@ -309,12 +309,12 @@ void ViraEditorView::setFloor(qulonglong floorId)
                         // qDebug() << "===> mark" << id << "res" << res;
 
                         QPointF center = mark->getCenter();
-                        MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(mark->getId());
-                        _markGraphicsItem->setPos(center);
+                        DefectGraphicsItem * _defectGraphicsItem = new DefectGraphicsItem(mark->getId());
+                        _defectGraphicsItem->setPos(center);
 
-                        scene()->addItem(_markGraphicsItem);
-                        connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
-                        _itemsOnFloor.insert(mark->getId(), _markGraphicsItem);
+                        scene()->addItem(_defectGraphicsItem);
+                        connect(_defectGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                        _itemsOnFloor.insert(mark->getId(), _defectGraphicsItem);
                     }
 
                 QColor roomColor(_roomDefaultColor);
@@ -508,7 +508,8 @@ void ViraEditorView::slotEditAreaGeometry(QVariant var)
 
 void ViraEditorView::slotSetMarkPosition(QVariant var)
 {
-    _editObjectGeometry = var.toUInt();
+    quint64 type = var.toUInt();
+    _editObjectGeometry = (type > 0 ? regionbiz::RegionBizManager::instance()->getSelectedEntity() : 0);
     if(_editObjectGeometry > 0)
     {
         if(_editObjectGeometry == _currFloor_id)
@@ -570,17 +571,17 @@ void ViraEditorView::slotObjectChanged(uint64_t id)
         }
         else
         {
-            MarkGraphicsItem * markItem = dynamic_cast<MarkGraphicsItem*>(it.value());
-            if(markItem)
+            DefectGraphicsItem * defectItem = dynamic_cast<DefectGraphicsItem*>(it.value());
+            if(defectItem)
             {
                 MarkPtr markPtr = RegionBizManager::instance()->getMark(id);
                 if(markInArchive(markPtr))
                 {
                     _itemsOnFloor.erase(it);
-                    delete markItem;
+                    delete defectItem;
                     return;
                 }
-                markItem->reinit();
+                defectItem->reinit();
             }
         }
     }
@@ -630,12 +631,12 @@ void ViraEditorView::slotAddObject(uint64_t id)
     if(addMark)
     {
         QPointF center = markPtr->getCenter();
-        MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(markPtr->getId());
-        _markGraphicsItem->setPos(center);
+        DefectGraphicsItem * _defectGraphicsItem = new DefectGraphicsItem(markPtr->getId());
+        _defectGraphicsItem->setPos(center);
 
-        scene()->addItem(_markGraphicsItem);
-        connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
-        _itemsOnFloor.insert(markPtr->getId(), _markGraphicsItem);
+        scene()->addItem(_defectGraphicsItem);
+        connect(_defectGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+        _itemsOnFloor.insert(markPtr->getId(), _defectGraphicsItem);
     }
 }
 
@@ -644,10 +645,10 @@ void ViraEditorView::slotDeleteObject(uint64_t id)
     auto it = _itemsOnFloor.find(id);
     if(it != _itemsOnFloor.end())
     {
-        MarkGraphicsItem * markItem = dynamic_cast<MarkGraphicsItem*>(it.value());
-        if(markItem)
+        DefectGraphicsItem * defectItem = dynamic_cast<DefectGraphicsItem*>(it.value());
+        if(defectItem)
         {
-            delete markItem;
+            delete defectItem;
             _itemsOnFloor.erase(it);
         }
     }
@@ -809,7 +810,7 @@ void ViraEditorView::mousePressEvent(QMouseEvent *e)
 //                markPtr->setName(QString::fromUtf8("дефект"));
 //                bool res = markPtr->commit();
 
-//                MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(markPtr->getId());
+//                DefectGraphicsItem * _markGraphicsItem = new DefectGraphicsItem(markPtr->getId());
 //                _markGraphicsItem->setPos(scenePos);
 //                scene()->addItem(_markGraphicsItem);
 //                connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
@@ -1151,9 +1152,9 @@ void ViraEditorView::slotRastersVisibleChanged()
     bool visibleDefects = defectsRasterVisible.toBool();
     foreach(QGraphicsItem * item, _itemsOnFloor.values())
     {
-        MarkGraphicsItem * markGraphicsItem = dynamic_cast<MarkGraphicsItem*>(item);
-        if(markGraphicsItem)
-            markGraphicsItem->setVisible(visibleDefects);
+        DefectGraphicsItem * defectGraphicsItem = dynamic_cast<DefectGraphicsItem*>(item);
+        if(defectGraphicsItem)
+            defectGraphicsItem->setVisible(visibleDefects);
     }
 }
 

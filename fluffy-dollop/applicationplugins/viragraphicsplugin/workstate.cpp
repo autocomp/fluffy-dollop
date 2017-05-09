@@ -3,7 +3,8 @@
 #include "areagraphicsitem.h"
 #include "locationitem.h"
 #include "types.h"
-#include "markgraphicsitem.h"
+#include "defectgraphicsitem.h"
+#include "fotographicsitem.h"
 #include <regionbiz/rb_entity_filter.h>
 #include <ctrcore/ctrcore/ctrconfig.h>
 #include <ctrcore/bus/common_message_notifier.h>
@@ -200,17 +201,42 @@ void WorkState::reinit()
                     for( MarkPtr mark: marks_of_facility )
                         if(markInArchive(mark) == false)
                         {
-                            QPointF center = mark->getCenter();
-                            MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(mark->getId());
-                            _markGraphicsItem->setProperty("locationId", locationId);
-                            _markGraphicsItem->setPos(center);
+                            QString mark_type_str = QString::fromUtf8("дефект");
+                            BaseMetadataPtr mark_type = mark->getMetadata("mark_type");
+                            if(mark_type)
+                            {
+                                QString _mark_type_str = mark_type->getValueAsVariant().toString();
+                                if(_mark_type_str == QString::fromUtf8("фотография"))
+                                    mark_type_str = _mark_type_str;
+                            }
+                            if(mark_type_str == QString::fromUtf8("дефект"))
+                            {
+                                QPointF center = mark->getCenter();
+                                DefectGraphicsItem * _defectGraphicsItem = new DefectGraphicsItem(mark->getId());
+                                _defectGraphicsItem->setProperty("locationId", locationId);
+                                _defectGraphicsItem->setPos(center);
 
-                            _scene->addItem(_markGraphicsItem);
-                            connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
-                            _items.insert(mark->getId(), _markGraphicsItem);
+                                _scene->addItem(_defectGraphicsItem);
+                                connect(_defectGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                                _items.insert(mark->getId(), _defectGraphicsItem);
 
-                            _markGraphicsItem->hide();
-                            graphicsItems.append(_markGraphicsItem);
+                                _defectGraphicsItem->hide();
+                                graphicsItems.append(_defectGraphicsItem);
+                            }
+                            else
+                            {
+                                QPointF center = mark->getCenter();
+                                FotoGraphicsItem * _photoGraphicsItem = new FotoGraphicsItem(mark->getId());
+                                _photoGraphicsItem->setProperty("locationId", locationId);
+                                _photoGraphicsItem->setPos(center);
+
+                                _scene->addItem(_photoGraphicsItem);
+                                connect(_photoGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                                _items.insert(mark->getId(), _photoGraphicsItem);
+
+                                _photoGraphicsItem->hide();
+                                graphicsItems.append(_photoGraphicsItem);
+                            }
                         }
                 }
 
@@ -218,17 +244,42 @@ void WorkState::reinit()
                 for( MarkPtr mark: marks_of_location )
                     if(markInArchive(mark) == false)
                     {
-                        QPointF center = mark->getCenter();
-                        MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(mark->getId());
-                        _markGraphicsItem->setProperty("locationId", locationId);
-                        _markGraphicsItem->setPos(center);
+                        QString mark_type_str = QString::fromUtf8("дефект");
+                        BaseMetadataPtr mark_type = mark->getMetadata("mark_type");
+                        if(mark_type)
+                        {
+                            QString _mark_type_str = mark_type->getValueAsVariant().toString();
+                            if(_mark_type_str == QString::fromUtf8("фотография"))
+                                mark_type_str = _mark_type_str;
+                        }
+                        if(mark_type_str == QString::fromUtf8("дефект"))
+                        {
+                            QPointF center = mark->getCenter();
+                            DefectGraphicsItem * _defectGraphicsItem = new DefectGraphicsItem(mark->getId());
+                            _defectGraphicsItem->setProperty("locationId", locationId);
+                            _defectGraphicsItem->setPos(center);
 
-                        _scene->addItem(_markGraphicsItem);
-                        connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
-                        _items.insert(mark->getId(), _markGraphicsItem);
+                            _scene->addItem(_defectGraphicsItem);
+                            connect(_defectGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                            _items.insert(mark->getId(), _defectGraphicsItem);
 
-                        _markGraphicsItem->hide();
-                        graphicsItems.append(_markGraphicsItem);
+                            _defectGraphicsItem->hide();
+                            graphicsItems.append(_defectGraphicsItem);
+                        }
+                        else if(mark_type_str == QString::fromUtf8("фотография"))
+                        {
+                            QPointF center = mark->getCenter();
+                            FotoGraphicsItem * _photoGraphicsItem = new FotoGraphicsItem(mark->getId());
+                            _photoGraphicsItem->setProperty("locationId", locationId);
+                            _photoGraphicsItem->setPos(center);
+
+                            _scene->addItem(_photoGraphicsItem);
+                            connect(_photoGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                            _items.insert(mark->getId(), _photoGraphicsItem);
+
+                            _photoGraphicsItem->hide();
+                            graphicsItems.append(_photoGraphicsItem);
+                        }
                     }
 
                 LocationItem * locationItem = new LocationItem(locationPtr->getId(), 16, locationPtr->getCoords().boundingRect(), graphicsItems, _scene);
@@ -256,6 +307,8 @@ void WorkState::slotObjectChanged(uint64_t id)
             auto markIt = _items.find(id);
             if(markIt != _items.end())
                 markIt.value()->reinit();
+            else
+                slotAddObject(id);
         }
     }
 }
@@ -292,16 +345,28 @@ void WorkState::slotAddObject(uint64_t id)
                 else
                     return;
 
-                QPointF center = markPtr->getCenter();
-                MarkGraphicsItem * _markGraphicsItem = new MarkGraphicsItem(markPtr->getId());
-                _markGraphicsItem->setProperty("locationId", locationId);
-                _markGraphicsItem->setPos(center);
-
-                _scene->addItem(_markGraphicsItem);
-                connect(_markGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
-                _items.insert(markPtr->getId(), _markGraphicsItem);
-
-                locationItem->addItem(_markGraphicsItem);
+                QString mark_type_str = QString::fromUtf8("дефект");
+                BaseMetadataPtr mark_type = markPtr->getMetadata("mark_type");
+                if(mark_type)
+                    mark_type_str = mark_type->getValueAsVariant().toString();
+                if(mark_type_str == QString::fromUtf8("дефект"))
+                {
+                    QPointF center = markPtr->getCenter();
+                    DefectGraphicsItem * _defectGraphicsItem = new DefectGraphicsItem(markPtr->getId());
+                    _defectGraphicsItem->setProperty("locationId", locationId);
+                    _defectGraphicsItem->setPos(center);
+                    _scene->addItem(_defectGraphicsItem);
+                    connect(_defectGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                    _items.insert(markPtr->getId(), _defectGraphicsItem);
+                    locationItem->addItem(_defectGraphicsItem);
+                }
+                else if(mark_type_str == QString::fromUtf8("фотография"))
+                {
+                    qDebug() << "--->" << QString::fromUtf8("фотография :")<< id;
+                }
+                else if(mark_type_str == QString::fromUtf8("панорамная фотография"))
+                {
+                }
             }
         }
     }
@@ -332,9 +397,10 @@ void WorkState::slotBlockGUI(QVariant var)
 
 void WorkState::slotSetMarkPosition(QVariant var)
 {
-    uint id = var.toUInt();
-    if(id > 0)
+    quint64 type = var.toUInt();
+    if(type > 0)
     {
+        uint id = regionbiz::RegionBizManager::instance()->getSelectedEntity();
         auto it = _items.find(id);
         if(it != _items.end())
         {
@@ -342,7 +408,7 @@ void WorkState::slotSetMarkPosition(QVariant var)
             QPolygonF pol = it.value()->getPolygon();
             centerViewOn(pol.boundingRect().center());
 
-            emit setMarkOnMap(id);
+            emit setMarkOnMap(type);
         }
     }
     else

@@ -1,20 +1,20 @@
-#ifndef MARKGRAPHICSITEM_H
-#define MARKGRAPHICSITEM_H
+#ifndef DEFECTGRAPHICSITEM_H
+#define DEFECTGRAPHICSITEM_H
 
 #include "viragraphicsitem.h"
 #include <QGraphicsPixmapItem>
 #include <QGraphicsPolygonItem>
 
-class MarkAreaItem;
-class MarkPreviewItem;
+class DefectAreaItem;
+class DefectPreviewItem;
 
-class MarkGraphicsItem : public ViraGraphicsItem, public QGraphicsPixmapItem
+class DefectGraphicsItem : public ViraGraphicsItem, public QGraphicsPixmapItem
 {
     Q_OBJECT
 
 public:
-    MarkGraphicsItem(qulonglong id);
-    ~MarkGraphicsItem();
+    DefectGraphicsItem(qulonglong id);
+    ~DefectGraphicsItem();
     void setItemselected(bool on_off);
     void centerOnItem();
     quint64 getId();
@@ -31,23 +31,23 @@ protected:
 
     const qulonglong _id;
     QPixmap _pixmap;
-    MarkPreviewItem * _preview = nullptr;
-    MarkAreaItem * _area = nullptr;
+    DefectPreviewItem * _preview = nullptr;
+    DefectAreaItem * _area = nullptr;
 };
 
-class MarkAreaItem : public QGraphicsPolygonItem
+class DefectAreaItem : public QGraphicsPolygonItem
 {
 public:
-    MarkAreaItem(const QPolygonF &polygon);
+    DefectAreaItem(const QPolygonF &polygon);
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR);
 };
 
-class MarkPreviewItem : public QObject, public QGraphicsPixmapItem
+class DefectPreviewItem : public QObject, public QGraphicsPixmapItem
 {
     Q_OBJECT
 
 public:
-    MarkPreviewItem(QPixmap pixmap, QGraphicsItem * parent);
+    DefectPreviewItem(QPixmap pixmap, QGraphicsItem * parent);
 
 signals:
     void hoverEnterEvent(bool on_off);

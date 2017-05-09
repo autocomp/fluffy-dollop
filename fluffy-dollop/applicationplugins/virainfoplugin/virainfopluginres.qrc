@@ -16,5 +16,7 @@
         <file>img/icons_minus.png</file>
         <file>img/icons_plus.png</file>
         <file>img/image_perf_size.png</file>
+        <file>img/foto360_button.png</file>
+        <file>img/foto_button.png</file>
     </qresource>
 </RCC>

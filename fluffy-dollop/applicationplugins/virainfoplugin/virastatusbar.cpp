@@ -24,12 +24,16 @@ ViraStatusBar::ViraStatusBar( quint64 parentWidgetId, QWidget *parent ):
     ui->setupUi(this);
     ui->editObject->setIcon(QIcon(":/img/edit_mode"));
     ui->moreInfo->setIcon(QIcon(":/img/info_button"));
-    ui->addMark->setIcon(QIcon(":/img/mark_button"));
+    ui->addDefect->setIcon(QIcon(":/img/mark_button"));
     ui->deleteObject->setIcon(QIcon(":/img/garbg"));
+    ui->addFoto->setIcon(QIcon(":/img/foto_button"));
+    ui->addFoto360->setIcon(QIcon(":/img/foto360_button"));
 
     connect(ui->moreInfo, SIGNAL(clicked()), this, SLOT(slotShowMoreInfo()));
     connect(ui->editObject, SIGNAL(clicked(bool)), this, SLOT(slotEditAreaGeometry(bool)));
-    connect(ui->addMark, SIGNAL(clicked(bool)), this, SLOT(slotAddMark(bool)));
+    connect(ui->addDefect, SIGNAL(clicked(bool)), this, SLOT(slotAddDefect(bool)));
+    connect(ui->addFoto, SIGNAL(clicked(bool)), this, SLOT(slotAddFoto(bool)));
+    connect(ui->addFoto360, SIGNAL(clicked(bool)), this, SLOT(slotAddFoto360(bool)));
     connect(ui->deleteObject, SIGNAL(clicked()), this, SLOT(slotDeleteObject()));
     reset();
 
@@ -112,8 +116,11 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
         switch( ptr->getType() ) {
         case BaseArea::AT_LOCATION:
         case BaseArea::AT_FACILITY:
+            ui->addFoto->show();
+            //ui->addFoto360->show();
+            //! without break !!!
         case BaseArea::AT_FLOOR:
-            ui->addMark->show();
+            ui->addDefect->show();
             //! without break !!!
         case BaseArea::AT_REGION:
         {
@@ -138,7 +145,7 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
 
             ui->editObject->show();
             ui->moreInfo->show();
-            ui->addMark->show();
+            ui->addDefect->show();
             ui->editObject->setToolTip(QString::fromUtf8("Редактировать контуры комнаты"));
             break;
         }
@@ -175,12 +182,34 @@ void ViraStatusBar::slotDeleteObject()
     }
 }
 
-void ViraStatusBar::slotAddMark(bool on_off)
+void ViraStatusBar::slotAddDefect(bool on_off)
 {
     CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(on_off), QString("visualize_system"));
 
-    quint64 id(on_off ? RegionBizManager::instance()->getSelectedEntity() : 0);
-    CommonMessageNotifier::send( (uint)visualize_system::BusTags::SetMarkPosition, QVariant(id), QString("visualize_system"));
+    quint64 type(on_off ? 1 : 0);
+    CommonMessageNotifier::send( (uint)visualize_system::BusTags::SetMarkPosition, QVariant(type), QString("visualize_system"));
+
+    ui->moreInfo->setDisabled(on_off);
+    ui->editObject->setDisabled(on_off);
+}
+
+void ViraStatusBar::slotAddFoto(bool on_off)
+{
+    CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(on_off), QString("visualize_system"));
+
+    quint64 type(on_off ? 2 : 0);
+    CommonMessageNotifier::send( (uint)visualize_system::BusTags::SetMarkPosition, QVariant(type), QString("visualize_system"));
+
+    ui->moreInfo->setDisabled(on_off);
+    ui->editObject->setDisabled(on_off);
+}
+
+void ViraStatusBar::slotAddFoto360(bool on_off)
+{
+    CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(on_off), QString("visualize_system"));
+
+    quint64 type(on_off ? 3 : 0);
+    CommonMessageNotifier::send( (uint)visualize_system::BusTags::SetMarkPosition, QVariant(type), QString("visualize_system"));
 
     ui->moreInfo->setDisabled(on_off);
     ui->editObject->setDisabled(on_off);
@@ -195,7 +224,7 @@ void ViraStatusBar::slotEditAreaGeometry(bool on_off)
     CommonMessageNotifier::send( (uint)visualize_system::BusTags::EditAreaGeometry, QVariant(id), QString("visualize_system"));
 
     ui->moreInfo->setDisabled(on_off);
-//    ui->addMark->setDisabled(on_off);
+//    ui->addDefect->setDisabled(on_off);
 }
 
 void ViraStatusBar::slotEditObjectGeometryFinish(QVariant var)
@@ -209,11 +238,11 @@ void ViraStatusBar::slotEditObjectGeometryFinish(QVariant var)
             ui->editObject->setChecked(false);
             ui->editObject->blockSignals(false);
         }
-        if(ui->addMark->isChecked())
+        if(ui->addDefect->isChecked())
         {
-            ui->addMark->blockSignals(true);
-            ui->addMark->setChecked(false);
-            ui->addMark->blockSignals(false);
+            ui->addDefect->blockSignals(true);
+            ui->addDefect->setChecked(false);
+            ui->addDefect->blockSignals(false);
 
             showMarkInfoWidgwt(id);
         }
@@ -235,9 +264,11 @@ void ViraStatusBar::reset()
     }
     ui->name->clear();
     ui->moreInfo->hide();
-    ui->addMark->hide();
+    ui->addDefect->hide();
     ui->editObject->hide();
     ui->deleteObject->hide();
+    ui->addFoto->hide();
+    ui->addFoto360->hide();
 }
 
 void ViraStatusBar::showTasks( AreaData data )
@@ -731,16 +762,28 @@ void ViraStatusBar::showMarkInfoWidgwt(quint64 id)
     else
     {
         _markForm->showWidget(id);
+//        ewApp()->setWidgetTitle(_ifaceInfoMarkWidget->id(), QString::fromUtf8("Информация о дефекте"));
+//        ewApp()->setWidgetIcon(_ifaceInfoMarkWidget->id(), ":/img/mark_button.png");
         ewApp()->setVisible(_ifaceInfoMarkWidget->id(), true);
     }
 }
 
 void ViraStatusBar::slotMarkCreated(QVariant var)
 {
-    if(ui->addMark->isChecked())
+    if(ui->addDefect->isChecked())
     {
-        ui->addMark->setChecked(false);
-        slotAddMark(false);
+        ui->addDefect->setChecked(false);
+        slotAddDefect(false);
+    }
+    if(ui->addFoto->isChecked())
+    {
+        ui->addFoto->setChecked(false);
+        slotAddFoto(false);
+    }
+    if(ui->addFoto360->isChecked())
+    {
+        ui->addFoto360->setChecked(false);
+        slotAddFoto360(false);
     }
 
     quint64 parentId = RegionBizManager::instance()->getSelectedEntity();
@@ -753,10 +796,6 @@ void ViraStatusBar::slotMarkCreated(QVariant var)
         QVariant type = list.at(0);
         switch(type.toInt())
         {
-        case 0 :
-        {
-
-        }break;
         case 1 : // defect
         {
             quint64 parentId = RegionBizManager::instance()->getSelectedEntity();
@@ -767,7 +806,7 @@ void ViraStatusBar::slotMarkCreated(QVariant var)
             {
                 _markForm = new MarkForm;
                 connect(_markForm, SIGNAL(signalCloseWindow()), this, SLOT(slotCloseMarkWindow()));
-                _markForm->showWidgetAndCreateMark(parentId, areaMark);
+                _markForm->showWidgetAndCreateMark(MarkForm::Defect, parentId, areaMark);
 
                 _ifaceInfoMarkWidget = new EmbIFaceNotifier(_markForm);
                 QString tag = QString("ViraStatusBar_MarkInfoWidget");
@@ -792,18 +831,56 @@ void ViraStatusBar::slotMarkCreated(QVariant var)
             }
             else
             {
-                _markForm->showWidgetAndCreateMark(parentId, areaMark);
+                _markForm->showWidgetAndCreateMark(MarkForm::Defect, parentId, areaMark);
+                ewApp()->setWidgetTitle(_ifaceInfoMarkWidget->id(), QString::fromUtf8("Информация о дефекте"));
+                ewApp()->setWidgetIcon(_ifaceInfoMarkWidget->id(), ":/img/mark_button.png");
                 ewApp()->setVisible(_ifaceInfoMarkWidget->id(), true);
             }
         }break;
         case 2 : // foto
         {
             QPointF pos = list.at(1).toPointF();
+            double direction = list.at(2).toDouble();
+            qDebug() << "---> pos" << pos << "direction" << direction;
+
+            if( !_ifaceInfoMarkWidget )
+            {
+                _markForm = new MarkForm;
+                connect(_markForm, SIGNAL(signalCloseWindow()), this, SLOT(slotCloseMarkWindow()));
+                _markForm->showWidgetAndCreateMark(MarkForm::Foto, parentId, QPolygonF()<<pos, direction);
+
+                _ifaceInfoMarkWidget = new EmbIFaceNotifier(_markForm);
+                QString tag = QString("ViraStatusBar_MarkInfoWidget");
+                quint64 widgetId = ewApp()->restoreWidget(tag, _ifaceInfoMarkWidget);
+                if(0 == widgetId)
+                {
+                    ew::EmbeddedWidgetStruct struc;
+                    ew::EmbeddedHeaderStruct headStr;
+                    headStr.hasCloseButton = true;
+                    headStr.hasMinMaxButton = false;
+                    headStr.hasCollapseButton = false;
+                    headStr.headerPixmap = ":/img/foto_button.png";
+                    headStr.windowTitle = QString::fromUtf8("Информация о фотографии");
+                    struc.header = headStr;
+                    struc.iface = _ifaceInfoMarkWidget;
+                    struc.widgetTag = tag;
+                    struc.minSize = QSize(300,300);
+                    struc.topOnHint = true;
+                    struc.isModal = true;
+                    ewApp()->createWidget(struc, _parentWidgetId);
+                }
+            }
+            else
+            {
+                _markForm->showWidgetAndCreateMark(MarkForm::Foto, parentId, QPolygonF()<<pos, direction);
+                ewApp()->setWidgetTitle(_ifaceInfoMarkWidget->id(), QString::fromUtf8("Информация о фотографии"));
+                ewApp()->setWidgetIcon(_ifaceInfoMarkWidget->id(), ":/img/foto_button.png");
+                ewApp()->setVisible(_ifaceInfoMarkWidget->id(), true);
+            }
         }break;
         case 3 : // foto360
         {
             QPointF pos = list.at(1).toPointF();
-            double direction = list.at(2).toDouble();
         }break;
         }
     }

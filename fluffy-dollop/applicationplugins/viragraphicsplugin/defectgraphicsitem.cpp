@@ -1,4 +1,4 @@
-#include "markgraphicsitem.h"
+#include "defectgraphicsitem.h"
 #include "viraeditorview.h"
 #include <QGraphicsPixmapItem>
 #include <QGraphicsView>
@@ -9,7 +9,7 @@
 
 using namespace regionbiz;
 
-MarkGraphicsItem::MarkGraphicsItem(qulonglong id)
+DefectGraphicsItem::DefectGraphicsItem(qulonglong id)
     : _id(id)
 {
     setFlag(QGraphicsItem::ItemIgnoresTransformations);
@@ -21,13 +21,13 @@ MarkGraphicsItem::MarkGraphicsItem(qulonglong id)
     reinit();
 }
 
-MarkGraphicsItem::~MarkGraphicsItem()
+DefectGraphicsItem::~DefectGraphicsItem()
 {
     if(_area)
         delete _area;
 }
 
-void MarkGraphicsItem::setItemselected(bool on_off)
+void DefectGraphicsItem::setItemselected(bool on_off)
 {
     //setPixmap(on_off ? QPixmap(":/img/selected_mark.png") : QPixmap(":/img/mark.png"));
     if(on_off)
@@ -39,7 +39,7 @@ void MarkGraphicsItem::setItemselected(bool on_off)
                 view->centerOn(this);
         }
 
-        _preview = new MarkPreviewItem(_pixmap, this);
+        _preview = new DefectPreviewItem(_pixmap, this);
         //-18, -2
 
 
@@ -67,7 +67,7 @@ void MarkGraphicsItem::setItemselected(bool on_off)
                 }
                 brushColor.setAlpha(30);
 
-                _area = new MarkAreaItem(pol);
+                _area = new DefectAreaItem(pol);
                 _area->setFlag(QGraphicsItem::ItemIsSelectable, false);
                 _area->setPen(pen);
                 _area->setBrush(QBrush(brushColor));
@@ -98,7 +98,7 @@ void MarkGraphicsItem::setItemselected(bool on_off)
     _isSelected = on_off;
 }
 
-void MarkGraphicsItem::centerOnItem()
+void DefectGraphicsItem::centerOnItem()
 {
     foreach(QGraphicsView * view, scene()->views())
     {
@@ -108,12 +108,12 @@ void MarkGraphicsItem::centerOnItem()
     }
 }
 
-quint64 MarkGraphicsItem::getId()
+quint64 DefectGraphicsItem::getId()
 {
     return _id;
 }
 
-void MarkGraphicsItem::reinit()
+void DefectGraphicsItem::reinit()
 {
     MarkPtr ptr = RegionBizManager::instance()->getMark(_id);
     if( ! ptr)
@@ -319,23 +319,23 @@ void MarkGraphicsItem::reinit()
     }
 }
 
-void MarkGraphicsItem::hoverEnterEventInPreview(bool on_off)
+void DefectGraphicsItem::hoverEnterEventInPreview(bool on_off)
 {
     setOpacity(on_off ? 1 : 0.25);
 }
 
-void MarkGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
+void DefectGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     emit signalSelectItem(_id, false);
     //QGraphicsPixmapItem::mousePressEvent(event);
 }
 
-void MarkGraphicsItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+void DefectGraphicsItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
     emit signalSelectItem(_id, true);
 }
 
-void MarkGraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
+void DefectGraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
 //    if( ! _isSelected)
 //    {
@@ -346,7 +346,7 @@ void MarkGraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 //    QGraphicsPolygonItem::hoverEnterEvent(event);
 }
 
-void MarkGraphicsItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+void DefectGraphicsItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
 //    if( ! _isSelected)
 //    {
@@ -359,18 +359,18 @@ void MarkGraphicsItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 
 //----------------------------------------------------------------------------
 
-MarkAreaItem::MarkAreaItem(const QPolygonF &polygon)
+DefectAreaItem::DefectAreaItem(const QPolygonF &polygon)
     : QGraphicsPolygonItem(polygon)
 {
 }
 
-void MarkAreaItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void DefectAreaItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     painter->setRenderHint(QPainter::Antialiasing);
     QGraphicsPolygonItem::paint(painter, option, widget);
 }
 
-MarkPreviewItem::MarkPreviewItem(QPixmap pixmap, QGraphicsItem *parent)
+DefectPreviewItem::DefectPreviewItem(QPixmap pixmap, QGraphicsItem *parent)
     : QGraphicsPixmapItem(pixmap, parent)
 {
     setFlag(QGraphicsItem::ItemIsSelectable, false);
@@ -379,13 +379,13 @@ MarkPreviewItem::MarkPreviewItem(QPixmap pixmap, QGraphicsItem *parent)
     setAcceptHoverEvents(true);
 }
 
-void MarkPreviewItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
+void DefectPreviewItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
     QGraphicsPixmapItem::hoverEnterEvent(event);
     emit hoverEnterEvent(true);
 }
 
-void MarkPreviewItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+void DefectPreviewItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
     QGraphicsPixmapItem::hoverLeaveEvent(event);
     emit hoverEnterEvent(false);
