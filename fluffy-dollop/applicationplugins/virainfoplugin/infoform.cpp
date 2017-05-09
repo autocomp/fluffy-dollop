@@ -226,7 +226,7 @@ void InfoForm::loadTasks(const QString &facilityName, const QString &floorName, 
 
         MarkPtrs marks_of_location = locationPtr->getMarks();
         for( MarkPtr mark: marks_of_location )
-            if(markInArchive(mark) == false)
+            if(defectActual(mark))
                 loadTasks(QString::fromUtf8("Не определено"), QString::fromUtf8("Не определено"), QString::fromUtf8("Не определено"), mark);
         }break;
 
@@ -236,7 +236,7 @@ void InfoForm::loadTasks(const QString &facilityName, const QString &floorName, 
 
         MarkPtrs marks_of_facility = facilityPtr->getMarks();
         for( MarkPtr mark: marks_of_facility )
-            if(markInArchive(mark) == false)
+            if(defectActual(mark))
                 loadTasks(facilityName, QString::fromUtf8("Не определено"), QString::fromUtf8("Не определено"), mark);
 
         FloorPtrs floors = facilityPtr->getChilds();
@@ -250,7 +250,7 @@ void InfoForm::loadTasks(const QString &facilityName, const QString &floorName, 
 
         MarkPtrs marks_of_floor = floorPtr->getMarks();
         for( MarkPtr mark: marks_of_floor )
-            if(markInArchive(mark) == false)
+            if(defectActual(mark))
                 loadTasks(facilityName, floorName, QString::fromUtf8("Не определено"), mark);
 
         auto rooms = floorPtr->getChilds();
@@ -268,7 +268,7 @@ void InfoForm::loadTasks(const QString &facilityName, const QString &floorName, 
         {
             MarkPtrs marks_of_room = room->getMarks();
             for( MarkPtr mark: marks_of_room )
-                if(markInArchive(mark) == false)
+                if(defectActual(mark))
                     loadTasks(facilityName, floorName, room->getName(), mark);
         }
     }break;
@@ -493,9 +493,9 @@ void InfoForm::slotDoubleClickOnMark(QTreeWidgetItem *item, int)
     }
 }
 
-bool InfoForm::markInArchive(regionbiz::MarkPtr markPtr)
+bool InfoForm::defectActual(regionbiz::MarkPtr markPtr)
 {
-    bool _markInArchive(false);
+    bool _defectActual(true);
     if(markPtr)
     {
         BaseMetadataPtr status = markPtr->getMetadata("status");
@@ -503,10 +503,18 @@ bool InfoForm::markInArchive(regionbiz::MarkPtr markPtr)
         {
             QString statusStr = status->getValueAsString();
             if(statusStr == QString::fromUtf8("в архиве"))
-                _markInArchive = true;
+                _defectActual = false;
+        }
+
+        BaseMetadataPtr mark_type = markPtr->getMetadata("mark_type");
+        if(mark_type)
+        {
+            QString mark_type_str = mark_type->getValueAsVariant().toString();
+            if(mark_type_str == QString::fromUtf8("фотография"))
+                _defectActual = false;
         }
     }
-    return _markInArchive;
+    return _defectActual;
 }
 
 

@@ -739,7 +739,11 @@ void ViraStatusBar::showMarkInfoWidgwt(quint64 id)
     QString mark_type_str = QString::fromUtf8("дефект");
     BaseMetadataPtr mark_type = ptr->getMetadata("mark_type");
     if(mark_type)
-        mark_type_str = mark_type->getValueAsVariant().toString();
+    {
+        QString _mark_type_str = mark_type->getValueAsVariant().toString();
+        if(_mark_type_str.isEmpty() == false)
+            mark_type_str = _mark_type_str;
+    }
 
     if(mark_type_str == QString::fromUtf8("дефект"))
     {
