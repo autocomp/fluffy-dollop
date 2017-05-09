@@ -4,6 +4,7 @@
 #include <QGraphicsLineItem>
 #include <QDir>
 #include <QDebug>
+#include <QtMath>
 #include <ctrcore/ctrcore/ctrconfig.h>
 #include <regionbiz/rb_manager.h>
 #include <regionbiz/rb_locations.h>

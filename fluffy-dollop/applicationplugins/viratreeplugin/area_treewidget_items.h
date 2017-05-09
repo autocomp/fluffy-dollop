@@ -1,6 +1,5 @@
 #ifndef AREA_TREEWIDGET_ITEMS_H
 #define AREA_TREEWIDGET_ITEMS_H
-
 #include <QTreeWidgetItem>
 
 class FloorTreeWidgetItem: public QTreeWidgetItem

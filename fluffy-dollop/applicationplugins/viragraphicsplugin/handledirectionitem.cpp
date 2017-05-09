@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QCursor>
 #include <QDebug>
+#include <QtMath>
 
 HandleDirectionItem::HandleDirectionItem(QGraphicsItem * parent, bool isMovable)
     : QGraphicsPixmapItem(parent)
