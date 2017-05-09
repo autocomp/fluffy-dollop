@@ -345,10 +345,14 @@ void WorkState::slotAddObject(uint64_t id)
                 else
                     return;
 
-                QString mark_type_str = QString::fromUtf8("дефект");
-                BaseMetadataPtr mark_type = markPtr->getMetadata("mark_type");
-                if(mark_type)
-                    mark_type_str = mark_type->getValueAsVariant().toString();
+                QString mark_type_str; //  = QString::fromUtf8("дефект");
+                BaseMetadataPtr markTypePtr = markPtr->getMetadata("mark_type");
+                if(markTypePtr)
+                {
+                    QString _mark_type_str = markTypePtr->getValueAsVariant().toString();;
+                    if(_mark_type_str == QString::fromUtf8("фотография") || _mark_type_str == QString::fromUtf8("дефект"))
+                        mark_type_str = markTypePtr->getValueAsVariant().toString();
+                }
                 if(mark_type_str == QString::fromUtf8("дефект"))
                 {
                     QPointF center = markPtr->getCenter();
@@ -362,7 +366,14 @@ void WorkState::slotAddObject(uint64_t id)
                 }
                 else if(mark_type_str == QString::fromUtf8("фотография"))
                 {
-                    qDebug() << "--->" << QString::fromUtf8("фотография :")<< id;
+                    QPointF center = markPtr->getCenter();
+                    FotoGraphicsItem * _photoGraphicsItem = new FotoGraphicsItem(markPtr->getId());
+                    _photoGraphicsItem->setProperty("locationId", locationId);
+                    _photoGraphicsItem->setPos(center);
+                    _scene->addItem(_photoGraphicsItem);
+                    connect(_photoGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                    _items.insert(markPtr->getId(), _photoGraphicsItem);
+                    locationItem->addItem(_photoGraphicsItem);
                 }
                 else if(mark_type_str == QString::fromUtf8("панорамная фотография"))
                 {

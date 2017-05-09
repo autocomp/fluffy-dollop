@@ -276,6 +276,7 @@ void MarkForm::closeAndCommit(bool moveToArchive)
 
         if(_markType == Defect)
         {
+            markPtr->addMetadata("string", "mark_type", QString::fromUtf8("дефект"));
             markPtr->addMetadata("string", "worker", ui->responsible->text());
             QString dataStr = ui->dateEdit->date().toString("dd.MM.yy");
             markPtr->addMetadata("string", "date", dataStr);
