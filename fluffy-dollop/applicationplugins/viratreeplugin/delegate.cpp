@@ -330,7 +330,7 @@ StatusDelegate::StatusDelegate(QObject *parent)
 void StatusDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     int itemType = index.model()->data(index, TYPE).toInt();
-    if(itemType == (int)ItemType::ItemTypeRoom || itemType == (int)ItemType::ItemTypeFloor || itemType == (int)ItemType::ItemTypeFacility)
+    if(itemType != (int)ItemType::ItemTypeRegion)
     {
         int tasks_new = index.model()->data(index, TASKS_NEW).toInt();
         int tasks_in_work = index.model()->data(index, TASKS_IN_WORK).toInt();

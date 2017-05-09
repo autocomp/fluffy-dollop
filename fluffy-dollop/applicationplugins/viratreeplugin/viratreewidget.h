@@ -1,6 +1,7 @@
 #ifndef VIRATREEWIDGET_H
 #define VIRATREEWIDGET_H
 
+#include <regionbiz/rb_entity_filter.h>
 #include <QObject>
 #include <QTreeWidget>
 #include <QMap>
@@ -30,6 +31,8 @@ protected:
 
     void recalcAreaInFacility(QTreeWidgetItem * facilityItem);
     void recalcTasksInFacility(QTreeWidgetItem * facilityItem);
+    void recalcTasksInLocation(QTreeWidgetItem * locationItem);
+    bool markIsDefect(regionbiz::MarkPtr markPtr);
 
     QMap<qulonglong, QTreeWidgetItem*> _items;
     QColor _defaultColor = QColor(Qt::white);

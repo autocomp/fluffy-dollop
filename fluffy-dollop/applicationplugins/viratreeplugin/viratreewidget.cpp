@@ -4,7 +4,6 @@
 #include <QDebug>
 #include <QHeaderView>
 #include <regionbiz/rb_manager.h>
-#include <regionbiz/rb_entity_filter.h>
 #include <iostream>
 #include <ctrcore/tempinputdata/tempdatatypies.h>
 #include <ctrcore/tempinputdata/tempdatacontroller.h>
@@ -98,7 +97,7 @@ void ViraTreeWidget::reinit()
         const qulonglong id(regionPtr->getId());
         regionItem->setText((int)ColumnTitle::ID, QString::number(id));
         for(int i(0); i<ColumnCount; ++i) regionItem->setData(i, ID, id);
-        for(int i(0); i<ColumnCount; ++i) regionItem->setData(i, TYPE, (int)ItemType::ItemTypeOther);
+        for(int i(0); i<ColumnCount; ++i) regionItem->setData(i, TYPE, (int)ItemType::ItemTypeRegion);
         _items.insert(id, regionItem);
 
         std::vector<BaseAreaPtr> locations = regionPtr->getChilds( Region::RCF_LOCATIONS );
@@ -112,7 +111,7 @@ void ViraTreeWidget::reinit()
                 const qulonglong id(locationPtr->getId());
                 locationItem->setText((int)ColumnTitle::ID, QString::number(id));
                 for(int i(0); i<ColumnCount; ++i) locationItem->setData(i, ID, id);
-                for(int i(0); i<ColumnCount; ++i) locationItem->setData(i, TYPE, (int)ItemType::ItemTypeOther);
+                for(int i(0); i<ColumnCount; ++i) locationItem->setData(i, TYPE, (int)ItemType::ItemTypeLocation);
                 _items.insert(id, locationItem);
 
                 std::vector< FacilityPtr > facilities = locationPtr->getChilds();
@@ -148,28 +147,20 @@ void ViraTreeWidget::reinit()
                         // WARNING check marks of floor
                         MarkPtrs marks_of_floor = floorPtr->getMarks();
                         for( MarkPtr mark: marks_of_floor )
-                        {
-                            BaseMetadataPtr status = mark->getMetadata("status");
-                            if(status)
+                            if(markIsDefect(mark))
                             {
-                                QString statusStr = status->getValueAsString();
-
-                                //!!! ВРЕМЕННЫЙ КОД !!!
-                                if(statusStr == QString::fromUtf8("в архиве"))
+                                BaseMetadataPtr status = mark->getMetadata("status");
+                                if(status)
                                 {
-                                    mark->addMetadata("string", "status", QString::fromUtf8("на проверку"));
-                                    mark->commit();
-                                    statusStr = QString::fromUtf8("на проверку");
+                                    QString statusStr = status->getValueAsString();
+                                    if(statusStr == QString::fromUtf8("новый"))
+                                        ++floor_tasks_new;
+                                    else if(statusStr == QString::fromUtf8("в работе"))
+                                        ++floor_tasks_in_work;
+                                    else if(statusStr == QString::fromUtf8("на проверку"))
+                                        ++floor_tasks_for_check;
                                 }
-
-                                if(statusStr == QString::fromUtf8("новый"))
-                                    ++floor_tasks_new;
-                                else if(statusStr == QString::fromUtf8("в работе"))
-                                    ++floor_tasks_in_work;
-                                else if(statusStr == QString::fromUtf8("на проверку"))
-                                    ++floor_tasks_for_check;
                             }
-                        }
                         floorItem->setData((int)ColumnTitle::TASKS, TASKS_NEW, floor_tasks_new);
                         floorItem->setData((int)ColumnTitle::TASKS, TASKS_IN_WORK, floor_tasks_in_work);
                         floorItem->setData((int)ColumnTitle::TASKS, TASKS_FOR_CHECK, floor_tasks_for_check);
@@ -242,28 +233,20 @@ void ViraTreeWidget::reinit()
                                 int tasks_for_check(0);
                                 MarkPtrs marks_of_room = room->getMarks();
                                 for( MarkPtr mark: marks_of_room )
-                                {
-                                    BaseMetadataPtr status = mark->getMetadata("status");
-                                    if(status)
+                                    if(markIsDefect(mark))
                                     {
-                                        QString statusStr = status->getValueAsString();
-
-                                        //!!! ВРЕМЕННЫЙ КОД !!!
-//                                        if(statusStr == QString::fromUtf8("в архиве"))
-//                                        {
-//                                            mark->addMetadata("string", "status", QString::fromUtf8("на проверку"));
-//                                            mark->commit();
-//                                            statusStr = QString::fromUtf8("на проверку");
-//                                        }
-
-                                        if(statusStr == QString::fromUtf8("новый"))
-                                            ++tasks_new;
-                                        else if(statusStr == QString::fromUtf8("в работе"))
-                                            ++tasks_in_work;
-                                        else if(statusStr == QString::fromUtf8("на проверку"))
-                                            ++tasks_for_check;
+                                        BaseMetadataPtr status = mark->getMetadata("status");
+                                        if(status)
+                                        {
+                                            QString statusStr = status->getValueAsString();
+                                            if(statusStr == QString::fromUtf8("новый"))
+                                                ++tasks_new;
+                                            else if(statusStr == QString::fromUtf8("в работе"))
+                                                ++tasks_in_work;
+                                            else if(statusStr == QString::fromUtf8("на проверку"))
+                                                ++tasks_for_check;
+                                        }
                                     }
-                                }
                                 roomItem->setData((int)ColumnTitle::TASKS, TASKS_NEW, tasks_new);
                                 roomItem->setData((int)ColumnTitle::TASKS, TASKS_IN_WORK, tasks_in_work);
                                 roomItem->setData((int)ColumnTitle::TASKS, TASKS_FOR_CHECK, tasks_for_check);
@@ -354,28 +337,20 @@ void ViraTreeWidget::recalcTasksInFacility(QTreeWidgetItem * facilityItem)
         {
             MarkPtrs marks_of_floor = floorPtr->getMarks();
             for( MarkPtr mark: marks_of_floor )
-            {
-                BaseMetadataPtr status = mark->getMetadata("status");
-                if(status)
+                if(markIsDefect(mark))
                 {
-                    QString statusStr = status->getValueAsString();
-
-                    //!!! ВРЕМЕННЫЙ КОД !!!
-                    if(statusStr == QString::fromUtf8("в архиве"))
+                    BaseMetadataPtr status = mark->getMetadata("status");
+                    if(status)
                     {
-                        mark->addMetadata("string", "status", QString::fromUtf8("на проверку"));
-                        mark->commit();
-                        statusStr = QString::fromUtf8("на проверку");
+                        QString statusStr = status->getValueAsString();
+                        if(statusStr == QString::fromUtf8("новый"))
+                            ++floor_tasks_new;
+                        else if(statusStr == QString::fromUtf8("в работе"))
+                            ++floor_tasks_in_work;
+                        else if(statusStr == QString::fromUtf8("на проверку"))
+                            ++floor_tasks_for_check;
                     }
-
-                    if(statusStr == QString::fromUtf8("новый"))
-                        ++floor_tasks_new;
-                    else if(statusStr == QString::fromUtf8("в работе"))
-                        ++floor_tasks_in_work;
-                    else if(statusStr == QString::fromUtf8("на проверку"))
-                        ++floor_tasks_for_check;
                 }
-            }
         }
 
         for(int i(0); i < floorItem->childCount(); ++i)
@@ -393,9 +368,76 @@ void ViraTreeWidget::recalcTasksInFacility(QTreeWidgetItem * facilityItem)
         facility_tasks_in_work += floor_tasks_in_work;
         facility_tasks_for_check += floor_tasks_for_check;
     }
+
+    uint64_t facility_id = facilityItem->data( 0, ID ).toULongLong();
+    auto facility_ptr = RegionBizManager::instance()->getBaseArea( facility_id );
+    FacilityPtr facilityPtr = BaseArea::convert< Facility >( facility_ptr );
+    if( facilityPtr )
+    {
+        MarkPtrs marks_of_facility = facilityPtr->getMarks();
+        for( MarkPtr mark: marks_of_facility )
+            if(markIsDefect(mark))
+            {
+                BaseMetadataPtr status = mark->getMetadata("status");
+                if(status)
+                {
+                    QString statusStr = status->getValueAsString();
+                    if(statusStr == QString::fromUtf8("новый"))
+                        ++facility_tasks_new;
+                    else if(statusStr == QString::fromUtf8("в работе"))
+                        ++facility_tasks_in_work;
+                    else if(statusStr == QString::fromUtf8("на проверку"))
+                        ++facility_tasks_for_check;
+                }
+            }
+    }
     facilityItem->setData((int)ColumnTitle::TASKS, TASKS_NEW, facility_tasks_new);
     facilityItem->setData((int)ColumnTitle::TASKS, TASKS_IN_WORK, facility_tasks_in_work);
     facilityItem->setData((int)ColumnTitle::TASKS, TASKS_FOR_CHECK, facility_tasks_for_check);
+
+    if(facilityItem->parent())
+        recalcTasksInLocation(facilityItem->parent());
+}
+
+void ViraTreeWidget::recalcTasksInLocation(QTreeWidgetItem * locationItem)
+{
+    int location_tasks_new(0);
+    int location_tasks_in_work(0);
+    int location_tasks_for_check(0);
+    for(int i(0); i < locationItem->childCount(); ++i)
+    {
+        QTreeWidgetItem * _facilityItem = locationItem->child(i);
+        if( ! _facilityItem) continue;
+
+        location_tasks_new += _facilityItem->data((int)ColumnTitle::TASKS, TASKS_NEW).toInt();
+        location_tasks_in_work += _facilityItem->data((int)ColumnTitle::TASKS, TASKS_IN_WORK).toInt();
+        location_tasks_for_check += _facilityItem->data((int)ColumnTitle::TASKS, TASKS_FOR_CHECK).toInt();
+    }
+    uint64_t location_id = locationItem->data( 0, ID ).toULongLong();
+    auto location_ptr = RegionBizManager::instance()->getBaseArea( location_id );
+    LocationPtr locationPtr = BaseArea::convert< Location >( location_ptr );
+    if( locationPtr )
+    {
+        MarkPtrs marks_of_location = locationPtr->getMarks();
+        for( MarkPtr mark: marks_of_location )
+            if(markIsDefect(mark))
+            {
+                BaseMetadataPtr status = mark->getMetadata("status");
+                if(status)
+                {
+                    QString statusStr = status->getValueAsString();
+                    if(statusStr == QString::fromUtf8("новый"))
+                        ++location_tasks_new;
+                    else if(statusStr == QString::fromUtf8("в работе"))
+                        ++location_tasks_in_work;
+                    else if(statusStr == QString::fromUtf8("на проверку"))
+                        ++location_tasks_for_check;
+                }
+            }
+    }
+    locationItem->setData((int)ColumnTitle::TASKS, TASKS_NEW, location_tasks_new);
+    locationItem->setData((int)ColumnTitle::TASKS, TASKS_IN_WORK, location_tasks_in_work);
+    locationItem->setData((int)ColumnTitle::TASKS, TASKS_FOR_CHECK, location_tasks_for_check);
 }
 
 void ViraTreeWidget::slotBlockGUI(QVariant var)
@@ -476,10 +518,15 @@ void ViraTreeWidget::slotSaveItemToDb(const QModelIndex &index)
 //        ptr->addMetadata("string", "comment", item->text(5));
 
     }break;
-    case (int)ItemType::ItemTypeOther : {
+    case (int)ItemType::ItemTypeLocation : {
 //        ptr->addMetadata("string", "comment", item->text(5));
 
     }break;
+    case (int)ItemType::ItemTypeRegion : {
+//        ptr->addMetadata("string", "comment", item->text(5));
+
+    }break;
+
     default:
         return;
     };
@@ -508,34 +555,16 @@ void ViraTreeWidget::slotObjectChanged(uint64_t id)
         auto it = _items.find(parentPtr->getId());
         if(it != _items.end())
             item = it.value();
+        else
+            return;
 
-        // WARNING check marks of floor
-        MarksHolderPtr holder = BaseArea::convert< MarksHolder >( parentPtr );
-        if(holder && item)
+        int itemType = item->data((int)ColumnTitle::NAME, TYPE).toInt();
+        if(itemType == (int)ItemType::ItemTypeLocation)
         {
-            int tasks_new(0);
-            int tasks_in_work(0);
-            int tasks_for_check(0);
-            MarkPtrs marks_of_room = holder->getMarks();
-            for( MarkPtr mark: marks_of_room )
-            {
-                BaseMetadataPtr status = mark->getMetadata("status");
-                if(status)
-                {
-                    QString statusStr = status->getValueAsString();
-                    if(statusStr == QString::fromUtf8("новый"))
-                        ++tasks_new;
-                    else if(statusStr == QString::fromUtf8("в работе"))
-                        ++tasks_in_work;
-                    else if(statusStr == QString::fromUtf8("на проверку"))
-                        ++tasks_for_check;
-                }
-            }
-            item->setData((int)ColumnTitle::TASKS, TASKS_NEW, tasks_new);
-            item->setData((int)ColumnTitle::TASKS, TASKS_IN_WORK, tasks_in_work);
-            item->setData((int)ColumnTitle::TASKS, TASKS_FOR_CHECK, tasks_for_check);
-
-            int itemType = item->data((int)ColumnTitle::NAME, TYPE).toInt();
+            recalcTasksInLocation(item);
+        }
+        else
+        {
             while(itemType != (int)ItemType::ItemTypeFacility)
             {
                 item = item->parent();
@@ -543,7 +572,6 @@ void ViraTreeWidget::slotObjectChanged(uint64_t id)
                     break;
                 itemType = item->data((int)ColumnTitle::NAME, TYPE).toInt();
             }
-
             if(item)
                 recalcTasksInFacility(item);
         }
@@ -645,3 +673,40 @@ void ViraTreeWidget::slotHeaderSectionClicked(int index)
 {
     sortByColumn(index);
 }
+
+bool ViraTreeWidget::markIsDefect(regionbiz::MarkPtr markPtr)
+{
+    bool isDefect(true);
+    if(markPtr)
+    {
+        BaseMetadataPtr mark_type = markPtr->getMetadata("mark_type");
+        if(mark_type)
+        {
+            QString mark_type_str = mark_type->getValueAsVariant().toString();
+            if(mark_type_str == QString::fromUtf8("фотография"))
+                isDefect = false;
+        }
+    }
+    return isDefect;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
