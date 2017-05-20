@@ -44,6 +44,7 @@ private:
     double _direction;
     PixmapListWidget * _listWidget;
     QList<QPixmap> _pixmaps;
+    QString _foto360FilePath;
 };
 
 

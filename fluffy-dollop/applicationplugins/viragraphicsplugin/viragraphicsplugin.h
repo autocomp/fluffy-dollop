@@ -29,6 +29,7 @@ private slots:
     void defectStateChoiced(QPolygonF);
     void fotoCreared(QPointF pos, double direction);
     void markCreatingAbort();
+    void foto360Creared(QPolygonF);
 
 private:
     bool _showFirstBaseCover = true;

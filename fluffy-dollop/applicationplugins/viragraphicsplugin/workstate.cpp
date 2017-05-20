@@ -5,6 +5,7 @@
 #include "types.h"
 #include "defectgraphicsitem.h"
 #include "fotographicsitem.h"
+#include "foto360graphicsitem.h"
 #include <regionbiz/rb_entity_filter.h>
 #include <ctrcore/ctrcore/ctrconfig.h>
 #include <ctrcore/bus/common_message_notifier.h>
@@ -206,7 +207,7 @@ void WorkState::reinit()
                             if(mark_type)
                             {
                                 QString _mark_type_str = mark_type->getValueAsVariant().toString();
-                                if(_mark_type_str == QString::fromUtf8("фотография"))
+                                if(_mark_type_str == QString::fromUtf8("фотография") || _mark_type_str == QString::fromUtf8("панорамная фотография"))
                                     mark_type_str = _mark_type_str;
                             }
                             if(mark_type_str == QString::fromUtf8("дефект"))
@@ -223,7 +224,7 @@ void WorkState::reinit()
                                 _defectGraphicsItem->hide();
                                 graphicsItems.append(_defectGraphicsItem);
                             }
-                            else
+                            else if(mark_type_str == QString::fromUtf8("фотография"))
                             {
                                 QPointF center = mark->getCenter();
                                 FotoGraphicsItem * _photoGraphicsItem = new FotoGraphicsItem(mark->getId());
@@ -237,6 +238,20 @@ void WorkState::reinit()
                                 _photoGraphicsItem->hide();
                                 graphicsItems.append(_photoGraphicsItem);
                             }
+                            else if(mark_type_str == QString::fromUtf8("панорамная фотография"))
+                            {
+                                QPointF center = mark->getCenter();
+                                Foto360GraphicsItem * _photo360GraphicsItem = new Foto360GraphicsItem(mark->getId());
+                                _photo360GraphicsItem->setProperty("locationId", locationId);
+                                _photo360GraphicsItem->setPos(center);
+
+                                _scene->addItem(_photo360GraphicsItem);
+                                connect(_photo360GraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                                _items.insert(mark->getId(), _photo360GraphicsItem);
+
+                                _photo360GraphicsItem->hide();
+                                graphicsItems.append(_photo360GraphicsItem);
+                            }
                         }
                 }
 
@@ -249,7 +264,7 @@ void WorkState::reinit()
                         if(mark_type)
                         {
                             QString _mark_type_str = mark_type->getValueAsVariant().toString();
-                            if(_mark_type_str == QString::fromUtf8("фотография"))
+                            if(_mark_type_str == QString::fromUtf8("фотография") || _mark_type_str == QString::fromUtf8("панорамная фотография"))
                                 mark_type_str = _mark_type_str;
                         }
                         if(mark_type_str == QString::fromUtf8("дефект"))
@@ -279,6 +294,20 @@ void WorkState::reinit()
 
                             _photoGraphicsItem->hide();
                             graphicsItems.append(_photoGraphicsItem);
+                        }
+                        else if(mark_type_str == QString::fromUtf8("панорамная фотография"))
+                        {
+                            QPointF center = mark->getCenter();
+                            Foto360GraphicsItem * _photo360GraphicsItem = new Foto360GraphicsItem(mark->getId());
+                            _photo360GraphicsItem->setProperty("locationId", locationId);
+                            _photo360GraphicsItem->setPos(center);
+
+                            _scene->addItem(_photo360GraphicsItem);
+                            connect(_photo360GraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                            _items.insert(mark->getId(), _photo360GraphicsItem);
+
+                            _photo360GraphicsItem->hide();
+                            graphicsItems.append(_photo360GraphicsItem);
                         }
                     }
 
@@ -350,9 +379,14 @@ void WorkState::slotAddObject(uint64_t id)
                 if(markTypePtr)
                 {
                     QString _mark_type_str = markTypePtr->getValueAsVariant().toString();;
-                    if(_mark_type_str == QString::fromUtf8("фотография") || _mark_type_str == QString::fromUtf8("дефект"))
+                    if(_mark_type_str == QString::fromUtf8("фотография") ||
+                            _mark_type_str == QString::fromUtf8("дефект") ||
+                            _mark_type_str == QString::fromUtf8("панорамная фотография") )
                         mark_type_str = markTypePtr->getValueAsVariant().toString();
                 }
+
+                qDebug() << "slotAddObject, ID:" << id << ", mark_type_str:" << mark_type_str;
+
                 if(mark_type_str == QString::fromUtf8("дефект"))
                 {
                     QPointF center = markPtr->getCenter();
@@ -377,6 +411,14 @@ void WorkState::slotAddObject(uint64_t id)
                 }
                 else if(mark_type_str == QString::fromUtf8("панорамная фотография"))
                 {
+                    QPointF center = markPtr->getCenter();
+                    Foto360GraphicsItem * _photo360GraphicsItem = new Foto360GraphicsItem(markPtr->getId());
+                    _photo360GraphicsItem->setProperty("locationId", locationId);
+                    _photo360GraphicsItem->setPos(center);
+                    _scene->addItem(_photo360GraphicsItem);
+                    connect(_photo360GraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                    _items.insert(markPtr->getId(), _photo360GraphicsItem);
+                    locationItem->addItem(_photo360GraphicsItem);
                 }
             }
         }

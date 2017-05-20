@@ -27,5 +27,6 @@
         <file>img/foto360_selected.png</file>
         <file>img/foto_selected.png</file>
         <file>img/cursor_foto.png</file>
+        <file>img/cursor_foto360.png</file>
     </qresource>
 </RCC>

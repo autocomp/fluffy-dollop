@@ -3,6 +3,7 @@
 #include "markform.h"
 #include "infoform.h"
 #include "imageviewer.h"
+#include "photo360form.h"
 
 #include <QDebug>
 
@@ -118,7 +119,7 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
         case BaseArea::AT_LOCATION:
         case BaseArea::AT_FACILITY:
             ui->addFoto->show();
-            //ui->addFoto360->show();
+            ui->addFoto360->show();
             //! without break !!!
         case BaseArea::AT_FLOOR:
             ui->addDefect->show();
@@ -760,7 +761,7 @@ void ViraStatusBar::showMarkInfoWidgwt(quint64 id)
             {
                 ew::EmbeddedWidgetStruct struc;
                 ew::EmbeddedHeaderStruct headStr;
-                headStr.hasCloseButton = true;
+                headStr.hasCloseButton = false;
                 headStr.hasMinMaxButton = false;
                 headStr.hasCollapseButton = false;
                 headStr.headerPixmap = ":/img/mark_button.png";
@@ -805,6 +806,46 @@ void ViraStatusBar::showMarkInfoWidgwt(quint64 id)
             imageViewer.showImageViewer(ptr->getName());
         }
     }
+    else if(mark_type_str == QString::fromUtf8("панорамная фотография"))
+    {
+        if( !_ifacePhoto360Widget )
+        {
+            _photo360Form = new Photo360Form;
+            _photo360Form->showWidget(id);
+            connect(_photo360Form, SIGNAL(signalCloseWindow()), this, SLOT(slotClosePhoto360Window()));
+
+            _ifacePhoto360Widget = new EmbIFaceNotifier(_photo360Form);
+            QString tag = QString("ViraStatusBar_Photo360Widget");
+            quint64 widgetId = ewApp()->restoreWidget(tag, _ifacePhoto360Widget);
+            if(0 == widgetId)
+            {
+                ew::EmbeddedWidgetStruct struc;
+                ew::EmbeddedHeaderStruct headStr;
+                headStr.hasCloseButton = false;
+                headStr.hasMinMaxButton = false;
+                headStr.hasCollapseButton = false;
+                headStr.headerPixmap = ":/img/foto360_button.png";
+                headStr.windowTitle = QString::fromUtf8("Панорамная фотография");
+                struc.header = headStr;
+                struc.iface = _ifacePhoto360Widget;
+                struc.widgetTag = tag;
+                struc.minSize = QSize(300,300);
+                struc.topOnHint = true;
+                struc.isModal = true;
+                ewApp()->createWidget(struc, _parentWidgetId);
+            }
+        }
+        else
+        {
+            _photo360Form->showWidget(id);
+            ewApp()->setVisible(_ifacePhoto360Widget->id(), true);
+        }
+    }
+}
+
+void ViraStatusBar::slotClosePhoto360Window()
+{
+    ewApp()->setVisible(_ifacePhoto360Widget->id(), false);
 }
 
 void ViraStatusBar::slotMarkCreated(QVariant var)
@@ -854,7 +895,7 @@ void ViraStatusBar::slotMarkCreated(QVariant var)
                 {
                     ew::EmbeddedWidgetStruct struc;
                     ew::EmbeddedHeaderStruct headStr;
-                    headStr.hasCloseButton = true;
+                    headStr.hasCloseButton = false;
                     headStr.hasMinMaxButton = false;
                     headStr.hasCollapseButton = false;
                     headStr.headerPixmap = ":/img/mark_button.png";
@@ -877,16 +918,26 @@ void ViraStatusBar::slotMarkCreated(QVariant var)
             }
         }break;
         case 2 : // foto
+        case 3 : // foto360
         {
+            MarkForm::MarkType markType(type.toInt() == 2 ? MarkForm::Foto : MarkForm::Foto360);
             QPointF pos = list.at(1).toPointF();
-            double direction = list.at(2).toDouble();
+            double direction = 0;
+            QString windowTitle = QString::fromUtf8("Панорамная фотография");
+            QString iconPath = ":/img/foto360_button.png";
+            if(markType == MarkForm::Foto)
+            {
+                windowTitle = QString::fromUtf8("Фотография");
+                iconPath =
+                direction = list.at(2).toDouble();
+            }
             qDebug() << "---> pos" << pos << "direction" << direction;
 
             if( !_ifaceInfoMarkWidget )
             {
                 _markForm = new MarkForm;
                 connect(_markForm, SIGNAL(signalCloseWindow()), this, SLOT(slotCloseMarkWindow()));
-                _markForm->showWidgetAndCreateMark(MarkForm::Foto, parentId, QPolygonF()<<pos, direction);
+                _markForm->showWidgetAndCreateMark(markType, parentId, QPolygonF()<<pos, direction);
 
                 _ifaceInfoMarkWidget = new EmbIFaceNotifier(_markForm);
                 QString tag = QString("ViraStatusBar_MarkInfoWidget");
@@ -898,8 +949,8 @@ void ViraStatusBar::slotMarkCreated(QVariant var)
                     headStr.hasCloseButton = true;
                     headStr.hasMinMaxButton = false;
                     headStr.hasCollapseButton = false;
-                    headStr.headerPixmap = ":/img/foto_button.png";
-                    headStr.windowTitle = QString::fromUtf8("Информация о фотографии");
+                    headStr.headerPixmap = iconPath;
+                    headStr.windowTitle = windowTitle;
                     struc.header = headStr;
                     struc.iface = _ifaceInfoMarkWidget;
                     struc.widgetTag = tag;
@@ -911,15 +962,11 @@ void ViraStatusBar::slotMarkCreated(QVariant var)
             }
             else
             {
-                _markForm->showWidgetAndCreateMark(MarkForm::Foto, parentId, QPolygonF()<<pos, direction);
-                ewApp()->setWidgetTitle(_ifaceInfoMarkWidget->id(), QString::fromUtf8("Информация о фотографии"));
-                ewApp()->setWidgetIcon(_ifaceInfoMarkWidget->id(), ":/img/foto_button.png");
+                _markForm->showWidgetAndCreateMark(markType, parentId, QPolygonF()<<pos, direction);
+                ewApp()->setWidgetTitle(_ifaceInfoMarkWidget->id(), windowTitle);
+                ewApp()->setWidgetIcon(_ifaceInfoMarkWidget->id(), iconPath);
                 ewApp()->setVisible(_ifaceInfoMarkWidget->id(), true);
             }
-        }break;
-        case 3 : // foto360
-        {
-            QPointF pos = list.at(1).toPointF();
         }break;
         }
     }

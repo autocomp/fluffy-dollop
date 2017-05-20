@@ -54,7 +54,10 @@ void MarkForm::showWidgetAndCreateMark(MarkType markType, quint64 parentId, QPol
     _pixmaps.clear();
     _listWidget->clear();
     ui->status->setCurrentText(QString::fromUtf8("новый"));
+    _foto360FilePath.clear();
     actulize();
+
+    ui->apply->setEnabled(_markType == Defect);
 }
 
 void MarkForm::actulize()
@@ -73,9 +76,26 @@ void MarkForm::actulize()
         ui->categoryLabel->show();
         ui->category->show();
         ui->toArchieve->show();
+        ui->loadImageLabel->setText(QString::fromUtf8("Загрузить изображение"));
+        _listWidget->show();
         break;
 
     case Foto :
+        ui->responsibleLabel->hide();
+        ui->responsible->hide();
+        ui->dateEditLabel->hide();
+        ui->dateEdit->hide();
+        ui->importanceLabel->hide();
+        ui->importance->hide();
+        ui->statusLabel->hide();
+        ui->status->hide();
+        ui->categoryLabel->hide();
+        ui->category->hide();
+        ui->toArchieve->hide();
+        ui->loadImageLabel->setText(QString::fromUtf8("Загрузить изображение"));
+        _listWidget->show();
+        break;
+
     case Foto360 :
         ui->responsibleLabel->hide();
         ui->responsible->hide();
@@ -88,6 +108,8 @@ void MarkForm::actulize()
         ui->categoryLabel->hide();
         ui->category->hide();
         ui->toArchieve->hide();
+        _listWidget->hide();
+        ui->loadImageLabel->setText(QString::fromUtf8("Загрузить панорамное изображение"));
         break;
     }
 }
@@ -106,7 +128,9 @@ void MarkForm::showWidget(quint64 id)
     ui->dateEdit->setDate(QDate::currentDate());
     _pixmaps.clear();
     _listWidget->clear();
+    _foto360FilePath.clear();
     ui->status->setCurrentText(QString::fromUtf8("новый"));
+    ui->apply->setEnabled(true);
 
     MarkPtr ptr = RegionBizManager::instance()->getMark(_id);
     if(ptr)
@@ -167,33 +191,55 @@ void MarkForm::showWidget(quint64 id)
 
 void MarkForm::slotLoadImage()
 {
-    QStringList list = QFileDialog::getOpenFileNames(this);
-    foreach (QString name, list)
+    if(_markType == Foto360)
     {
-        QPixmap pm(name);
-        if(pm.isNull())
-            continue;
-
-        int rotate(0);
-        QImageReader imageReader(name);
-        switch(imageReader.transformation())
+        QString filePath = QFileDialog::getOpenFileName(this);
+        if(filePath.isEmpty() == false)
         {
-        case QImageIOHandler::TransformationRotate90 :{
-            rotate = 90;
-        }break;
-        case QImageIOHandler::TransformationRotate180 :{
-            rotate = 180;
-        }break;
-        case QImageIOHandler::TransformationRotate270 :{
-            rotate = 270;
-        }break;
+            _foto360FilePath = filePath;
+            QFileInfo fi(_foto360FilePath);
+            ui->loadImageLabel->setText(QString::fromUtf8("Панорамное изображение загружено : ") + fi.fileName());
+            ui->apply->setEnabled(true);
         }
+    }
+    else
+    {
+        QStringList list;
+        if(_markType == Foto)
+            list.append(QFileDialog::getOpenFileName(this));
+        else
+            list = QFileDialog::getOpenFileNames(this);
 
-        if(rotate != 0)
-            pm = pm.transformed(QTransform().rotate(rotate));
+        foreach (QString name, list)
+        {
+            QPixmap pm(name);
+            if(pm.isNull())
+                continue;
 
-        _pixmaps.append(pm);
-        _listWidget->addItem(pm);
+            if(_markType == Foto)
+                ui->apply->setEnabled(true);
+
+            int rotate(0);
+            QImageReader imageReader(name);
+            switch(imageReader.transformation())
+            {
+            case QImageIOHandler::TransformationRotate90 :{
+                rotate = 90;
+            }break;
+            case QImageIOHandler::TransformationRotate180 :{
+                rotate = 180;
+            }break;
+            case QImageIOHandler::TransformationRotate270 :{
+                rotate = 270;
+            }break;
+            }
+
+            if(rotate != 0)
+                pm = pm.transformed(QTransform().rotate(rotate));
+
+            _pixmaps.append(pm);
+            _listWidget->addItem(pm);
+        }
     }
 }
 
@@ -245,7 +291,6 @@ void MarkForm::closeAndCommit(bool moveToArchive)
                 markPtr->setCenter(_markArea.first());
             else
                 markPtr->setCoords(_markArea);
-            // markPtr->setName(QString::fromUtf8("дефект"));
             bool res = markPtr->commit();
             qDebug() << "commit mark :" << res;
         }
@@ -256,7 +301,7 @@ void MarkForm::closeAndCommit(bool moveToArchive)
 
     if(markPtr)
     {
-        if(_pixmaps.isEmpty() == false)
+        if(_markType != Foto360 && _pixmaps.isEmpty() == false)
         {
             QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath");
             if(regionBizInitJson_Path.isValid())
@@ -294,6 +339,18 @@ void MarkForm::closeAndCommit(bool moveToArchive)
         }
         else if(_markType == Foto360)
         {
+            QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath");
+            if(regionBizInitJson_Path.isValid())
+            {
+                QString destPath = regionBizInitJson_Path.toString();
+                QDir dir(destPath);
+                dir.mkdir(QString::number(_id));
+                QFileInfo fi(_foto360FilePath);
+                destPath = destPath + QDir::separator() + QString::number(_id) + QDir::separator() + fi.fileName();
+                bool res = QFile::copy(_foto360FilePath, destPath);
+                qDebug() << "copy foto360 from :" << _foto360FilePath << " to :" << destPath << ", res :" << res;
+            }
+
             markPtr->addMetadata("string", "mark_type", QString::fromUtf8("панорамная фотография"));
         }
 

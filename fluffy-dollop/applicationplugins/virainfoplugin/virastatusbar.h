@@ -15,6 +15,7 @@ class ViraStatusBar;
 
 class MarkForm;
 class InfoForm;
+class Photo360Form;
 
 class ViraStatusBar : public QWidget
 {
@@ -61,6 +62,7 @@ protected slots:
     void showMarkInfoWidgwt(quint64 id);
     void slotMarkCreated(QVariant var);
     void slotDeleteObject();
+    void slotClosePhoto360Window();
 
 protected:
     void reset();
@@ -89,6 +91,8 @@ protected:
     EmbIFaceNotifier* _ifaceInfoMarkWidget = nullptr;
     InfoForm * _infoForm;
     EmbIFaceNotifier* _ifaceInfoWidget = nullptr;
+    Photo360Form * _photo360Form;
+    EmbIFaceNotifier* _ifacePhoto360Widget = nullptr;
 };
 
 #endif // VIRASTATUSBAR_H

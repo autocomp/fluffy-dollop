@@ -36,6 +36,7 @@ HEADERS += \
     defectgraphicsitem.h \
     viragraphicsitem.h \
     setimagestate.h \
+    foto360graphicsitem.h \
     fotographicsitem.h \
     handledirectionitem.h
 
@@ -53,6 +54,7 @@ SOURCES += \
     locationitem.cpp \
     defectgraphicsitem.cpp \
     setimagestate.cpp \
+    foto360graphicsitem.cpp \
     fotographicsitem.cpp \
     handledirectionitem.cpp
 

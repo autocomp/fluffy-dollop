@@ -92,8 +92,10 @@ void ViraGraphicsPlugin::setMarkOnMap(qulonglong markType)
             connect(_setImageState.data(), SIGNAL(signalAbort()), this, SLOT(markCreatingAbort()));
         }break;
         case 3 :{ // foto360
-
-
+            _setDefectState = QSharedPointer<ChoiceAreaState>(new ChoiceAreaState(ChoiceAreaState::POINT, QCursor(QPixmap(":/img/cursor_foto360.png"), 0, 0)));
+            visualize_system::VisualizerManager::instance()->getStateInterface(getVisualizerId())->setVisualizerState(_setDefectState);
+            connect(_setDefectState.data(), SIGNAL(signalAreaChoiced(QPolygonF)), this, SLOT(foto360Creared(QPolygonF)));
+            connect(_setDefectState.data(), SIGNAL(signalAbort()), this, SLOT(markCreatingAbort()));
         }break;
         }
     }
@@ -162,6 +164,24 @@ void ViraGraphicsPlugin::markCreatingAbort()
     }
 
     QList<QVariant>list;
+    CommonMessageNotifier::send( (uint)visualize_system::BusTags::MarkCreated, list, QString("visualize_system"));
+}
+
+void ViraGraphicsPlugin::foto360Creared(QPolygonF pol)
+{
+    if(_setImageState)
+    {
+        _setImageState->emit_closeState();
+        _setImageState.clear();
+    }
+
+    QList<QVariant>list;
+    if(pol.isEmpty() == false)
+    {
+        QVariant type(3);
+        list.append(type);
+        list.append(pol.first());
+    }
     CommonMessageNotifier::send( (uint)visualize_system::BusTags::MarkCreated, list, QString("visualize_system"));
 }
 

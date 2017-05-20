@@ -31,6 +31,7 @@ HEADERS += \
     slide_window.h \
     filter_form.h \
     imageviewer.h \
+    photo360form.h
 
 SOURCES += \
     virainfoplugin.cpp \
@@ -42,7 +43,8 @@ SOURCES += \
     pixmaplistwidget.cpp \
     slide_window.cpp \
     filter_form.cpp \
-    imageviewer.cpp
+    imageviewer.cpp \
+    photo360form.cpp
 
 RESOURCES += \
     virainfopluginres.qrc
@@ -52,7 +54,8 @@ FORMS += \
     virainfowidget.ui \
     markform.ui \
     infoform.ui \
-    filter_form.ui
+    filter_form.ui \
+    photo360form.ui
 
 
 

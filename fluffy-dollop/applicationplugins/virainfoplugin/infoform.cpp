@@ -510,7 +510,7 @@ bool InfoForm::defectActual(regionbiz::MarkPtr markPtr)
         if(mark_type)
         {
             QString mark_type_str = mark_type->getValueAsVariant().toString();
-            if(mark_type_str == QString::fromUtf8("фотография"))
+            if(mark_type_str == QString::fromUtf8("фотография") || mark_type_str == QString::fromUtf8("панорамная фотография"))
                 _defectActual = false;
         }
     }
