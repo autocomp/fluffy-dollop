@@ -96,9 +96,10 @@ public:
 
     uint64_t getHolderId();
     MarkPtrs getMarks();
+    MarkPtrs getMarks( Mark::MarkType type );
 
-    MarkPtr addMark( QPointF center = QPointF() );
-    MarkPtr addMark( QPolygonF coords );
+    MarkPtr addMark(Mark::MarkType type, QPointF center = QPointF() );
+    MarkPtr addMark(Mark::MarkType type, QPolygonF coords );
     bool commitMarks();
     bool deleteMarks();
 

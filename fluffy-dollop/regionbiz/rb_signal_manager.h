@@ -4,6 +4,8 @@
 #include <QObject>
 #include <set>
 
+#define UNSELECTED_ID 0
+
 namespace regionbiz {
 
 class RegionBizManager;
@@ -15,20 +17,24 @@ class SelectionManager: public QObject
     friend class RegionBizManager;
 
 Q_SIGNALS:
-    void selectBaseEntity( uint64_t old_id,
-                           uint64_t new_id );
-    void selectedSet( std::set< uint64_t > ids );
-    void selectClear();
+    void currentEntityChange( uint64_t old_id,
+                              uint64_t new_id );
+    void selectedSetChange( std::vector< uint64_t > selected,
+                            std::vector< uint64_t > deselected );
+    void selectedSetChange();
     void centerOnBaseEntity( uint64_t id );
 
 private:
     SelectionManager();
-    void selectNewEntity( uint64_t new_id );
-    void centerOnNewEntity(uint64_t id );
-    void clearSelect();
-    void appendToSeletedSet( uint64_t id );
+    void setNewCurrentEntity( uint64_t new_id );
 
-    uint64_t _selected_entity_id = 0;
+    void appendToSeletedSet( std::vector< uint64_t > ids, bool force = true );
+    void removeFromSeletedSet( std::vector< uint64_t > ids, bool force = true );
+    void clearSelect();
+
+    void centerOnNewEntity(uint64_t id );
+
+    uint64_t _current_entity_id = 0;
     std::set< uint64_t > _selected_set;
 };
 

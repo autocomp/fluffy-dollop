@@ -134,17 +134,30 @@ MarkPtrs MarksHolder::getMarks()
     return marks;
 }
 
-MarkPtr MarksHolder::addMark( QPointF center )
+MarkPtrs MarksHolder::getMarks(Mark::MarkType type)
 {
-    return addMark( QPolygonF( { center } ));
+    MarkPtrs marks;
+
+    if( checkHolderId() )
+    {
+        auto mngr = RegionBizManager::instance();
+        marks = mngr->getMarksByParent( _holder_id, type );
+    }
+
+    return marks;
 }
 
-MarkPtr MarksHolder::addMark( QPolygonF coords )
+MarkPtr MarksHolder::addMark( Mark::MarkType type, QPointF center )
+{
+    return addMark( type, QPolygonF( { center } ));
+}
+
+MarkPtr MarksHolder::addMark( Mark::MarkType type, QPolygonF coords )
 {
     if( checkHolderId() )
     {
         auto mngr = RegionBizManager::instance();
-        return mngr->addMark( _holder_id, coords );
+        return mngr->addMark( _holder_id, type, coords );
     }
 
     return MarkPtr();
@@ -204,8 +217,6 @@ LocationType Region::getType()
 {
     return AT_REGION;
 }
-
-
 
 std::vector<BaseAreaPtr> Region::getChilds(RegionChildFilter filter )
 {

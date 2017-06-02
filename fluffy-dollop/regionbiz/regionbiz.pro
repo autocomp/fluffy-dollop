@@ -24,7 +24,8 @@ SOURCES  += \
     rb_files_translator.cpp \
     rb_files.cpp \
     rb_data_translator.cpp \
-    rb_translator.cpp
+    rb_translator.cpp \
+    rb_meta_constraints.cpp
 
 HEADERS  += \
     rb_manager.h \
@@ -40,7 +41,8 @@ HEADERS  += \
     rb_files.h \
     rb_plugin_register.h \
     rb_data_translator.h \
-    rb_translator.h
+    rb_translator.h \
+    rb_meta_constraints.h
 
 win32 {
     DEFINES += STACKWALKER

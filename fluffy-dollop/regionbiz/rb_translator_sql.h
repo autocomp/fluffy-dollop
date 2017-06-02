@@ -59,6 +59,8 @@ private:
     QString getStringType(BaseArea::AreaType area_type );
     QString getStringFileType( BaseFileKeeper::FileType type );
     BaseFileKeeper::FileType getFileTypeByString( QString type );
+    MarkPtr getMarkByTypeString(QString type , uint64_t id);
+    QString getMarkType( Mark::MarkType type );
 };
 
 //------------------------------------------------------------

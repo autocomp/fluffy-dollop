@@ -28,6 +28,8 @@ void BaseMetadata::setName(QString name)
     _name = name;
 }
 
+//-------------------------------------------
+
 DoubleMetadata::DoubleMetadata(uint64_t parent_id):
     BaseMetadata( parent_id )
 {}
@@ -66,6 +68,8 @@ void DoubleMetadata::setValue(double val)
 {
     _value = val;
 }
+
+//----------------------------------------------
 
 StringMetadata::StringMetadata( uint64_t parent_id ):
     BaseMetadata( parent_id )
@@ -106,6 +110,8 @@ void StringMetadata::setValue(QString val)
     _value = val;
 }
 
+//----------------------------------------------
+
 IntegerMetadata::IntegerMetadata(uint64_t parent_id):
     BaseMetadata( parent_id )
 {}
@@ -144,6 +150,8 @@ void IntegerMetadata::setValue(int val)
 {
     _value = val;
 }
+
+//----------------------------------------------------
 
 BaseMetadataPtr MetadataFabric::createMetadata( QString type,
                                                 uint64_t parent_id )

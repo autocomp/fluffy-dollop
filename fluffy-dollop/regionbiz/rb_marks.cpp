@@ -53,3 +53,59 @@ bool Mark::commit()
     auto mngr = RegionBizManager::instance();
     return mngr->commitMark( _id );
 }
+
+//--------------------------------------------
+
+MarkPtr MarkFabric::createByType(Mark::MarkType type, uint64_t id )
+{
+    MarkPtr mark;
+    switch( type )
+    {
+    case Mark::MT_DEFECT:
+        mark = BaseEntity::createWithId< DefectMark >( id );
+        break;
+    case Mark::MT_PHOTO:
+        mark = BaseEntity::createWithId< PhotoMark >( id );
+        break;
+    case Mark::MT_PHOTO_3D:
+        mark = BaseEntity::createWithId< Photo3dMark >( id );
+        break;
+    case Mark::MT_INVALID:
+        static_assert( true, "Create mark with invalid type" );
+        break;
+    }
+    return mark;
+}
+
+//---------------------------------------------
+
+DefectMark::DefectMark(uint64_t id):
+    Mark( id )
+{}
+
+Mark::MarkType DefectMark::getMarkType()
+{
+    return MT_DEFECT;
+}
+
+//---------------------------------------------
+
+PhotoMark::PhotoMark(uint64_t id):
+    Mark( id )
+{}
+
+Mark::MarkType PhotoMark::getMarkType()
+{
+    return MT_PHOTO;
+}
+
+//---------------------------------------------
+
+Photo3dMark::Photo3dMark(uint64_t id):
+    Mark( id )
+{}
+
+Mark::MarkType Photo3dMark::getMarkType()
+{
+    return MT_PHOTO_3D;
+}

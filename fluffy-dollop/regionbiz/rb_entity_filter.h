@@ -73,6 +73,8 @@ public:
     static bool isFiltered( uint64_t id );
     static bool isFiltered( BaseEntityPtr entity );
 
+    //! if filter changed. Signature:
+    //! slot()
     static void subscribeOnFilterChacnge( QObject* obj,
                                           const char *slot,
                                           bool queue = false );

@@ -99,11 +99,13 @@ public:
     // marks
     MarkPtr getMark( uint64_t id );
     MarkPtrs getMarksByParent( uint64_t id );
+    MarkPtrs getMarksByParent( uint64_t id, Mark::MarkType type );
     MarkPtrs getMarksByParent( MarksHolderPtr parent );
+    MarkPtrs getMarksByParent( MarksHolderPtr parent, Mark::MarkType type );
     MarkPtrs getMarks();
-    MarkPtr addMark( uint64_t parent_id,
+    MarkPtr addMark(uint64_t parent_id, Mark::MarkType type,
                      QPointF center = QPointF() );
-    MarkPtr addMark( uint64_t parent_id,
+    MarkPtr addMark(uint64_t parent_id, Mark::MarkType type,
                      QPolygonF coords );
     bool commitMark( uint64_t id );
     bool commitMark( MarkPtr mark );
@@ -125,40 +127,64 @@ public:
     BaseFileKeeper::FileState syncFile( BaseFileKeeperPtr file );
 
     // signals of file processing subscribe
+    //! signal on file synced. Signature:
+    //! slot( BaseFileKeeperPtr )
     void subscribeFileSynced( QObject* obj,
                               const char *slot );
+    //! signal on file added. Signature:
+    //! slot( BaseFileKeeperPtr )
     void subscribeFileAdded( QObject* obj,
                              const char *slot );
     // tranlators
     BaseTranslatorPtr getTranslatorByName( QString name );
 
     // selection managment
-    uint64_t getSelectedEntity();
-    std::set<uint64_t> &getSelectedSet();
-    void selectEntity( uint64_t id );
-    void subscribeOnSelect( QObject* obj,
-                            const char *slot,
-                            bool queue = false );
+    uint64_t getCurrentEntity();
+    void setCurrentEntity( uint64_t id );
+    void clearCurrent();
+    //! change current. Signature:
+    //! slot( uint64_t prev_id, uint64_t ne_id )
+    void subscribeOnCurrentChange( QObject* obj,
+                                   const char *slot,
+                                   bool queue = false );
+
+    std::vector< uint64_t > getSelectedSet();
+    void appendToSelectedSet( uint64_t id, bool force = true );
+    void appendToSelectedSet( std::vector< uint64_t > ids, bool force = true );
+    void removeFromSelectedSet( uint64_t id, bool force = true );
+    void removeFromSelectedSet( std::vector< uint64_t > ids, bool force = true );
     void clearSelect();
-    void appendToSelectedSet( uint64_t id );
-    void subscribeSelectedSet( QObject* obj,
-                               const char *slot,
-                               bool queue = false );
-    void subscribeClearSelect( QObject* obj,
-                               const char *slot,
-                               bool queue = false );
+    //! change selected set. Signature:
+    //! slot( std::vector< uint64_t > selected, std::vector< uint64_t > deselected );
+    void subscribeOnSelectedSetChange( QObject* obj,
+                                       const char *slot,
+                                       bool queue = false );
+    //! change selected by anyway. Signature:
+    //! slot()
+    void subscribeOnSelectedChange( QObject* obj,
+                                    const char *slot,
+                                    bool queue = false );
+
     void centerOnEntity( uint64_t id );
+    //! center on some. Signature:
+    //! slot( uint64_t id )
     void subscribeCenterOn( QObject* obj,
                             const char *slot,
                             bool queue = false );
 
     // other signals
+    //! if some entity was chacged (commited). Signature:
+    //! slot( uint64_t id )
     void subscribeOnChangeEntity( QObject* obj,
                                   const char *slot,
                                   bool queue = false );
+    //! if some entity was deleted. Signature:
+    //! slot( uint64_t id )
     void subscribeOnDeleteEntity( QObject* obj,
                                   const char *slot,
                                   bool queue = false );
+    //! if some entity was added. Signature:
+    //! slot( uint64_t id )
     void subscribeOnAddEntity( QObject* obj,
                                const char *slot,
                                bool queue = false );

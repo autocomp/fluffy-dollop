@@ -11,8 +11,17 @@ namespace regionbiz {
 class Mark: public BaseEntity
 {
 public:
+    enum MarkType
+    {
+        MT_INVALID,
+        MT_DEFECT,
+        MT_PHOTO,
+        MT_PHOTO_3D
+    };
+
     Mark( uint64_t id );
     EntityType getEntityType() override;
+    virtual MarkType getMarkType() = 0;
 
     // center
     QPointF getCenter();
@@ -34,6 +43,47 @@ private:
 
 typedef std::shared_ptr< Mark > MarkPtr;
 typedef std::vector< MarkPtr > MarkPtrs;
+
+//---------------------------------------
+
+class MarkFabric
+{
+public:
+    static MarkPtr createByType(Mark::MarkType type , uint64_t id);
+};
+
+//---------------------------------------
+
+class DefectMark: public Mark
+{
+public:
+    DefectMark( uint64_t id );
+    MarkType getMarkType() override;
+};
+typedef std::shared_ptr< DefectMark > DefectMarkPtr;
+typedef std::vector< DefectMarkPtr > DefectMarkPtrs;
+
+//---------------------------------------
+
+class PhotoMark: public Mark
+{
+public:
+    PhotoMark( uint64_t id );
+    MarkType getMarkType() override;
+};
+typedef std::shared_ptr< PhotoMark > PhotoMarkPtr;
+typedef std::vector< PhotoMarkPtr > PhotoMarkPtrs;
+
+//---------------------------------------
+
+class Photo3dMark: public Mark
+{
+public:
+    Photo3dMark( uint64_t id );
+    MarkType getMarkType() override;
+};
+typedef std::shared_ptr< Photo3dMark > Photo3dMarkPtr;
+typedef std::vector< Photo3dMarkPtr > Photo3dMarkPtrs;
 
 }
 

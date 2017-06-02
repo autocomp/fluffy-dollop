@@ -332,9 +332,25 @@ MarkPtrs RegionBizManager::getMarksByParent( uint64_t id )
     return marks;
 }
 
+MarkPtrs RegionBizManager::getMarksByParent(uint64_t id, Mark::MarkType type)
+{
+    MarkPtrs res_marks;
+    auto marks = getMarksByParent( id );
+    for( MarkPtr mark: marks )
+        if( mark->getMarkType() == type )
+            res_marks.push_back( mark );
+
+    return res_marks;
+}
+
 MarkPtrs RegionBizManager::getMarksByParent(MarksHolderPtr parent)
 {
     return getMarksByParent( parent->getHolderId() );
+}
+
+MarkPtrs RegionBizManager::getMarksByParent(MarksHolderPtr parent, Mark::MarkType type)
+{
+    return getMarksByParent( parent->getHolderId(), type );
 }
 
 MarkPtrs RegionBizManager::getMarks()
@@ -346,19 +362,24 @@ MarkPtrs RegionBizManager::getMarks()
 }
 
 MarkPtr RegionBizManager::addMark( uint64_t parent_id,
+                                   Mark::MarkType type,
                                    QPointF center )
 {
-    return addMark( parent_id, QPolygonF( { center } ));
+    return addMark( parent_id, type, QPolygonF( { center } ));
 }
 
-MarkPtr RegionBizManager::addMark(uint64_t parent_id, QPolygonF coords)
+MarkPtr RegionBizManager::addMark( uint64_t parent_id,
+                                   Mark::MarkType type,
+                                   QPolygonF coords )
 {
     MarkPtr mark;
     BaseAreaPtr parent = getBaseArea( parent_id );
     if( !( parent->BaseEntity::convert< MarksHolder >() ))
         return mark;
 
-    mark = BaseEntity::createWithId< Mark >( BaseEntity::getMaxId() + 1 );
+    // add by type
+    uint64_t id = BaseEntity::getMaxId() + 1;
+    mark = MarkFabric::createByType( type, id );
     if( mark )
     {
         mark->setCoords( coords );
@@ -485,25 +506,35 @@ BaseTranslatorPtr RegionBizManager::getTranslatorByName(QString name)
     return ptr;
 }
 
-uint64_t RegionBizManager::getSelectedEntity()
+//--------------------------------------------------
+
+uint64_t RegionBizManager::getCurrentEntity()
 {
-    return _select_manager._selected_entity_id;
+    return _select_manager._current_entity_id;
 }
 
-std::set<uint64_t>& RegionBizManager::getSelectedSet()
+void RegionBizManager::clearCurrent()
 {
-    return _select_manager._selected_set;
+    setCurrentEntity( UNSELECTED_ID );
 }
 
-void RegionBizManager::selectEntity(uint64_t id)
+void RegionBizManager::setCurrentEntity(uint64_t id)
 {
-    _select_manager.selectNewEntity( id );
+    _select_manager.setNewCurrentEntity( id );
 }
 
-void RegionBizManager::subscribeOnSelect(QObject *obj, const char *slot, bool queue)
+void RegionBizManager::subscribeOnCurrentChange( QObject *obj, const char *slot, bool queue )
 {
-    QObject::connect( &_select_manager, SIGNAL( selectBaseEntity(uint64_t,uint64_t) ),
+    QObject::connect( &_select_manager, SIGNAL( currentEntityChange(uint64_t,uint64_t) ),
                       obj, slot, ( queue ? Qt::QueuedConnection : Qt::DirectConnection ));
+}
+
+std::vector<uint64_t> RegionBizManager::getSelectedSet()
+{
+    std::vector< uint64_t > ids;
+    for( uint64_t id : _select_manager._selected_set )
+        ids.push_back( id );
+    return ids;
 }
 
 void RegionBizManager::clearSelect()
@@ -511,9 +542,37 @@ void RegionBizManager::clearSelect()
     _select_manager.clearSelect();
 }
 
-void RegionBizManager::appendToSelectedSet(uint64_t id)
+void RegionBizManager::appendToSelectedSet(uint64_t id, bool force)
 {
-    _select_manager.appendToSeletedSet( id );
+    _select_manager.appendToSeletedSet( { id }, force );
+}
+
+void RegionBizManager::appendToSelectedSet(std::vector<uint64_t> ids, bool force)
+{
+    _select_manager.appendToSeletedSet( ids, force );
+}
+
+void RegionBizManager::removeFromSelectedSet(uint64_t id, bool force)
+{
+    _select_manager.removeFromSeletedSet( { id }, force );
+}
+
+void RegionBizManager::removeFromSelectedSet(std::vector<uint64_t> ids, bool force)
+{
+    _select_manager.removeFromSeletedSet( ids, force );
+}
+
+void RegionBizManager::subscribeOnSelectedSetChange(QObject *obj, const char *slot, bool queue)
+{
+    QObject::connect( &_select_manager, SIGNAL( selectedSetChange( std::vector< uint64_t >,
+                                                                   std::vector< uint64_t > )),
+                      obj, slot, ( queue ? Qt::QueuedConnection : Qt::DirectConnection ));
+}
+
+void RegionBizManager::subscribeOnSelectedChange(QObject *obj, const char *slot, bool queue)
+{
+    QObject::connect( &_select_manager, SIGNAL( selectedSetChange() ),
+                      obj, slot, ( queue ? Qt::QueuedConnection : Qt::DirectConnection ));
 }
 
 void RegionBizManager::centerOnEntity(uint64_t id)
@@ -524,18 +583,6 @@ void RegionBizManager::centerOnEntity(uint64_t id)
 void RegionBizManager::subscribeCenterOn(QObject *obj, const char *slot, bool queue)
 {
     QObject::connect( &_select_manager, SIGNAL( centerOnBaseEntity( uint64_t )),
-                      obj, slot, ( queue ? Qt::QueuedConnection : Qt::DirectConnection ));
-}
-
-void RegionBizManager::subscribeSelectedSet(QObject *obj, const char *slot, bool queue)
-{
-    QObject::connect( &_select_manager, SIGNAL( selectedSet( std::set< uint64_t > )),
-                      obj, slot, ( queue ? Qt::QueuedConnection : Qt::DirectConnection ));
-}
-
-void RegionBizManager::subscribeClearSelect(QObject *obj, const char *slot, bool queue)
-{
-    QObject::connect( &_select_manager, SIGNAL( selectClear() ),
                       obj, slot, ( queue ? Qt::QueuedConnection : Qt::DirectConnection ));
 }
 

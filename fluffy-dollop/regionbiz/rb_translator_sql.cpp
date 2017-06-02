@@ -307,7 +307,8 @@ MarkPtrs SqlTranslator::loadMarks()
     }
 
     // select marks
-    QString select = "SELECT id, parent_id, name, description FROM marks";
+    QString select = "SELECT e.id, e.parent_id, e.name, e.description, m.type "
+                     "FROM entitys as e JOIN marks as m ON (e.id = m.id)";
     res = query.exec( select );
     if( res )
         for( query.first(); query.isValid(); query.next() )
@@ -316,8 +317,9 @@ MarkPtrs SqlTranslator::loadMarks()
             uint64_t parent_id = query.value( 1 ).toLongLong();
             QString name = query.value( 2 ).toString();
             QString descr = query.value( 3 ).toString();
+            QString type = query.value( 4 ).toString();
 
-            MarkPtr mark = BaseEntity::createWithId< Mark >( id );
+            MarkPtr mark = getMarkByTypeString( type, id );
             if( !mark )
                 continue;
 
@@ -339,18 +341,29 @@ bool SqlTranslator::commitMark( MarkPtr mark )
     db.transaction();
 
     // update mark
-    QString delete_mark = "DELETE FROM marks "
+    QString delete_ent = "DELETE FROM entitys "
                           "WHERE id = " + QString::number( mark->getId() );
     QSqlQuery query( db );
+    tryQuery( delete_ent );
+
+    QString delete_mark = "DELETE FROM marks "
+                          "WHERE id = " + QString::number( mark->getId() );
     tryQuery( delete_mark );
 
-    QString insert_update = "INSERT INTO marks( id, parent_id, name, description ) "
+    QString insert_update = "INSERT INTO entitys( id, parent_id, name, description ) "
                             "VALUES (?, ?, ?, ?)";
     query.prepare( insert_update );
     query.addBindValue( (qulonglong) mark->getId() );
     query.addBindValue( (qulonglong) mark->getParentId() );
     query.addBindValue( mark->getName() );
     query.addBindValue( mark->getDescription() );
+    tryQuery();
+
+    QString insert_mark = "INSERT INTO marks( id, type ) "
+                          "VALUES (?, ?)";
+    query.prepare( insert_mark );
+    query.addBindValue( (qulonglong) mark->getId() );
+    query.addBindValue( getMarkType( mark->getMarkType() ));
     tryQuery();
 
     // commit metadata
@@ -385,10 +398,15 @@ bool SqlTranslator::deleteMark( MarkPtr mark )
     // lock base
     db.transaction();
 
-    // update mark
-    QString delete_mark = "DELETE FROM marks "
+    // delete ent
+    QString delete_ent = "DELETE FROM entitys "
                           "WHERE id = " + QString::number( mark->getId() );
     QSqlQuery query( db );
+    tryQuery( delete_ent );
+
+    // delete mark
+    QString delete_mark = "DELETE FROM marks "
+                          "WHERE id = " + QString::number( mark->getId() );
     tryQuery( delete_mark );
 
     // metadata
@@ -741,6 +759,35 @@ BaseFileKeeper::FileType SqlTranslator::getFileTypeByString(QString type)
         return BaseFileKeeper::FT_IMAGE;
 
     return BaseFileKeeper::FT_NONE;
+}
+
+MarkPtr SqlTranslator::getMarkByTypeString(QString type, uint64_t id)
+{
+    if( "defect" == type )
+        return BaseEntity::createWithId< DefectMark >( id );
+    if( "photo" == type )
+        return BaseEntity::createWithId< PhotoMark >( id );
+    if( "photo_3d" == type )
+        return BaseEntity::createWithId< Photo3dMark >( id );
+
+    return nullptr;
+}
+
+QString SqlTranslator::getMarkType( Mark::MarkType type )
+{
+    switch( type )
+    {
+    case Mark::MT_DEFECT:
+        return "defect";
+    case Mark::MT_PHOTO:
+        return "photo";
+    case Mark::MT_PHOTO_3D:
+        return "photo3d";
+    case Mark::MT_INVALID:
+        static_assert( true, "Get inbalid type of Mark" );
+    }
+
+    return "";
 }
 
 bool SqliteTranslator::initBySettings(QVariantMap settings)
