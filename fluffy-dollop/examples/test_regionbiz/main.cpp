@@ -32,7 +32,7 @@ void loadXlsx()
     }
     qDebug() << "All deleted";
 
-    mngr->selectEntity( facility->getId() );
+    mngr->setCurrentEntity( facility->getId() );
 
     // load translator
     BaseDataTranslatorPtr ptr = BaseTranslator::convert< BaseDataTranslator >(
@@ -147,9 +147,9 @@ void bigExample()
 
     //! Selection test
     TestReciver recv;
-    mngr->subscribeOnSelect( &recv, SLOT(onSelection(uint64_t,uint64_t)) );
-    mngr->selectEntity( 4 );
-    mngr->selectEntity( 5 );
+    mngr->subscribeOnCurrentChange( &recv, SLOT(onSelection(uint64_t,uint64_t)) );
+    mngr->setCurrentEntity( 4 );
+    mngr->setCurrentEntity( 5 );
 
     mngr->subscribeCenterOn( &recv, SLOT(onCenterOn(uint64_t)) );
     mngr->centerOnEntity( 6 );
@@ -210,7 +210,7 @@ void bigExample()
     auto room_ptr = mngr->addArea< Room >( 13 );
     RoomPtr room_for_marks = BaseArea::convert< Room >( room_ptr );
     // add mark
-    MarkPtr mark = room_for_marks->addMark( QPointF( 30, 10 ));
+    MarkPtr mark = room_for_marks->addMark( Mark::MT_DEFECT, QPointF( 30, 10 ));
     qDebug() << "Add mark:" << (bool) mark;
     MarkPtrs marks = room_for_marks->getMarks();
     if( marks.size() )
@@ -227,7 +227,7 @@ void bigExample()
     marks = room_for_marks->getMarks();
     qDebug() << "We have" << marks.size() << "marks after commit-delete";
     // check other variant
-    MarkPtr mark_new = room_for_marks->addMark( QPointF( 50, 20 ));
+    MarkPtr mark_new = room_for_marks->addMark( Mark::MT_DEFECT, QPointF( 50, 20 ));
     mark_new->setName( "Тест" );
     mark_new->setDesription( "Описание" );
 
@@ -247,28 +247,25 @@ void selectManagment()
 
     //! init
     auto mngr = RegionBizManager::instance();
-    QString str = "contour_ng\\regionbiz_sqlite.json";
-    bool inited = mngr->init( str );
 
     // subscribes
     TestReciver rcv;
-    mngr->subscribeOnSelect( &rcv, SLOT( onSelection(uint64_t ,uint64_t )) );
-    mngr->subscribeClearSelect( &rcv, SLOT( onClearSelect() ));
-    mngr->subscribeSelectedSet( &rcv, SLOT( onSelectedSet(std::set<uint64_t> )));
+    mngr->subscribeOnCurrentChange( &rcv, SLOT( onCurrentChange( uint64_t, uint64_t )));
+    mngr->subscribeOnSelectedSetChange( &rcv, SLOT( onSelectedSet( std::vector<uint64_t>, std::vector<uint64_t> )));
 
     // check select
-    mngr->selectEntity( 13 );
+    mngr->setCurrentEntity( 13 );
     // check repeat append
     mngr->appendToSelectedSet( 18 );
-    mngr->appendToSelectedSet( 18 );
+    mngr->appendToSelectedSet( { 19, 20 } );
     mngr->appendToSelectedSet( 18 );
     // and append again
-    mngr->appendToSelectedSet( 18 );
+    mngr->appendToSelectedSet( 18, false );
     // check clear
     mngr->clearSelect();
 
     // if select and clear. Select 0 and clear signals:
-    mngr->selectEntity( 13 );
+    mngr->setCurrentEntity( 14 );
     mngr->clearSelect();
 }
 
@@ -401,7 +398,7 @@ void init()
 
     //! init
     auto mngr = RegionBizManager::instance();
-    QString str = "contour_ng\\regionbiz_psql.json";
+    QString str = "config/regionbiz_inet.json";
     bool inited = mngr->init( str );
 }
 
@@ -419,10 +416,22 @@ void checkMarksCoords()
     RegionPtr reg = regions.front();
     auto locs = reg->getChilds( Region::RCF_LOCATIONS );
     LocationPtr location = locs[ 0 ]->convert< Location >();
-    auto mark = location->addMark();
+    auto mark = location->addMark( Mark::MT_DEFECT );
     mark->setCoords( QPolygonF() << QPointF( 10, 10 ) << QPointF( 20, 20 ) << QPointF( 30, 15 ));
     qDebug () << "Commit mark:" << mark->commit();
     qDebug () << "Delete mark:" << mngr->deleteMark( mark );
+}
+
+void addFloors()
+{
+    using namespace regionbiz;
+
+    auto mngr = RegionBizManager::instance();
+    auto facil = mngr->getBaseArea( 5023 )->convert< Facility >();
+    auto mark = facil->addMark( Mark::MT_PHOTO );
+    mark->addMetadata( "double", "test" );
+    qDebug() << "Commit:" << mark->commit();
+    qDebug() << "Delete:" << mngr->deleteMark( mark );
 }
 
 int main( int argc, char** argv )
@@ -435,9 +444,6 @@ int main( int argc, char** argv )
     //! load xlsx
     // loadXlsx();
 
-    //! select managment
-    //selectManagment();
-
     //! filter checker
     // filterCheck();
 
@@ -447,11 +453,17 @@ int main( int argc, char** argv )
     //! init
     init();
 
+    //! select managment
+    selectManagment();
+
     //! check ftp
     //checkFtp();
 
     //! check marks coords
-    checkMarksCoords();
+    // checkMarksCoords();
+
+    //! add floors
+    // addFloors();
 
     return app.exec();
 }

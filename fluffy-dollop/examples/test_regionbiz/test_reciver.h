@@ -9,21 +9,17 @@ class TestReciver: public QObject
 {
     Q_OBJECT
 public Q_SLOTS:
-    void onSelection( uint64_t prev_id,
+    void onCurrentChange( uint64_t prev_id,
                       uint64_t new_id )
     {
-        std::cout << "Selection!!! prev: " << prev_id
+        std::cout << "Current!!! prev: " << prev_id
                   << ", new: " << new_id << std::endl;
     }
 
-    void onClearSelect()
+    void onSelectedSet( std::vector< uint64_t > sel_ids, std::vector<uint64_t> desel_ids )
     {
-        std::cout << "Clear select!!!" << std::endl;
-    }
-
-    void onSelectedSet( std::set< uint64_t > ids )
-    {
-        std::cout << "Selected " << ids.size() << " elements" << std::endl;
+        std::cout << "Selected " << sel_ids.size() << " elements, " <<
+                  "desel " << desel_ids.size() << " elements" << std::endl;
     }
 
     void onCenterOn( uint64_t id )
