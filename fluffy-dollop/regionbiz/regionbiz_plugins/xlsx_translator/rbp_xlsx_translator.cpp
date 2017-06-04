@@ -10,7 +10,7 @@ REGISTER_TRANSLATOR( XlsxTranlsator )
 XlsxTranlsator::XlsxTranlsator()
 {
     auto mngr = RegionBizManager::instance();
-    mngr->subscribeOnSelect( this, SLOT( onObjectSelected( uint64_t, uint64_t )));
+    mngr->subscribeOnCurrentChange( this, SLOT( onObjectSelected( uint64_t, uint64_t )));
 }
 
 bool XlsxTranlsator::initBySettings( QVariantMap settings )
