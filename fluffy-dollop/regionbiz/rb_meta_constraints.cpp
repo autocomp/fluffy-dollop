@@ -50,7 +50,7 @@ QString Constraint::separator()
 
 //-----------------------------------
 
-void ConstraintsManager::init( QString aim )
+void ConstraintsManager::init( QString /*aim*/ )
 {
     Constraint cons( "area", "0:" );
     addConstraint( BaseEntity::ET_AREA, cons );

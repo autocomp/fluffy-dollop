@@ -10,6 +10,7 @@
 #include "rb_signal_manager.h"
 #include "rb_metadata.h"
 #include "rb_marks.h"
+#include "rb_group.h"
 
 #define FIND_IF( cont, func ) std::find_if( cont.begin(), cont.end(), func );
 
@@ -112,6 +113,17 @@ public:
     bool deleteMark( uint64_t id );
     bool deleteMark( MarkPtr mark );
 
+    // groups
+    GroupEntityPtr getGroup( uint64_t id );
+    GroupEntityPtrs getGroups();
+    GroupEntityPtr getGroupOfEntity( uint64_t id );
+    GroupEntityPtr addGroup();
+    bool commitGroup( uint64_t id );
+    bool commitGroup( GroupEntityPtr group );
+    bool commitGroupsChanged();
+    bool deleteGroup( GroupEntityPtr group );
+    bool deleteGroup( uint64_t id );
+
     // files
     BaseFileKeeperPtrs getFilesByEntity( uint64_t id );
     BaseFileKeeperPtrs getFilesByEntity( BaseEntityPtr ptr );
@@ -208,22 +220,12 @@ private:
     BaseDataTranslatorPtr _data_translator = nullptr;
     BaseFilesTranslatorPtr _files_translator = nullptr;
 
-    // data locations
-    //    std::vector< RegionPtr > _regions;
-    //    std::vector< LocationPtr > _locations;
-    //    std::vector< FacilityPtr > _facilitys;
-    //    std::vector< FloorPtr > _floors;
-    //    std::vector< RoomsGroupPtr > _rooms_groups;
-
     // data relations
     //    std::vector< PropertyPtr > _propertys;
     //    std::vector< RentPtr > _rents;
 
     // metadata
     MetadataById _metadata;
-
-    // marks
-    //MarkPtrs _marks;
 
     // signals
     SelectionManager _select_manager;

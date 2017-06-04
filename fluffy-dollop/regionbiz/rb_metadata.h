@@ -3,16 +3,16 @@
 
 #include <memory>
 #include <map>
+#include <unordered_map>
 #include <QString>
 #include <QVariant>
 
 namespace regionbiz {
 
-
 class BaseMetadata;
 typedef std::shared_ptr< BaseMetadata > BaseMetadataPtr;
 typedef std::map< QString, BaseMetadataPtr > MetadataByName;
-typedef std::map< uint64_t, MetadataByName > MetadataById;
+typedef std::unordered_map< uint64_t, MetadataByName > MetadataById;
 
 class BaseMetadata
 {

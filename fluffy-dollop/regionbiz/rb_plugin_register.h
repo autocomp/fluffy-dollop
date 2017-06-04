@@ -9,7 +9,7 @@
     class plugin: public QObject \
     { \
         Q_OBJECT \
-        Q_PLUGIN_METADATA(IID "ru.vega.contour.RegionBizPluginIface") \
+        Q_PLUGIN_METADATA(IID "ru.vira.autocomp.RegionBizPluginIface") \
     };
 
 #endif // RB_PLUGIN_REGISTER_H

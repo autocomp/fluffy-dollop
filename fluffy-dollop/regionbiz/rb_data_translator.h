@@ -13,6 +13,7 @@
 #include "rb_metadata.h"
 #include "rb_marks.h"
 #include "rb_files.h"
+#include "rb_group.h"
 
 namespace regionbiz {
 
@@ -60,9 +61,15 @@ public:
     // files
     BaseFileKeeperPtrs loadFiles();
 
+    // groups
+    GroupEntityPtrs loadGroups();
+    bool commitGroups( GroupEntityPtrs groups );
+    bool deleteGroup( GroupEntityPtr group );
+
 protected:
     void setParentForBaseLocation( BaseAreaPtr loc, uint64_t parent_id );
     void setAreaForBaseRalation( BaseBizRelationPtr relation, uint64_t id );
+    void freeChangedGroups();
 
     // locations
     std::function< std::vector< RegionPtr >( void ) > _load_regions;
@@ -91,6 +98,11 @@ protected:
 
     // files
     std::function< std::vector< BaseFileKeeperPtr >( void ) > _load_files;
+
+    // groups
+    std::function< GroupEntityPtrs( void ) > _load_groups;
+    std::function< bool( GroupEntityPtrs ) > _commit_groups;
+    std::function< bool( GroupEntityPtr ) > _delete_group;
 
 private:
     /**

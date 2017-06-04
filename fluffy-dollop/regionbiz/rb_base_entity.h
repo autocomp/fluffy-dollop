@@ -1,7 +1,7 @@
 #ifndef RB_BASE_ENTITY_H
 #define RB_BASE_ENTITY_H
 
-#include <map>
+#include <unordered_map>
 #include <memory>
 #include <iostream>
 #include "rb_metadata.h"
@@ -22,6 +22,7 @@ public:
     {
         ET_AREA,
         ET_MARK,
+        ET_GROUP,
         ET_RELATION
     };
 
@@ -53,6 +54,7 @@ public:
     BaseFileKeeperPtrs getFiles();
     BaseFileKeeperPtrs getFilesByType( BaseFileKeeper::FileType type );
 
+    // TODO make create entity private
     // create new entity
     template< typename Type >
     static std::shared_ptr< Type > createWithId( uint64_t id );
@@ -87,7 +89,7 @@ protected:
     // TODO flag of commited
 
 private:
-    static std::map< uint64_t, BaseEntityPtr >& getEntitys();
+    static std::unordered_map< uint64_t, BaseEntityPtr >& getEntitys();
 
     template< typename Type >
     static std::vector< std::shared_ptr< Type >>

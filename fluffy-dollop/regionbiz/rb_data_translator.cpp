@@ -207,6 +207,50 @@ BaseFileKeeperPtrs BaseDataTranslator::loadFiles()
         return BaseFileKeeperPtrs();
 }
 
+GroupEntityPtrs BaseDataTranslator::loadGroups()
+{
+    if( _load_groups )
+    {
+        auto groups = _load_groups();
+        return groups;
+    }
+    else
+        return GroupEntityPtrs();
+}
+
+bool BaseDataTranslator::commitGroups( GroupEntityPtrs groups )
+{
+    for( GroupEntityPtr group: groups )
+        if( group->getElements().empty() )
+            deleteGroup( group );
+
+    if( _commit_groups )
+    {
+        bool comm = _commit_groups( groups );
+        return comm;
+    }
+    else
+        return false;
+}
+
+bool BaseDataTranslator::deleteGroup(GroupEntityPtr group)
+{
+    if( _delete_group )
+    {
+        group->disband();
+        bool del = _delete_group( group );
+        if( del )
+        {
+            auto mngr = RegionBizManager::instance();
+            mngr->_metadata.erase( group->getId() );
+            BaseEntity::deleteEntity( group );
+        }
+        return del;
+    }
+    else
+        return false;
+}
+
 void BaseDataTranslator::setParentForBaseLocation( BaseAreaPtr loc, uint64_t parent_id )
 {
     loc->setParent( parent_id );
@@ -215,6 +259,11 @@ void BaseDataTranslator::setParentForBaseLocation( BaseAreaPtr loc, uint64_t par
 void BaseDataTranslator::setAreaForBaseRalation(BaseBizRelationPtr relation, uint64_t id)
 {
     relation->setAreaId( id );
+}
+
+void BaseDataTranslator::freeChangedGroups()
+{
+    GroupWatcher::freeChanged();
 }
 
 //-------------------------------------------------

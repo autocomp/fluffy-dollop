@@ -1,6 +1,8 @@
 #ifndef RB_TRANSLATOR_SQLITE_H
 #define RB_TRANSLATOR_SQLITE_H
 
+#include <QSqlDriver>
+
 #include "rb_data_translator.h"
 
 namespace regionbiz {
@@ -45,6 +47,11 @@ private:
     // files
     BaseFileKeeperPtrs loadFiles();
 
+    // groups
+    GroupEntityPtrs loadGroups();
+    bool commitGroups( GroupEntityPtrs groups );
+    bool deleteGroup( GroupEntityPtr group );
+
     // support functions
     template< typename LocTypePtr >
     bool loadCoordinate( std::vector< LocTypePtr >& vector );
@@ -75,8 +82,16 @@ private:
 
 //------------------------------------------------------------
 
-class PsqlTranslator: public SqlTranslator
+class PsqlTranslator: public QObject, public SqlTranslator
 {
+    // FIXME tmp solution of notify check ---
+    Q_OBJECT
+private Q_SLOTS:
+    void onNewNotify(const QString &name,
+                      QSqlDriver::NotificationSource source,
+                      const QVariant& payload );
+    //--------------------------------------
+
 private:
     bool initBySettings( QVariantMap settings ) override;
     QString getTranslatorName() override;

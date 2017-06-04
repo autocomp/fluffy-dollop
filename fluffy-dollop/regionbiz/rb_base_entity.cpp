@@ -34,9 +34,9 @@ BaseEntityPtr BaseEntity::getEntity(uint64_t id)
     return nullptr;
 }
 
-std::map< uint64_t, BaseEntityPtr >& BaseEntity::getEntitys()
+std::unordered_map<uint64_t, BaseEntityPtr> &BaseEntity::getEntitys()
 {
-    static std::map< uint64_t, BaseEntityPtr > entitys;
+    static std::unordered_map< uint64_t, BaseEntityPtr > entitys;
     return entitys;
 }
 

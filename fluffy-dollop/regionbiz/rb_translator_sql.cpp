@@ -46,6 +46,11 @@ void SqlTranslator::loadFunctions()
 
     // files
     _load_files = std::bind( &SqlTranslator::loadFiles, this );
+
+    // groups
+    _load_groups = std::bind( &SqlTranslator::loadGroups, this );
+    _commit_groups = std::bind( &SqlTranslator::commitGroups, this, std::placeholders::_1 );
+    _delete_group = std::bind( &SqlTranslator::deleteGroup, this, std::placeholders::_1 );
 }
 
 std::vector< RegionPtr > SqlTranslator::loadRegions()
@@ -549,6 +554,163 @@ bool SqlTranslator::commitFiles(BaseEntityPtr entity)
     return query.execBatch();
 }
 
+GroupEntityPtrs SqlTranslator::loadGroups()
+{
+    // lock database
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    db.transaction();
+    QSqlQuery query( db );
+
+    // select group like entitys
+    QString select_groups = "SELECT id FROM entitys WHERE id IN "
+                            "( SELECT DISTINCT group_id FROM groups )";
+    query.setForwardOnly( true );
+    bool res = query.exec( select_groups );
+    std::map< uint64_t, GroupEntityPtr > groups_by_id;
+    if( res )
+    {
+        for( query.first(); query.isValid(); query.next() )
+        {
+            uint64_t id = query.value( 0 ).toLongLong();
+            groups_by_id[ id ] = BaseEntity::createWithId< GroupEntity >( id );
+        }
+    }
+
+    // select all elements
+    QString select_groups_and_elements = "SELECT group_id, element_id FROM groups";
+    query.setForwardOnly( true );
+    res = query.exec( select_groups_and_elements );
+    if( res )
+    {
+        for( query.first(); query.isValid(); query.next() )
+        {
+            uint64_t id_group = query.value( 0 ).toLongLong();
+            uint64_t id_element = query.value( 1 ).toLongLong();
+
+            // check group existence
+            if( groups_by_id.find( id_group ) != groups_by_id.end() )
+            {
+                // add element to group
+                groups_by_id[ id_group ]->addElement( id_element );
+            }
+            else
+                std::cerr << "Group " << id_group
+                          << " doesn't exist" << std::endl;
+        }
+    }
+
+    // clear list of changed groups for commit
+    freeChangedGroups();
+
+    // make vector of groups
+    GroupEntityPtrs groups;
+    for( auto pair: groups_by_id )
+    {
+        GroupEntityPtr group = pair.second;
+        if( group->getElements().size() )
+            groups.push_back( group );
+        else
+            std::cerr << "Empty group finded: "
+                      << group->getId() << std::endl;
+    }
+
+    return groups;
+}
+
+bool SqlTranslator::commitGroups( GroupEntityPtrs groups )
+{
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    // lock base
+    db.transaction();
+
+    for( GroupEntityPtr group: groups )
+    {
+        // update mark
+        QString delete_ent = "DELETE FROM entitys "
+                             "WHERE id = " + QString::number( group->getId() );
+        QSqlQuery query( db );
+        tryQuery( delete_ent );
+    }
+
+    for( GroupEntityPtr group: groups )
+    {
+        // update group like entity
+        QString insert_update = "INSERT INTO entitys( id, parent_id, name, description ) "
+                                "VALUES (?, ?, ?, ?)";
+        QSqlQuery query( db );
+        query.prepare( insert_update );
+        query.addBindValue( (qulonglong) group->getId() );
+        // NOTE group has't parent
+        query.addBindValue( (qulonglong) UNSELECTED_ID );
+        query.addBindValue( group->getName() );
+        query.addBindValue( group->getDescription() );
+        tryQuery();
+
+        // update group consist
+        QString insert_coords = "INSERT INTO groups ( group_id, element_id ) "
+                                "VALUES ( ?, ? );";
+        query.prepare( insert_coords );
+        // prepare data
+        QVariantList group_ids, element_ids;
+        for( auto element_id: group->getElementsIds() )
+        {
+            group_ids.push_back( (qulonglong) group->getId() );
+            element_ids.push_back( (qulonglong) element_id );
+        }
+        // bind data
+        query.addBindValue( group_ids );
+        query.addBindValue( element_ids );
+
+        if( !query.execBatch() )
+        {
+            db.rollback();
+            return false;
+        }
+
+        // commit metadata
+        if( !commitMetadate( group ))
+        {
+            db.rollback();
+            return false;
+        }
+
+        // commit files
+        if( !commitFiles( group ))
+        {
+            db.rollback();
+            return false;
+        }
+    }
+
+    // unlock base
+    db.commit();
+    return true;
+}
+
+bool SqlTranslator::deleteGroup(GroupEntityPtr group)
+{
+    // lock database
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    db.transaction();
+    QSqlQuery query( db );
+
+    // delete group
+    QString delete_group = "DELETE FROM entitys "
+                           "WHERE id = " + QString::number( group->getId() );
+    tryQuery( delete_group );
+
+    // metadata
+    QString delete_meta = "DELETE FROM metadata "
+                          "WHERE entity_id = " + QString::number( group->getId() );
+    tryQuery( delete_meta );
+
+    // TODO delete files
+
+    // unlock
+    db.commit();
+    return true;
+}
+
 //------------------------------------------------------
 
 template<typename LocType>
@@ -818,6 +980,17 @@ QString SqliteTranslator::getBaseName()
     return "REGION_BIZ_SQLITE";
 }
 
+// FIXME tmp solution of notify check ---
+void PsqlTranslator::onNewNotify( const QString& name,
+                                  QSqlDriver::NotificationSource source,
+                                  const QVariant &payload)
+{
+    qDebug() << "From"
+             << ( QSqlDriver::SelfSource == source ? "this" : "other" );
+    qDebug() << "Notify:" << name << "with:" << payload;
+}
+//-------------------------------------------
+
 bool PsqlTranslator::initBySettings(QVariantMap settings)
 {
     QSqlDatabase db = QSqlDatabase::addDatabase( "QPSQL", getBaseName() );
@@ -833,6 +1006,16 @@ bool PsqlTranslator::initBySettings(QVariantMap settings)
 
     if (db.open())
     {
+        // FIXME tmp solution of notify check -------
+        db.driver()->subscribeToNotification( "test" );
+        QObject::connect( db.driver(), SIGNAL( notification( const QString&,
+                                                             QSqlDriver::NotificationSource,
+                                                             const QVariant& )),
+                          this, SLOT( onNewNotify( const QString&,
+                                                   QSqlDriver::NotificationSource,
+                                                   const QVariant& )));
+        //-------------------------------------------
+
         std::cout << "Database: connection ok" << std::endl;
         return true;
     }

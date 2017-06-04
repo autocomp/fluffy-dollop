@@ -429,6 +429,109 @@ bool RegionBizManager::deleteMark(MarkPtr mark)
     return del;
 }
 
+GroupEntityPtr RegionBizManager::getGroup(uint64_t id)
+{
+    auto entity = BaseEntity::getEntity( id );
+    GroupEntityPtr group = BaseEntity::convert< GroupEntity >( entity );
+    return group;
+}
+
+GroupEntityPtrs RegionBizManager::getGroups()
+{
+    // get groupd from entitys
+    auto group_ptrs = BaseEntity::getEntitysByType< GroupEntity >( BaseEntity::ET_GROUP );
+
+    return group_ptrs;
+}
+
+// TODO think how doing fast search
+GroupEntityPtr RegionBizManager::getGroupOfEntity(uint64_t id)
+{
+    for( GroupEntityPtr group: getGroups() )
+        for( uint64_t element_id : group->getElementsIds() )
+            if( element_id == id )
+                return group;
+
+    return nullptr;
+}
+
+GroupEntityPtr RegionBizManager::addGroup()
+{
+    uint64_t id = BaseEntity::getMaxId() + 1;
+    GroupEntityPtr group = BaseEntity::createWithId< GroupEntity >( id );
+    group->setChanged();
+
+    // emit signal
+    _change_watcher.addBaseEntity( group->getId() );
+
+    return group;
+}
+
+bool RegionBizManager::commitGroup(uint64_t id)
+{
+    GroupEntityPtr group = getGroup( id );
+    bool comm = commitGroup( group );
+
+    return comm;
+}
+
+bool RegionBizManager::commitGroup( GroupEntityPtr group )
+{
+    if( !group )
+        return false;
+
+    bool free_changes( true );
+    std::vector< uint64_t > groups_on_commit =
+            GroupWatcher::getChangedGroups( !free_changes );
+
+    // if group in set of changed groups - cpmmit all (for sync)
+    auto check_id = [ group ]( uint64_t id ){ return group->getId() == id; };
+    auto iter = FIND_IF( groups_on_commit, check_id );
+    if( iter != groups_on_commit.end() )
+    {
+        return commitGroupsChanged();
+    }
+
+    return true;
+}
+
+bool RegionBizManager::commitGroupsChanged()
+{
+    std::vector< uint64_t > groups_on_commit = GroupWatcher::getChangedGroups();
+
+    GroupEntityPtrs groups;
+    for( uint64_t id: groups_on_commit )
+        groups.push_back( getGroup( id ));
+
+    bool comm = _data_translator->commitGroups( groups );
+    if( comm )
+    {
+        // signals for all groups
+        for( uint64_t id: groups_on_commit )
+            _change_watcher.changeEntity( id );
+    }
+
+    return comm;
+}
+
+bool RegionBizManager::deleteGroup(GroupEntityPtr group)
+{
+    bool del = _data_translator->deleteGroup( group );
+    if( del )
+    {
+        // emit signal
+        _change_watcher.deleteEntity( group->getId() );
+    }
+    return del;
+}
+
+bool RegionBizManager::deleteGroup(uint64_t id)
+{
+    auto mngr = RegionBizManager::instance();
+    auto group = mngr->getGroup( id );
+    return deleteGroup( group );
+}
+
 BaseFileKeeperPtrs RegionBizManager::getFilesByEntity(uint64_t id)
 {
     auto& files = BaseFileKeeper::getFiles();

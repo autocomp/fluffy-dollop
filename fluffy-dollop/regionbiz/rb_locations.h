@@ -18,6 +18,8 @@ typedef std::shared_ptr< BaseArea > BaseAreaPtr;
 typedef std::vector< BaseAreaPtr > BaseAreaPtrs;
 
 class RegionBizManager;
+class GroupEntity;
+typedef std::shared_ptr< GroupEntity > GroupEntityPtr;
 
 class BaseArea: public BaseEntity
 {
@@ -48,6 +50,11 @@ public:
     BaseAreaPtr getParent( AreaType parent_type );
     BaseAreaPtr getParent();
     BaseAreaPtrs getBaseAreaChilds();
+
+    // groups
+    GroupEntityPtr getGroup();
+    bool moveToGroup( GroupEntityPtr group );
+    bool leaveGroup();
 
     // commit
     bool commit();

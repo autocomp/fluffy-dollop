@@ -1,5 +1,6 @@
 #include "rb_locations.h"
 
+#include "rb_group.h"
 #include "rb_manager.h"
 
 using namespace regionbiz;
@@ -53,6 +54,28 @@ BaseAreaPtrs BaseArea::getBaseAreaChilds()
     auto childs = mngr->getAreaChildsByParent( _id );
 
     return childs;
+}
+
+GroupEntityPtr BaseArea::getGroup()
+{
+    auto mngr = RegionBizManager::instance();
+    auto group = mngr->getGroupOfEntity( getId() );
+
+    return group;
+}
+
+bool BaseArea::moveToGroup(GroupEntityPtr group)
+{
+    return group->addElement( getId() );
+}
+
+bool BaseArea::leaveGroup()
+{
+    auto group = getGroup();
+    if( group )
+        return group->removeElement( getId() );
+
+    return true;
 }
 
 bool BaseArea::commit()
