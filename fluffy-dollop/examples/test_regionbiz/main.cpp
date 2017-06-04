@@ -398,7 +398,7 @@ void init()
 
     //! init
     auto mngr = RegionBizManager::instance();
-    QString str = "config/regionbiz_inet.json";
+    QString str = "config/regionbiz.json";
     bool inited = mngr->init( str );
 }
 
@@ -434,6 +434,40 @@ void addFloors()
     qDebug() << "Delete:" << mngr->deleteMark( mark );
 }
 
+void checkGroups()
+{
+    using namespace regionbiz;
+
+    auto mngr = RegionBizManager::instance();
+    // create
+    auto group = mngr->addGroup();
+    qDebug() << "Size of group" << group->getElements().size();
+
+    // add elements
+    auto floor = mngr->getBaseArea( 5 )->convert< Floor >();
+    for( uint i = 0; i < 3; ++i )
+        qDebug() << "Add" << floor->getChilds()[ i ]->moveToGroup( group );
+    qDebug() << "Size of group" << group->getCount();
+
+    // remove one element
+    qDebug() << "Leave" << floor->getChilds()[ 0 ]->leaveGroup();
+    qDebug() << "Size of group" << group->getCount();
+
+    // double add element
+    qDebug() << "Add" << floor->getChilds()[ 1 ]->moveToGroup( group );
+    qDebug() << "Size of group" << group->getCount();
+
+    // check commit
+    qDebug() << "Commit" << group->commit();
+
+    // check delete
+    qDebug() << "Delete" << mngr->deleteGroup( group );
+
+    // try to do somth with deleted group
+    qDebug() << "Add" << floor->getChilds()[ 1 ]->moveToGroup( group );
+    qDebug() << "Size of group" << group->getCount();
+}
+
 int main( int argc, char** argv )
 {
     QCoreApplication app( argc, argv );
@@ -454,7 +488,7 @@ int main( int argc, char** argv )
     init();
 
     //! select managment
-    selectManagment();
+    //selectManagment();
 
     //! check ftp
     //checkFtp();
@@ -464,6 +498,9 @@ int main( int argc, char** argv )
 
     //! add floors
     // addFloors();
+
+    //! check group working
+    checkGroups();
 
     return app.exec();
 }
