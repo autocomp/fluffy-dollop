@@ -40,6 +40,12 @@ BaseFileKeeper::FileState BaseFileKeeper::syncFile()
     return state;
 }
 
+bool BaseFileKeeper::commit()
+{
+    auto mngr = RegionBizManager::instance();
+    return mngr->commitFile( getItself() );
+}
+
 FileKeepersById &BaseFileKeeper::getFiles()
 {
     static FileKeepersById files;

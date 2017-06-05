@@ -174,13 +174,11 @@ bool RegionBizManager::deleteArea(BaseAreaPtr area)
             deleteMark( mark );
     }
 
+    // emit signal
+    _change_watcher.deleteEntity( area->getId() );
+
     // delete this one
     bool del = _data_translator->deleteArea( area );
-    if( del )
-    {
-        // emit signal
-        _change_watcher.deleteEntity( area->getId() );
-    }
     return del;
 }
 
@@ -420,12 +418,11 @@ bool RegionBizManager::deleteMark(uint64_t id)
 
 bool RegionBizManager::deleteMark(MarkPtr mark)
 {
+    // emit signal
+    _change_watcher.deleteEntity( mark->getId() );
+
+    // delete
     bool del = _data_translator->deleteMark( mark );
-    if( del )
-    {
-        // emit signal
-        _change_watcher.deleteEntity( mark->getId() );
-    }
     return del;
 }
 
@@ -516,12 +513,11 @@ bool RegionBizManager::commitGroupsChanged()
 
 bool RegionBizManager::deleteGroup(GroupEntityPtr group)
 {
+    // emit signal
+    _change_watcher.deleteEntity( group->getId() );
+
+    // delete
     bool del = _data_translator->deleteGroup( group );
-    if( del )
-    {
-        // emit signal
-        _change_watcher.deleteEntity( group->getId() );
-    }
     return del;
 }
 
@@ -592,6 +588,36 @@ BaseFileKeeper::FileState RegionBizManager::syncFile(BaseFileKeeperPtr file)
     return state;
 }
 
+bool RegionBizManager::deleteFile(BaseFileKeeperPtr file)
+{
+    bool del = _files_translator->deleteFile( file );
+    if( del )
+    {
+        #define FILES_OF_ENTITY BaseFileKeeper::getFiles()[ file->getEntityId() ]
+
+        auto check_path = [ file ]( BaseFileKeeperPtr our_file ){
+            return our_file->getPath() == file->getPath();
+        };
+        auto iter = FIND_IF( FILES_OF_ENTITY, check_path );
+        if( iter != FILES_OF_ENTITY.end() )
+            FILES_OF_ENTITY.erase( iter );
+
+        #undef FILES
+    }
+
+    return del;
+}
+
+bool RegionBizManager::commitFile( BaseFileKeeperPtr file )
+{
+    auto entity = getBaseEntity( file->getEntityId() );
+    if( entity )
+        // TODO commit files only
+        return entity->commit();
+
+    return false;
+}
+
 void RegionBizManager::subscribeFileSynced(QObject *obj, const char *slot)
 {
     _files_translator->subscribeFileSynced( obj, slot );
@@ -600,6 +626,11 @@ void RegionBizManager::subscribeFileSynced(QObject *obj, const char *slot)
 void RegionBizManager::subscribeFileAdded(QObject *obj, const char *slot)
 {
     _files_translator->subscribeFileAdded( obj, slot );
+}
+
+void RegionBizManager::subscribeFileDeleted(QObject *obj, const char *slot)
+{
+    _files_translator->subscribeFileDeleted( obj, slot );
 }
 
 BaseTranslatorPtr RegionBizManager::getTranslatorByName(QString name)

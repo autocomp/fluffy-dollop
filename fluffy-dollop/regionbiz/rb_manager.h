@@ -83,7 +83,7 @@ public:
     bool commitArea( BaseAreaPtr area );
     bool commitArea( uint64_t id );
 
-    // biz relstions
+    // biz relations
     BaseBizRelationPtrs getBizRelationByArea( uint64_t id );
     BaseBizRelationPtrs getBizRelationByArea( uint64_t id, BaseBizRelation::RelationType type );
 
@@ -133,10 +133,12 @@ public:
                                BaseFileKeeper::FileType type,
                                uint64_t entity_id );
 
-    // through tranlator
+    // through file tranlator
     QFilePtr getLocalFile( BaseFileKeeperPtr file );
     BaseFileKeeper::FileState getFileState( BaseFileKeeperPtr file );
     BaseFileKeeper::FileState syncFile( BaseFileKeeperPtr file );
+    bool deleteFile( BaseFileKeeperPtr file );
+    bool commitFile( BaseFileKeeperPtr file );
 
     // signals of file processing subscribe
     //! signal on file synced. Signature:
@@ -147,6 +149,11 @@ public:
     //! slot( BaseFileKeeperPtr )
     void subscribeFileAdded( QObject* obj,
                              const char *slot );
+    //! signal on file deleted. Signature:
+    //! slot( BaseFileKeeperPtr )
+    void subscribeFileDeleted( QObject* obj,
+                               const char *slot );
+
     // tranlators
     BaseTranslatorPtr getTranslatorByName( QString name );
 
@@ -155,7 +162,7 @@ public:
     void setCurrentEntity( uint64_t id );
     void clearCurrent();
     //! change current. Signature:
-    //! slot( uint64_t prev_id, uint64_t ne_id )
+    //! slot( uint64_t prev_id, uint64_t new_id )
     void subscribeOnCurrentChange( QObject* obj,
                                    const char *slot,
                                    bool queue = false );

@@ -78,6 +78,15 @@ bool BaseArea::leaveGroup()
     return true;
 }
 
+MarksHolderPtr BaseArea::convertToMarksHolder()
+{
+    auto holder = convert< MarksHolder>();
+    if( holder )
+        return holder;
+
+    return MarksHolderPtr( new MarksHolder( 0 ));
+}
+
 bool BaseArea::commit()
 {
     auto mngr = RegionBizManager::instance();

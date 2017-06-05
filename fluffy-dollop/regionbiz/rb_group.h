@@ -17,6 +17,7 @@ class GroupEntity: public BaseEntity
 public:
     GroupEntity( uint64_t id );
     EntityType getEntityType();
+    bool commit() override;
 
     BaseAreaPtrs getElements();
     std::vector< uint64_t > getElementsIds();
@@ -36,8 +37,6 @@ public:
     bool isValid();
     void disband();
     GroupEntityPtr combine( GroupEntityPtr other_group );
-
-    bool commit();
 
 private:
     BaseArea::AreaType getType();

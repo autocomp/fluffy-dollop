@@ -19,9 +19,11 @@ public:
         MT_PHOTO_3D
     };
 
+    // base comunication
     Mark( uint64_t id );
     EntityType getEntityType() override;
     virtual MarkType getMarkType() = 0;
+    bool commit() override;
 
     // center
     QPointF getCenter();
@@ -32,9 +34,6 @@ public:
     // asociated object
     uint64_t getParentId();
     void setParentId( uint64_t id );
-
-    // base comunication
-    bool commit();
 
 private:
     QPolygonF _coords;

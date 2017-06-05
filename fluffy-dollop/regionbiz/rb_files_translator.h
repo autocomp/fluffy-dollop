@@ -23,10 +23,12 @@ public:
     FileSyncer();
     void onSyncFile( BaseFileKeeperPtr file );
     void onFileAdded( BaseFileKeeperPtr file );
+    void onFileDeleted( BaseFileKeeperPtr file );
 
 Q_SIGNALS:
     void fileSynced( BaseFileKeeperPtr file );
     void fileAdded( BaseFileKeeperPtr file );
+    void fileDeleted( BaseFileKeeperPtr file );
 };
 
 class BaseFilesTranslator: public BaseTranslator
@@ -36,16 +38,19 @@ public:
     BaseFileKeeper::FileState getFileState( BaseFileKeeperPtr file );
     BaseFileKeeper::FileState syncFile( BaseFileKeeperPtr file );
     BaseFileKeeperPtr addFile(QString file_path , BaseFileKeeper::FileType type, uint64_t entity_id);
+    bool deleteFile( BaseFileKeeperPtr file );
 
     void subscribeFileSynced( QObject* obj,
                               const char *slot );
     void subscribeFileAdded( QObject* obj,
                              const char *slot );
+    void subscribeFileDeleted( QObject* obj,
+                               const char *slot );
 
 protected:
     void onSyncFile( BaseFileKeeperPtr file );
     void onAddFile( BaseFileKeeperPtr file );
-    void appendFile( BaseFileKeeperPtr file );
+    void onDeleteFile( BaseFileKeeperPtr file );
 
     std::function< QFilePtr( BaseFileKeeperPtr ) > _get_file;
     std::function< BaseFileKeeper::FileState( BaseFileKeeperPtr ) > _get_file_state;
@@ -53,6 +58,7 @@ protected:
     std::function< BaseFileKeeperPtr( QString local_path, QString inner_path,
                                       BaseFileKeeper::FileType type,
                                       uint64_t entity_id ) > _add_file;
+    std::function< void( BaseFileKeeperPtr ) > _delete_file;
 
 private:
     FileSyncer _file_syncer;

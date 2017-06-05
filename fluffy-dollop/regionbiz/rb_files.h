@@ -53,6 +53,7 @@ public:
     QFilePtr getLocalFile();
     FileState getFileState();
     FileState syncFile();
+    bool commit();
 
 private:
     static FileKeepersById& getFiles();

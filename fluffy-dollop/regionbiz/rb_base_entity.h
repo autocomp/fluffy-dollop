@@ -30,6 +30,7 @@ public:
     BaseEntity( uint64_t id );
     uint64_t getId();
     virtual EntityType getEntityType() = 0;
+    virtual bool commit() = 0;
 
     // params
     QString getDescription();
@@ -66,7 +67,6 @@ public:
         return std::dynamic_pointer_cast< Type >( base );
     }
 
-    // WARNING slow converter
     template< typename Type >
     std::shared_ptr< Type > convert()
     {

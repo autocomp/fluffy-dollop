@@ -110,8 +110,11 @@ bool SqlTranslator::deleteArea(BaseAreaPtr area)
                           " WHERE id = " + QString::number( area->getId() );
     tryQuery( delete_area );
 
+    QString delete_files = "DELETE FROM files "
+                           " WHERE id = " + QString::number( area->getId() );
+    tryQuery( delete_files );
+
     // TODO delete relations
-    // TODO delete files
 
     // unlock
     db.commit();
@@ -424,7 +427,10 @@ bool SqlTranslator::deleteMark( MarkPtr mark )
                             "WHERE id = " + QString::number( mark->getId() );
     tryQuery( delete_coords );
 
-    // TODO delete files
+    // files
+    QString delete_files = "DELETE FROM files "
+                           "WHERE id = " + QString::number( mark->getId() );
+    tryQuery( delete_files );
 
     // unlock base
     db.commit();
@@ -1006,6 +1012,8 @@ bool PsqlTranslator::initBySettings(QVariantMap settings)
 
     if (db.open())
     {
+        // TODO check version of database
+
         // FIXME tmp solution of notify check -------
         db.driver()->subscribeToNotification( "test" );
         QObject::connect( db.driver(), SIGNAL( notification( const QString&,

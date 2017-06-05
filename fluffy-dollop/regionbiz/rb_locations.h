@@ -21,6 +21,9 @@ class RegionBizManager;
 class GroupEntity;
 typedef std::shared_ptr< GroupEntity > GroupEntityPtr;
 
+class MarksHolder;
+typedef std::shared_ptr< MarksHolder > MarksHolderPtr;
+
 class BaseArea: public BaseEntity
 {
     friend class BaseDataTranslator;
@@ -36,10 +39,12 @@ public:
         AT_ROOM
     };
 
+    // main
     BaseArea( uint64_t id );
     virtual ~BaseArea(){}
     virtual AreaType getType() = 0;
     EntityType getEntityType() override;
+    bool commit() override;
 
     // coords
     QPolygonF getCoords();
@@ -56,8 +61,8 @@ public:
     bool moveToGroup( GroupEntityPtr group );
     bool leaveGroup();
 
-    // commit
-    bool commit();
+    // converts
+    MarksHolderPtr convertToMarksHolder();
 
     template< typename Type >
     static std::shared_ptr< Type > convert( BaseAreaPtr base )
@@ -65,7 +70,6 @@ public:
         return std::dynamic_pointer_cast< Type >( base );
     }
 
-    // WARNING slow converter
     template< typename Type >
     std::shared_ptr< Type > convert()
     {
@@ -115,7 +119,6 @@ private:
 
     uint64_t _holder_id;
 };
-typedef std::shared_ptr< MarksHolder > MarksHolderPtr;
 
 //----------------------------------------------
 

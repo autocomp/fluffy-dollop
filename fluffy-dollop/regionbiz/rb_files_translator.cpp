@@ -64,6 +64,17 @@ BaseFileKeeperPtr BaseFilesTranslator::addFile( QString file_path,
     return nullptr;
 }
 
+bool BaseFilesTranslator::deleteFile(BaseFileKeeperPtr file)
+{
+    if( _delete_file )
+    {
+        _delete_file( file );
+        return true;
+    }
+
+    return false;
+}
+
 void BaseFilesTranslator::subscribeFileSynced( QObject *obj, const char *slot )
 {
     QObject::connect( &_file_syncer, SIGNAL( fileSynced( BaseFileKeeperPtr )),
@@ -73,6 +84,12 @@ void BaseFilesTranslator::subscribeFileSynced( QObject *obj, const char *slot )
 void BaseFilesTranslator::subscribeFileAdded(QObject *obj, const char *slot)
 {
     QObject::connect( &_file_syncer, SIGNAL( fileAdded( BaseFileKeeperPtr )),
+                      obj, slot, Qt::QueuedConnection );
+}
+
+void BaseFilesTranslator::subscribeFileDeleted(QObject *obj, const char *slot)
+{
+    QObject::connect( &_file_syncer, SIGNAL( fileDeleted( BaseFileKeeperPtr )),
                       obj, slot, Qt::QueuedConnection );
 }
 
@@ -86,11 +103,9 @@ void BaseFilesTranslator::onAddFile(BaseFileKeeperPtr file)
     _file_syncer.onFileAdded( file );
 }
 
-void BaseFilesTranslator::appendFile(BaseFileKeeperPtr file)
+void BaseFilesTranslator::onDeleteFile(BaseFileKeeperPtr file)
 {
-    auto& files = BaseFileKeeper::getFiles();
-    // TODO check path to uniq
-    files[ file->getEntityId() ].push_back( file );
+    _file_syncer.onFileDeleted( file );
 }
 
 FileSyncer::FileSyncer()
@@ -106,5 +121,10 @@ void FileSyncer::onSyncFile( BaseFileKeeperPtr file )
 void FileSyncer::onFileAdded(BaseFileKeeperPtr file)
 {
     Q_EMIT fileAdded( file );
+}
+
+void FileSyncer::onFileDeleted(BaseFileKeeperPtr file)
+{
+    Q_EMIT fileDeleted( file );
 }
 
