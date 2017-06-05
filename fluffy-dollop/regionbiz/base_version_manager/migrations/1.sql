@@ -22,10 +22,10 @@ ALTER TABLE marks
 /* set specific type of marks */
 UPDATE marks SET type = 'photo' WHERE id IN
   ( SELECT id FROM marks AS m JOIN metadata AS me ON (me.entity_id = m.id) 
-  WHERE me.value = 'фотография' AND me.name = 'mark_type' )
+  WHERE me.value = 'фотография' AND me.name = 'mark_type' );
 UPDATE marks SET type = 'photo3d' WHERE id IN
   ( SELECT id FROM marks AS m JOIN metadata AS me ON (me.entity_id = m.id) 
-  WHERE me.value = 'панорамная фотография' AND me.name = 'mark_type' )
+  WHERE me.value = 'панорамная фотография' AND me.name = 'mark_type' );
 
 /* add reference in metadata */
 DELETE FROM metadata WHERE entity_id NOT IN ( SELECT id FROM entitys );
