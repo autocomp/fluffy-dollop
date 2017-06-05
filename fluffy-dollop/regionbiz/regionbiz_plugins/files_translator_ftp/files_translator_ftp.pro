@@ -11,10 +11,12 @@ TEMPLATE = lib
 TARGET   = files_translator_ftp
 
 HEADERS += \
-    rbp_files_translator_ftp.h
+    rbp_files_translator_ftp.h \
+    rbp_ftp_wrapper.h
 
 SOURCES += \
-    rbp_files_translator_ftp.cpp
+    rbp_files_translator_ftp.cpp \
+    rbp_ftp_wrapper.cpp
 
 LIBS += -L$${INSTALL_PATH_LIB} \
         -lregionbiz -lQtFtp
