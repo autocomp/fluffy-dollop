@@ -96,6 +96,11 @@ QWidget* ViewInterface::widget()
     return _abstractVisualizer.widget();
 }
 
+QGraphicsView *ViewInterface::graphicsView()
+{
+    return _abstractVisualizer.graphicsView();
+}
+
 QStackedWidget *ViewInterface::stackedWidget()
 {
     return _abstractVisualizer.stackedWidget();

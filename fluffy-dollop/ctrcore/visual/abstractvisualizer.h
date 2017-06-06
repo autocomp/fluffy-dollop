@@ -20,6 +20,8 @@ namespace sw
 class AbstractSceneWidget;
 }
 
+class QGraphicsView;
+
 namespace visualize_system
 {
 
@@ -80,6 +82,7 @@ public:
     virtual sw::AbstractSceneWidget* getAbstractSceneWidget() = 0;
 
     virtual QWidget* widget() = 0;
+    virtual QGraphicsView* graphicsView()= 0;
     virtual QStackedWidget* stackedWidget() = 0;
     virtual QWidget* minimapWidget() = 0;
     virtual QPixmap snapShort() = 0;

@@ -2,6 +2,7 @@
 #define VIEWINTERFACE_H
 
 #include "visualizerinterface.h"
+class QGraphicsView;
 
 namespace sw
 {
@@ -36,6 +37,7 @@ public:
     quint64 getVisualizerWindowId();
 
     QWidget* widget();
+    QGraphicsView* graphicsView();
     QStackedWidget* stackedWidget();
     bool addWidgetToSplitterLeftArea(QWidget * wdg);
     bool addWidgetToStatusBar(QWidget * wdg);

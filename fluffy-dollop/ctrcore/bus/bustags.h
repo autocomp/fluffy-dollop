@@ -34,7 +34,7 @@ enum class BusTags
     OpenFolderInImageGallery,
     //! Запуск\окончание, параметр - quint64 (>0 - ИД object, ==0 - окончание).
     EditAreaGeometry,
-    //!
+    //! параметр - quint64 -> ==0 - abort, >0 - type (defect=1, foto=2, foto360=3);
     SetMarkPosition,
     //! Запуск\окончание, параметр - quint64 (>0 - ИД object). recivers - virainfoplugin, check off edit button and send EditObjectGeometry to other plugins.
     EditModeFinish,
