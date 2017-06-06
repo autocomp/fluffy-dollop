@@ -36,15 +36,18 @@ void Photo360Form::showWidget(quint64 id)
     if( ! ptr )
         return;
 
-    BaseMetadataPtr mark_type = ptr->getMetadata("mark_type");
-    if( ! mark_type )
+    if(ptr->getMarkType() != Mark::MT_PHOTO_3D)
         return;
-    else
-    {
-        QString mark_type_str = mark_type->getValueAsVariant().toString();
-        if(mark_type_str != QString::fromUtf8("панорамная фотография"))
-            return;
-    }
+
+//    BaseMetadataPtr mark_type = ptr->getMetadata("mark_type");
+//    if( ! mark_type )
+//        return;
+//    else
+//    {
+//        QString mark_type_str = mark_type->getValueAsVariant().toString();
+//        if(mark_type_str != QString::fromUtf8("панорамная фотография"))
+//            return;
+//    }
 
     ui->markNameLabel->setText(ptr->getName());
 

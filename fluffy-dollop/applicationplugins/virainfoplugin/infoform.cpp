@@ -498,20 +498,17 @@ bool InfoForm::defectActual(regionbiz::MarkPtr markPtr)
     bool _defectActual(true);
     if(markPtr)
     {
-        BaseMetadataPtr status = markPtr->getMetadata("status");
-        if(status)
+        if(markPtr->getMarkType() != Mark::MT_DEFECT)
+            _defectActual = false;
+        else
         {
-            QString statusStr = status->getValueAsString();
-            if(statusStr == QString::fromUtf8("в архиве"))
-                _defectActual = false;
-        }
-
-        BaseMetadataPtr mark_type = markPtr->getMetadata("mark_type");
-        if(mark_type)
-        {
-            QString mark_type_str = mark_type->getValueAsVariant().toString();
-            if(mark_type_str == QString::fromUtf8("фотография") || mark_type_str == QString::fromUtf8("панорамная фотография"))
-                _defectActual = false;
+            BaseMetadataPtr status = markPtr->getMetadata("status");
+            if(status)
+            {
+                QString statusStr = status->getValueAsString();
+                if(statusStr == QString::fromUtf8("в архиве"))
+                    _defectActual = false;
+            }
         }
     }
     return _defectActual;

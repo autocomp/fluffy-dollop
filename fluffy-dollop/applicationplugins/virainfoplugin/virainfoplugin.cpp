@@ -5,7 +5,9 @@
 #include <ctrcore/visual/datainterface.h>
 #include <ctrcore/visual/visualizermanager.h>
 
-#include "slide_window.h"
+#include <ctrwidgets/components/slidewindow/slide_window.h>
+#include <ctrwidgets/components/layersmanager/layersmanager.h>
+
 #include "filter_form.h"
 
 void ViraInfoPlugin::init(uint visualizerId, quint64 visualizerWindowId)
@@ -28,6 +30,8 @@ void ViraInfoPlugin::init(uint visualizerId, quint64 visualizerWindowId)
     FilterForm& ff = FilterForm::instance();
     ff.setParentId( visualizerWindowId );
     ff.registrateToSlideWindow();
+
+    _layersManager = new LayersManager;
 }
 
 ViraInfoPlugin::~ViraInfoPlugin()

@@ -5,6 +5,7 @@
 #include <ctrcore/plugin/embifacenotifier.h>
 
 class ViraStatusBar;
+class LayersManager;
 
 class ViraInfoPlugin: public CtrAppVisualizerPlugin
 {
@@ -22,6 +23,7 @@ private slots:
 
 private:
     ViraStatusBar * _viraStatusBar;
+    LayersManager * _layersManager = nullptr;
 };
 
 class ViraInfoPluginInterface : public CtrPluginIface

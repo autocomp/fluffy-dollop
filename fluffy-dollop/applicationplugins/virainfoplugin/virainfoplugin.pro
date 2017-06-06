@@ -28,7 +28,6 @@ HEADERS += \
     data_getter.h \
     infoform.h \
     pixmaplistwidget.h \
-    slide_window.h \
     filter_form.h \
     imageviewer.h \
     photo360form.h
@@ -41,7 +40,6 @@ SOURCES += \
     data_getter.cpp \
     infoform.cpp \
     pixmaplistwidget.cpp \
-    slide_window.cpp \
     filter_form.cpp \
     imageviewer.cpp \
     photo360form.cpp

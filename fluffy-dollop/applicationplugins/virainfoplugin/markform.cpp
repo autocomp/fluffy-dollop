@@ -8,7 +8,6 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QImageReader>
-#include <regionbiz/rb_manager.h>
 #include <regionbiz/rb_locations.h>
 #include <ctrcore/ctrcore/ctrconfig.h>
 
@@ -39,7 +38,7 @@ MarkForm::~MarkForm()
     delete ui;
 }
 
-void MarkForm::showWidgetAndCreateMark(MarkType markType, quint64 parentId, QPolygonF markArea, double direction)
+void MarkForm::showWidgetAndCreateMark(regionbiz::Mark::MarkType markType, quint64 parentId, QPolygonF markArea, double direction)
 {
     _markType = markType;
     _id = 0;
@@ -57,14 +56,14 @@ void MarkForm::showWidgetAndCreateMark(MarkType markType, quint64 parentId, QPol
     _foto360FilePath.clear();
     actulize();
 
-    ui->apply->setEnabled(_markType == Defect);
+    ui->apply->setEnabled(_markType == Mark::MT_DEFECT);
 }
 
 void MarkForm::actulize()
 {
     switch(_markType)
     {
-    case Defect :
+    case Mark::MT_DEFECT :
         ui->responsibleLabel->show();
         ui->responsible->show();
         ui->dateEditLabel->show();
@@ -80,7 +79,7 @@ void MarkForm::actulize()
         _listWidget->show();
         break;
 
-    case Foto :
+    case Mark::MT_PHOTO :
         ui->responsibleLabel->hide();
         ui->responsible->hide();
         ui->dateEditLabel->hide();
@@ -96,7 +95,7 @@ void MarkForm::actulize()
         _listWidget->show();
         break;
 
-    case Foto360 :
+    case Mark::MT_PHOTO_3D :
         ui->responsibleLabel->hide();
         ui->responsible->hide();
         ui->dateEditLabel->hide();
@@ -116,7 +115,7 @@ void MarkForm::actulize()
 
 void MarkForm::showWidget(quint64 id)
 {
-    _markType = Defect;
+    // _markType = Defect;
     _id = id;
     _parentId = 0;
     _markArea.clear();
@@ -135,21 +134,24 @@ void MarkForm::showWidget(quint64 id)
     MarkPtr ptr = RegionBizManager::instance()->getMark(_id);
     if(ptr)
     {
-        BaseMetadataPtr mark_type = ptr->getMetadata("mark_type");
-        if(mark_type)
-        {
-            QString mark_type_str = mark_type->getValueAsVariant().toString();
-            if(mark_type_str == QString::fromUtf8("фотография"))
-                _markType = Foto;
-            else if(mark_type_str == QString::fromUtf8("панорамная фотография"))
-                _markType = Foto360;
-        }
+        _markType = ptr->getMarkType();
+
+//        BaseMetadataPtr mark_type = ptr->getMetadata("mark_type");
+//        if(mark_type)
+//        {
+//            QString mark_type_str = mark_type->getValueAsVariant().toString();
+//            if(mark_type_str == QString::fromUtf8("фотография"))
+//                _markType = Foto;
+//            else if(mark_type_str == QString::fromUtf8("панорамная фотография"))
+//                _markType = Foto360;
+//        }
+
         actulize();
 
         ui->markName->setText(ptr->getName());
         ui->description->setPlainText(ptr->getDescription());
 
-        if(_markType == Defect)
+        if(_markType == Mark::MT_DEFECT)
         {
             BaseMetadataPtr worker = ptr->getMetadata("worker");
             if(worker)
@@ -191,7 +193,7 @@ void MarkForm::showWidget(quint64 id)
 
 void MarkForm::slotLoadImage()
 {
-    if(_markType == Foto360)
+    if(_markType == Mark::MT_PHOTO_3D)
     {
         QString filePath = QFileDialog::getOpenFileName(this);
         if(filePath.isEmpty() == false)
@@ -205,7 +207,7 @@ void MarkForm::slotLoadImage()
     else
     {
         QStringList list;
-        if(_markType == Foto)
+        if(_markType == Mark::MT_PHOTO)
             list.append(QFileDialog::getOpenFileName(this));
         else
             list = QFileDialog::getOpenFileNames(this);
@@ -216,7 +218,7 @@ void MarkForm::slotLoadImage()
             if(pm.isNull())
                 continue;
 
-            if(_markType == Foto)
+            if(_markType == Mark::MT_PHOTO)
                 ui->apply->setEnabled(true);
 
             int rotate(0);
@@ -260,6 +262,14 @@ void MarkForm::closeAndCommit(bool moveToArchive)
     if(_id == 0)
     {
         auto areaPtr = RegionBizManager::instance()->getBaseArea(_parentId);
+        auto holder = areaPtr->convert<MarksHolder>();
+        if(holder)
+            markPtr = holder->addMark(_markType, _markArea);
+
+        if(markPtr)
+            _id = markPtr->getId();
+
+        /*
         switch(areaPtr->getType())
         {
         case BaseArea::AT_LOCATION :
@@ -294,6 +304,7 @@ void MarkForm::closeAndCommit(bool moveToArchive)
             bool res = markPtr->commit();
             qDebug() << "commit mark :" << res;
         }
+        */
     }
 
     if( ! markPtr)
@@ -301,7 +312,7 @@ void MarkForm::closeAndCommit(bool moveToArchive)
 
     if(markPtr)
     {
-        if(_markType != Foto360 && _pixmaps.isEmpty() == false)
+        if(_markType != Mark::MT_PHOTO_3D && _pixmaps.isEmpty() == false)
         {
             QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath");
             if(regionBizInitJson_Path.isValid())
@@ -319,9 +330,9 @@ void MarkForm::closeAndCommit(bool moveToArchive)
         markPtr->setName( ui->markName->text());
         markPtr->setDesription( ui->description->toPlainText());
 
-        if(_markType == Defect)
+        if(_markType == Mark::MT_DEFECT)
         {
-            markPtr->addMetadata("string", "mark_type", QString::fromUtf8("дефект"));
+//            markPtr->addMetadata("string", "mark_type", QString::fromUtf8("дефект"));
             markPtr->addMetadata("string", "worker", ui->responsible->text());
             QString dataStr = ui->dateEdit->date().toString("dd.MM.yy");
             markPtr->addMetadata("string", "date", dataStr);
@@ -332,12 +343,12 @@ void MarkForm::closeAndCommit(bool moveToArchive)
             else
                 markPtr->addMetadata("string", "status", ui->status->currentText());
         }
-        else if(_markType == Foto)
+        else if(_markType == Mark::MT_PHOTO)
         {
-            markPtr->addMetadata("string", "mark_type", QString::fromUtf8("фотография"));
+//            markPtr->addMetadata("string", "mark_type", QString::fromUtf8("фотография"));
             markPtr->addMetadata("double", "foto_direction", _direction);
         }
-        else if(_markType == Foto360)
+        else if(_markType == Mark::MT_PHOTO_3D)
         {
             QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath");
             if(regionBizInitJson_Path.isValid())
@@ -351,7 +362,7 @@ void MarkForm::closeAndCommit(bool moveToArchive)
                 qDebug() << "copy foto360 from :" << _foto360FilePath << " to :" << destPath << ", res :" << res;
             }
 
-            markPtr->addMetadata("string", "mark_type", QString::fromUtf8("панорамная фотография"));
+//            markPtr->addMetadata("string", "mark_type", QString::fromUtf8("панорамная фотография"));
         }
 
         bool commitRes = markPtr->commit();

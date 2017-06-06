@@ -8,7 +8,7 @@
 #include <dmanager/embeddedapp.h>
 #include <regionbiz/rb_entity_filter.h>
 
-#include "slide_window.h"
+#include <ctrwidgets/components/slidewindow/slide_window.h>
 
 FilterForm::FilterForm(QWidget *parent) :
     QWidget(parent),

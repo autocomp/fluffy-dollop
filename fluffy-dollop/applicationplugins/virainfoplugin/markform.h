@@ -5,6 +5,7 @@
 #include <QListWidget>
 #include <QPixmap>
 #include "pixmaplistwidget.h"
+#include <regionbiz/rb_manager.h>
 
 namespace Ui {
 class MarkForm;
@@ -17,12 +18,10 @@ class MarkForm : public QWidget
     Q_OBJECT
 
 public:
-    enum MarkType{Defect, Foto, Foto360};
-
     explicit MarkForm(QWidget *parent = 0);
     ~MarkForm();
     void showWidget(quint64 id);
-    void showWidgetAndCreateMark(MarkType markType, quint64 parentId, QPolygonF markArea, double direction = 0);
+    void showWidgetAndCreateMark(regionbiz::Mark::MarkType markType, quint64 parentId, QPolygonF markArea, double direction = 0);
 
 signals:
     void signalCloseWindow();
@@ -38,7 +37,7 @@ private slots:
 
 private:
     Ui::MarkForm *ui;
-    MarkType _markType;
+    regionbiz::Mark::MarkType _markType;
     quint64 _id, _parentId;
     QPolygonF _markArea;
     double _direction;
