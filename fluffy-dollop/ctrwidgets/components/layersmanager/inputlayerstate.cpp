@@ -233,6 +233,7 @@ void InputLayerState::moveMarks(bool createMarks)
         pEllipseItem->setToolTip(QString::fromUtf8("Изменить размер пропорционально"));
         pEllipseItem->setRect(-C/2,-C/2,C,C);
         pEllipseItem->setZValue(1000);
+        pEllipseItem->hide();
         markList.append(pEllipseItem);
 
         pEllipseItem = new global_state::Mark(TURN, _pixmapItem);
