@@ -20,6 +20,8 @@ protected slots:
     void slotItemDoubleClicked(QTreeWidgetItem*,int);
     void slotObjectSelectionChanged(uint64_t prev_id, uint64_t curr_id);
     void slotObjectChanged(uint64_t id);
+    void slotAddObject(uint64_t id);
+    void slotDeleteObject(uint64_t id);
     void slotHeaderSectionClicked(int index);
     void slotBlockGUI(QVariant var);
     void slotEditModeFinish(QVariant var);
@@ -29,10 +31,10 @@ protected slots:
 protected:
     const int ColumnCount = 4; //8;
 
+    void checkMarks(QTreeWidgetItem * item);
     void recalcAreaInFacility(QTreeWidgetItem * facilityItem);
     void recalcTasksInFacility(QTreeWidgetItem * facilityItem);
     void recalcTasksInLocation(QTreeWidgetItem * locationItem);
-    bool markIsDefect(regionbiz::MarkPtr markPtr);
 
     QMap<qulonglong, QTreeWidgetItem*> _items;
     QColor _defaultColor = QColor(Qt::white);

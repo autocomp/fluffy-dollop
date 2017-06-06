@@ -70,8 +70,10 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
     connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), this, SLOT(slotItemDoubleClicked(QTreeWidgetItem*,int)));
 
     auto mngr = RegionBizManager::instance();
-    mngr->subscribeOnSelect(this, SLOT(slotObjectSelectionChanged(uint64_t,uint64_t)));
+    mngr->subscribeOnCurrentChange(this, SLOT(slotObjectSelectionChanged(uint64_t,uint64_t)));
     mngr->subscribeOnChangeEntity(this, SLOT(slotObjectChanged(uint64_t)));
+    mngr->subscribeOnAddEntity(this, SLOT(slotAddObject(uint64_t)));
+    mngr->subscribeOnDeleteEntity(this, SLOT(slotDeleteObject(uint64_t)));
 
     regionbiz::EntityFilter::subscribeOnFilterChacnge(this, SLOT(reinit()));
 
@@ -147,7 +149,7 @@ void ViraTreeWidget::reinit()
                         // WARNING check marks of floor
                         MarkPtrs marks_of_floor = floorPtr->getMarks();
                         for( MarkPtr mark: marks_of_floor )
-                            if(markIsDefect(mark))
+                            if(mark->getMarkType() == Mark::MT_DEFECT)
                             {
                                 BaseMetadataPtr status = mark->getMetadata("status");
                                 if(status)
@@ -233,7 +235,7 @@ void ViraTreeWidget::reinit()
                                 int tasks_for_check(0);
                                 MarkPtrs marks_of_room = room->getMarks();
                                 for( MarkPtr mark: marks_of_room )
-                                    if(markIsDefect(mark))
+                                    if(mark->getMarkType() == Mark::MT_DEFECT)
                                     {
                                         BaseMetadataPtr status = mark->getMetadata("status");
                                         if(status)
@@ -264,6 +266,41 @@ void ViraTreeWidget::reinit()
             }
         }
         regionItem->setExpanded(true);
+    }
+}
+
+void ViraTreeWidget::checkMarks(QTreeWidgetItem * item)
+{
+    qulonglong id = item->data(0, ID).toULongLong();
+    auto areaPtr = RegionBizManager::instance()->getBaseArea(id);
+    if(areaPtr)
+    {
+        auto holder = areaPtr->convert<MarksHolder>();
+        if(holder)
+        {
+            int tasks_new(0);
+            int tasks_in_work(0);
+            int tasks_for_check(0);
+            MarkPtrs marks = holder->getMarks();
+            for( MarkPtr mark: marks )
+                if(mark->getMarkType() == Mark::MT_DEFECT)
+                {
+                    BaseMetadataPtr status = mark->getMetadata("status");
+                    if(status)
+                    {
+                        QString statusStr = status->getValueAsString();
+                        if(statusStr == QString::fromUtf8("новый"))
+                            ++tasks_new;
+                        else if(statusStr == QString::fromUtf8("в работе"))
+                            ++tasks_in_work;
+                        else if(statusStr == QString::fromUtf8("на проверку"))
+                            ++tasks_for_check;
+                    }
+                }
+            item->setData((int)ColumnTitle::TASKS, TASKS_NEW, tasks_new);
+            item->setData((int)ColumnTitle::TASKS, TASKS_IN_WORK, tasks_in_work);
+            item->setData((int)ColumnTitle::TASKS, TASKS_FOR_CHECK, tasks_for_check);
+        }
     }
 }
 
@@ -337,7 +374,7 @@ void ViraTreeWidget::recalcTasksInFacility(QTreeWidgetItem * facilityItem)
         {
             MarkPtrs marks_of_floor = floorPtr->getMarks();
             for( MarkPtr mark: marks_of_floor )
-                if(markIsDefect(mark))
+                if(mark->getMarkType() == Mark::MT_DEFECT)
                 {
                     BaseMetadataPtr status = mark->getMetadata("status");
                     if(status)
@@ -356,6 +393,8 @@ void ViraTreeWidget::recalcTasksInFacility(QTreeWidgetItem * facilityItem)
         for(int i(0); i < floorItem->childCount(); ++i)
         {
             QTreeWidgetItem * roomItem = floorItem->child(i);
+            checkMarks(roomItem);
+
             floor_tasks_new += roomItem->data((int)ColumnTitle::TASKS, TASKS_NEW).toInt();
             floor_tasks_in_work += roomItem->data((int)ColumnTitle::TASKS, TASKS_IN_WORK).toInt();
             floor_tasks_for_check += roomItem->data((int)ColumnTitle::TASKS, TASKS_FOR_CHECK).toInt();
@@ -376,7 +415,7 @@ void ViraTreeWidget::recalcTasksInFacility(QTreeWidgetItem * facilityItem)
     {
         MarkPtrs marks_of_facility = facilityPtr->getMarks();
         for( MarkPtr mark: marks_of_facility )
-            if(markIsDefect(mark))
+            if(mark->getMarkType() == Mark::MT_DEFECT)
             {
                 BaseMetadataPtr status = mark->getMetadata("status");
                 if(status)
@@ -420,7 +459,7 @@ void ViraTreeWidget::recalcTasksInLocation(QTreeWidgetItem * locationItem)
     {
         MarkPtrs marks_of_location = locationPtr->getMarks();
         for( MarkPtr mark: marks_of_location )
-            if(markIsDefect(mark))
+            if(mark->getMarkType() == Mark::MT_DEFECT)
             {
                 BaseMetadataPtr status = mark->getMetadata("status");
                 if(status)
@@ -628,6 +667,37 @@ void ViraTreeWidget::slotObjectChanged(uint64_t id)
     }
 }
 
+void ViraTreeWidget::slotAddObject(uint64_t id)
+{
+
+}
+
+void ViraTreeWidget::slotDeleteObject(uint64_t id)
+{
+    auto it = _items.find(id);
+    if(it != _items.end())
+    {
+        QTreeWidgetItem * parentItem = it.value()->parent();
+        int itemType = parentItem->data((int)ColumnTitle::NAME, TYPE).toInt();
+        if(itemType == (int)ItemType::ItemTypeLocation)
+        {
+            recalcTasksInLocation(parentItem);
+        }
+        else
+        {
+            while(itemType != (int)ItemType::ItemTypeFacility)
+            {
+                parentItem = parentItem->parent();
+                if( ! parentItem)
+                    break;
+                itemType = parentItem->data((int)ColumnTitle::NAME, TYPE).toInt();
+            }
+            if(parentItem)
+                recalcTasksInFacility(parentItem);
+        }
+    }
+}
+
 void ViraTreeWidget::slotItemSelectionChanged()
 {
     qulonglong id(0);
@@ -637,7 +707,7 @@ void ViraTreeWidget::slotItemSelectionChanged()
         QTreeWidgetItem* item = list.first();
         id = item->data((int)ColumnTitle::NAME, ID).toULongLong();
     }
-    RegionBizManager::instance()->selectEntity(id);
+    RegionBizManager::instance()->setCurrentEntity(id);
     qDebug() << "slotItemSelectionChanged, ID :" << id;
 }
 
@@ -674,21 +744,6 @@ void ViraTreeWidget::slotHeaderSectionClicked(int index)
     sortByColumn(index);
 }
 
-bool ViraTreeWidget::markIsDefect(regionbiz::MarkPtr markPtr)
-{
-    bool isDefect(true);
-    if(markPtr)
-    {
-        BaseMetadataPtr mark_type = markPtr->getMetadata("mark_type");
-        if(mark_type)
-        {
-            QString mark_type_str = mark_type->getValueAsVariant().toString();
-            if(mark_type_str == QString::fromUtf8("фотография") || mark_type_str == QString::fromUtf8("панорамная фотография"))
-                isDefect = false;
-        }
-    }
-    return isDefect;
-}
 
 
 
