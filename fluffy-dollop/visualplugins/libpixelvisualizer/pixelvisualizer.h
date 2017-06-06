@@ -1,25 +1,20 @@
-#ifndef Visualizer2d_H
-#define Visualizer2d_H
+#ifndef PIXELVISUALIZER_H
+#define PIXELVISUALIZER_H
 
 #include <ctrcore/visual/visualizertype.h>
 #include <ctrcore/visual/abstractvisualizer.h>
-#include <ctrcore/visual/geoscenedescriptor.h>
+#include <ctrcore/visual/pixelscenedescriptor.h>
 #include <ctrvisual/scenecontrol/conturtilemixer.h>
 #include <ctrvisual/scenecontrol/scenecontroller.h>
 #include <ctrvisual/scenecontrol/viewercontroller.h>
 #include <ctrvisual/scenecontrol/scene2dwidget.h>
 #include <ctrcore/visual/abstractscenewidget.h>
-//#include <ctrvectorrender/render/vectorrender.h>
-#include <ctrcore/bus/imessagenotifier.h>
 
 #include <QDebug>
 #include <QtPlugin>
-#include <QStackedWidget>
-#include <QSplitter>
-#include <QVBoxLayout>
+
 #include <ctrcore/provider/rasterdataprovider.h>
 
-class ViraVisualizer2dForm;
 
 namespace visualize_system
 {
@@ -31,12 +26,12 @@ class StateInterface;
 class SelectionModelInterface;
 class VisualizerControlPanel;
 
-class Visualizer2d : public AbstractVisualizer
+class PixelVisualizer : public AbstractVisualizer
 {
-    Q_OBJECT  
+    Q_OBJECT
 public:
-    Visualizer2d();
-    virtual ~Visualizer2d();
+    PixelVisualizer();
+    virtual ~PixelVisualizer();
 
     virtual void init(uint visualizerId);
     virtual uint getVisualizerId();
@@ -71,16 +66,14 @@ public:
     virtual void scrollDown();
     virtual void setVisualizerWindowId(quint64 id);
     virtual quint64 getVisualizerWindowId();
-    virtual uint32_t getVisualizerCursorId();
     virtual sw::AbstractSceneWidget* getAbstractSceneWidget();
+    virtual SceneDescriptor * getSceneDescriptor();
 
     virtual QWidget* widget();
     virtual QGraphicsView* graphicsView();
-    virtual QStackedWidget* stackedWidget();
-    virtual bool addWidgetToSplitterLeftArea(QWidget * wdg);
-    virtual bool addWidgetToStatusBar(QWidget * wdg);
     virtual QWidget* minimapWidget();
     virtual QPixmap snapShort();
+    virtual QStackedWidget* stackedWidget();
 
     virtual void addToolButton(QToolButton* tb);
     virtual void addActionToObjectMenu(QList<QAction*> actions, QString groupName, uint groupWeight, QString subMenuName);
@@ -89,66 +82,55 @@ public:
     void loadPluginCategory(QString pluginType);
     void readSettings();
     void saveSettings(QPair<ctrplugin::InitPluginData, CtrAppVisualizerPlugin*> &_struct_plugin);
+    void saveSetting(const QString &key, const QString &value);
+
+    virtual uint32_t getVisualizerCursorId();
+
+    virtual void repaintVisualizer();
 
 signals:
 
 private:
-    struct TmsXmlData
-    {
-        QString name, srsEpsg, srsProj;
-    };
-
-    GlobalMessageNotifier *m_pGlobalNotif;
-//    QTimer *m_waitInitContextTimer;
     uint VISUALIZER_ID;
     quint64 VISUALIZER_WINDOW_ID;
-    uint32_t VISUALIZER_CURSOR_ID;
-    ViewInterface * _viewInterface;
-    DataInterface * _dataInterface;
-    VectorDataInterface * _vectorDataInterface;
-    StateInterface * _stateInterface;
-    SelectionModelInterface * _selectionModelInterface;
+
+    visualize_system::ViewInterface * _viewInterface;
+    visualize_system::DataInterface * _dataInterface;
+    visualize_system::VectorDataInterface * _vectorDataInterface;
+    visualize_system::StateInterface * _stateInterface;
+    visualize_system::SelectionModelInterface * _selectionModelInterface;
+
     SceneDescriptor *m_sceneDescriptor;
-    ConturTileMixer *m_tileMixer;
+    visualize_system::ConturTileMixer *m_tileMixer;
     SceneController *m_controller;
     ViewerController* m_viewerController;
     sw::Scene2DWidget *m_scene2dWidget;
-//    VectorRender *m_pVectorRender;
-    QPointF m_centerScenePos;
     VisualizerControlPanel *vcp = nullptr;
-    ViraVisualizer2dForm * m_ViraVisualizer2dForm = nullptr;
-
-    QString getDefaultXml();
-    void getTmsXmlData(const QByteArray& byteArray, QList<TmsXmlData>& tmsDataList);
     QHash<QAction*, QPair<ctrplugin::InitPluginData, CtrAppVisualizerPlugin*> > m_ActionsToPlugins;
 
 private slots:
+    void initPixelScene(QSizeF rasterSceneSize, double baseZlevel, int frameId, int empty, QString pixelVizFilePath);
     void createPlugins();
-    void slotUserViewControlAction(UserAction);
-    void slotCenterViewOn();
     void slotPluginActivated(bool checked);
     void slotPluginChecked(const QString &buttonName,bool checked);
-    void slot2DCursorCreated(uint32_t id);
     void sceneWidgetSizeChanged(int newW, int newH);
     void panelVisibleChanged(bool tf);
 };
-
 }
 
-class AbstractVisualizer2dInterface : public CtrPluginIface
+class AbstractPixelVisualizerInterface : public CtrPluginIface
 {
     Q_OBJECT
     Q_INTERFACES(CtrPluginIface)
     Q_PLUGIN_METADATA(IID "ru.vega.contour.CtrPluginIface")
 public:
-    AbstractVisualizer2dInterface() {}
-    virtual ~AbstractVisualizer2dInterface() {}
+    AbstractPixelVisualizerInterface() {}
+    virtual ~AbstractPixelVisualizerInterface() {}
 
     virtual TYPE_PLUGIN getPluginType() const { return TYPE_VISUALIZER; }
 
-    virtual CtrPlugin* createPlugin() {return new visualize_system::Visualizer2d;}
+    virtual CtrPlugin* createPlugin() {return new visualize_system::PixelVisualizer();}
 };
-
 
 #endif
 

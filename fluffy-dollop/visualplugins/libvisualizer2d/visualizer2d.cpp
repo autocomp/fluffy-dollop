@@ -141,6 +141,7 @@ void Visualizer2d::init(uint visualizerId)
             m_tileMixer, SLOT(slotProviderPropertyChanged(uint,QString)));
 
     m_viewerController = m_controller->addView();
+    m_controller->setZoomLevels(2, 20, 0);
 
     m_scene2dWidget = new sw::Scene2DWidget();
 
@@ -732,6 +733,11 @@ bool Visualizer2d::addWidgetToStatusBar(QWidget * wdg)
 QWidget* Visualizer2d::widget()
 {
     return m_ViraVisualizer2dForm; // m_scene2dWidget;
+}
+
+QGraphicsView *Visualizer2d::graphicsView()
+{
+    return m_viewerController;
 }
 
 QStackedWidget *Visualizer2d::stackedWidget()
