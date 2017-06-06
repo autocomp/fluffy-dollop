@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>img/019_icons_32_layers.png</file>
+    </qresource>
+</RCC>

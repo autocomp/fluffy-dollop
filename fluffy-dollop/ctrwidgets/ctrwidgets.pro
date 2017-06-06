@@ -14,9 +14,7 @@ CONFIG += plugin
 
 include($${ROOT_DIR}/pri/common.pri)
 
-QT += xml
-QT += network
-QT += core gui
+QT += core gui sql xml network
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 LIBS += -L$${INSTALL_PATH_LIB} \
@@ -33,6 +31,8 @@ LIBS += -L$${INSTALL_PATH_LIB} \
 SOURCES += \
 #    components/filedialog/*.cpp \
     $$files(components/waitdialog/*.cpp) \
+    $$files(components/layersmanager/*.cpp) \
+    $$files(components/slidewindow/*.cpp) \
 #    components/filepathwidget/*.cpp \
 #    components/sourcesensorwidget/*.cpp \
 #    components/endworkingwidgets/*.cpp \
@@ -42,6 +42,8 @@ SOURCES += \
 HEADERS += \
 #    components/filedialog/*.h \
     $$files(components/waitdialog/*.h) \
+    $$files(components/layersmanager/*.h) \
+    $$files(components/slidewindow/*.h) \
 #    components/filepathwidget/*.h \
 #    components/sourcesensorwidget/*.h \
 #    components/endworkingwidgets/*.h \
@@ -56,10 +58,12 @@ RESOURCES += \
 #    components/sourcesensorwidget/sourcesensorwidget.qrc \
 #    ctrwidgets.qrc \
 #    components/endworkingwidgets/endworkingwidgets.qrc
-    components/waitdialog/resources.qrc
+    components/waitdialog/resources.qrc \
+    components/layersmanager/resources.qrc
 
 FORMS += \
 #    components/filedialog/previewform.ui \
 #    components/sourcesensorwidget/sourcesensorwidget.ui
+    components/layersmanager/layersmanagerform.ui
 
 include ($${ROOT_DIR}/pri/install.pri)
