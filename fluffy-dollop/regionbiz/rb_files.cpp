@@ -19,6 +19,16 @@ uint64_t BaseFileKeeper::getEntityId()
     return _entity_id;
 }
 
+void BaseFileKeeper::setName(QString name)
+{
+    _name = name;
+}
+
+QString BaseFileKeeper::getName()
+{
+    return _name;
+}
+
 QFilePtr BaseFileKeeper::getLocalFile()
 {
     auto mngr = RegionBizManager::instance();

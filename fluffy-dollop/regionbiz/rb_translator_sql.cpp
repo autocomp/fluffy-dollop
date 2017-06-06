@@ -295,6 +295,9 @@ MarkPtrs SqlTranslator::loadMarks()
     std::map< uint64_t, QPolygonF > coords;
 
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    // lock
+    db.transaction();
+
     QSqlQuery query( db );
     // select coords of marks
     QString select_coords = "SELECT c.id, c.x, c.y, c.number FROM marks as m JOIN coords as c "
@@ -339,6 +342,8 @@ MarkPtrs SqlTranslator::loadMarks()
             marks.push_back( mark );
         }
 
+    // unlock
+    db.commit();
     return marks;
 }
 
@@ -511,30 +516,32 @@ bool SqlTranslator::commitFiles(BaseEntityPtr entity)
         return false;
 
     // insert all files
-    QString insert_files = "INSERT INTO files( entity_id, path, type ) VALUES ( ?, ?, ? );";
+    QString insert_files = "INSERT INTO files( entity_id, path, type, name ) VALUES ( ?, ?, ?, ? );";
     query.prepare( insert_files );
     // prepare data
-    QVariantList ids, paths, types;
+    QVariantList ids, paths, types, names;
     for( auto file: entity->getFiles() )
     {
         ids.push_back( (qulonglong) entity->getId() );
         paths.push_back( file->getPath() );
         types.push_back( getStringFileType( file->getType() ));
+        names.push_back( file->getName() );
     }
     // bind data
     query.addBindValue( ids );
     query.addBindValue( paths );
     query.addBindValue( types );
+    query.addBindValue( names );
 
     if ( !query.execBatch() )
         return false;
 
     // insert plans
-    QString insert_plans = "INSERT INTO plans( path, scale_w, scale_h, angle, x, y) VALUES ( ?, ?, ?, ?, ?, ? );";
+    QString insert_plans = "INSERT INTO plans( path, scale_w, scale_h, angle, x, y, opacity ) VALUES ( ?, ?, ?, ?, ?, ?, ? );";
     query.prepare( insert_plans );
     // prepare data
     QVariantList plan_paths, scales_w, scales_h,
-            angles, xs, ys;
+            angles, xs, ys, opacitys;
     for( auto file: entity->getFiles() )
     {
         PlanFileKeeperPtr plan = BaseFileKeeper::convert< PlanFileKeeper >( file );
@@ -548,6 +555,7 @@ bool SqlTranslator::commitFiles(BaseEntityPtr entity)
         angles.push_back( params.rotate );
         xs.push_back( params.x );
         ys.push_back( params.y );
+        opacitys.push_back( params.opacity );
     }
     // bind data
     query.addBindValue( plan_paths );
@@ -556,6 +564,7 @@ bool SqlTranslator::commitFiles(BaseEntityPtr entity)
     query.addBindValue( angles );
     query.addBindValue( xs );
     query.addBindValue( ys );
+    query.addBindValue( opacitys );
 
     return query.execBatch();
 }
@@ -564,6 +573,8 @@ GroupEntityPtrs SqlTranslator::loadGroups()
 {
     // lock database
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+
+    // lock
     db.transaction();
     QSqlQuery query( db );
 
@@ -620,6 +631,8 @@ GroupEntityPtrs SqlTranslator::loadGroups()
                       << group->getId() << std::endl;
     }
 
+    // unlock
+    db.commit();
     return groups;
 }
 
@@ -726,6 +739,9 @@ std::vector< std::shared_ptr< LocType >> SqlTranslator::loadBaseAreas( QString t
     std::vector< LocTypePtr > areas;
 
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    // lock
+    db.transaction();
+
     QString select = "SELECT name, e.id, description, parent_id "
                      "FROM entitys as e JOIN areas as a "
                      "on (a.id = e.id AND a.type = \'" + type_name + "\')";
@@ -758,6 +774,8 @@ std::vector< std::shared_ptr< LocType >> SqlTranslator::loadBaseAreas( QString t
 
     loadCoordinate< LocTypePtr >( areas );
 
+    // unlock
+    db.commit();
     return areas;
 }
 
@@ -798,12 +816,15 @@ BaseFileKeeperPtrs SqlTranslator::loadFiles()
     BaseFileKeeperPtrs files;
 
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    // lock
+    db.transaction();
+
     QSqlQuery query( db );
     // boost speed
     query.setForwardOnly( true );
 
     std::map< QString, PlanFileKeeper::PlanParams > plan_params;
-    QString select_plans = "SELECT path, scale_w, scale_h, angle, x, y FROM plans ";
+    QString select_plans = "SELECT path, scale_w, scale_h, angle, x, y, opacity FROM plans";
     bool res_plans = query.exec( select_plans );
     if( res_plans )
     {
@@ -817,12 +838,13 @@ BaseFileKeeperPtrs SqlTranslator::loadFiles()
             params.rotate = query.value( 3 ).toDouble();
             params.x = query.value( 4 ).toDouble();
             params.y = query.value( 5 ).toDouble();
+            params.opacity = query.value( 6 ).toDouble();
 
             plan_params[ path ] = params;
         }
     }
 
-    QString select_files = "SELECT entity_id, path, type FROM files";
+    QString select_files = "SELECT entity_id, path, type, name FROM files";
     bool res = query.exec( select_files );
     if( res )
     {
@@ -831,9 +853,11 @@ BaseFileKeeperPtrs SqlTranslator::loadFiles()
             uint64_t parent_id = query.value( 0 ).toLongLong();
             QString path = query.value( 1 ).toString();
             QString type_str = query.value( 2 ).toString();
+            QString name = query.value( 3 ).toString();
             BaseFileKeeper::FileType type = getFileTypeByString( type_str );
 
             BaseFileKeeperPtr file_ptr = FileKeeperFabric::createFile( path, parent_id, type );
+            file_ptr->setName( name );
 
             if( BaseFileKeeper::FT_PLAN == type )
             {
@@ -849,6 +873,8 @@ BaseFileKeeperPtrs SqlTranslator::loadFiles()
         }
     }
 
+    // unlock
+    db.commit();
     return files;
 }
 

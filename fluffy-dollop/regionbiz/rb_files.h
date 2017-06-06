@@ -41,6 +41,8 @@ public:
     virtual FileType getType() = 0;
     QString getPath();
     uint64_t getEntityId();
+    void setName( QString name );
+    QString getName();
 
     // convert
     template< typename Type >
@@ -61,6 +63,7 @@ private:
 
     QString _path;
     uint64_t _entity_id;
+    QString _name = "";
 };
 
 //---------------------------------------------------------
@@ -84,6 +87,7 @@ public:
         double rotate = 0;
         double x = 0;
         double y = 0;
+        double opacity = 1;
     };
 
     PlanFileKeeper(QString path , uint64_t entity_id);
