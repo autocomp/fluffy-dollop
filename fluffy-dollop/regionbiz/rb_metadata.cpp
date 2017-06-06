@@ -28,6 +28,32 @@ void BaseMetadata::setName(QString name)
     _name = name;
 }
 
+void BaseMetadata::removeForEntity( uint64_t id )
+{
+    getMutex().lock();
+    getMetadatas().erase( id );
+    getMutex().unlock();
+}
+
+void BaseMetadata::addForEntityByName( BaseMetadataPtr data )
+{
+    getMutex().lock();
+    getMetadatas()[ data->getParentId() ][ data->getName() ] = data;
+    getMutex().unlock();
+}
+
+MetadataById& BaseMetadata::getMetadatas()
+{
+    static MetadataById meta;
+    return meta;
+}
+
+std::recursive_mutex& BaseMetadata::getMutex()
+{
+    static std::recursive_mutex mutex;
+    return mutex;
+}
+
 //-------------------------------------------
 
 DoubleMetadata::DoubleMetadata(uint64_t parent_id):

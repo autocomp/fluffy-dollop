@@ -21,8 +21,6 @@ typedef std::shared_ptr< RegionBizManager > RegionBizManagerPtr;
 
 class RegionBizManager
 {
-    friend class BaseDataTranslator;
-
 public:
     virtual ~RegionBizManager(){}
 
@@ -230,9 +228,6 @@ private:
     // data relations
     //    std::vector< PropertyPtr > _propertys;
     //    std::vector< RentPtr > _rents;
-
-    // metadata
-    MetadataById _metadata;
 
     // signals
     SelectionManager _select_manager;

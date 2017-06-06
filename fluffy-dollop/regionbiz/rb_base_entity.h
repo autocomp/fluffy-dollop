@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include <memory>
+#include <mutex>
 #include <iostream>
 #include "rb_metadata.h"
 #include "rb_files.h"
@@ -96,6 +97,7 @@ private:
     getEntitysByType( BaseEntity::EntityType type );
 
     static uint64_t _max_id;
+    static std::recursive_mutex _mutex;
 };
 
 //------------------------------------------------------------
@@ -107,7 +109,11 @@ std::shared_ptr< Type > BaseEntity::createWithId( uint64_t id )
     {
         // create and add to map of all obj
         auto entity_ptr = std::shared_ptr< Type >( new Type( id ));
+
+        BaseEntity::_mutex.lock();
         getEntitys()[id] = entity_ptr;
+        BaseEntity::_mutex.unlock();
+
         return entity_ptr;
     }
     else
@@ -124,6 +130,8 @@ std::vector<std::shared_ptr< Type >>
 BaseEntity::getEntitysByType( BaseEntity::EntityType type )
 {
     std::vector< std::shared_ptr< Type >> entitys;
+
+    _mutex.lock();
     for( auto pair: getEntitys() )
     {
         BaseEntityPtr entity = pair.second;
@@ -135,6 +143,8 @@ BaseEntity::getEntitysByType( BaseEntity::EntityType type )
                 entitys.push_back( entity_typed );
         }
     }
+    _mutex.unlock();
+
     return std::move( entitys );
 }
 

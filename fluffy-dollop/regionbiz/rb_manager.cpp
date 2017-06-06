@@ -78,6 +78,8 @@ BaseAreaPtr RegionBizManager::getBaseArea( uint64_t id,
 BaseAreaPtrs RegionBizManager::getAreaChildsByParent( uint64_t id )
 {
     BaseAreaPtrs childs;
+
+    BaseEntity::_mutex.lock();
     for( auto pair: BaseEntity::getEntitys() )
     {
         BaseEntityPtr ent_ch = pair.second;
@@ -96,6 +98,7 @@ BaseAreaPtrs RegionBizManager::getAreaChildsByParent( uint64_t id )
                 childs.push_back( area_ch );
         }
     }
+    BaseEntity::_mutex.unlock();
 
     return childs;
 }
@@ -239,7 +242,13 @@ BaseBizRelationPtrs RegionBizManager::getBizRelationByArea( uint64_t id,
 BaseMetadataPtr RegionBizManager::getMetadata( uint64_t id, QString name )
 {
     if( isMetadataPresent( id, name ))
-        return _metadata[id][name];
+    {
+        BaseMetadata::getMutex().lock();
+        auto data = BaseMetadata::getMetadatas()[id][name];
+        BaseMetadata::getMutex().unlock();
+
+        return data;
+    }
 
     return EmptyMetadata::instance();
 }
@@ -252,16 +261,27 @@ QVariant RegionBizManager::getMetadataValue(uint64_t id, QString name)
 
 MetadataByName RegionBizManager::getMetadataMap(uint64_t id)
 {
-    if( _metadata.find( id ) != _metadata.end() )
-            return _metadata[id];
+    MetadataByName datas = MetadataByName();
 
-    return MetadataByName();
+    BaseMetadata::getMutex().lock();
+    if( BaseMetadata::getMetadatas().find( id )
+            != BaseMetadata::getMetadatas().end() )
+    {
+        datas = BaseMetadata::getMetadatas()[id];
+    }
+    BaseMetadata::getMutex().unlock();
+
+    return datas;
 }
 
 bool RegionBizManager::isMetadataPresent( uint64_t id, QString name )
 {
-    bool present = ( _metadata.find( id ) != _metadata.end() ) &&
-            ( _metadata[id].find( name ) != _metadata[id].end() );
+    BaseMetadata::getMutex().lock();
+    bool present = ( BaseMetadata::getMetadatas().find( id )
+                     != BaseMetadata::getMetadatas().end() ) &&
+            ( BaseMetadata::getMetadatas()[id].find( name )
+              != BaseMetadata::getMetadatas()[id].end() );
+    BaseMetadata::getMutex().unlock();
 
     return present;
 }
@@ -270,7 +290,10 @@ bool RegionBizManager::setMetadataValue( uint64_t id, QString name, QVariant val
 {
     if( isMetadataPresent( id, name ))
     {
-        BaseMetadataPtr data = _metadata[id][name];
+        BaseMetadata::getMutex().lock();
+        BaseMetadataPtr data = BaseMetadata::getMetadatas()[id][name];
+        BaseMetadata::getMutex().unlock();
+
         data->setValueByVariant( val );
         return true;
     }
@@ -292,8 +315,7 @@ bool RegionBizManager::addMetadata( BaseMetadataPtr data )
 {
     if( !isMetadataPresent( data->getParentId(), data->getName() ))
     {
-       _metadata[data->getParentId()][data->getName()] = data;
-
+       BaseMetadata::addForEntityByName( data );
        return true;
     }
     else
@@ -530,11 +552,15 @@ bool RegionBizManager::deleteGroup(uint64_t id)
 
 BaseFileKeeperPtrs RegionBizManager::getFilesByEntity(uint64_t id)
 {
+    BaseFileKeeperPtrs files_keepers;
+
+    BaseFileKeeper::getMutex().lock();
     auto& files = BaseFileKeeper::getFiles();
     if( files.find( id ) != files.end() )
-        return files[ id ];
+        files_keepers = files[ id ];
+    BaseFileKeeper::getMutex().unlock();
 
-    return BaseFileKeeperPtrs();
+    return files_keepers;
 }
 
 BaseFileKeeperPtrs RegionBizManager::getFilesByEntity(BaseEntityPtr ptr)
@@ -565,7 +591,9 @@ BaseFileKeeperPtr RegionBizManager::addFile( QString file_path,
 {
     BaseFileKeeperPtr file =
             _files_translator->addFile( file_path, type, entity_id );
+    BaseFileKeeper::getMutex().lock();
     BaseFileKeeper::getFiles()[ entity_id ].push_back( file );
+    BaseFileKeeper::getMutex().unlock();
 
     return file;
 }
@@ -1000,11 +1028,17 @@ void RegionBizManager::loadDataByTranslator()
 void RegionBizManager::clearCurrentData( bool clear_entitys )
 {
     //data
-    _metadata.clear();
+    BaseMetadata::getMutex().lock();
+    BaseMetadata::getMetadatas().clear();
+    BaseMetadata::getMutex().unlock();
 
     // entitys
     if( clear_entitys )
+    {
+        BaseEntity::_mutex.lock();
         BaseEntity::getEntitys().clear();
+        BaseEntity::_mutex.unlock();
+    }
 }
 
 template<typename LocType>

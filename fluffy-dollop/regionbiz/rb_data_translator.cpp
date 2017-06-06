@@ -104,8 +104,7 @@ bool BaseDataTranslator::deleteArea(BaseAreaPtr area)
         if( del )
         {
             // remove from model system
-            auto mngr = RegionBizManager::instance();
-            mngr->_metadata.erase( area->getId() );
+            BaseMetadata::removeForEntity( area->getId() );
             BaseEntity::deleteEntity( area );
         }
         return del;
@@ -138,8 +137,7 @@ BaseMetadataPtrs BaseDataTranslator::loadMetadata()
         for( BaseMetadataPtr data: metadata )
         {
             // add by parent_id / name of metadata
-            auto mngr = RegionBizManager::instance();
-            mngr->_metadata[ data->getParentId() ][ data->getName() ] = data;
+            BaseMetadata::addForEntityByName( data );
         }
 
         return metadata;
@@ -179,8 +177,7 @@ bool BaseDataTranslator::deleteMark( MarkPtr mark )
         bool del = _delete_mark( mark );
         if( del )
         {
-            auto mngr = RegionBizManager::instance();
-            mngr->_metadata.erase( mark->getId() );
+            BaseMetadata::removeForEntity( mark->getId() );
             BaseEntity::deleteEntity( mark );
         }
         return del;
@@ -197,8 +194,10 @@ BaseFileKeeperPtrs BaseDataTranslator::loadFiles()
         for( BaseFileKeeperPtr file: file_vec )
         {
             // TODO check entity id of file
+            BaseFileKeeper::getMutex().lock();
             FileKeepersById& files = BaseFileKeeper::getFiles();
             files[ file->getEntityId() ].push_back( file );
+            BaseFileKeeper::getMutex().unlock();
         }
 
         return file_vec;
@@ -241,8 +240,7 @@ bool BaseDataTranslator::deleteGroup(GroupEntityPtr group)
         bool del = _delete_group( group );
         if( del )
         {
-            auto mngr = RegionBizManager::instance();
-            mngr->_metadata.erase( group->getId() );
+            BaseMetadata::removeForEntity( group->getId() );
             BaseEntity::deleteEntity( group );
         }
         return del;

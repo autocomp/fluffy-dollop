@@ -4,6 +4,7 @@
 #include <memory>
 #include <map>
 #include <unordered_map>
+#include <mutex>
 #include <QString>
 #include <QVariant>
 
@@ -16,6 +17,9 @@ typedef std::unordered_map< uint64_t, MetadataByName > MetadataById;
 
 class BaseMetadata
 {
+    friend class RegionBizManager;
+    friend class BaseDataTranslator;
+
 public:
     BaseMetadata( uint64_t parent_id );
 
@@ -44,6 +48,12 @@ public:
 protected:
     uint64_t _parent_id;
     QString _name;
+
+private:
+    static void removeForEntity( uint64_t id );
+    static void addForEntityByName(BaseMetadataPtr data);
+    static MetadataById& getMetadatas();
+    static std::recursive_mutex& getMutex();
 };
 typedef std::vector< BaseMetadataPtr > BaseMetadataPtrs;
 

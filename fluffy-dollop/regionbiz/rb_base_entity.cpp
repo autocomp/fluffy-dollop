@@ -8,6 +8,7 @@ using namespace regionbiz;
 class RegionBizManager;
 
 uint64_t BaseEntity::_max_id = 0;
+std::recursive_mutex BaseEntity::_mutex;
 
 BaseEntity::BaseEntity(uint64_t id):
     _id( id )
@@ -29,7 +30,13 @@ uint64_t BaseEntity::getMaxId()
 BaseEntityPtr BaseEntity::getEntity(uint64_t id)
 {
     if( isEntityExist( id ))
-        return getEntitys()[id];
+    {
+        _mutex.lock();
+        BaseEntityPtr ent = getEntitys()[id];
+        _mutex.unlock();
+
+        return ent;
+    }
 
     return nullptr;
 }
@@ -62,7 +69,10 @@ void BaseEntity::setName(QString name)
 
 bool BaseEntity::isEntityExist(uint64_t id)
 {
+    _mutex.lock();
     bool exist = getEntitys().find( id ) != getEntitys().end();
+    _mutex.unlock();
+
     return exist;
 }
 
@@ -142,11 +152,19 @@ bool BaseEntity::deleteEntity(BaseEntityPtr ent)
 
 bool BaseEntity::deleteEntity(uint64_t id)
 {
-    return getEntitys().erase( id );
+    _mutex.lock();
+    bool del = getEntitys().erase( id );
+    _mutex.unlock();
+
+    return del;
 }
 
 BaseEntityPtr BaseEntity::getItself()
 {
-    return getEntitys()[ _id ];
+    _mutex.lock();
+    BaseEntityPtr itself = getEntitys()[ _id ];
+    _mutex.unlock();
+
+    return itself;
 }
 

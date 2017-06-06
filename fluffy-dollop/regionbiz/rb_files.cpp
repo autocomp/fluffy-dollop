@@ -62,13 +62,24 @@ FileKeepersById &BaseFileKeeper::getFiles()
     return files;
 }
 
+std::recursive_mutex &BaseFileKeeper::getMutex()
+{
+    static std::recursive_mutex mutex;
+    return mutex;
+}
+
 BaseFileKeeperPtr BaseFileKeeper::getItself()
 {
+    BaseFileKeeperPtr itself = nullptr;
+
+    BaseFileKeeper::getMutex().lock();
     auto&& files = getFiles()[ _entity_id ];
     for( BaseFileKeeperPtr ptr: files )
         if( ptr->getPath() == _path )
-            return ptr;
-    return nullptr;
+            itself = ptr ;
+    BaseFileKeeper::getMutex().unlock();
+
+    return itself;
 }
 
 //--------------------------------------------------

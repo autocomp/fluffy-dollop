@@ -2,6 +2,8 @@
 #define RB_FILES_H
 
 #include <memory>
+#include <unordered_map>
+#include <mutex>
 #include <QFile>
 
 namespace regionbiz {
@@ -10,7 +12,7 @@ typedef std::shared_ptr< QFile > QFilePtr;
 class BaseFileKeeper;
 typedef std::shared_ptr< BaseFileKeeper > BaseFileKeeperPtr;
 typedef std::vector< BaseFileKeeperPtr > BaseFileKeeperPtrs;
-typedef std::map< uint64_t, BaseFileKeeperPtrs > FileKeepersById;
+typedef std::unordered_map< uint64_t, BaseFileKeeperPtrs > FileKeepersById;
 
 class BaseFileKeeper
 {
@@ -59,6 +61,7 @@ public:
 
 private:
     static FileKeepersById& getFiles();
+    static std::recursive_mutex& getMutex();
     BaseFileKeeperPtr getItself();
 
     QString _path;
