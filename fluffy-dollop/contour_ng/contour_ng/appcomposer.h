@@ -85,7 +85,6 @@ private:
     quint64 mainWindowId;
     QString m_applicationName;
     QList<CtrAppVisualizerPlugin*> m_pAppPlugins;
-
     QAction *initiatorActionForEwoFinisher = nullptr;
 
 };

@@ -257,7 +257,6 @@ void AppComposer::init()
         }
     }
 
-
     //------------------------------------
 //    m_pScenarioSelector = new ScenarioSelector("",this);
 //    m_pObjTree = new ManagerVectorObjectPlugin(this);
