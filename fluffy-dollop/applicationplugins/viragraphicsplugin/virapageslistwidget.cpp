@@ -79,7 +79,7 @@ void ViraPagesListWidget::slotSelectionChanged()
         _block = true;
         QListWidgetItem * item = selectedItems().first();
         qulonglong id = item->data(Qt::UserRole).toULongLong();
-        RegionBizManager::instance()->selectEntity(id);
+        RegionBizManager::instance()->setCurrentEntity(id);
         emit setFloor(id);
         _block = false;
     }

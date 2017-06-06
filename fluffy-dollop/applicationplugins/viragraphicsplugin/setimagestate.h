@@ -14,6 +14,7 @@ public:
     SetImageState();
     SetImageState(QPointF pos, double direction);
     ~SetImageState();
+    void setBoundingArea(const QPolygonF & boundingArea);
     void init(QGraphicsScene * scene, QGraphicsView * view, const int * zoom, const double * scale, double frameCoef, uint visualizerId);
     bool mousePressEvent(QMouseEvent* e, QPointF scenePos);
     bool mouseReleaseEvent(QMouseEvent *e, QPointF scenePos);
@@ -44,6 +45,7 @@ protected:
     HandleDirectionItem * _directionItem = nullptr;
     QGraphicsLineItem * _line = nullptr;
     bool _showDirection = false;
+    QPolygonF _boundingArea;
     
 };
 

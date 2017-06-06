@@ -19,6 +19,11 @@ SetImageState::~SetImageState()
     delete _rasterPixmapItem;
 }
 
+void SetImageState::setBoundingArea(const QPolygonF &boundingArea)
+{
+    _boundingArea = boundingArea;
+}
+
 void SetImageState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom, const double *scale, double frameCoef, uint visualizerId)
 {
     ScrollBaseState::init(scene, view, zoom, scale, frameCoef, visualizerId);
@@ -77,8 +82,19 @@ bool SetImageState::mousePressEvent(QMouseEvent *e, QPointF scenePos)
 {
     if( _pos == QPointF() )
     {
-        _pos = scenePos;
-        createItem();
+        if(_boundingArea.isEmpty())
+        {
+            _pos = scenePos;
+            createItem();
+        }
+        else
+        {
+            if(_boundingArea.containsPoint(scenePos, Qt::OddEvenFill))
+            {
+                _pos = scenePos;
+                createItem();
+            }
+        }
     }
 
     return ScrollBaseState::mousePressEvent(e, scenePos);
@@ -93,7 +109,17 @@ bool SetImageState::mouseReleaseEvent(QMouseEvent *e, QPointF scenePos)
 bool SetImageState::mouseMoveEvent(QMouseEvent *e, QPointF scenePos)
 {
     if(_pos == QPointF())
-        _view->setCursor(QCursor(QPixmap(":/img/cursor_foto.png"), 0, 0));
+    {
+        if(_boundingArea.isEmpty())
+            _view->setCursor(QCursor(QPixmap(":/img/cursor_foto.png"), 0, 0));
+        else
+        {
+            if(_boundingArea.containsPoint(scenePos, Qt::OddEvenFill) == false)
+                _view->setCursor(Qt::ForbiddenCursor);
+            else
+                _view->setCursor(QCursor(QPixmap(":/img/cursor_foto.png"), 0, 0));
+        }
+    }
     else
         _view->setCursor(Qt::ArrowCursor);
 

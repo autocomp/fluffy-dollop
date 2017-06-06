@@ -36,7 +36,7 @@ ViraEditorForm::ViraEditorForm(QWidget *parent) :
 
     auto mngr = RegionBizManager::instance();
     mngr->subscribeCenterOn(this, SLOT(slotCenterOn(uint64_t)));
-    mngr->subscribeOnSelect(this, SLOT(slotSelectionItemsChanged(uint64_t,uint64_t)));
+    mngr->subscribeOnCurrentChange(this, SLOT(slotSelectionItemsChanged(uint64_t,uint64_t)));
 
     regionbiz::EntityFilter::subscribeOnFilterChacnge(this, SLOT(reinit()));
 

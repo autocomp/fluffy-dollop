@@ -2,8 +2,8 @@
 #define VIARGRAPHICSPLUGIN_H
 #include <ctrcore/plugin/ctrappvisualizerplugin.h>
 #include <ctrcore/plugin/embifacenotifier.h>
-#include "viraeditorform.h"
 #include "workstate.h"
+#include "pixelworkstate.h"
 #include "setimagestate.h"
 #include <ctrvisual/state/choiceareastate.h>
 
@@ -26,18 +26,24 @@ private slots:
     void switchOnMap();
     void switchOnEditor();
     void setMarkOnMap(qulonglong markType);
+    void setMarkOnPlan(qulonglong markType, QPolygonF area);
     void defectStateChoiced(QPolygonF);
     void fotoCreared(QPointF pos, double direction);
     void markCreatingAbort();
     void foto360Creared(QPolygonF);
+    void editAreaGeometry(bool on_off);
+    void areaGeometryEdited(QPolygonF);
+    void areaGeometryEditingAbort();
+    void currentItemsChanged(uint64_t,uint64_t);
 
 private:
     bool _showFirstBaseCover = true;
+    uint _pixelVisualizerId = 0;
 
-    ViraEditorForm * _pdfEditorForm;
     QSharedPointer<WorkState> _workState;
+    QSharedPointer<PixelWorkState> _pixelWorkState;
     QSharedPointer<SetImageState> _setImageState;
-    QSharedPointer<ChoiceAreaState> _setDefectState;
+    QSharedPointer<ChoiceAreaState> _choiceAreaState;
     QStackedWidget * _stackedWidget = nullptr;
 };
 

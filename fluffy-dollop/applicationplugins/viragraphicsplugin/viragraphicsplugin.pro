@@ -38,7 +38,9 @@ HEADERS += \
     setimagestate.h \
     foto360graphicsitem.h \
     fotographicsitem.h \
-    handledirectionitem.h
+    handledirectionitem.h \
+    pixelworkstate.h \
+    layersmenu.h \
 
 SOURCES += \
     viragraphicsplugin.cpp \
@@ -56,7 +58,9 @@ SOURCES += \
     setimagestate.cpp \
     foto360graphicsitem.cpp \
     fotographicsitem.cpp \
-    handledirectionitem.cpp
+    handledirectionitem.cpp \
+    pixelworkstate.cpp \
+    layersmenu.cpp \
 
 RESOURCES += \
     viragraphicspluginres.qrc

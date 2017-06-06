@@ -10,21 +10,21 @@
 #include <ctrcore/provider/abstractdataprovider.h>
 #include <ctrcore/bus/common_message_notifier.h>
 #include <ctrcore/bus/bustags.h>
+#include <regionbiz/rb_manager.h>
 #include <QMessageBox>
 #include <QFileInfo>
 #include <QFileDialog>
 #include <QStackedWidget>
 #include <QDebug>
 
+using namespace regionbiz;
+
 ViraGraphicsPlugin::ViraGraphicsPlugin()
-    : _pdfEditorForm(0)
 {
 }
 
 ViraGraphicsPlugin::~ViraGraphicsPlugin()
 {
-    if(_pdfEditorForm)
-        delete _pdfEditorForm;
 }
 
 void ViraGraphicsPlugin::init(uint visualizerId, quint64 visualizerWindowId)
@@ -45,15 +45,23 @@ void ViraGraphicsPlugin::launchWorkState()
     connect(_workState.data(), SIGNAL(setMarkOnMap(qulonglong)), this, SLOT(setMarkOnMap(qulonglong)));
     visualize_system::VisualizerManager::instance()->getStateInterface(getVisualizerId())->setVisualizerState(_workState);
 
-    _pdfEditorForm = new ViraEditorForm;
-    connect(_pdfEditorForm, SIGNAL(switchOnMap()), this, SLOT(switchOnMap()));
-    //connect(_workState.data(), SIGNAL(centerEditorOn(qulonglong)), _pdfEditorForm, SLOT(centerEditorOn(qulonglong)));
+    _pixelVisualizerId = visualize_system::VisualizerManager::instance()->addVisualizer(visualize_system::VisualizerPixel);
+     visualize_system::ViewInterface * pixelVisualizerViewInterface = visualize_system::VisualizerManager::instance()->getViewInterface(_pixelVisualizerId);
+
+    _pixelWorkState = QSharedPointer<PixelWorkState>(new PixelWorkState(_pixelVisualizerId));
+    connect(_pixelWorkState.data(), SIGNAL(setMarkOnPlan(qulonglong, QPolygonF)), this, SLOT(setMarkOnPlan(qulonglong, QPolygonF)));
+    connect(_pixelWorkState.data(), SIGNAL(switchOnEditor()), this, SLOT(switchOnEditor()));
+    connect(_pixelWorkState.data(), SIGNAL(editAreaGeometry(bool)), this, SLOT(editAreaGeometry(bool)));
+    visualize_system::VisualizerManager::instance()->getStateInterface(_pixelVisualizerId)->setVisualizerState(_pixelWorkState);
 
     int visualizerIndex = _stackedWidget->currentIndex();
     _stackedWidget->setProperty("visualizerIndex", visualizerIndex);
-    int pdfEditorFormIndex = _stackedWidget->addWidget(_pdfEditorForm);
+    int pdfEditorFormIndex = _stackedWidget->addWidget(pixelVisualizerViewInterface->widget());
     _stackedWidget->setProperty("pdfEditorFormIndex", pdfEditorFormIndex);
     _stackedWidget->setCurrentIndex(visualizerIndex);
+
+    auto mngr = RegionBizManager::instance();
+    mngr->subscribeOnCurrentChange(this, SLOT(currentItemsChanged(uint64_t,uint64_t)));
 }
 
 void ViraGraphicsPlugin::showFacility(qulonglong id)
@@ -80,10 +88,10 @@ void ViraGraphicsPlugin::setMarkOnMap(qulonglong markType)
         switch(markType)
         {
         case 1 :{ // defect
-            _setDefectState = QSharedPointer<ChoiceAreaState>(new ChoiceAreaState(ChoiceAreaState::POINT_OR_POLYGON, QCursor(QPixmap(":/img/cursor_mark.png"), 0, 0)));
-            visualize_system::VisualizerManager::instance()->getStateInterface(getVisualizerId())->setVisualizerState(_setDefectState);
-            connect(_setDefectState.data(), SIGNAL(signalAreaChoiced(QPolygonF)), this, SLOT(defectStateChoiced(QPolygonF)));
-            connect(_setDefectState.data(), SIGNAL(signalAbort()), this, SLOT(markCreatingAbort()));
+            _choiceAreaState = QSharedPointer<ChoiceAreaState>(new ChoiceAreaState(ChoiceAreaState::POINT_OR_POLYGON, QCursor(QPixmap(":/img/cursor_mark.png"), 0, 0)));
+            visualize_system::VisualizerManager::instance()->getStateInterface(getVisualizerId())->setVisualizerState(_choiceAreaState);
+            connect(_choiceAreaState.data(), SIGNAL(signalAreaChoiced(QPolygonF)), this, SLOT(defectStateChoiced(QPolygonF)));
+            connect(_choiceAreaState.data(), SIGNAL(signalAbort()), this, SLOT(markCreatingAbort()));
         }break;
         case 2 :{ // foto
             _setImageState = QSharedPointer<SetImageState>(new SetImageState());
@@ -92,19 +100,65 @@ void ViraGraphicsPlugin::setMarkOnMap(qulonglong markType)
             connect(_setImageState.data(), SIGNAL(signalAbort()), this, SLOT(markCreatingAbort()));
         }break;
         case 3 :{ // foto360
-            _setDefectState = QSharedPointer<ChoiceAreaState>(new ChoiceAreaState(ChoiceAreaState::POINT, QCursor(QPixmap(":/img/cursor_foto360.png"), 0, 0)));
-            visualize_system::VisualizerManager::instance()->getStateInterface(getVisualizerId())->setVisualizerState(_setDefectState);
-            connect(_setDefectState.data(), SIGNAL(signalAreaChoiced(QPolygonF)), this, SLOT(foto360Creared(QPolygonF)));
-            connect(_setDefectState.data(), SIGNAL(signalAbort()), this, SLOT(markCreatingAbort()));
+            _choiceAreaState = QSharedPointer<ChoiceAreaState>(new ChoiceAreaState(ChoiceAreaState::POINT, QCursor(QPixmap(":/img/cursor_foto360.png"), 0, 0)));
+            visualize_system::VisualizerManager::instance()->getStateInterface(getVisualizerId())->setVisualizerState(_choiceAreaState);
+            connect(_choiceAreaState.data(), SIGNAL(signalAreaChoiced(QPolygonF)), this, SLOT(foto360Creared(QPolygonF)));
+            connect(_choiceAreaState.data(), SIGNAL(signalAbort()), this, SLOT(markCreatingAbort()));
         }break;
         }
     }
     else
     {
-        if(_setDefectState)
+        if(_choiceAreaState)
         {
-            _setDefectState->emit_closeState();
-            _setDefectState.clear();
+            _choiceAreaState->emit_closeState();
+            _choiceAreaState.clear();
+        }
+        if(_setImageState)
+        {
+            _setImageState->emit_closeState();
+            _setImageState.clear();
+        }
+    }
+}
+
+void ViraGraphicsPlugin::setMarkOnPlan(qulonglong markType, QPolygonF area)
+{
+    if(markType > 0)
+    {
+        _stackedWidget->setCurrentIndex(_stackedWidget->property("pdfEditorFormIndex").toInt());
+
+        switch(markType)
+        {
+        case 1 :{ // defect
+            _choiceAreaState = QSharedPointer<ChoiceAreaState>(new ChoiceAreaState(ChoiceAreaState::POINT_OR_POLYGON, QCursor(QPixmap(":/img/cursor_mark.png"), 0, 0)));
+            _choiceAreaState->setBoundingArea(area);
+            visualize_system::VisualizerManager::instance()->getStateInterface(_pixelVisualizerId)->setVisualizerState(_choiceAreaState);
+            connect(_choiceAreaState.data(), SIGNAL(signalAreaChoiced(QPolygonF)), this, SLOT(defectStateChoiced(QPolygonF)));
+            connect(_choiceAreaState.data(), SIGNAL(signalAbort()), this, SLOT(markCreatingAbort()));
+        }break;
+        case 2 :{ // foto
+            _setImageState = QSharedPointer<SetImageState>(new SetImageState());
+            _setImageState->setBoundingArea(area);
+            visualize_system::VisualizerManager::instance()->getStateInterface(_pixelVisualizerId)->setVisualizerState(_setImageState);
+            connect(_setImageState.data(), SIGNAL(signalCreated(QPointF,double)), this, SLOT(fotoCreared(QPointF,double)));
+            connect(_setImageState.data(), SIGNAL(signalAbort()), this, SLOT(markCreatingAbort()));
+        }break;
+        case 3 :{ // foto360
+            _choiceAreaState = QSharedPointer<ChoiceAreaState>(new ChoiceAreaState(ChoiceAreaState::POINT, QCursor(QPixmap(":/img/cursor_foto360.png"), 0, 0)));
+            _choiceAreaState->setBoundingArea(area);
+            visualize_system::VisualizerManager::instance()->getStateInterface(_pixelVisualizerId)->setVisualizerState(_choiceAreaState);
+            connect(_choiceAreaState.data(), SIGNAL(signalAreaChoiced(QPolygonF)), this, SLOT(foto360Creared(QPolygonF)));
+            connect(_choiceAreaState.data(), SIGNAL(signalAbort()), this, SLOT(markCreatingAbort()));
+        }break;
+        }
+    }
+    else
+    {
+        if(_choiceAreaState)
+        {
+            _choiceAreaState->emit_closeState();
+            _choiceAreaState.clear();
         }
         if(_setImageState)
         {
@@ -117,10 +171,10 @@ void ViraGraphicsPlugin::setMarkOnMap(qulonglong markType)
 void ViraGraphicsPlugin::defectStateChoiced(QPolygonF pol)
 {
     // create or change mark !
-    if(_setDefectState)
+    if(_choiceAreaState)
     {
-        _setDefectState->emit_closeState();
-        _setDefectState.clear();
+        _choiceAreaState->emit_closeState();
+        _choiceAreaState.clear();
     }
     QList<QVariant>list;
 
@@ -152,10 +206,10 @@ void ViraGraphicsPlugin::fotoCreared(QPointF pos, double direction)
 
 void ViraGraphicsPlugin::markCreatingAbort()
 {
-    if(_setDefectState)
+    if(_choiceAreaState)
     {
-        _setDefectState->emit_closeState();
-        _setDefectState.clear();
+        _choiceAreaState->emit_closeState();
+        _choiceAreaState.clear();
     }
     if(_setImageState)
     {
@@ -183,6 +237,65 @@ void ViraGraphicsPlugin::foto360Creared(QPolygonF pol)
         list.append(pol.first());
     }
     CommonMessageNotifier::send( (uint)visualize_system::BusTags::MarkCreated, list, QString("visualize_system"));
+}
+
+void ViraGraphicsPlugin::editAreaGeometry(bool on_off)
+{
+    if(on_off)
+    {
+        _choiceAreaState = QSharedPointer<ChoiceAreaState>(new ChoiceAreaState(ChoiceAreaState::POLYGON, QCursor(QPixmap(":/img/cursor_polygon.png"), 0, 0)));
+        visualize_system::VisualizerManager::instance()->getStateInterface(_pixelVisualizerId)->setVisualizerState(_choiceAreaState);
+        connect(_choiceAreaState.data(), SIGNAL(signalAreaChoiced(QPolygonF)), this, SLOT(areaGeometryEdited(QPolygonF)));
+        connect(_choiceAreaState.data(), SIGNAL(signalAbort()), this, SLOT(areaGeometryEditingAbort()));
+    }
+    else
+    {
+        if(_choiceAreaState)
+        {
+            _choiceAreaState->emit_closeState();
+            _choiceAreaState.clear();
+        }
+    }
+}
+
+void ViraGraphicsPlugin::areaGeometryEdited(QPolygonF pol)
+{
+    if(_choiceAreaState)
+    {
+        _choiceAreaState->emit_closeState();
+        _choiceAreaState.clear();
+        _pixelWorkState->areaGeometryEdited(pol);
+    }
+}
+
+void ViraGraphicsPlugin::areaGeometryEditingAbort()
+{
+    if(_choiceAreaState)
+    {
+        _choiceAreaState->emit_closeState();
+        _choiceAreaState.clear();
+        _pixelWorkState->areaGeometryEdited(QPolygonF());
+    }
+}
+
+void ViraGraphicsPlugin::currentItemsChanged(uint64_t, uint64_t curr_id)
+{
+    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(curr_id);
+    if(ptr)
+        switch(ptr->getType())
+        {
+        case BaseArea::AT_REGION :
+        case BaseArea::AT_LOCATION :
+        case BaseArea::AT_FACILITY :
+           if(_stackedWidget->currentIndex() != _stackedWidget->property("visualizerIndex").toInt())
+               switchOnMap();
+        break;
+        case BaseArea::AT_FLOOR :
+        case BaseArea::AT_ROOM :
+            if(_stackedWidget->currentIndex() != _stackedWidget->property("pdfEditorFormIndex").toInt())
+                switchOnEditor();
+        break;
+        }
 }
 
 QList<InitPluginData> ViraGraphicsPlugin::getInitPluginData()

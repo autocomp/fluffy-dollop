@@ -68,7 +68,7 @@ void WorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom
                                       QString("visualize_system") );
 
     auto mngr = RegionBizManager::instance();
-    mngr->subscribeOnSelect(this, SLOT(slotSelectionItemsChanged(uint64_t,uint64_t)));
+    mngr->subscribeOnCurrentChange(this, SLOT(slotSelectionItemsChanged(uint64_t,uint64_t)));
     mngr->subscribeCenterOn(this, SLOT(slotCenterOn(uint64_t)));
     mngr->subscribeOnChangeEntity(this, SLOT(slotObjectChanged(uint64_t)));
     mngr->subscribeOnAddEntity(this, SLOT(slotAddObject(uint64_t)));
@@ -200,6 +200,55 @@ void WorkState::reinit()
 
                     MarkPtrs marks_of_facility = facilityPtr->getMarks();
                     for( MarkPtr mark: marks_of_facility )
+                    {
+                        switch(mark->getMarkType())
+                        {
+                        case Mark::MT_DEFECT :
+                            if(markInArchive(mark) == false)
+                            {
+                                QPointF center = mark->getCenter();
+                                DefectGraphicsItem * _defectGraphicsItem = new DefectGraphicsItem(mark->getId());
+                                _defectGraphicsItem->setProperty("locationId", locationId);
+                                _defectGraphicsItem->setPos(center);
+
+                                _scene->addItem(_defectGraphicsItem);
+                                connect(_defectGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                                _items.insert(mark->getId(), _defectGraphicsItem);
+
+                                _defectGraphicsItem->hide();
+                                graphicsItems.append(_defectGraphicsItem);
+                            }break;
+                        case Mark::MT_PHOTO :
+                        {
+                            QPointF center = mark->getCenter();
+                            FotoGraphicsItem * _photoGraphicsItem = new FotoGraphicsItem(mark->getId());
+                            _photoGraphicsItem->setProperty("locationId", locationId);
+                            _photoGraphicsItem->setPos(center);
+
+                            _scene->addItem(_photoGraphicsItem);
+                            connect(_photoGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                            _items.insert(mark->getId(), _photoGraphicsItem);
+
+                            _photoGraphicsItem->hide();
+                            graphicsItems.append(_photoGraphicsItem);
+                        }break;
+                        case Mark::MT_PHOTO_3D :
+                        {
+                            QPointF center = mark->getCenter();
+                            Foto360GraphicsItem * _photo360GraphicsItem = new Foto360GraphicsItem(mark->getId());
+                            _photo360GraphicsItem->setProperty("locationId", locationId);
+                            _photo360GraphicsItem->setPos(center);
+
+                            _scene->addItem(_photo360GraphicsItem);
+                            connect(_photo360GraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                            _items.insert(mark->getId(), _photo360GraphicsItem);
+
+                            _photo360GraphicsItem->hide();
+                            graphicsItems.append(_photo360GraphicsItem);
+                        }break;
+                        }
+
+                        /*
                         if(markInArchive(mark) == false)
                         {
                             QString mark_type_str = QString::fromUtf8("дефект");
@@ -253,10 +302,60 @@ void WorkState::reinit()
                                 graphicsItems.append(_photo360GraphicsItem);
                             }
                         }
+                        */
+                    }
                 }
 
                 MarkPtrs marks_of_location = locationPtr->getMarks();
                 for( MarkPtr mark: marks_of_location )
+                {
+                    switch(mark->getMarkType())
+                    {
+                    case Mark::MT_DEFECT :
+                        if(markInArchive(mark) == false)
+                        {
+                            QPointF center = mark->getCenter();
+                            DefectGraphicsItem * _defectGraphicsItem = new DefectGraphicsItem(mark->getId());
+                            _defectGraphicsItem->setProperty("locationId", locationId);
+                            _defectGraphicsItem->setPos(center);
+
+                            _scene->addItem(_defectGraphicsItem);
+                            connect(_defectGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                            _items.insert(mark->getId(), _defectGraphicsItem);
+
+                            _defectGraphicsItem->hide();
+                            graphicsItems.append(_defectGraphicsItem);
+                        }break;
+                    case Mark::MT_PHOTO :
+                    {
+                        QPointF center = mark->getCenter();
+                        FotoGraphicsItem * _photoGraphicsItem = new FotoGraphicsItem(mark->getId());
+                        _photoGraphicsItem->setProperty("locationId", locationId);
+                        _photoGraphicsItem->setPos(center);
+
+                        _scene->addItem(_photoGraphicsItem);
+                        connect(_photoGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                        _items.insert(mark->getId(), _photoGraphicsItem);
+
+                        _photoGraphicsItem->hide();
+                        graphicsItems.append(_photoGraphicsItem);
+                    }break;
+                    case Mark::MT_PHOTO_3D :
+                    {
+                        QPointF center = mark->getCenter();
+                        Foto360GraphicsItem * _photo360GraphicsItem = new Foto360GraphicsItem(mark->getId());
+                        _photo360GraphicsItem->setProperty("locationId", locationId);
+                        _photo360GraphicsItem->setPos(center);
+
+                        _scene->addItem(_photo360GraphicsItem);
+                        connect(_photo360GraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                        _items.insert(mark->getId(), _photo360GraphicsItem);
+
+                        _photo360GraphicsItem->hide();
+                        graphicsItems.append(_photo360GraphicsItem);
+                    }break;
+                    }
+                    /*
                     if(markInArchive(mark) == false)
                     {
                         QString mark_type_str = QString::fromUtf8("дефект");
@@ -310,6 +409,8 @@ void WorkState::reinit()
                             graphicsItems.append(_photo360GraphicsItem);
                         }
                     }
+                    */
+                }
 
                 LocationItem * locationItem = new LocationItem(locationPtr->getId(), 16, locationPtr->getCoords().boundingRect(), graphicsItems, _scene);
                 connect(locationItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
@@ -374,6 +475,44 @@ void WorkState::slotAddObject(uint64_t id)
                 else
                     return;
 
+                switch(markPtr->getMarkType())
+                {
+                case Mark::MT_DEFECT :
+                {
+                    QPointF center = markPtr->getCenter();
+                    DefectGraphicsItem * _defectGraphicsItem = new DefectGraphicsItem(markPtr->getId());
+                    _defectGraphicsItem->setProperty("locationId", locationId);
+                    _defectGraphicsItem->setPos(center);
+                    _scene->addItem(_defectGraphicsItem);
+                    connect(_defectGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                    _items.insert(markPtr->getId(), _defectGraphicsItem);
+                    locationItem->addItem(_defectGraphicsItem);
+                }break;
+                case Mark::MT_PHOTO :
+                {
+                    QPointF center = markPtr->getCenter();
+                    FotoGraphicsItem * _photoGraphicsItem = new FotoGraphicsItem(markPtr->getId());
+                    _photoGraphicsItem->setProperty("locationId", locationId);
+                    _photoGraphicsItem->setPos(center);
+                    _scene->addItem(_photoGraphicsItem);
+                    connect(_photoGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                    _items.insert(markPtr->getId(), _photoGraphicsItem);
+                    locationItem->addItem(_photoGraphicsItem);
+                }break;
+                case Mark::MT_PHOTO_3D :
+                {
+                    QPointF center = markPtr->getCenter();
+                    Foto360GraphicsItem * _photo360GraphicsItem = new Foto360GraphicsItem(markPtr->getId());
+                    _photo360GraphicsItem->setProperty("locationId", locationId);
+                    _photo360GraphicsItem->setPos(center);
+                    _scene->addItem(_photo360GraphicsItem);
+                    connect(_photo360GraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                    _items.insert(markPtr->getId(), _photo360GraphicsItem);
+                    locationItem->addItem(_photo360GraphicsItem);
+                }break;
+                }
+
+                /*
                 QString mark_type_str; //  = QString::fromUtf8("дефект");
                 BaseMetadataPtr markTypePtr = markPtr->getMetadata("mark_type");
                 if(markTypePtr)
@@ -420,6 +559,7 @@ void WorkState::slotAddObject(uint64_t id)
                     _items.insert(markPtr->getId(), _photo360GraphicsItem);
                     locationItem->addItem(_photo360GraphicsItem);
                 }
+                */
             }
         }
     }
@@ -453,7 +593,7 @@ void WorkState::slotSetMarkPosition(QVariant var)
     quint64 type = var.toUInt();
     if(type > 0)
     {
-        uint id = regionbiz::RegionBizManager::instance()->getSelectedEntity();
+        uint id = regionbiz::RegionBizManager::instance()->getCurrentEntity();
         auto it = _items.find(id);
         if(it != _items.end())
         {
@@ -474,9 +614,29 @@ void WorkState::slotSelectItem(qulonglong id, bool centerOnEntity)
 {
     if( ! _blockGUI)
     {
-        regionbiz::RegionBizManager::instance()->selectEntity(id);
         if(centerOnEntity)
+        {
             regionbiz::RegionBizManager::instance()->centerOnEntity(id);
+            BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(id);
+            if(ptr)
+                if(ptr->getType() == BaseArea::AT_FACILITY)
+                {
+                    FacilityPtr facilityPtr = BaseArea::convert< Facility >(ptr);
+                    if(facilityPtr)
+                    {
+                        FloorPtrs floors = facilityPtr->getChilds();
+                        QMap<uint16_t, uint64_t> floorsMap;
+                        for( FloorPtr floorPtr: floors )
+                            floorsMap.insert(floorPtr->getNumber(), floorPtr->getId());
+                        if(floorsMap.isEmpty() == false)
+                        {
+                            id = floorsMap.begin().value();
+                            emit switchOnEditor();
+                        }
+                    }
+                }
+        }
+        regionbiz::RegionBizManager::instance()->setCurrentEntity(id);
     }
 }
 
@@ -650,7 +810,7 @@ void WorkState::slotCenterOn(uint64_t id)
 
     if(facilityId > 0)
     {
-        emit showFacility(facilityId);
+        // emit showFacility(facilityId);
         if(ptr->getType() != BaseArea::AT_FACILITY)
             emit centerEditorOn(id);
     }
