@@ -4124,7 +4124,7 @@ void ViewerController::changeZoom(int zoom, bool withDelay)
 {
     //if(m_changeZoomDelayTimer->isActive())
     int zoomForSet = -1;
-    if(withDelay)
+    if(false) // withDelay)
     {
 //        qDebug() << "ViewerController::changeZoom, if(withDelay), zoom" << zoom << "m_zoomMax" << m_zoomMax << "m_zoomMin" << m_zoomMin;
 
@@ -4187,7 +4187,7 @@ void ViewerController::changeZoom(int zoom, bool withDelay)
 
 void ViewerController::slotChangeZoomTimeout()
 {
-    if(-1 != m_zoomForSet)
+    if(true) // -1 != m_zoomForSet)
     {
 //        qDebug() << "ViewerController::slotChangeZoomTimeout, IF, m_zoomForSet" << m_zoomForSet;
         slotChangeZoom(m_zoomForSet);

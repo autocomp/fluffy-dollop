@@ -19,6 +19,7 @@ public:
     ~ChoiceAreaState();
     void setPen(QPen pen);
     void setEmitingAbortAfterPushedToStack(bool on_off);
+    void setBoundingArea(const QPolygonF & boundingArea);
 
     virtual QString stateName();
     virtual void statePushedToStack();
@@ -44,6 +45,7 @@ private:
     QPen _pen;
     QPointF _lastMousePos;
     bool _emitAbortAfterPushedToStack;
+    QPolygonF _boundingArea;
 };
 
 #endif // CHOICEOBJETCSTATE_H

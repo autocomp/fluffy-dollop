@@ -829,13 +829,13 @@ void SceneController::moveMouseInView(const QPointF& scenePos, int zLevel)
     }
     else /*if(getFrameId() != -1)*/
     {
-        QPointF framePos(scenePos);
-        sceneToFrame(framePos);
-        if(m_curCoordSyst == 0)
-        {
-            emit signalShowCoords(QString::number((int)(framePos.y())), QString::number((int)(framePos.x())), "");
-            // qDebug() << "===>" << (int)framePos.x() << (int)framePos.y();
-        }
+//        QPointF framePos(scenePos);
+//        sceneToFrame(framePos);
+//        if(m_curCoordSyst == 0)
+//        {
+//            emit signalShowCoords(QString::number((int)(framePos.y())), QString::number((int)(framePos.x())), "");
+//            // qDebug() << "===>" << (int)framePos.x() << (int)framePos.y();
+//        }
 //        else
 //        {
 //            PFramePtr pFramePtr(RepresentationServer::instance()->getPFrameById(getFrameId()));
@@ -1120,7 +1120,7 @@ void SceneController::setSceneRect(QRectF sceneRect)
     m_Scene.setSceneRect(sceneRect);
 }
 
-void SceneController::setZoomLevels(uint minZlevel, uint maxZlevel, uint baseZlevel)
+void SceneController::setZoomLevels(int minZlevel, int maxZlevel, int baseZlevel)
 {
     m_BaseZlevel = baseZlevel;
     m_zoomMax = maxZlevel;

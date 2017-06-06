@@ -31,11 +31,19 @@ void ChoiceAreaState::setPen(QPen pen)
 
 bool ChoiceAreaState::mouseMoveEvent(QMouseEvent*, QPointF scenePos)
 {
-    if(_scene->sceneRect().contains(scenePos) == false)
+    if(_boundingArea.isEmpty() == false)
     {
-        _view->setCursor(Qt::ForbiddenCursor);
-        return false;
+        if(_boundingArea.containsPoint(scenePos, Qt::OddEvenFill) == false)
+        {
+            _view->setCursor(Qt::ForbiddenCursor);
+            return false;
+        }
     }
+//    else if(_scene->sceneRect().contains(scenePos) == false)
+//    {
+//        _view->setCursor(Qt::ForbiddenCursor);
+//        return false;
+//    }
 
     _view->setCursor(_cursor);
     _lastMousePos = scenePos;
@@ -68,11 +76,19 @@ bool ChoiceAreaState::mousePressEvent(QMouseEvent* e, QPointF scenePos)
 {
     if(e->button() == Qt::LeftButton)
     {
-        if(_scene->sceneRect().contains(scenePos) == false)
+        if(_boundingArea.isEmpty() == false)
         {
-            _view->setCursor(Qt::ForbiddenCursor);
-            return false;
+            if(_boundingArea.containsPoint(scenePos, Qt::OddEvenFill) == false)
+            {
+                _view->setCursor(Qt::ForbiddenCursor);
+                return false;
+            }
         }
+//        else if(_scene->sceneRect().contains(scenePos) == false)
+//        {
+//            _view->setCursor(Qt::ForbiddenCursor);
+//            return false;
+//        }
 
         _polygon.append(scenePos);
 
@@ -102,11 +118,19 @@ bool ChoiceAreaState::mouseDoubleClickEvent(QMouseEvent *e, QPointF scenePos)
 {
     if(e->button() == Qt::LeftButton)
     {
-        if(_scene->sceneRect().contains(scenePos) == false)
+        if(_boundingArea.isEmpty() == false)
         {
-            _view->setCursor(Qt::ForbiddenCursor);
-            return false;
+            if(_boundingArea.containsPoint(scenePos, Qt::OddEvenFill) == false)
+            {
+                _view->setCursor(Qt::ForbiddenCursor);
+                return false;
+            }
         }
+//        else if(_scene->sceneRect().contains(scenePos) == false)
+//        {
+//            _view->setCursor(Qt::ForbiddenCursor);
+//            return false;
+//        }
 
         switch(_areaType)
         {
@@ -201,6 +225,11 @@ QString ChoiceAreaState::stateName()
 void ChoiceAreaState::setEmitingAbortAfterPushedToStack(bool on_off)
 {
     _emitAbortAfterPushedToStack = on_off;
+}
+
+void ChoiceAreaState::setBoundingArea(const QPolygonF &boundingArea)
+{
+    _boundingArea = boundingArea;
 }
 
 void ChoiceAreaState::statePushedToStack()

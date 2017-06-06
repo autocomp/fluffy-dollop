@@ -12,7 +12,7 @@ TileScene::TileScene(bool isGeo, QSize sceneSize, QObject *parent)
     , isActive(false)
     , mouseMoveEnabled(false)
 {
-    setBackgroundBrush(QBrush(Qt::gray));
+    setBackgroundBrush(QBrush(Qt::white));
     QRect r(0,0,sceneSize.width(),sceneSize.height());
     setSceneRect(r);
 

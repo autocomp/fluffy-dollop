@@ -147,7 +147,7 @@ public slots:
     void slotBindLayer(quint64 id, bool isBind);
     void slotCurCoordSystChanged(int curCoordSyst);
     void setSceneRect(QRectF sceneRect);
-    void setZoomLevels(uint minZlevel, uint maxZlevel, uint baseZlevel);
+    void setZoomLevels(int minZlevel, int maxZlevel, int baseZlevel);
     void setAsincLoadingOnGeoMap(bool on_off);
     void getViewportRect(QRectF & r);
     void slotConvertSceneCoordToGlobal(QPointF &);
@@ -161,7 +161,7 @@ protected:
     const SceneDescriptor& m_sceneDescriptor;
     const QSize m_tileSize;
     const QSize m_tilesCount;
-    uint m_zoomMin, m_zoomMax;
+    int m_zoomMin, m_zoomMax;
     QString m_filePath;
     bool m_blockAbortLoading;
     TileScene m_Scene, m_TileScene, m_MinimapScene;
