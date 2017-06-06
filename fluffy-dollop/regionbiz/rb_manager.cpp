@@ -992,6 +992,9 @@ void RegionBizManager::loadDataByTranslator()
 
     // files
     _data_translator->loadFiles();
+
+    // groups
+    _data_translator->loadGroups();
 }
 
 void RegionBizManager::clearCurrentData( bool clear_entitys )
