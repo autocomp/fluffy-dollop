@@ -3,7 +3,7 @@ message( $${ROOT_DIR} )
 include( $${ROOT_DIR}/pri/common.pri )
 
 # lib
-QT       += sql gui
+QT       += sql gui widgets
 TEMPLATE = app
 
 # target

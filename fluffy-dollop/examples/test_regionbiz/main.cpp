@@ -1,8 +1,9 @@
 #include <QDebug>
 #include <QDir>
-#include <QCoreApplication>
+#include <QApplication>
 #include <QPointF>
 #include <QPolygonF>
+#include <QWidget>
 
 #include <regionbiz/rb_manager.h>
 #include <regionbiz/rb_entity_filter.h>
@@ -470,7 +471,7 @@ void checkGroups()
 
 int main( int argc, char** argv )
 {
-    QCoreApplication app( argc, argv );
+    QApplication app( argc, argv );
 
     //! old exmple
     // bigExample();
@@ -491,7 +492,7 @@ int main( int argc, char** argv )
     //selectManagment();
 
     //! check ftp
-    //checkFtp();
+    checkFtp();
 
     //! check marks coords
     // checkMarksCoords();
@@ -500,7 +501,11 @@ int main( int argc, char** argv )
     // addFloors();
 
     //! check group working
-    checkGroups();
+    //checkGroups();
+
+    // for check close program
+    QWidget* wgt = new QWidget();
+    wgt->show();
 
     return app.exec();
 }
