@@ -16,6 +16,14 @@
         return false; \
     } \
 
+#define tryBatch() \
+    if( !query.execBatch() ) \
+    { \
+        db.rollback(); \
+        return false; \
+    } \
+
+
 using namespace regionbiz;
 
 ThreadSql::ThreadSql()
@@ -78,8 +86,7 @@ void ThreadSql::processQueueOfCommand()
         }
         case C_DELETE_AREA:
         {
-            auto area = mngr->getBaseArea( id );
-            no_error = deleteArea( area );
+            no_error = deleteArea( id );
             break;
         }
 
@@ -91,8 +98,7 @@ void ThreadSql::processQueueOfCommand()
         }
         case C_DELETE_MARK:
         {
-            auto mark = mngr->getMark( id );
-            no_error = deleteMark( mark );
+            no_error = deleteMark( id );
             break;
         }
 
@@ -104,11 +110,18 @@ void ThreadSql::processQueueOfCommand()
         }
         case C_DELETE_GROUP:
         {
-            auto mark = mngr->getGroup( id );
-            no_error = deleteGroup( mark );
+            no_error = deleteGroup( id );
             break;
         }
 
+        case C_COMMIT_LAYERS:
+        {
+            no_error = commitLayers();
+            break;
+        }
+        case C_DELETE_LAYER:
+            no_error = deleteLayer( id );
+            break;
         }
 
         if( !no_error )
@@ -202,7 +215,7 @@ bool ThreadSql::commitArea(BaseAreaPtr area)
     return true;
 }
 
-bool ThreadSql::deleteArea(BaseAreaPtr area)
+bool ThreadSql::deleteArea( uint64_t id )
 {
     // lock database
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
@@ -211,23 +224,23 @@ bool ThreadSql::deleteArea(BaseAreaPtr area)
 
     // delete all data
     QString delete_metadata = "DELETE FROM metadata "
-                              "WHERE entity_id = " + QString::number( area->getId() );
+                              "WHERE entity_id = " + QString::number( id );
     tryQuery( delete_metadata );
 
     QString delete_coords = "DELETE FROM coords "
-                            "WHERE id = " + QString::number( area->getId() );
+                            "WHERE id = " + QString::number( id );
     tryQuery( delete_coords );
 
     QString delete_entity = "DELETE FROM entitys "
-                          " WHERE id = " + QString::number( area->getId() );
+                          " WHERE id = " + QString::number( id );
     tryQuery( delete_entity );
 
     QString delete_area = "DELETE FROM areas "
-                          " WHERE id = " + QString::number( area->getId() );
+                          " WHERE id = " + QString::number( id );
     tryQuery( delete_area );
 
     QString delete_files = "DELETE FROM files "
-                           " WHERE id = " + QString::number( area->getId() );
+                           " WHERE id = " + QString::number( id );
     tryQuery( delete_files );
 
     // TODO delete relations
@@ -295,7 +308,7 @@ bool ThreadSql::commitMark(MarkPtr mark)
     return true;
 }
 
-bool ThreadSql::deleteMark(MarkPtr mark)
+bool ThreadSql::deleteMark(uint64_t id)
 {
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
     // lock base
@@ -303,28 +316,28 @@ bool ThreadSql::deleteMark(MarkPtr mark)
 
     // delete ent
     QString delete_ent = "DELETE FROM entitys "
-                          "WHERE id = " + QString::number( mark->getId() );
+                          "WHERE id = " + QString::number( id );
     QSqlQuery query( db );
     tryQuery( delete_ent );
 
     // delete mark
     QString delete_mark = "DELETE FROM marks "
-                          "WHERE id = " + QString::number( mark->getId() );
+                          "WHERE id = " + QString::number( id );
     tryQuery( delete_mark );
 
     // metadata
     QString delete_meta = "DELETE FROM metadata "
-                          "WHERE entity_id = " + QString::number( mark->getId() );
+                          "WHERE entity_id = " + QString::number( id );
     tryQuery( delete_meta );
 
     // coords
     QString delete_coords = "DELETE FROM coords "
-                            "WHERE id = " + QString::number( mark->getId() );
+                            "WHERE id = " + QString::number( id );
     tryQuery( delete_coords );
 
     // files
     QString delete_files = "DELETE FROM files "
-                           "WHERE id = " + QString::number( mark->getId() );
+                           "WHERE id = " + QString::number( id );
     tryQuery( delete_files );
 
     // unlock base
@@ -390,7 +403,7 @@ bool ThreadSql::commitGroup( GroupEntityPtr group )
     return true;
 }
 
-bool ThreadSql::deleteGroup(GroupEntityPtr group)
+bool ThreadSql::deleteGroup(uint64_t id)
 {
     // lock database
     QSqlDatabase db = QSqlDatabase::database( getBaseName() );
@@ -399,15 +412,134 @@ bool ThreadSql::deleteGroup(GroupEntityPtr group)
 
     // delete group
     QString delete_group = "DELETE FROM entitys "
-                           "WHERE id = " + QString::number( group->getId() );
+                           "WHERE id = " + QString::number( id );
     tryQuery( delete_group );
 
     // metadata
     QString delete_meta = "DELETE FROM metadata "
-                          "WHERE entity_id = " + QString::number( group->getId() );
+                          "WHERE entity_id = " + QString::number( id );
     tryQuery( delete_meta );
 
     // TODO delete files
+
+    // unlock
+    db.commit();
+    return true;
+}
+
+bool ThreadSql::commitLayers()
+{
+    // get all layers
+    auto mngr = RegionBizManager::instance();
+    LayerPtrs layers = mngr->getLayers();
+
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    // lock
+    db.transaction();
+    QSqlQuery query( db );
+
+    // delete layers
+    QString delete_layers = "DELETE FROM layers;"
+                            "DELETE FROM layers_elements;";
+    tryQuery( delete_layers );
+
+    // insert layers in main table
+    QString insert_layers = "INSERT INTO layers ( id, priority, name ) "
+                            "VALUES ( ?, ?, ? );";
+    query.prepare( insert_layers );
+    // prepare data
+    QVariantList ids, prioritys, names;
+    for( LayerPtr layer: layers )
+    {
+        ids.push_back( (qulonglong) layer->getId() );
+        prioritys.push_back( (qulonglong) layer->getNumber() );
+        names.push_back( layer->getName() );
+    }
+    // bind data
+    query.addBindValue( ids );
+    query.addBindValue( prioritys );
+    query.addBindValue( names );
+
+    if( !query.execBatch() )
+    {
+        db.rollback();
+        return false;
+    }
+
+    // insert elements - marks
+    QString insert_marks = "INSERT INTO layers_elements ( layer_id, element.id, type ) "
+                           "VALUES ( ?, ?, 'mark' );";
+    query.prepare( insert_marks );
+    {
+        QVariantList layer_ids, element_ids;
+        for( LayerPtr layer: layers  )
+        {
+            for( MarkPtr element_mark: layer->getMarks() )
+            {
+                layer_ids.push_back( (qulonglong) layer->getId() );
+                element_ids.push_back( (qulonglong) element_mark->getId() );
+            }
+        }
+        query.addBindValue( layer_ids );
+        query.addBindValue( element_ids );
+    }
+    tryBatch();
+
+    // insert elements - files
+    QString insert_files = "INSERT INTO layers_elements ( layer_id, element.name, type ) "
+                           "VALUES ( ?, ?, 'file' );";
+    query.prepare( insert_files );
+    {
+        QVariantList layer_ids, element_ids;
+        for( LayerPtr layer: layers  )
+        {
+            for( BaseFileKeeperPtr element_file: layer->getFiles() )
+            {
+                layer_ids.push_back( (qulonglong) layer->getId() );
+                element_ids.push_back( element_file->getPath() );
+            }
+        }
+        query.addBindValue( layer_ids );
+        query.addBindValue( element_ids );
+    }
+    tryBatch();
+
+    // insert elements - meta
+    QString insert_meta = "INSERT INTO layers_elements ( layer_id, element.name, type ) "
+                          "VALUES ( ?, ?, 'metadata' );";
+    query.prepare( insert_meta );
+    {
+        QVariantList layer_ids, element_ids;
+        for( LayerPtr layer: layers  )
+        {
+            for( QString element_meta: layer->getMetadataNames() )
+            {
+                layer_ids.push_back( (qulonglong) layer->getId() );
+                element_ids.push_back( element_meta );
+            }
+        }
+        query.addBindValue( layer_ids );
+        query.addBindValue( element_ids );
+    }
+    tryBatch();
+
+    // unlock
+    db.commit();
+    return true;
+}
+
+bool ThreadSql::deleteLayer(uint64_t id )
+{
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    // lock
+    db.transaction();
+    QSqlQuery query( db );
+
+    // delete layers
+    QString id_str = QString::number( id );
+    QString delete_layer = "DELETE FROM layers WHERE id = " + id_str + ";"
+                           "DELETE FROM layers_elements WHERE layer_id = " + id_str + ";";
+    tryQuery( delete_layer );
 
     // unlock
     db.commit();

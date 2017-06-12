@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "rb_manager.h"
+
 using namespace regionbiz;
 
 BaseMetadata::BaseMetadata(uint64_t parent_id):
@@ -26,6 +28,24 @@ QString BaseMetadata::getName()
 void BaseMetadata::setName(QString name)
 {
     _name = name;
+}
+
+LayerPtr BaseMetadata::getLayer()
+{
+    auto mngr = RegionBizManager::instance();
+    return mngr->getLayerOfMetadataName( getName() );
+}
+
+void BaseMetadata::moveToLayer(LayerPtr layer)
+{
+    layer->addMetadataName( getName() );
+}
+
+void BaseMetadata::leaveLayer()
+{
+    auto layer = getLayer();
+    if( layer )
+        layer->removeMetadataName( getName() );
 }
 
 void BaseMetadata::removeForEntity( uint64_t id )

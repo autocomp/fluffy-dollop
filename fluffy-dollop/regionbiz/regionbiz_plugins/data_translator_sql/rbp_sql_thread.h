@@ -5,6 +5,9 @@
 #include <QThread>
 
 #include <regionbiz/rb_locations.h>
+#include <regionbiz/rb_layers.h>
+
+#define NO_ID 0
 
 namespace regionbiz {
 
@@ -19,7 +22,9 @@ public:
         C_COMMIT_MARK,
         C_DELETE_MARK,
         C_COMMIT_GROUP,
-        C_DELETE_GROUP
+        C_DELETE_GROUP,
+        C_COMMIT_LAYERS,
+        C_DELETE_LAYER
     };
 
     ThreadSql();
@@ -44,11 +49,13 @@ private:
 
     // main functions
     bool commitArea( BaseAreaPtr area );
-    bool deleteArea( BaseAreaPtr area );
+    bool deleteArea(uint64_t id );
     bool commitMark( MarkPtr mark );
-    bool deleteMark( MarkPtr mark );
+    bool deleteMark( uint64_t id );
     bool commitGroup( GroupEntityPtr group );
-    bool deleteGroup( GroupEntityPtr group );
+    bool deleteGroup( uint64_t id );
+    bool commitLayers();
+    bool deleteLayer( uint64_t id );
 
     // commit small elements
     template< typename EntType >

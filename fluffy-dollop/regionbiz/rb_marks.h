@@ -8,6 +8,9 @@
 
 namespace regionbiz {
 
+class Layer;
+typedef std::shared_ptr< Layer > LayerPtr;
+
 class Mark: public BaseEntity
 {
 public:
@@ -34,6 +37,11 @@ public:
     // asociated object
     uint64_t getParentId();
     void setParentId( uint64_t id );
+
+    // layer
+    LayerPtr getLayer();
+    void moveToLayer( LayerPtr layer );
+    void leaveLayer();
 
 private:
     QPolygonF _coords;

@@ -10,6 +10,9 @@
 
 namespace regionbiz {
 
+class Layer;
+typedef std::shared_ptr< Layer > LayerPtr;
+
 class BaseMetadata;
 typedef std::shared_ptr< BaseMetadata > BaseMetadataPtr;
 typedef std::map< QString, BaseMetadataPtr > MetadataByName;
@@ -37,6 +40,11 @@ public:
     uint64_t getParentId();
     QString getName();
     void setName( QString name );
+
+    // layers
+    LayerPtr getLayer();
+    void moveToLayer( LayerPtr layer );
+    void leaveLayer();
 
     // convert
     template< typename Type >

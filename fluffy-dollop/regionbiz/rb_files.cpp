@@ -56,6 +56,63 @@ bool BaseFileKeeper::commit()
     return mngr->commitFile( getItself() );
 }
 
+LayerPtr BaseFileKeeper::getLayer()
+{
+    auto mngr = RegionBizManager::instance();
+    return mngr->getLayerOfFile( getPath() );
+}
+
+void BaseFileKeeper::moveToLayer(LayerPtr layer)
+{
+    if( layer )
+        layer->addFile( getPath() );
+}
+
+void BaseFileKeeper::leaveLayer()
+{
+    auto layer = getLayer();
+    if( layer )
+        layer->removeFile( getPath() );
+}
+
+void BaseFileKeeper::addFile( BaseFileKeeperPtr file )
+{
+    addFile( file, file->getEntityId() );
+}
+
+void BaseFileKeeper::addFile(BaseFileKeeperPtr file, uint64_t entity_id)
+{
+    getMutex().lock();
+    {
+        FileKeepersById& files = BaseFileKeeper::getFiles();
+        files[ entity_id ].push_back( file );
+
+        getFilesByPath()[ file->getPath().toStdString() ] = file;
+    }
+    getMutex().unlock();
+}
+
+void BaseFileKeeper::deleteFile( BaseFileKeeperPtr file )
+{
+    getMutex().lock();
+    {
+        // by entity id
+        auto check_path = [ file ]( BaseFileKeeperPtr our_file ){
+            return our_file->getPath() == file->getPath();
+        };
+
+        auto iter = FIND_IF( getFiles()[ file->getEntityId() ], check_path );
+        if( iter != getFiles()[ file->getEntityId() ].end() )
+            getFiles()[ file->getEntityId() ].erase( iter );
+
+        // by path
+        auto iter_by_path = getFilesByPath().find( file->getPath().toStdString() );
+        if( iter_by_path != getFilesByPath().end() )
+            getFilesByPath().erase( iter_by_path );
+    }
+    getMutex().unlock();
+}
+
 FileKeepersById &BaseFileKeeper::getFiles()
 {
     static FileKeepersById files;
@@ -66,6 +123,42 @@ std::recursive_mutex &BaseFileKeeper::getMutex()
 {
     static std::recursive_mutex mutex;
     return mutex;
+}
+
+BaseFileKeeperPtrs BaseFileKeeper::getFileKeepersByEntity(uint64_t entity_id)
+{
+    BaseFileKeeperPtrs files_keepers;
+
+    getMutex().lock();
+    {
+        auto& files = BaseFileKeeper::getFiles();
+        if( files.find( entity_id ) != files.end() )
+            files_keepers = files[ entity_id ];
+    }
+    getMutex().unlock();
+
+    return files_keepers;
+}
+
+BaseFileKeeperPtr BaseFileKeeper::getFileByPath( QString path )
+{
+    BaseFileKeeperPtr file;
+
+    getMutex().lock();
+    {
+        auto iter = getFilesByPath().find( path.toStdString() );
+        if( iter != getFilesByPath().end() )
+            file = (*iter).second;
+    }
+    getMutex().unlock();
+
+    return file;
+}
+
+FileKeepersByPath& BaseFileKeeper::getFilesByPath()
+{
+    static FileKeepersByPath by_path;
+    return by_path;
 }
 
 BaseFileKeeperPtr BaseFileKeeper::getItself()

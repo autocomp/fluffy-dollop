@@ -67,6 +67,11 @@ void SqlTranslator::loadFunctions()
     _load_groups = std::bind( &SqlTranslator::loadGroups, this );
     _commit_groups = std::bind( &SqlTranslator::commitGroups, this, std::placeholders::_1 );
     _delete_group = std::bind( &SqlTranslator::deleteGroup, this, std::placeholders::_1 );
+
+    // layers
+    _load_layers = std::bind( &SqlTranslator::loadLayers, this );
+    _commit_layers = std::bind( &SqlTranslator::commitLayers, this );
+    _delete_layer = std::bind( &SqlTranslator::deleteLayer, this, std::placeholders::_1 );
 }
 
 std::vector< RegionPtr > SqlTranslator::loadRegions()
@@ -358,6 +363,113 @@ bool SqlTranslator::deleteGroup(GroupEntityPtr group)
 {
     // WARNING test multithread commit
     _thread_sql.appendCommand( ThreadSql::C_DELETE_GROUP, group->getId() );
+    return true;
+}
+
+LayerPtrs SqlTranslator::loadLayers()
+{
+    LayerPtrs layers;
+
+    // lock database
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+
+    // lock
+    db.transaction();
+    QSqlQuery query( db );
+
+    // select layers
+    QString select_layers = "SELECT id, name FROM layers ORDER BY priority;";
+    query.setForwardOnly( true );
+    bool res = query.exec( select_layers );
+    if( res )
+        for( query.first(); query.isValid(); query.next() )
+        {
+            uint64_t id = query.value( 0 ).toULongLong();
+            QString name = query.value( 1 ).toString();
+
+            appendNewLayerFromBase( id, name );
+        }
+
+    // select all elements
+    QString select_layers_marks = "SELECT layer_id, (element).id FROM layers_elements "
+                                  "WHERE type = 'mark';";
+    query.setForwardOnly( true );
+    res = query.exec( select_layers_marks );
+    if( res )
+        for( query.first(); query.isValid(); query.next() )
+        {
+            uint64_t id_layer = query.value( 0 ).toULongLong();
+            uint64_t id_element = query.value( 1 ).toULongLong();
+
+            LayerPtr layer = LayerManager::instance()->getLayer( id_layer );
+            if( layer )
+            {
+                // add element to layer
+                layer->addMark( id_element );
+            }
+            else
+                std::cerr << "Layer " << id_layer
+                          << " doesn't exist" << std::endl;
+        }
+
+    QString select_layers_files = "SELECT layer_id, (element).name FROM layers_elements "
+                                  "WHERE type = 'file';";
+    query.setForwardOnly( true );
+    res = query.exec( select_layers_files );
+    if( res )
+        for( query.first(); query.isValid(); query.next() )
+        {
+            uint64_t id_layer = query.value( 0 ).toLongLong();
+            QString id_element = query.value( 1 ).toString();
+
+            LayerPtr layer = LayerManager::instance()->getLayer( id_layer );
+            if( layer )
+            {
+                // add element to layer
+                layer->addFile( id_element );
+            }
+            else
+                std::cerr << "Layer " << id_layer
+                          << " doesn't exist" << std::endl;
+        }
+
+    QString select_layers_meta = "SELECT layer_id, (element).name FROM layers_elements "
+                                  "WHERE type = 'metadata';";
+    query.setForwardOnly( true );
+    res = query.exec( select_layers_meta );
+    if( res )
+        for( query.first(); query.isValid(); query.next() )
+        {
+            uint64_t id_layer = query.value( 0 ).toLongLong();
+            QString id_element = query.value( 1 ).toString();
+
+            LayerPtr layer = LayerManager::instance()->getLayer( id_layer );
+            if( layer )
+            {
+                // add element to layer
+                layer->addMetadataName( id_element );
+            }
+            else
+                std::cerr << "Layer " << id_layer
+                          << " doesn't exist" << std::endl;
+        }
+
+    // unlock
+    db.commit();
+    return layers;
+}
+
+bool SqlTranslator::commitLayers()
+{
+    // WARNING test multithread commit
+    _thread_sql.appendCommand( ThreadSql::C_COMMIT_LAYERS, NO_ID );
+    return true;
+}
+
+bool SqlTranslator::deleteLayer(LayerPtr layer)
+{
+    // WARNING test multithread commit
+    _thread_sql.appendCommand( ThreadSql::C_DELETE_LAYER, layer->getId() );
     return true;
 }
 

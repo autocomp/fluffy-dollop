@@ -83,6 +83,9 @@ RoomPtrs BaseDataTranslator::loadRooms()
 
 bool BaseDataTranslator::commitArea( BaseAreaPtr area )
 {
+    if( !area )
+        return false;
+
     // if we try to commit area
     // that hold outside model system
     auto mngr = RegionBizManager::instance();
@@ -164,6 +167,9 @@ MarkPtrs BaseDataTranslator::loadMarks()
 
 bool BaseDataTranslator::commitMark( MarkPtr mark )
 {
+    if( !mark )
+        return false;
+
     if( _commit_mark )
         return _commit_mark( mark );
     else
@@ -194,10 +200,7 @@ BaseFileKeeperPtrs BaseDataTranslator::loadFiles()
         for( BaseFileKeeperPtr file: file_vec )
         {
             // TODO check entity id of file
-            BaseFileKeeper::getMutex().lock();
-            FileKeepersById& files = BaseFileKeeper::getFiles();
-            files[ file->getEntityId() ].push_back( file );
-            BaseFileKeeper::getMutex().unlock();
+            BaseFileKeeper::addFile( file );
         }
 
         return file_vec;
@@ -249,6 +252,40 @@ bool BaseDataTranslator::deleteGroup(GroupEntityPtr group)
         return false;
 }
 
+LayerPtrs BaseDataTranslator::loadLayers()
+{
+    if( _load_layers )
+    {
+        auto layers = _load_layers();
+        return layers;
+    }
+    else
+        return LayerPtrs();
+}
+
+bool BaseDataTranslator::commitLayers()
+{
+    if( _commit_layers )
+        return _commit_layers();
+    else
+        return false;
+}
+
+bool BaseDataTranslator::deleteLayer(LayerPtr layer)
+{
+    if( _delete_layer )
+    {
+        bool del = _delete_layer( layer );
+        if( del )
+        {
+            Layer::removeLayer( layer );
+            return true;
+        }
+    }
+    else
+        return false;
+}
+
 void BaseDataTranslator::setParentForBaseLocation( BaseAreaPtr loc, uint64_t parent_id )
 {
     loc->setParent( parent_id );
@@ -257,6 +294,11 @@ void BaseDataTranslator::setParentForBaseLocation( BaseAreaPtr loc, uint64_t par
 void BaseDataTranslator::setAreaForBaseRalation(BaseBizRelationPtr relation, uint64_t id)
 {
     relation->setAreaId( id );
+}
+
+void BaseDataTranslator::appendNewLayerFromBase(uint64_t id, QString name)
+{
+    Layer::appendLayer( id, name );
 }
 
 void BaseDataTranslator::freeChangedGroups()

@@ -62,6 +62,11 @@ private:
     bool commitGroups( GroupEntityPtrs groups );
     bool deleteGroup( GroupEntityPtr group );
 
+    // layers
+    LayerPtrs loadLayers();
+    bool commitLayers();
+    bool deleteLayer( LayerPtr layer );
+
     // support functions
     template< typename LocTypePtr >
     bool loadCoordinate( std::vector< LocTypePtr >& vector );

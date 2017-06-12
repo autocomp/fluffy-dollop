@@ -48,6 +48,25 @@ void Mark::setParentId(uint64_t id)
     _parent_id = id;
 }
 
+LayerPtr Mark::getLayer()
+{
+    auto mngr = RegionBizManager::instance();
+    return mngr->getLayerOfMark( getId() );
+}
+
+void Mark::moveToLayer(LayerPtr layer)
+{
+    if( layer )
+        layer->addMark( getId() );
+}
+
+void Mark::leaveLayer()
+{
+    auto layer = getLayer();
+    if( layer )
+        layer->removeMark( getId() );
+}
+
 bool Mark::commit()
 {
     auto mngr = RegionBizManager::instance();

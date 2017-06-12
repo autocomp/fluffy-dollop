@@ -14,6 +14,7 @@
 #include "rb_marks.h"
 #include "rb_files.h"
 #include "rb_group.h"
+#include "rb_layers.h"
 
 namespace regionbiz {
 
@@ -66,9 +67,15 @@ public:
     bool commitGroups( GroupEntityPtrs groups );
     bool deleteGroup( GroupEntityPtr group );
 
+    // layers
+    LayerPtrs loadLayers();
+    bool commitLayers();
+    bool deleteLayer( LayerPtr layer );
+
 protected:
     void setParentForBaseLocation( BaseAreaPtr loc, uint64_t parent_id );
     void setAreaForBaseRalation( BaseBizRelationPtr relation, uint64_t id );
+    void appendNewLayerFromBase( uint64_t id, QString name );
     void freeChangedGroups();
 
     // locations
@@ -103,6 +110,11 @@ protected:
     std::function< GroupEntityPtrs( void ) > _load_groups;
     std::function< bool( GroupEntityPtrs ) > _commit_groups;
     std::function< bool( GroupEntityPtr ) > _delete_group;
+
+    // layers
+    std::function< LayerPtrs( void ) > _load_layers;
+    std::function< bool() > _commit_layers;
+    std::function< bool( LayerPtr ) > _delete_layer;
 
 private:
     /**

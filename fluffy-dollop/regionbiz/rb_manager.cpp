@@ -163,6 +163,9 @@ BaseAreaPtr RegionBizManager::addArea( BaseArea::AreaType type,
 
 bool RegionBizManager::deleteArea(BaseAreaPtr area)
 {
+    if( !area )
+        return false;
+
     // delete childs recursive
     auto childs = area->getBaseAreaChilds();
     for( BaseAreaPtr child: childs )
@@ -440,6 +443,9 @@ bool RegionBizManager::deleteMark(uint64_t id)
 
 bool RegionBizManager::deleteMark(MarkPtr mark)
 {
+    if( !mark )
+        return false;
+
     // emit signal
     _change_watcher.deleteEntity( mark->getId() );
 
@@ -535,6 +541,9 @@ bool RegionBizManager::commitGroupsChanged()
 
 bool RegionBizManager::deleteGroup(GroupEntityPtr group)
 {
+    if( !group )
+        return false;
+
     // emit signal
     _change_watcher.deleteEntity( group->getId() );
 
@@ -550,16 +559,141 @@ bool RegionBizManager::deleteGroup(uint64_t id)
     return deleteGroup( group );
 }
 
+LayerPtr RegionBizManager::getLayer(uint64_t id)
+{
+    return getLayerManager()->getLayer( id );
+}
+
+LayerPtrs RegionBizManager::getLayers()
+{
+    return getLayerManager()->getLayers();
+}
+
+LayerManagerPtr RegionBizManager::getLayerManager()
+{
+    return LayerManager::instance();
+}
+
+LayerPtr RegionBizManager::addLayer( QString name )
+{
+    auto layer = getLayerManager()->addLayer( name );
+    if( layer )
+        LayerManager::instance()->
+                _signal_emiter.onLayerAdded( layer->getId() );
+    return layer;
+}
+
+bool RegionBizManager::commitLayers()
+{
+    bool com = _data_translator->commitLayers();
+    if( com )
+        LayerManager::instance()->_signal_emiter.onLayersChanged();
+
+    return com;
+}
+
+bool RegionBizManager::deleteLayer( LayerPtr layer )
+{
+    if( !layer )
+        return false;
+
+    // delete layer signal
+    LayerManager::instance()->
+            _signal_emiter.onLayerDeleted( layer->getId() );
+
+    bool del = _data_translator->deleteLayer( layer );
+    return del;
+}
+
+bool RegionBizManager::deleteLayer( uint64_t id )
+{
+    auto mngr = RegionBizManager::instance();
+    LayerPtr layer = mngr->getLayer( id );
+    if( layer )
+        return deleteLayer( layer );
+
+    return false;
+}
+
+LayerPtr RegionBizManager::getLayerOfMark(uint64_t id)
+{
+    auto mngr = RegionBizManager::instance();
+    auto mark = mngr->getMark( id );
+    return getLayerOfMark( mark );
+}
+
+LayerPtr RegionBizManager::getLayerOfMark(MarkPtr mark)
+{
+    if( !mark )
+        return nullptr;
+
+    for( LayerPtr layer: getLayers() )
+        for( MarkPtr elem_mark: layer->getMarks() )
+            if( mark->getId() == elem_mark->getId() )
+                return layer;
+
+    return nullptr;
+}
+
+LayerPtr RegionBizManager::getLayerOfFile(BaseFileKeeperPtr file)
+{
+    if( !file )
+        return nullptr;
+
+    for( LayerPtr layer: getLayers() )
+        for( BaseFileKeeperPtr elem_file: layer->getFiles() )
+            if( file->getPath() == elem_file->getPath() )
+                return layer;
+
+    return nullptr;
+}
+
+LayerPtr RegionBizManager::getLayerOfFile(QString path)
+{
+    auto mngr = RegionBizManager::instance();
+    auto file = mngr->getFileByPath( path );
+    return getLayerOfFile( file );
+}
+
+LayerPtr RegionBizManager::getLayerOfMetadataName(QString name)
+{
+    for( LayerPtr layer: getLayers() )
+        for( QString elem_mark: layer->getMetadataNames() )
+            if( name == elem_mark )
+                return layer;
+
+    return nullptr;
+}
+
+void RegionBizManager::subscribeLayerAdded(QObject *obj, const char *slot, bool queue)
+{
+    getLayerManager()->subscribeLayerAdded( obj, slot, queue );
+}
+
+void RegionBizManager::subscribeLayersChanged(QObject *obj, const char *slot, bool queue)
+{
+    getLayerManager()->subscribeLayersChanged( obj, slot, queue );
+}
+
+void RegionBizManager::subscribeLayerDeleted(QObject *obj, const char *slot, bool queue)
+{
+    getLayerManager()->subscribeLayerDeleted( obj, slot, queue );
+}
+
+void RegionBizManager::subscribeLayersChangedOrder(QObject *obj, const char *slot, bool queue)
+{
+    getLayerManager()->subscribeLayersChangedOrder( obj, slot, queue );
+}
+
+void RegionBizManager::subscribeLayerChangeShowed(QObject *obj, const char *slot, bool queue)
+{
+    getLayerManager()->subscribeLayerChangeShowed( obj, slot, queue );
+}
+
 BaseFileKeeperPtrs RegionBizManager::getFilesByEntity(uint64_t id)
 {
-    BaseFileKeeperPtrs files_keepers;
-
-    BaseFileKeeper::getMutex().lock();
-    auto& files = BaseFileKeeper::getFiles();
-    if( files.find( id ) != files.end() )
-        files_keepers = files[ id ];
-    BaseFileKeeper::getMutex().unlock();
-
+    BaseFileKeeperPtrs files_keepers =
+            BaseFileKeeper::getFileKeepersByEntity( id );
     return files_keepers;
 }
 
@@ -585,15 +719,18 @@ BaseFileKeeperPtrs RegionBizManager::getFilesByEntity(BaseEntityPtr ptr, BaseFil
     return getFilesByEntity( ptr->getId(), type );
 }
 
+BaseFileKeeperPtr RegionBizManager::getFileByPath(QString path)
+{
+    return BaseFileKeeper::getFileByPath( path );
+}
+
 BaseFileKeeperPtr RegionBizManager::addFile( QString file_path,
                                              BaseFileKeeper::FileType type,
                                              uint64_t entity_id )
 {
     BaseFileKeeperPtr file =
             _files_translator->addFile( file_path, type, entity_id );
-    BaseFileKeeper::getMutex().lock();
-    BaseFileKeeper::getFiles()[ entity_id ].push_back( file );
-    BaseFileKeeper::getMutex().unlock();
+    BaseFileKeeper::addFile( file, entity_id );
 
     return file;
 }
@@ -620,19 +757,7 @@ bool RegionBizManager::deleteFile(BaseFileKeeperPtr file)
 {
     bool del = _files_translator->deleteFile( file );
     if( del )
-    {
-        #define FILES_OF_ENTITY BaseFileKeeper::getFiles()[ file->getEntityId() ]
-
-        auto check_path = [ file ]( BaseFileKeeperPtr our_file ){
-            return our_file->getPath() == file->getPath();
-        };
-        auto iter = FIND_IF( FILES_OF_ENTITY, check_path );
-        if( iter != FILES_OF_ENTITY.end() )
-            FILES_OF_ENTITY.erase( iter );
-
-        #undef FILES
-    }
-
+        BaseFileKeeper::deleteFile( file );
     return del;
 }
 
@@ -1023,6 +1148,9 @@ void RegionBizManager::loadDataByTranslator()
 
     // groups
     _data_translator->loadGroups();
+
+    // layers
+    _data_translator->loadLayers();
 }
 
 void RegionBizManager::clearCurrentData( bool clear_entitys )

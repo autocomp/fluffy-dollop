@@ -11,6 +11,7 @@
 #include "rb_metadata.h"
 #include "rb_marks.h"
 #include "rb_group.h"
+#include "rb_layers.h"
 
 #define FIND_IF( cont, func ) std::find_if( cont.begin(), cont.end(), func );
 
@@ -73,13 +74,12 @@ public:
         return add_area;
     }
 
-    // delete
-    bool deleteArea( BaseAreaPtr area );
-    bool deleteArea( uint64_t id );
-
     // commit
     bool commitArea( BaseAreaPtr area );
     bool commitArea( uint64_t id );
+    // delete
+    bool deleteArea( BaseAreaPtr area );
+    bool deleteArea( uint64_t id );
 
     // biz relations
     BaseBizRelationPtrs getBizRelationByArea( uint64_t id );
@@ -122,11 +122,55 @@ public:
     bool deleteGroup( GroupEntityPtr group );
     bool deleteGroup( uint64_t id );
 
+    // layers
+    LayerPtr getLayer( uint64_t id );
+    LayerPtrs getLayers();
+    LayerManagerPtr getLayerManager();
+    LayerPtr addLayer( QString name );
+    bool commitLayers();
+    bool deleteLayer( LayerPtr layer );
+    bool deleteLayer( uint64_t id );
+
+    // layers get by data
+    LayerPtr getLayerOfMark( uint64_t id );
+    LayerPtr getLayerOfMark( MarkPtr mark );
+    LayerPtr getLayerOfFile( BaseFileKeeperPtr file );
+    LayerPtr getLayerOfFile( QString path );
+    LayerPtr getLayerOfMetadataName( QString name );
+
+    // layers signals
+    //! signal on layer added. Signature:
+    //! slot( uint64_t )
+    void subscribeLayerAdded( QObject* obj,
+                              const char *slot,
+                              bool queue = false);
+    //! signal on layers changed. Signature:
+    //! slot( )
+    void subscribeLayersChanged( QObject* obj,
+                                 const char *slot,
+                                 bool queue = false);
+    //! signal on layer deleted. Signature:
+    //! slot( uint64_t )
+    void subscribeLayerDeleted( QObject* obj,
+                                const char *slot,
+                                bool queue = false);
+    //! signal on layers change order. Signature:
+    //! slot( )
+    void subscribeLayersChangedOrder( QObject* obj,
+                                      const char *slot,
+                                      bool queue = false);
+    //! signal on layer change showed. Signature:
+    //! slot( uint64_t id, bool showed )
+    void subscribeLayerChangeShowed( QObject* obj,
+                                     const char *slot,
+                                     bool queue = false);
+
     // files
     BaseFileKeeperPtrs getFilesByEntity( uint64_t id );
     BaseFileKeeperPtrs getFilesByEntity( BaseEntityPtr ptr );
     BaseFileKeeperPtrs getFilesByEntity( uint64_t id, BaseFileKeeper::FileType type );
     BaseFileKeeperPtrs getFilesByEntity( BaseEntityPtr ptr, BaseFileKeeper::FileType type );
+    BaseFileKeeperPtr getFileByPath( QString path );
     BaseFileKeeperPtr addFile( QString file_path ,
                                BaseFileKeeper::FileType type,
                                uint64_t entity_id );

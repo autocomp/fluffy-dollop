@@ -8,11 +8,15 @@
 
 namespace regionbiz {
 
+class Layer;
+typedef std::shared_ptr< Layer > LayerPtr;
+
 typedef std::shared_ptr< QFile > QFilePtr;
 class BaseFileKeeper;
 typedef std::shared_ptr< BaseFileKeeper > BaseFileKeeperPtr;
 typedef std::vector< BaseFileKeeperPtr > BaseFileKeeperPtrs;
 typedef std::unordered_map< uint64_t, BaseFileKeeperPtrs > FileKeepersById;
+typedef std::unordered_map< std::string, BaseFileKeeperPtr > FileKeepersByPath;
 
 class BaseFileKeeper
 {
@@ -59,9 +63,25 @@ public:
     FileState syncFile();
     bool commit();
 
+    // layer
+    LayerPtr getLayer();
+    void moveToLayer( LayerPtr layer );
+    void leaveLayer();
+
 private:
+    static BaseFileKeeperPtrs getFileKeepersByEntity( uint64_t entity_id );
+    static BaseFileKeeperPtr getFileByPath( QString path );
+
+    static void addFile(BaseFileKeeperPtr file);
+    static void addFile( BaseFileKeeperPtr file, uint64_t entity_id );
+    static void deleteFile( BaseFileKeeperPtr file );
+
+    // type of hold - path
+    static FileKeepersByPath& getFilesByPath();
+    // type of hold - parent id
     static FileKeepersById& getFiles();
     static std::recursive_mutex& getMutex();
+
     BaseFileKeeperPtr getItself();
 
     QString _path;
