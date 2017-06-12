@@ -23,4 +23,5 @@ LIBS += -L$${INSTALL_PATH_LIB} \
 
 HEADERS += \
     test_reciver.h \
-    ftp_checker.h
+    ftp_checker.h \
+    test_layer_reciver.h

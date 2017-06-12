@@ -11,6 +11,7 @@
 
 #include "test_reciver.h"
 #include "ftp_checker.h"
+#include "test_layer_reciver.h"
 
 void loadXlsx()
 {
@@ -469,6 +470,67 @@ void checkGroups()
     qDebug() << "Size of group" << group->getCount();
 }
 
+void checkLayers()
+{
+    using namespace regionbiz;
+
+    auto mngr = RegionBizManager::instance();
+
+    // test reciver of signals
+    TestLayerReciver test_reciver;
+    test_reciver.subscribe();
+
+    if( mngr->getLayers().empty() )
+    {
+        // create
+        LayerPtr layer = mngr->addLayer( QString::fromUtf8( "Тестовый слой" ));
+        qDebug() << "Have" << mngr->getLayers().size() << "layers";
+
+        MarkPtr mark = mngr->getMarks()[ 0 ];
+        layer->addMark( mark );
+
+        auto file = mngr->getFilesByEntity( 1 )[ 0 ];
+        layer->addFile( file );
+
+        layer->addMetadataName( "area" );
+        layer->addMetadataName( "height" );
+
+        // check show/hide
+        layer->hide();
+        layer->show();
+
+        // check file
+        qDebug() << "File layer:" << file->getLayer()->getName();
+
+        // create 2
+        LayerPtr layer2 = mngr->addLayer( QString::fromUtf8( "Тестовый слой 2" ));
+        qDebug() << "Have" << mngr->getLayers().size() << "layers";
+
+        // check order change
+        layer2->moveUp();
+
+        layer2->addMark( mark );
+        layer2->addMetadataName( "area" );
+
+        // check mark
+        qDebug() << "Mark layer:" << mark->getLayer()->getName();
+        mark->moveToLayer( layer );
+        qDebug() << "Mark layer:" << mark->getLayer()->getName();
+        mark->leaveLayer();
+
+        // commit
+        qDebug() << "Commit:" << mngr->commitLayers();
+        qDebug() << "Have" << mngr->getLayers().size() << "layers";
+    }
+    else
+    {
+        // delete
+        LayerPtr layer = mngr->getLayers()[ 0 ];
+        qDebug() << "Delete:" << mngr->deleteLayer( layer );
+        qDebug() << "Have" << mngr->getLayers().size() << "layers";
+    }
+}
+
 int main( int argc, char** argv )
 {
     QApplication app( argc, argv );
@@ -492,7 +554,7 @@ int main( int argc, char** argv )
     //selectManagment();
 
     //! check ftp
-    checkFtp();
+    //checkFtp();
 
     //! check marks coords
     // checkMarksCoords();
@@ -503,9 +565,12 @@ int main( int argc, char** argv )
     //! check group working
     //checkGroups();
 
+    //! check layers
+    checkLayers();
+
     // for check close program
-    QWidget* wgt = new QWidget();
-    wgt->show();
+    //QWidget* wgt = new QWidget();
+    //wgt->show();
 
     return app.exec();
 }
