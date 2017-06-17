@@ -18,6 +18,7 @@ QT += core gui sql xml network
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 LIBS += -L$${INSTALL_PATH_LIB} \
+        -lctrcore \
         -lctrvisual \
 #        -ldpf_sfm \
 #        -ldpf_io_base \
