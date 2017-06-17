@@ -7,6 +7,11 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsPolygonItem>
 
+namespace input_layer_state
+{
+
+class HandleItem;
+
 class InputLayerState : public ScrollBaseState
 {
     Q_OBJECT
@@ -24,6 +29,8 @@ public:
     virtual bool mousePressEvent(QMouseEvent* e, QPointF scenePos);
     virtual bool mouseReleaseEvent(QMouseEvent *e, QPointF scenePos);
     virtual bool keyPressEvent(QKeyEvent *e);
+
+    void setOffsetPos(QPointF pos);
 
 signals:
     void signalStateAborted();
@@ -63,6 +70,28 @@ private:
     double _scaleX, _scaleY, _angel, _scaleAfterResizeX, _scaleAfterResizeY;
     QList<global_state::Mark*> markList;
     QCursor _turningCursor, _crossCursor;
+    //HandleItem * _handleItem = nullptr;
 };
+
+class HandleItem : public QGraphicsPixmapItem
+{
+public:
+    HandleItem(InputLayerState * inputLayerState, QGraphicsItem * parent);
+    //HandleType getHandleType();
+    void updatePos();
+
+protected:
+    void mousePressEvent(QGraphicsSceneMouseEvent * event);
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent * event);
+    QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+
+private:
+    InputLayerState * _inputLayerState;
+    //const HandleType _handleType;
+    QCursor _cursor;
+    bool _itemMoved = false;
+};
+
+}
 
 #endif

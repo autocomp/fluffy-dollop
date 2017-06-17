@@ -302,7 +302,7 @@ void LayersManagerForm::slotAddLayer()
         }
         else
         {
-            _inputLayerState = QSharedPointer<InputLayerState>(new InputLayerState(pm));
+            _inputLayerState = QSharedPointer<input_layer_state::InputLayerState>(new input_layer_state::InputLayerState(pm));
             connect(_inputLayerState.data(), SIGNAL(signalStateAborted()), this, SLOT(slotEditStateAborted()));
 
             visualize_system::StateInterface * stateInterface = visualize_system::VisualizerManager::instance()->getStateInterface(_pixelVisId);

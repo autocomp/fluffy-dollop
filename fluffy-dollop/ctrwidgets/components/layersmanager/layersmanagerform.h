@@ -39,7 +39,7 @@ private:
     QGraphicsView * _pixelView = nullptr;
     uint _geoVisId = 0;
     uint _pixelVisId = 0;
-    QSharedPointer<InputLayerState> _inputLayerState;
+    QSharedPointer<input_layer_state::InputLayerState> _inputLayerState;
 
     QTreeWidgetItem * _baseLayer, * _defectLayer, * _photoLayer, * _photo3dLayer ;
     QTreeWidgetItem * _axisLayer;

@@ -4,6 +4,8 @@
 #include<QGraphicsLineItem>
 #include<QPen>
 
+using namespace input_layer_state;
+
 InputLayerState::InputLayerState(const QPixmap &pixmap)
     : _pixmap(pixmap)
 {
@@ -28,7 +30,13 @@ void InputLayerState::init(QGraphicsScene * scene, QGraphicsView * view, const i
     _scaleY = 1; // 1/K;
     _angel = 0;
 
+//    QColor col(Qt::yellow);
+//    col.setAlpha(30);
+//    _pixmap.fill(col);
+
     _pixmapItem = new QGraphicsPixmapItem(_pixmap);
+    //_pixmapItem->setOffset(-_pixmap.width()/2., -_pixmap.height()/2.);
+
 //    _pixmapItem->setOpacity(0.5);
 //    _pixmapItem->setTransform(QTransform().scale(_scaleX, _scaleY));
     _pixmapItem->setZValue(1000000);
@@ -43,6 +51,8 @@ void InputLayerState::init(QGraphicsScene * scene, QGraphicsView * view, const i
     pen.setWidth(3);
     pen.setCosmetic(true);
     _polygonItem->setPen(pen);
+
+    //_handleItem = new HandleItem(this, _pixmapItem);
 
     moveMarks(true);
 }
@@ -84,6 +94,7 @@ bool InputLayerState::mouseMoveEvent(QMouseEvent* e, QPointF scenePos)
         const QPointF offset(scenePos - _lastMousePos);
         _pixmapItem->moveBy(offset.x(), offset.y());
         _isChanged = true;
+        _lastMousePos = scenePos;
     }
     else if(_state == PROPORTIONAL_RESIZING)
     {
@@ -114,8 +125,6 @@ bool InputLayerState::mouseMoveEvent(QMouseEvent* e, QPointF scenePos)
 //        _pixmapItem->setPos(offset);
 //        _isChanged = true;
     }
-
-    _lastMousePos = scenePos;
 
     return false;
 }
@@ -151,10 +160,26 @@ bool InputLayerState::keyPressEvent(QKeyEvent *e)
         _pixmapItem->setTransform(QTransform().scale(_scaleX, _scaleY));
         _isChanged = true;
     }break;
+    case Qt::Key_Space : {
+        _pixmapItem->resetTransform();
+        _scaleX = 1;
+        _scaleY = 1;
+        _pixmapItem->resetTransform();
+        _isChanged = true;
+    }break;
     case Qt::Key_Escape : {
         emit signalStateAborted();
     }break;
     }
+}
+
+void InputLayerState::setOffsetPos(QPointF pos)
+{
+    QPointF _offset = _pixmapItem->offset();
+    _pixmapItem->setOffset(-_offset.x(), -_offset.y());
+    QPointF posOffset = pos - _offset;
+    _pixmapItem->moveBy(posOffset.x(), posOffset.y());
+    _pixmapItem->setOffset(-pos.x(), -pos.y());
 }
 
 bool InputLayerState::mousePressEvent(QMouseEvent* e, QPointF scenePos)
@@ -186,6 +211,7 @@ bool InputLayerState::mousePressEvent(QMouseEvent* e, QPointF scenePos)
                 {
                     _view->setCursor(_crossCursor);
                     _state = MOVING;
+                    _lastMousePos = scenePos;
                     return false;
                 }
                 else
@@ -292,7 +318,144 @@ bool InputLayerState::check(double coef, QPointF p1, QPointF p2)
     return sqrt( (p1.x() - p2.x()) * (p1.x() - p2.x()) +  (p1.y() - p2.y()) * (p1.y() - p2.y()) ) <= coef;
 }
 
+//-----------------------------------------------------------
 
+HandleItem::HandleItem(InputLayerState *inputLayerState, QGraphicsItem *parent)
+    : QGraphicsPixmapItem(parent)
+    , _inputLayerState(inputLayerState)
+{
+    setZValue(1002);
+
+    QPixmap pm(11,11);
+    pm.fill(Qt::transparent);
+    QPen pen(Qt::magenta);
+    QBrush brush(Qt::white);
+    QPainter pr(&pm);
+    pr.setPen(pen);
+    pr.setBrush(brush);
+    pr.drawRoundRect(0,0,10,10);
+    pr.restore();
+    setPixmap(pm);
+
+    setFlags(QGraphicsItem::ItemIgnoresTransformations | QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsScenePositionChanges);
+    setOffset(-5,-5);
+
+//    switch(_handleType)
+//    {
+//    case HandleType::topLeft :
+//    case HandleType::bottomRight :
+//        _cursor = QCursor(Qt::SizeFDiagCursor);
+//    break;
+//    case HandleType::topCenter :
+//    case HandleType::bottomCenter :
+//        _cursor = QCursor(Qt::SizeVerCursor);
+//    break;
+//    case HandleType::topRight :
+//    case HandleType::bottomLeft :
+//        _cursor = QCursor(Qt::SizeBDiagCursor);
+//    break;
+//    case HandleType::rightCenter :
+//    case HandleType::leftCenter :
+//        _cursor = QCursor(Qt::SizeHorCursor);
+//    break;
+//    }
+    setCursor(_cursor);
+    updatePos();
+}
+
+void HandleItem::updatePos()
+{
+//    const QRectF r = _fogItem.getArea();
+//    switch(_handleType)
+//    {
+//    case HandleType::topLeft : {
+//        setPos(r.topLeft());
+//    }break;
+//    case HandleType::topCenter : {
+//        setPos(r.x() + r.width()/2., r.y());
+//    }break;
+//    case HandleType::topRight : {
+//        setPos(r.topRight());
+//    }break;
+//    case HandleType::rightCenter : {
+//        setPos(r.x() + r.width(), r.y() + r.height()/2.);
+//    }break;
+//    case HandleType::bottomRight : {
+//        setPos(r.bottomRight());
+//    }break;
+//    case HandleType::bottomCenter : {
+//        setPos(r.x() + r.width()/2., r.y() + r.height());
+//    }break;
+//    case HandleType::bottomLeft : {
+//        setPos(r.bottomLeft());
+//    }break;
+//    case HandleType::leftCenter : {
+//        setPos(r.x(), r.y() + r.height()/2.);
+//    }break;
+//    }
+}
+
+//HandleType HandleItem::getHandleType()
+//{
+//    return _handleType;
+//}
+
+void HandleItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    _itemMoved = true;
+    QGraphicsPixmapItem::mousePressEvent(event);
+    setCursor(QCursor(Qt::ArrowCursor));
+    //_fogItem.handleItemStartMove(this, true);
+}
+
+void HandleItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    _itemMoved = false;
+    QGraphicsPixmapItem::mouseReleaseEvent(event);
+    setCursor(_cursor);
+
+    _inputLayerState->setOffsetPos(pos());
+
+    //_fogItem.updateHandleItemPos();
+    //_fogItem.handleItemStartMove(this, false);
+}
+
+QVariant HandleItem::itemChange(GraphicsItemChange change, const QVariant &value)
+{
+//    if(change == ItemPositionChange && _itemMoved)
+//    {
+//        QPointF newPos = value.toPointF();
+//        QRectF sceneRect(scene()->sceneRect());
+//        if(sceneRect.contains(newPos) == false)
+//        {
+//            if(newPos.x() < sceneRect.left())
+//                newPos.setX(sceneRect.left());
+//            else if(newPos.x() > sceneRect.right())
+//                newPos.setX(sceneRect.right());
+
+//            if(newPos.y() < sceneRect.top())
+//                newPos.setY(sceneRect.top());
+//            else if(newPos.y() > sceneRect.bottom())
+//                newPos.setY(sceneRect.bottom());
+//        }
+
+//        switch(_handleType)
+//        {
+//        case HandleType::topCenter :
+//        case HandleType::bottomCenter :
+//            newPos.setX(pos().x());
+//            break;
+//        case HandleType::rightCenter :
+//        case HandleType::leftCenter :
+//            newPos.setY(pos().y());
+//            break;
+//        }
+//        _fogItem.handleItemMoved(_handleType, newPos);
+//        return QGraphicsItem::itemChange(change, newPos);
+//    }
+
+    return QGraphicsItem::itemChange(change, value);
+}
 
 
 
