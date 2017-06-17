@@ -20,6 +20,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 LIBS += -L$${INSTALL_PATH_LIB} \
         -lctrcore \
         -lctrvisual \
+        -lregionbiz \
 #        -ldpf_sfm \
 #        -ldpf_io_base \
 #        -ldpf_core \
