@@ -35,22 +35,12 @@ SOURCES += \
     $$files(components/waitdialog/*.cpp) \
     $$files(components/layersmanager/*.cpp) \
     $$files(components/slidewindow/*.cpp) \
-#    components/filepathwidget/*.cpp \
-#    components/sourcesensorwidget/*.cpp \
-#    components/endworkingwidgets/*.cpp \
-#    components/splitters/*.cpp \
-#    components/comboboxes/*.cpp
 
 HEADERS += \
 #    components/filedialog/*.h \
     $$files(components/waitdialog/*.h) \
     $$files(components/layersmanager/*.h) \
     $$files(components/slidewindow/*.h) \
-#    components/filepathwidget/*.h \
-#    components/sourcesensorwidget/*.h \
-#    components/endworkingwidgets/*.h \
-#    components/splitters/*.h \
-#    components/comboboxes/*.h
 
 OTHER_FILES += \
 
@@ -66,6 +56,7 @@ RESOURCES += \
 FORMS += \
 #    components/filedialog/previewform.ui \
 #    components/sourcesensorwidget/sourcesensorwidget.ui
-    components/layersmanager/layersmanagerform.ui
+    components/layersmanager/layersmanagerform.ui \
+    components/layersmanager/layerinstrumentalform.ui
 
 include ($${ROOT_DIR}/pri/install.pri)
