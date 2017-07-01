@@ -49,6 +49,7 @@
 //#include "libstyledebuggerplugin/debuggerinstaller.h"
 
 #include <ctrcore/undoactions/undocontroller.h>
+#include <ctrcore/ctrcore/tempdircontroller.h>
 //#include <ctrwidgets/components/endworkingwidgets/endworkingobject.h>
 
 #include <ctrcore/bus/common_message_notifier.h>
@@ -86,12 +87,10 @@ AppComposer::AppComposer(QObject *parent) : QObject(parent)
 
 AppComposer::~AppComposer()
 {
-    qDebug() << "===> ~AppComposer()";
+    TempDirController::clearCurrentUserTempDir();
     m_pAppPlugins.clear();
     saveLastOpenedScenarioId(0);
 }
-
-
 
 void AppComposer::init()
 {
@@ -304,6 +303,8 @@ void AppComposer::init()
 //        if( res == QMessageBox::Yes )
 //            ((ScenarioMainWidget *)m_pScenarioSelector->getOpenScenarioWidget())->slotOpenContext(lastScenarioId);
 //    }
+
+    TempDirController::checkTempDirForAllUsers();
 }
 
 void AppComposer::slotMainMenuClicked()
