@@ -17,6 +17,11 @@ QRectF ViewInterface::getViewportRect()
     return _abstractVisualizer.getViewportRect();
 }
 
+QRectF ViewInterface::getViewportSceneRect()
+{
+    return _abstractVisualizer.getViewportSceneRect();
+}
+
 void ViewInterface::centerOn(QPointF nativeCoords)
 {
     return _abstractVisualizer.centerOn(nativeCoords);

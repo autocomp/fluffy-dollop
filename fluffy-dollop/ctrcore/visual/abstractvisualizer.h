@@ -62,6 +62,7 @@ public:
 
     // под нативными подразумеваются родные координаты визуализатора, например для двумерного и трехмерного - WGS84, для пиксельного и видео - координаты матрицы изображения.
     virtual QRectF getViewportRect() = 0;
+    virtual QRectF getViewportSceneRect() = 0;
     virtual void centerOn(QPointF nativeCoords) = 0;
     virtual void centerOn(QRectF nativeArea) = 0;
 

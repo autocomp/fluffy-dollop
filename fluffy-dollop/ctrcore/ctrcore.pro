@@ -25,7 +25,7 @@ SOURCES +=     \
     $$files(ctrcore/*.cpp) \
     $$files(bus/*.cpp) \
     $$files(undoactions/*.cpp) \
-    $$files(tempinputdata/*.cpp)
+    $$files(tempinputdata/*.cpp) \
 
 HEADERS += \
     $$files(provider/*.h) \
@@ -34,7 +34,7 @@ HEADERS += \
     $$files(ctrcore/*.h) \
     $$files(bus/*.h) \
     $$files(undoactions/*.h) \
-    $$files(tempinputdata/*.h)
+    $$files(tempinputdata/*.h) \
 
 #TRANSLATIONS += ctrcore.ts
 
