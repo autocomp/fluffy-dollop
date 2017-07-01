@@ -6,21 +6,79 @@
 #include <QFrame>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <libembeddedwidgets/embeddedstruct.h>
+#include <libembeddedwidgets/embeddedapp.h>
+
+ProgressDialog::ProgressDialog(const QString& captionText)
+{
+    QVBoxLayout *pLayout = new QVBoxLayout(this);
+
+    m_label = new QLabel(captionText, this);
+    pLayout->addWidget(m_label, 0, Qt::AlignCenter);
+
+    QSpacerItem * spacer = new QSpacerItem(0, 5, QSizePolicy::Minimum, QSizePolicy::Preferred);
+    pLayout->addSpacerItem(spacer);
+
+    QFrame *fr = new QFrame(this);
+    fr->setFrameShape(QFrame::HLine);
+    fr->setFrameShadow(QFrame::Sunken );
+    pLayout->addWidget(fr);
+
+    spacer = new QSpacerItem(0, 5, QSizePolicy::Minimum, QSizePolicy::Preferred);
+    pLayout->addSpacerItem(spacer);
+
+    m_progressBar = new QProgressBar(this);
+    m_progressBar->setMinimum(0);
+    m_progressBar->setMaximum(100);
+    m_progressBar->setValue(0);
+    pLayout->addWidget(m_progressBar);
+
+    _iface = new EmbIFaceNotifier(this);
+    QString tag = QString("ProgressDialog.withProgressBar");
+    ew::EmbeddedWidgetStruct struc;
+    ew::EmbeddedHeaderStruct headStr;
+    struc.headerVisible = false;
+    struc.topOnHint = true;
+    struc.header = headStr;
+    struc.isModal = true;
+    struc.isModalBlock = false;
+    struc.iface = _iface;
+    struc.widgetTag = tag;
+    struc.topOnHint = true;
+    struc.minSize = QSize(300,80);
+    struc.maxSize = QSize(300,80);
+    ewApp()->createWidget(struc, ewApp()->getMainWindowId());
+    ewApp()->setVisible(_iface->id(), true);
+    connect(_iface, SIGNAL(signalClosed()), this, SLOT(slotEmbWidgetClose()));
+}
+
+ProgressDialog::~ProgressDialog()
+{
+    ewApp()->setVisible(_iface->id(), false);
+    _iface->deleteLater();
+}
+
+void ProgressDialog::setPersent(uint persent)
+{
+    m_progressBar->setValue(persent);
+}
+
+void ProgressDialog::slotEmbWidgetClose()
+{
+    ewApp()->setVisible(_iface->id(), true);
+}
+
+//---------------------------------------------------------------
 
 WaitDialog::WaitDialog(bool &cancelFlag, const QString& captionText, const QString &cancelButtonText)
     : m_cancelFlag(cancelFlag)
 {
     m_cancelFlag = false;
 
-    setStyleSheet("QWidget{background:lightGray;}");
-    setWindowFlags(Qt::SplashScreen);
-    setWindowModality(Qt::ApplicationModal);
-    setModal(true);
-
     QVBoxLayout *pLayout = new QVBoxLayout(this);
 
-    QLabel * label = new QLabel(captionText, this);
-    pLayout->addWidget(label, 0, Qt::AlignCenter);
+    m_label = new QLabel(captionText, this);
+    pLayout->addWidget(m_label, 0, Qt::AlignCenter);
 
     QSpacerItem * spacer = new QSpacerItem(0, 5, QSizePolicy::Minimum, QSizePolicy::Preferred);
     pLayout->addSpacerItem(spacer);
@@ -49,7 +107,35 @@ WaitDialog::WaitDialog(bool &cancelFlag, const QString& captionText, const QStri
 
     pLayout->addLayout(pHLayout);
 
-    show();
+    _iface = new EmbIFaceNotifier(this);
+    QString tag = QString("WaitDialog.withProgressBar");
+    ew::EmbeddedWidgetStruct struc;
+    ew::EmbeddedHeaderStruct headStr;
+    struc.headerVisible = false;
+    struc.topOnHint = true;
+    struc.header = headStr;
+    struc.isModal = true;
+    struc.isModalBlock = false;
+    struc.iface = _iface;
+    struc.widgetTag = tag;
+    struc.topOnHint = true;
+    struc.minSize = QSize(300,120);
+    struc.maxSize = QSize(300,120);
+    ewApp()->createWidget(struc, ewApp()->getMainWindowId());
+    ewApp()->setVisible(_iface->id(), true);
+    connect(_iface, SIGNAL(signalClosed()), this, SLOT(slotEmbWidgetClose()));
+}
+
+WaitDialog::~WaitDialog()
+{
+    ewApp()->setVisible(_iface->id(), false);
+    _iface->deleteLater();
+}
+
+
+void WaitDialog::setCancelButtonVisibility(bool on_off)
+{
+    m_cancelButton->setVisible(on_off);
 }
 
 void WaitDialog::setPersent(uint persent)
@@ -59,21 +145,22 @@ void WaitDialog::setPersent(uint persent)
 
 void WaitDialog::slotCancel()
 {
-    m_cancelButton->hide();
+    m_label->setText(QString::fromUtf8("Останавливается ..."));
+    m_cancelButton->setDisabled(true);
     m_cancelFlag = true;
     emit signalCancel();
-    close();
 }
 
-//---------------------------------------------------------------
-
-WaitDialogUnlimited::WaitDialogUnlimited( QString descriptionText, QString userButtonText, uint maxWgtWidth, QWidget *parent, QString gifResourcePath)
-    : QDialog(parent)
+void WaitDialog::slotEmbWidgetClose()
 {
-    setWindowModality(Qt::ApplicationModal);
-    setWindowFlags(Qt::WindowStaysOnTopHint|Qt::FramelessWindowHint);
+    ewApp()->setVisible(_iface->id(), true);
+}
 
-    uint defaultMaxWidth = maxWgtWidth;         //150
+//-----------------------------------------------------------------------
+
+WaitDialogUnlimited::WaitDialogUnlimited(QString descriptionText, QString userButtonText, uint maxWgtWidth, QWidget *parent, QString gifResourcePath)
+{
+    uint defaultMaxWidth = maxWgtWidth;
     uint defaultMaxHeight = defaultMaxWidth;
 
     QVBoxLayout *pMainVBLayout = new QVBoxLayout(this);
@@ -111,13 +198,31 @@ WaitDialogUnlimited::WaitDialogUnlimited( QString descriptionText, QString userB
         defaultMaxHeight = defaultMaxWidth + m_pbUserButton->height();
     }
 
-//    setFixedSize(QSize(defaultMaxWidth,defaultMaxHeight));
+    _iface = new EmbIFaceNotifier(this);
+    QString tag = QString("WaitDialogUnlimited.withProgressBar");
+    ew::EmbeddedWidgetStruct struc;
+    ew::EmbeddedHeaderStruct headStr;
+    struc.headerVisible = false;
+    struc.topOnHint = true;
+    struc.header = headStr;
+    struc.isModal = true;
+    struc.isModalBlock = false;
+    struc.iface = _iface;
+    struc.widgetTag = tag;
+    struc.topOnHint = true;
+    struc.minSize = QSize(120,120);
+    struc.maxSize = QSize(120,120);
+    ewApp()->createWidget(struc, ewApp()->getMainWindowId());
+    ewApp()->setVisible(_iface->id(), true);
+    connect(_iface, SIGNAL(signalClosed()), this, SLOT(slotEmbWidgetClose()));
 
     startWaiting();
 }
 
 WaitDialogUnlimited::~WaitDialogUnlimited()
 {
+    ewApp()->setVisible(_iface->id(), false);
+    _iface->deleteLater();
     stopWaiting();
     delete m_movie;
     m_movie = nullptr;
@@ -126,15 +231,16 @@ WaitDialogUnlimited::~WaitDialogUnlimited()
 void WaitDialogUnlimited::startWaiting()
 {
     m_movie->start();
-    show();
-    move(qApp->desktop()->screenGeometry(qApp->desktop()->primaryScreen()).width()/2 - width()/2,
-         qApp->desktop()->screenGeometry(qApp->desktop()->primaryScreen()).height()/2 - height()/2);
 }
 
 void WaitDialogUnlimited::stopWaiting()
 {
     m_movie->stop();
-    hide();
+}
+
+void WaitDialogUnlimited::slotEmbWidgetClose()
+{
+    ewApp()->setVisible(_iface->id(), true);
 }
 
 

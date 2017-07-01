@@ -5,6 +5,27 @@
 #include <QProgressBar>
 #include <QLabel>
 #include <QMovie>
+#include <ctrcore/plugin/embifacenotifier.h>
+
+class ProgressDialog : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit ProgressDialog(const QString & captionText);
+    ~ProgressDialog();
+
+public slots:
+    void setPersent(uint persent);
+
+protected slots:
+    void slotEmbWidgetClose();
+
+private:
+    QLabel * m_label;
+    QProgressBar * m_progressBar;
+    EmbIFaceNotifier* _iface;
+};
 
 class WaitDialog : public QDialog
 {
@@ -12,18 +33,23 @@ class WaitDialog : public QDialog
 
 public:
     explicit WaitDialog(bool& cancelFlag, const QString & captionText, const QString & cancelButtonText);
+    ~WaitDialog();
     void closeBlockDialog();
+    void setCancelButtonVisibility(bool on_off);
 
 public slots:
     void setPersent(uint persent);
 
 protected slots:
     void slotCancel();
+    void slotEmbWidgetClose();
 
 private:
     bool& m_cancelFlag;
+    QLabel * m_label;
     QProgressBar * m_progressBar;
     QPushButton * m_cancelButton;
+    EmbIFaceNotifier* _iface;
 
 signals:
     void signalCancel();
@@ -41,11 +67,15 @@ private:
     void startWaiting();
     void stopWaiting();
 
+private slots:
+    void slotEmbWidgetClose();
+
 signals:
     void sigUserButtonClicked();
 
 private:
     QMovie * m_movie;
+    EmbIFaceNotifier* _iface;
 };
 
 
