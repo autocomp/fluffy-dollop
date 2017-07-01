@@ -51,6 +51,7 @@ public:
     virtual bool setVisualizerState(QSharedPointer<visualize_system::VisualizerStateObject> state);
     virtual QString getCurrentState();
     virtual QRectF getViewportRect();
+    virtual QRectF getViewportSceneRect();
     virtual void centerOn(QPointF nativeCoords);
     virtual void centerOn(QRectF nativeArea);
     virtual void setZlevel(int zLevel);

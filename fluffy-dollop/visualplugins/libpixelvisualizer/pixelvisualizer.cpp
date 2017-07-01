@@ -196,6 +196,11 @@ QRectF PixelVisualizer::getViewportRect()
     return QRectF();
 }
 
+QRectF PixelVisualizer::getViewportSceneRect()
+{
+    return m_controller->getViewportSceneRect();
+}
+
 void PixelVisualizer::centerOn(QPointF nativeCoords)
 {
 

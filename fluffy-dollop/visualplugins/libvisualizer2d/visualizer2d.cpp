@@ -623,6 +623,11 @@ QRectF Visualizer2d::getViewportRect()
     return m_controller->getViewportRect();
 }
 
+QRectF Visualizer2d::getViewportSceneRect()
+{
+    return m_controller->getViewportSceneRect();
+}
+
 void Visualizer2d::centerOn(QPointF nativeCoords)
 {
     double X(nativeCoords.x());
