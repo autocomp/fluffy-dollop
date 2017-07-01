@@ -1,5 +1,6 @@
 #include "layersmanagerform.h"
 #include "ui_layersmanagerform.h"
+#include "layerinstrumentalform.h"
 #include <QFile>
 #include <QDir>
 #include <QGraphicsView>
@@ -13,6 +14,8 @@
 #include <ctrcore/bus/common_message_notifier.h>
 #include <ctrcore/bus/bustags.h>
 #include <ctrcore/ctrcore/ctrconfig.h>
+#include <dmanager/embeddedstruct.h>
+#include <dmanager/embeddedapp.h>
 
 using namespace regionbiz;
 
@@ -107,6 +110,11 @@ LayersManagerForm::~LayersManagerForm()
     delete ui;
 }
 
+void LayersManagerForm::setEmbeddedWidgetId(quint64 id)
+{
+    _embeddedWidgetId = id;
+}
+
 void LayersManagerForm::reset()
 {
     setDisabled(true);
@@ -132,12 +140,12 @@ void LayersManagerForm::reset()
         delete item;
 }
 
-void LayersManagerForm::reload(BaseAreaPtr ptr)
+void LayersManagerForm::reload(BaseAreaPtr ptr, bool isGeoScene)
 {
     reset();
     setDisabled(false);
-
-    QGraphicsScene * _scene = _pixelView->scene(); /// <---- !!! set geo or pixel scene !!!
+    _isGeoScene = isGeoScene;
+    QGraphicsScene * _scene = (_isGeoScene ? _geoView->scene() : _pixelView->scene());
 
     BaseFileKeeperPtrs baseFileKeeperPtrs = ptr->getFilesByType(BaseFileKeeper::FT_PLAN);
     foreach (BaseFileKeeperPtr baseFileKeeperPtr, baseFileKeeperPtrs)
@@ -292,21 +300,43 @@ void LayersManagerForm::slotItemChanged(QTreeWidgetItem *item, int /*column*/)
 
 void LayersManagerForm::slotAddLayer()
 {
-    QString filePath = QFileDialog::getOpenFileName(this);
+    QString filePath = QFileDialog::getOpenFileName(this, QString::fromUtf8("Выберите изображение"));
     if(filePath.isEmpty() == false)
     {
-        QPixmap pm(filePath);
-        if(pm.isNull())
+        QPixmap pixmap(filePath);
+        if(pixmap.isNull())
         {
             QMessageBox::information(this, QString::fromUtf8("Внимание"), QString::fromUtf8("Выбранный файл не является изображением !"));
         }
         else
         {
-            _inputLayerState = QSharedPointer<input_layer_state::InputLayerState>(new input_layer_state::InputLayerState(pm));
-            connect(_inputLayerState.data(), SIGNAL(signalStateAborted()), this, SLOT(slotEditStateAborted()));
+            _instrumentalForm = new LayerInstrumentalForm( (_isGeoScene ? _geoVisId : _pixelVisId ), pixmap);
+            _ifaceInstrumentalForm = new EmbIFaceNotifier(_instrumentalForm);
 
-            visualize_system::StateInterface * stateInterface = visualize_system::VisualizerManager::instance()->getStateInterface(_pixelVisId);
-            stateInterface->setVisualizerState(_inputLayerState);
+            QString tag("LayerInstrumentalForm");
+            quint64 widgetId = ewApp()->restoreWidget(tag, _ifaceInstrumentalForm);
+            if(0 == widgetId)
+            {
+                ew::EmbeddedWidgetStruct struc;
+                ew::EmbeddedHeaderStruct headStr;
+                headStr.hasCloseButton = true;
+                headStr.windowTitle = QString("");
+                headStr.headerPixmap = QString(":/img/icon_edit_image.png");
+                struc.widgetTag = tag;
+                struc.minSize = QSize(245,25);
+                struc.maxSize = QSize(245,250);
+                struc.size = QSize(245,25);
+                struc.header = headStr;
+                struc.iface = _ifaceInstrumentalForm;
+                struc.topOnHint = true;
+                struc.isModal = false;
+                //visualize_system::ViewInterface * viewInterface = visualize_system::VisualizerManager::instance()->getViewInterface(_geoVisId);
+                widgetId = ewApp()->createWidget(struc); //, viewInterface->getVisualizerWindowId());
+            }
+            _instrumentalForm->setEmbeddedWidgetId(widgetId);
+            connect(_ifaceInstrumentalForm, SIGNAL(signalClosed()), this, SLOT(slotLayerInstrumentalFormClose()));
+            ewApp()->setVisible(_ifaceInstrumentalForm->id(), true);
+            ewApp()->setVisible(_embeddedWidgetId, false);
 
             bool block(true);
             CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(block), QString("visualize_system"));
@@ -354,13 +384,21 @@ void LayersManagerForm::slotBlockGUI(QVariant var)
     setDisabled(var.toBool());
 }
 
-void LayersManagerForm::slotEditStateAborted()
+void LayersManagerForm::slotLayerInstrumentalFormClose()
 {
-    _inputLayerState->emit_closeState();
-    _inputLayerState.clear();
+    if(_ifaceInstrumentalForm)
+    {
+        ewApp()->removeWidget(_ifaceInstrumentalForm->id());
+        _instrumentalForm->deleteLater();
+        _instrumentalForm = nullptr;
+
+        delete _ifaceInstrumentalForm;
+        _ifaceInstrumentalForm = nullptr;
+    }
 
     bool block(false);
     CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(block), QString("visualize_system"));
+    ewApp()->setVisible(_embeddedWidgetId, true);
 }
 
 void LayersManagerForm::syncChechState(QTreeWidgetItem *item, bool setVisible)

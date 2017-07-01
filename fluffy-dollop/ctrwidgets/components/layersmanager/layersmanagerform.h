@@ -4,9 +4,11 @@
 #include <QWidget>
 #include <QTreeWidgetItem>
 #include <regionbiz/rb_manager.h>
-#include "inputlayerstate.h"
+#include <ctrcore/plugin/embifacenotifier.h>
+
 class QGraphicsView;
 class QGraphicsPixmapItem;
+class LayerInstrumentalForm;
 
 namespace Ui {
 class LayersManagerForm;
@@ -19,8 +21,9 @@ class LayersManagerForm : public QWidget
 public:
     explicit LayersManagerForm(QWidget *parent = 0);
     ~LayersManagerForm();
+    void setEmbeddedWidgetId(quint64 id);
     void reset();
-    void reload(regionbiz::BaseAreaPtr ptr);
+    void reload(regionbiz::BaseAreaPtr ptr, bool isGeoScene);
 
 private slots:
     void slotItemChanged(QTreeWidgetItem *item, int column);
@@ -29,17 +32,20 @@ private slots:
     void slotDeleteLayer();
     void slotSelectionChanged();
     void slotBlockGUI(QVariant);
-    void slotEditStateAborted();
+    void slotLayerInstrumentalFormClose();
 
 private:
     void syncChechState(QTreeWidgetItem *item, bool setVisible);
 
     Ui::LayersManagerForm *ui;
+    quint64 _embeddedWidgetId = 0;
     QGraphicsView * _geoView = nullptr;
     QGraphicsView * _pixelView = nullptr;
     uint _geoVisId = 0;
     uint _pixelVisId = 0;
-    QSharedPointer<input_layer_state::InputLayerState> _inputLayerState;
+    bool _isGeoScene;
+    LayerInstrumentalForm * _instrumentalForm = nullptr;
+    EmbIFaceNotifier * _ifaceInstrumentalForm = nullptr;
 
     QTreeWidgetItem * _baseLayer, * _defectLayer, * _photoLayer, * _photo3dLayer ;
     QTreeWidgetItem * _axisLayer;

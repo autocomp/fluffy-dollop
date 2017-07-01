@@ -1,5 +1,24 @@
 <RCC>
     <qresource prefix="/">
-        <file>img/019_icons_32_layers.png</file>
+        <file>img/icon_layers.png</file>
+        <file>img/arrow_cross_cursor.png</file>
+        <file>img/cross_cursor.png</file>
+        <file>img/getcolor_cursor.png</file>
+        <file>img/icon_apply.png</file>
+        <file>img/icon_apply_color.png</file>
+        <file>img/icon_crop.png</file>
+        <file>img/icon_delete.png</file>
+        <file>img/icon_edit_image.png</file>
+        <file>img/icon_get_color.png</file>
+        <file>img/icon_opacity.png</file>
+        <file>img/icon_polygon.png</file>
+        <file>img/icon_transform.png</file>
+        <file>img/icon_undo_act.png</file>
+        <file>img/polygon_cursor.png</file>
+        <file>img/transparent_background.png</file>
+        <file>img/turn_cursor.png</file>
+        <file>img/handle.png</file>
+        <file>img/handle_anchor.png</file>
+        <file>img/handle_rotater.png</file>
     </qresource>
 </RCC>

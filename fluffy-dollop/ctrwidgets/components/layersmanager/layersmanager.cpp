@@ -30,7 +30,7 @@ void LayersManager::init()
     _layersButton->setChecked(true);
     _layersButton->setMinimumSize( 40, 40 );
     _layersButton->setMaximumSize( 40, 40 );
-    _layersButton->setIcon( QIcon( ":/img/019_icons_32_layers.png" ));
+    _layersButton->setIcon( QIcon( ":/img/icon_layers.png" ));
     _layersButton->setToolTip( QString::fromUtf8("Слои"));
     connect(_layersButton, SIGNAL(clicked(bool)), this, SLOT(setVisible(bool)));
     sw->addWidget( _layersButton );
@@ -61,6 +61,7 @@ void LayersManager::init()
         struc.isModal = false;
         ewApp()->createWidget(struc);
     }
+    _layersManagerForm->setEmbeddedWidgetId(widgetId);
     reset();
 }
 
@@ -89,6 +90,7 @@ void LayersManager::slotObjectSelectionChanged(uint64_t /*prev_id*/, uint64_t cu
         return;
     }
 
+    bool isGeoScene(false);
     switch( entity->getEntityType() )
     {
     case BaseEntity::ET_MARK:
@@ -115,6 +117,8 @@ void LayersManager::slotObjectSelectionChanged(uint64_t /*prev_id*/, uint64_t cu
             return;
         case BaseArea::AT_LOCATION:
         case BaseArea::AT_FACILITY:
+            isGeoScene = true;
+            //! NOT BREAK !!!
         case BaseArea::AT_FLOOR:
             currentObject = ptr->getId();
             break;
@@ -134,7 +138,7 @@ void LayersManager::slotObjectSelectionChanged(uint64_t /*prev_id*/, uint64_t cu
         _currentObject = currentObject;
         ptr = RegionBizManager::instance()->getBaseArea(_currentObject);
         if(ptr)
-            reload(ptr);
+            reload(ptr, isGeoScene);
     }
     }
 }
@@ -145,10 +149,10 @@ void LayersManager::reset()
     _layersManagerForm->reset();
 }
 
-void LayersManager::reload(BaseAreaPtr ptr)
+void LayersManager::reload(BaseAreaPtr ptr, bool isGeoScene)
 {
     ewApp()->setWidgetTitle(_iface->id(), ptr->getName());
-    _layersManagerForm->reload(ptr);
+    _layersManagerForm->reload(ptr, isGeoScene);
 }
 
 

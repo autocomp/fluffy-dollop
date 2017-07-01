@@ -25,7 +25,7 @@ private slots:
 
 private:
     void reset();
-    void reload(regionbiz::BaseAreaPtr ptr);
+    void reload(regionbiz::BaseAreaPtr ptr, bool isGeoScene);
 
     QPushButton* _layersButton;
     EmbIFaceNotifier* _iface = nullptr;
