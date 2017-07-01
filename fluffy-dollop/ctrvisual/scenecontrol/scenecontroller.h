@@ -123,6 +123,7 @@ public:
     void emit_ClickRBOnObject(quint64 id) {emit signal_clickRBOnObject(id);}
     uint getVisualizerId() {return m_visualizerId;}
     QRectF getViewportRect();
+    QRectF getViewportSceneRect();
     void emit_signalUserViewControlAction(UserAction userAction);
 
 public slots:

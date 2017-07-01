@@ -1081,6 +1081,14 @@ QRectF SceneController::getViewportRect()
     return nativeRect;
 }
 
+QRectF SceneController::getViewportSceneRect()
+{
+    QRectF viewportSceneRect;
+    if(m_viewList.isEmpty() == false)
+        viewportSceneRect = m_viewList.first()->getViewportRect();
+    return viewportSceneRect;
+}
+
 void SceneController::emit_signalUserViewControlAction(UserAction userAction)
 {
     emit signalUserViewControlAction(userAction);
