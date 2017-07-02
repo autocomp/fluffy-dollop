@@ -718,6 +718,17 @@ void PixmapTransformState::changeImageColor(QColor inColor, QColor outColor, int
     if(inColor.isValid() && outColor.isValid())
         inColor.setAlpha(outColor.alpha());
 
+    QString filePath = TempDirController::createTempDirForCurrentUser() + QDir::separator() + "temp.tif";
+    bool res = _pixmap.save(filePath, "TIF");
+    UndoAct undoAct;
+    undoAct.filePath = filePath;
+    undoAct.scenePos = _handleItemTopLeft->scenePos();
+    undoAct.scaleW = _scW;
+    undoAct.scaleH = _scH;
+    undoAct.rotation = _rotation;
+    _undoStack.push(undoAct);
+    emit signalPixmapChanged();
+
     QString text;
     if(_areaOnImage.isEmpty()) // всё изображени
     {
@@ -743,7 +754,7 @@ void PixmapTransformState::changeImageColor(QColor inColor, QColor outColor, int
             {
                 if(inColor.isValid() && outColor.isValid()) // замена "outColor" на "inColor"
                 {
-                    QColor pixelColor = QColor::fromRgb( image.pixel(x,y) );
+                    QColor pixelColor = QColor::fromRgba( image.pixel(x,y) );
                     if(pixelColor.alpha() > 1 && lenght(pixelColor, outColor) <= sensitivity)
                         image.setPixel(x, y, inColor.rgba());
                 }

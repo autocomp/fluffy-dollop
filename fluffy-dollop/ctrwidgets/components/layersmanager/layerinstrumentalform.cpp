@@ -444,7 +444,7 @@ void LayerInstrumentalForm::applyForImageOrArea(bool on_off)
 
 void LayerInstrumentalForm::pixmapChanged()
 {
-    ui->undoAction->setEnabled(true); //_pixmapTransformState->changed());
+    ui->undoAction->setEnabled(_pixmapTransformState->changed());
 }
 
 void LayerInstrumentalForm::undoAction()
