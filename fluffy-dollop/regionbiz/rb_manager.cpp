@@ -757,7 +757,14 @@ bool RegionBizManager::deleteFile(BaseFileKeeperPtr file)
 {
     bool del = _files_translator->deleteFile( file );
     if( del )
+    {
         BaseFileKeeper::deleteFile( file );
+
+        auto entity = getBaseEntity( file->getEntityId() );
+        if( entity )
+            // TODO commit files only
+            return entity->commit();
+    }
     return del;
 }
 
