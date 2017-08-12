@@ -12,6 +12,7 @@ public:
     virtual ~ViraGraphicsItem() {}
     bool itemIsSelected() {return _isSelected;}
     virtual void setItemselected(bool on_off) = 0;
+    virtual void setItemEnabled(bool on_off) = 0;
     virtual void centerOnItem() = 0;
     virtual quint64 getId() = 0;
     virtual void reinit() = 0;

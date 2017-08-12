@@ -29,9 +29,9 @@ LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPixmap &p
     ui->changeColor->setIcon(QIcon(":/img/icon_get_color.png"));
     connect(ui->changeColor, SIGNAL(clicked(bool)), this, SLOT(setMode(bool)));
 
-    ui->setOpacity->setIcon(QIcon(":/img/icon_opacity.png"));
-    ui->setOpacity->setEnabled(false);
-    connect(ui->setOpacity, SIGNAL(clicked(bool)), this, SLOT(setOpacity(bool)));
+    ui->save->setIcon(QIcon(":/img/icon_save.png"));
+    connect(ui->save, SIGNAL(clicked()), this, SLOT(save()));
+
     ui->persentFrame->setVisible(false);
     connect(ui->persentSlider, SIGNAL(valueChanged(int)), this, SLOT(setOpacityValue(int)));
 
@@ -41,7 +41,6 @@ LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPixmap &p
 
     ui->apply->setIcon(QIcon(":/img/icon_apply.png"));
     connect(ui->apply, SIGNAL(clicked()), this, SLOT(apply()));
-    ui->apply->setEnabled(false);
 
     ui->colorFrame->setVisible(false);
     ui->setColorOutFromImage->setIcon(QIcon(":/img/icon_get_color.png"));
@@ -71,12 +70,11 @@ LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPixmap &p
     connect(ui->setTransparent, SIGNAL(clicked(bool)), this, SLOT(setColorMode(bool)));
     connect(ui->setColor, SIGNAL(clicked(bool)), this, SLOT(setColorMode(bool)));
 
-    QPointF pos;
+    QPointF pos(0,0);
     double originalScale(-1);
     visualize_system::ViewInterface * viewInterface = visualize_system::VisualizerManager::instance()->getViewInterface(_visualizerId);
-    if(viewInterface)
+    if(viewInterface->getVisualizerType() == visualize_system::Visualizer2D)
     {
-        visualize_system::ViewInterface * viewInterface = visualize_system::VisualizerManager::instance()->getViewInterface(_visualizerId);
         QRectF viewportSceneRect = viewInterface->getViewportSceneRect();
         double v_W = viewportSceneRect.width() / 5.;
         double v_H = viewportSceneRect.height() / 5.;
@@ -157,7 +155,6 @@ void LayerInstrumentalForm::setEmbeddedWidgetId(quint64 id)
 void LayerInstrumentalForm::setMode(bool on_off)
 {
     bool changeColorModeOff(false);
-
     if(on_off)
     {
         if(ui->transform == sender())
@@ -193,6 +190,9 @@ void LayerInstrumentalForm::setMode(bool on_off)
     }
     else
     {
+        if(ui->crop == sender())
+            _pixmapTransformState->cropPixmap();
+
         _pixmapTransformState->setMode(StateMode::ScrollMap);
         changeColorModeOff = true;
     }
@@ -218,17 +218,13 @@ void LayerInstrumentalForm::setMode(bool on_off)
     if(! ui->transform->isChecked() && ! ui->crop->isChecked() && ! ui->changeColor->isChecked())
     {
         ui->apply->setEnabled(_pixmapTransformState->changed());
+        ui->save->setEnabled(_pixmapTransformState->changed());
     }
-
-    if(ui->setOpacity->isChecked())
-        if( ! ui->transform->isChecked())
-            ui->setOpacity->setChecked(false);
 
     ui->persentSlider->setValue(0);
     setOpacityValue(0);
 
-    ui->setOpacity->setEnabled( ui->transform->isChecked() );
-    ui->persentFrame->setVisible(ui->transform->isChecked() && ui->setOpacity->isChecked());
+    ui->persentFrame->setVisible(ui->transform->isChecked());
 
     ui->colorFrame->setVisible( ui->changeColor->isChecked() );
 
@@ -248,12 +244,6 @@ void LayerInstrumentalForm::makeAdjustForm()
     ewApp()->adjustWidgetSize(_embeddedWidgetId);
     wgt->setMinimumWidth(wgtMinSize.width());
     wgt->setMaximumWidth(wgtMaxSize.width());
-}
-
-void LayerInstrumentalForm::setOpacity(bool on_off)
-{
-    ui->persentFrame->setVisible(on_off);
-    QTimer::singleShot(50,this,SLOT(makeAdjustForm()));
 }
 
 void LayerInstrumentalForm::setOpacityValue(int precent)
@@ -361,6 +351,7 @@ void LayerInstrumentalForm::setColorOnImage(QColor color)
     bool changed(true);
     ui->apply->setEnabled(changed);
     ui->undoAction->setEnabled(_pixmapTransformState->changed());
+    ui->save->setEnabled(_pixmapTransformState->changed());
 }
 
 void LayerInstrumentalForm::setArea(bool on_off)
@@ -378,6 +369,7 @@ void LayerInstrumentalForm::setArea(bool on_off)
 
         ui->apply->setEnabled(false);
         ui->undoAction->setEnabled(_pixmapTransformState->changed());
+        ui->save->setEnabled(_pixmapTransformState->changed());
     }
     else
     {
@@ -395,6 +387,7 @@ void LayerInstrumentalForm::setArea(bool on_off)
         bool changed(true);
         ui->apply->setEnabled(changed);
         ui->undoAction->setEnabled(_pixmapTransformState->changed());
+        ui->save->setEnabled(_pixmapTransformState->changed());
     }
 }
 
@@ -408,6 +401,7 @@ void LayerInstrumentalForm::LayerInstrumentalForm::areaSetted()
     bool changed(true);
     ui->apply->setEnabled(changed);
     ui->undoAction->setEnabled(_pixmapTransformState->changed());
+    ui->save->setEnabled(_pixmapTransformState->changed());
 }
 
 void LayerInstrumentalForm::clearArea()
@@ -445,11 +439,18 @@ void LayerInstrumentalForm::applyForImageOrArea(bool on_off)
 void LayerInstrumentalForm::pixmapChanged()
 {
     ui->undoAction->setEnabled(_pixmapTransformState->changed());
+    ui->save->setEnabled(_pixmapTransformState->changed());
 }
 
 void LayerInstrumentalForm::undoAction()
 {
     _pixmapTransformState->undoAction();
+}
+
+void LayerInstrumentalForm::save()
+{
+    UndoAct currentParams = _pixmapTransformState->getCurrentParams();
+    emit signalSaved(currentParams.filePath, currentParams.scenePos, currentParams.scaleW, currentParams.scaleH, currentParams.rotation);
 }
 
 void LayerInstrumentalForm::changeColorRBdependElementsEnabled(bool on_off)

@@ -20,5 +20,14 @@
         <file>img/handle.png</file>
         <file>img/handle_anchor.png</file>
         <file>img/handle_rotater.png</file>
+        <file>img/icon_add.png</file>
+        <file>img/line_cursor.png</file>
+        <file>img/icon_reload_image.png</file>
+        <file>img/rect_cursor.png</file>
+        <file>img/icon_line_mode.png</file>
+        <file>img/icon_select_mode.png</file>
+        <file>img/icon_line_color.png</file>
+        <file>img/icon_rect_mode.png</file>
+        <file>img/icon_save.png</file>
     </qresource>
 </RCC>

@@ -58,9 +58,25 @@ PixelWorkState::~PixelWorkState()
 {
 }
 
+void PixelWorkState::statePushedToStack()
+{
+    for(auto it = _itemsOnFloor.begin(); it != _itemsOnFloor.end(); ++it)
+    {
+        ViraGraphicsItem * viraGraphicsItem = dynamic_cast<ViraGraphicsItem*>(it.value());
+        if(viraGraphicsItem)
+            viraGraphicsItem->setItemEnabled(false);
+    }
+}
+
 void PixelWorkState::statePoppedFromStack()
 {
     setActiveForScene(true);
+    for(auto it = _itemsOnFloor.begin(); it != _itemsOnFloor.end(); ++it)
+    {
+        ViraGraphicsItem * viraGraphicsItem = dynamic_cast<ViraGraphicsItem*>(it.value());
+        if(viraGraphicsItem)
+            viraGraphicsItem->setItemEnabled(true);
+    }
 }
 
 void PixelWorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom, const double *scale, double frameCoef, uint visualizerId)

@@ -16,7 +16,7 @@ public:
     WorkState();
     ~WorkState();
     virtual QString stateName() {return QString("WorkState");}
-    virtual void statePushedToStack() {}
+    virtual void statePushedToStack();
     virtual void statePoppedFromStack();
     virtual bool mousePressEvent(QMouseEvent* e, QPointF scenePos);
     virtual bool mouseDoubleClickEvent(QMouseEvent *e, QPointF scenePos);

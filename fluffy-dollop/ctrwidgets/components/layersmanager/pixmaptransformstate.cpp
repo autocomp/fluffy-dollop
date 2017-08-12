@@ -23,6 +23,15 @@ PixmapTransformState::PixmapTransformState(const QPixmap & pixmap, QPointF pixma
 PixmapTransformState::~PixmapTransformState()
 {
     delete _pixmapItem;
+
+//    if(_needSyncSceneRectByItems)
+//    {
+//        QRectF r = _scene->itemsBoundingRect();
+//        double dW = r.width()*0.2;
+//        double dH = r.height()*0.2;
+//        r = QRectF(r.x()-dW, r.y()-dH, r.width() + 2*dW, r.height() + 2*dH);
+//        _view->setSceneRect(r);
+//    }
 }
 
 void PixmapTransformState::setMode(StateMode stateMode)
@@ -213,10 +222,12 @@ void PixmapTransformState::init(QGraphicsScene *scene, QGraphicsView *view, cons
     _handleItems.append(_handleItemRotater);
 
     if(_originalScale < 0)
-        _originalScale = 1. / (pow(2,(*zoom)-1));
+    {
+        _originalScale = 1; // = 1. / (pow(2,(*zoom)-1));
+        _needSyncSceneRectByItems = true;
+    }
     _scW = _originalScale;
     _scH = _originalScale;
-    _scMax = _originalScale * 50; //! коэффициент необходимо вынести во внешние настройки !!!
     _pixmapItem->setTransform(QTransform().scale(_scW, _scH));
 
     _pixmapItem->setPos(_handleItemAnchor->scenePos());
@@ -243,6 +254,13 @@ void PixmapTransformState::init(QGraphicsScene *scene, QGraphicsView *view, cons
     undoAct.scaleW = _scW;
     undoAct.scaleH = _scH;
     _undoStack.push(undoAct);
+
+//    if(_needSyncSceneRectByItems)
+//    {
+//        QRectF r = _scene->itemsBoundingRect();
+//        r.adjust(-r.width()/2., -r.height()/2, r.width()/2., r.height()/2);
+//        _view->setSceneRect(r);
+//    }
 }
 
 bool PixmapTransformState::wheelEvent(QWheelEvent* e, QPointF scenePos)
@@ -430,7 +448,7 @@ bool PixmapTransformState::mouseMoveEvent(QMouseEvent *event, QPointF scenePos)
         if(processed)
         {
             _pixmapItem->setFlags(0);
-            if(_scW > _scMax || _scH > _scMax)
+            if(_scW > _scWmax || _scH > _scHmax)
             {
                 _scW = scW;
                 _scH = scH;
@@ -503,6 +521,10 @@ bool PixmapTransformState::mouseReleaseEvent(QMouseEvent *e, QPointF scenePos)
 
 
         }
+    }break;
+    case StateMode::TransformImage : {
+//        if(_needSyncSceneRectByItems)
+//            _view->setSceneRect(_scene->itemsBoundingRect());
     }break;
     default : {}
     }
@@ -631,6 +653,9 @@ void PixmapTransformState::pressHandle(HandleType handleType)
 {
     if(handleType != HandleType::Invalid)
     {
+        _scWmax = _scW*15;
+        _scHmax = _scH*15;
+
         UndoAct undoAct;
         undoAct.scenePos = _handleItemTopLeft->scenePos();
         undoAct.scaleW = _scW;
@@ -662,6 +687,8 @@ void PixmapTransformState::createUserHandler(QPointF scenePos)
     _userHandleLenght = lenght(_handleItemAnchor->scenePos(), scenePos);
     _userHandleSCW = _scW;
     _userHandleSCH = _scH;
+    _scWmax = _scW*15;
+    _scHmax = _scH*15;
 }
 
 void PixmapTransformState::resendColor(QColor color)
@@ -672,6 +699,12 @@ void PixmapTransformState::resendColor(QColor color)
 void PixmapTransformState::pixmapMoved()
 {
     emit signalPixmapChanged();
+//    if(_needSyncSceneRectByItems)
+//    {
+//        QRectF r = _scene->itemsBoundingRect();
+//        r.adjust(-r.width()/2., -r.height()/2, r.width()/2., r.height()/2);
+//        _view->setSceneRect(r);
+//    }
 }
 
 double PixmapTransformState::lenght(QPointF p1, QPointF p2)
@@ -695,6 +728,19 @@ void PixmapTransformState::clearAreaOnImage()
         delete _fogItem;
         _fogItem = nullptr;
     }
+}
+
+UndoAct PixmapTransformState::getCurrentParams()
+{
+    QString filePath = TempDirController::createTempDirForCurrentUser() + QDir::separator() + "temp.tif";
+    bool res = _pixmap.save(filePath, "TIF");
+    UndoAct currentParams;
+    currentParams.filePath = filePath;
+    currentParams.scenePos = _handleItemTopLeft->scenePos();
+    currentParams.scaleW = _scW;
+    currentParams.scaleH = _scH;
+    currentParams.rotation = _rotation;
+    return currentParams;
 }
 
 LineItem* PixmapTransformState::createAreaLineItem(QPointF p1, QPointF p2)

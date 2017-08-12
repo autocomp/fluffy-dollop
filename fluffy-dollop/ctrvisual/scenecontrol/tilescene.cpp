@@ -14,13 +14,17 @@ TileScene::TileScene(bool isGeo, QSize sceneSize, QObject *parent)
 {
     setBackgroundBrush(QBrush(Qt::white));
     QRect r(0,0,sceneSize.width(),sceneSize.height());
-    setSceneRect(r);
 
     if(isGeo)
     {
         QGraphicsRectItem* pRItem = new QGraphicsRectItem(r);
         addItem(pRItem);
         pRItem->setBrush(Qt::lightGray);
+        setSceneRect(r);
+    }
+    else
+    {
+        setSceneRect(-10000,-10000,20000,20000);
     }
 }
 

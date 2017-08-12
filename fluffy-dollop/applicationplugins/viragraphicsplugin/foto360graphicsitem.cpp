@@ -35,6 +35,11 @@ void Foto360GraphicsItem::setItemselected(bool on_off)
     setPixmap(on_off ? QPixmap(":/img/foto360_selected.png") : QPixmap(":/img/foto360.png"));
 }
 
+void Foto360GraphicsItem::setItemEnabled(bool on_off)
+{
+    setEnabled(on_off);
+}
+
 void Foto360GraphicsItem::centerOnItem()
 {
     foreach(QGraphicsView * view, scene()->views())

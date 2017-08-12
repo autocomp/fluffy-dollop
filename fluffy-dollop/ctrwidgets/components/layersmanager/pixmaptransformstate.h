@@ -89,6 +89,8 @@ public:
     bool cropPixmap();
     void clearAreaOnImage();
     void setAreaOnImagefinish();
+    void undoAction();
+    UndoAct getCurrentParams();
 
     // все методы ниже вызываются только из хендлов !
     void pressHandle(HandleType handleType);
@@ -97,7 +99,6 @@ public:
     void createUserHandler(QPointF scenePos);
     void resendColor(QColor color);
     void pixmapMoved();
-    void undoAction();
 
 signals:
     void signalPixmapChanged();
@@ -125,12 +126,12 @@ protected:
     QPointF _lastScenePos, _userHandlePos;
     HandleType _currentHandleType = HandleType::Invalid;
     QList<HandleItem*> _handleItems;
-    double _originalScale=-1, _scW=1, _scH=1, _scMax=5, _rotation=0, _originW, _originH, _userHandleLenght, _userHandleSCW, _userHandleSCH;
+    double _originalScale=-1, _scW=1, _scH=1, _rotation=0, _scWmax, _scHmax, _originW, _originH, _userHandleLenght, _userHandleSCW, _userHandleSCH;
     QRectF _cropArea;
     FogItem * _fogItem=nullptr;
     QList<LineItem*> _areaLineItems;
     QPolygonF _areaOnImage;
-
+    bool _needSyncSceneRectByItems = false;
     QStack<UndoAct> _undoStack;
 };
 

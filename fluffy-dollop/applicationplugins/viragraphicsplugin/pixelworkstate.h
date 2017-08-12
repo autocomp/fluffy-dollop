@@ -17,7 +17,7 @@ public:
     PixelWorkState(uint pixelVisualizerId);
     ~PixelWorkState();
     virtual QString stateName() {return QString("PixelWorkState");}
-    virtual void statePushedToStack() {}
+    virtual void statePushedToStack();
     virtual void statePoppedFromStack();
     virtual bool mousePressEvent(QMouseEvent* e, QPointF scenePos);
     virtual bool mouseDoubleClickEvent(QMouseEvent *e, QPointF scenePos);

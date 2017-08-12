@@ -16,6 +16,7 @@ public:
     DefectGraphicsItem(qulonglong id);
     ~DefectGraphicsItem();
     void setItemselected(bool on_off);
+    void setItemEnabled(bool on_off);
     void centerOnItem();
     quint64 getId();
     void reinit();

@@ -38,7 +38,6 @@ void PixmapItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
         else
         {
             setFlags(QGraphicsItem::ItemIsMovable);
-            _controller.pixmapMoved();
         }
     }break;
     default :
@@ -46,6 +45,12 @@ void PixmapItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
     }
 
     QGraphicsPixmapItem::mousePressEvent(event);
+}
+
+void PixmapItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    _controller.pixmapMoved();
+    QGraphicsPixmapItem::mouseReleaseEvent(event);
 }
 
 void PixmapItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)

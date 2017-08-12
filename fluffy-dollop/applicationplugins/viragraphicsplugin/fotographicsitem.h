@@ -13,6 +13,7 @@ public:
     FotoGraphicsItem(qulonglong id);
     ~FotoGraphicsItem();
     void setItemselected(bool on_off);
+    void setItemEnabled(bool on_off);
     void centerOnItem();
     quint64 getId();
     void reinit();

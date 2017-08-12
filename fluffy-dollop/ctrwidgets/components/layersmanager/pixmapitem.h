@@ -12,6 +12,7 @@ class PixmapItem : public QGraphicsPixmapItem
 public:
     PixmapItem(PixmapTransformState & controller);
     virtual void mousePressEvent(QGraphicsSceneMouseEvent * event);
+    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent * event);
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     void setTransparentBackground(bool on_off);
 

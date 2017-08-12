@@ -10,6 +10,7 @@ public:
     Foto360GraphicsItem(qulonglong id);
     ~Foto360GraphicsItem();
     void setItemselected(bool on_off);
+    void setItemEnabled(bool on_off);
     void centerOnItem();
     quint64 getId();
     void reinit();

@@ -35,7 +35,7 @@
       <number>3</number>
      </property>
      <item>
-      <widget class="QToolButton" name="addTb">
+      <widget class="QToolButton" name="addEntity">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -50,6 +50,9 @@
          <width>32</width>
          <height>32</height>
         </size>
+       </property>
+       <property name="toolTip">
+        <string>Добавить</string>
        </property>
        <property name="text">
         <string/>
@@ -57,7 +60,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="editTb">
+      <widget class="QToolButton" name="editEntity">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -72,6 +75,9 @@
          <width>32</width>
          <height>32</height>
         </size>
+       </property>
+       <property name="toolTip">
+        <string>Редактировать</string>
        </property>
        <property name="text">
         <string/>
@@ -79,7 +85,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="transparentTb">
+      <widget class="QToolButton" name="deleteEntity">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -94,6 +100,9 @@
          <width>32</width>
          <height>32</height>
         </size>
+       </property>
+       <property name="toolTip">
+        <string>Удалить</string>
        </property>
        <property name="text">
         <string/>
@@ -101,7 +110,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="deleteTb">
+      <widget class="QToolButton" name="transparentEntity">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -116,6 +125,9 @@
          <width>32</width>
          <height>32</height>
         </size>
+       </property>
+       <property name="toolTip">
+        <string>Задать прозрачность</string>
        </property>
        <property name="text">
         <string/>
@@ -123,7 +135,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="upTb">
+      <widget class="QToolButton" name="upEntity">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -138,6 +150,9 @@
          <width>32</width>
          <height>32</height>
         </size>
+       </property>
+       <property name="toolTip">
+        <string>Поднять</string>
        </property>
        <property name="text">
         <string/>
@@ -145,7 +160,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="downTb">
+      <widget class="QToolButton" name="downEntity">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -160,6 +175,9 @@
          <width>32</width>
          <height>32</height>
         </size>
+       </property>
+       <property name="toolTip">
+        <string>Опустить</string>
        </property>
        <property name="text">
         <string/>
@@ -178,6 +196,53 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="addLayer">
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Добавить слой</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="deleteLayer">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Удалить слой</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

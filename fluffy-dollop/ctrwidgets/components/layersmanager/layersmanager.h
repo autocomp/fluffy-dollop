@@ -7,7 +7,10 @@
 
 class QTreeWidget;
 class QPushButton;
+
+namespace layers_manager_form {
 class LayersManagerForm;
+}
 
 class LayersManager : public QObject
 {
@@ -30,7 +33,7 @@ private:
     QPushButton* _layersButton;
     EmbIFaceNotifier* _iface = nullptr;
     uint64_t _currentObject = 0;
-    LayersManagerForm * _layersManagerForm = nullptr;
+    layers_manager_form::LayersManagerForm * _layersManagerForm = nullptr;
 
 };
 

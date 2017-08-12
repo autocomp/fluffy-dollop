@@ -98,6 +98,11 @@ void DefectGraphicsItem::setItemselected(bool on_off)
     _isSelected = on_off;
 }
 
+void DefectGraphicsItem::setItemEnabled(bool on_off)
+{
+    setEnabled(on_off);
+}
+
 void DefectGraphicsItem::centerOnItem()
 {
     foreach(QGraphicsView * view, scene()->views())

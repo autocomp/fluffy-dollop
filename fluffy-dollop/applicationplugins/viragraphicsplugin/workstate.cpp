@@ -47,9 +47,17 @@ WorkState::~WorkState()
         delete it.value();
 }
 
+void WorkState::statePushedToStack()
+{
+    for(auto it = _items.begin(); it != _items.end(); ++it)
+        it.value()->setItemEnabled(false);
+}
+
 void WorkState::statePoppedFromStack()
 {
     setActiveForScene(true);
+    for(auto it = _items.begin(); it != _items.end(); ++it)
+        it.value()->setItemEnabled(true);
 }
 
 void WorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom, const double *scale, double frameCoef, uint visualizerId)

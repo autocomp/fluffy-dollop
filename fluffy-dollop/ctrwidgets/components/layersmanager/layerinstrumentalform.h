@@ -13,7 +13,7 @@ namespace pixmap_transform_state {
 class PixmapTransformState;
 }
 
-class LayerInstrumentalForm : public QWidget //, public ew::EmbeddedSubIFace
+class LayerInstrumentalForm : public QWidget
 {
     Q_OBJECT
     
@@ -23,14 +23,13 @@ public:
     void setEmbeddedWidgetId(quint64 id);
 
 signals:
-    void signalClosed();
+    void signalSaved(QString filePath, QPointF scenePos, double scaleW, double scaleH, double rotate);
 
 private slots:
     void setMode(bool);
     void setColorMode(bool);
     void pressSetColor();
     void makeAdjustForm();
-    void setOpacity(bool);
     void setOpacityValue(int val);
     void apply();
     void GetColorOnImage(bool on_off);
@@ -41,6 +40,7 @@ private slots:
     void applyForImageOrArea(bool on_off);
     void pixmapChanged();
     void undoAction();
+    void save();
     
 private:
     void changeColorRBdependElementsEnabled(bool on_off);

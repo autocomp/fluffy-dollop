@@ -64,6 +64,11 @@ void FotoGraphicsItem::setItemselected(bool on_off)
     }
 }
 
+void FotoGraphicsItem::setItemEnabled(bool on_off)
+{
+    setEnabled(on_off);
+}
+
 void FotoGraphicsItem::centerOnItem()
 {
     foreach(QGraphicsView * view, scene()->views())

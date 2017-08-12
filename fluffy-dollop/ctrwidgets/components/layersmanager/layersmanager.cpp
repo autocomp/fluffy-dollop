@@ -38,7 +38,7 @@ void LayersManager::init()
     auto mngr = RegionBizManager::instance();
     mngr->subscribeOnCurrentChange(this, SLOT(slotObjectSelectionChanged(uint64_t,uint64_t)));
 
-    _layersManagerForm = new LayersManagerForm;
+    _layersManagerForm = new layers_manager_form::LayersManagerForm;
 
     _iface = new EmbIFaceNotifier(_layersManagerForm);
     connect(_iface, SIGNAL(signalClosed()), this, SLOT(slotCloseWindow()));
@@ -51,15 +51,15 @@ void LayersManager::init()
         headStr.hasCloseButton = true;
         headStr.hasMinMaxButton = false;
         headStr.hasCollapseButton = false;
-        headStr.headerPixmap = ":/img/019_icons_32_layers.png";
-        headStr.windowTitle = QString::fromUtf8("Слои");
+        headStr.headerPixmap = ":/img/icon_layers.png";
+        headStr.windowTitle = QString("");
         struc.header = headStr;
         struc.iface = _iface;
         struc.widgetTag = tag;
         struc.minSize = QSize(200,200);
         struc.topOnHint = true;
         struc.isModal = false;
-        ewApp()->createWidget(struc);
+        widgetId = ewApp()->createWidget(struc);
     }
     _layersManagerForm->setEmbeddedWidgetId(widgetId);
     reset();
@@ -146,13 +146,15 @@ void LayersManager::slotObjectSelectionChanged(uint64_t /*prev_id*/, uint64_t cu
 void LayersManager::reset()
 {
     ewApp()->setWidgetTitle(_iface->id(), QString(""));
-    _layersManagerForm->reset();
+    if(_layersManagerForm)
+        _layersManagerForm->reset();
 }
 
 void LayersManager::reload(BaseAreaPtr ptr, bool isGeoScene)
 {
     ewApp()->setWidgetTitle(_iface->id(), ptr->getName());
-    _layersManagerForm->reload(ptr, isGeoScene);
+    if(_layersManagerForm)
+        _layersManagerForm->reload(ptr, isGeoScene);
 }
 
 
