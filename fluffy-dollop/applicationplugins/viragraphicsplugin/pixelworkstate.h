@@ -38,6 +38,8 @@ protected:
     bool markInArchive(regionbiz::MarkPtr markPtr);
     void reinit(qulonglong facilityId);
     void setFloor(qulonglong floorId);
+    void insertItemToLayer(regionbiz::LayerPtr ptr, qulonglong itemId);
+
 
 protected slots:
     void slotSetItemselect(qulonglong id, bool on_off);
@@ -53,6 +55,7 @@ protected slots:
     void slotFloorUp();
     void slotFloorDown();
     void slotEditAreaGeometry(QVariant var);
+    void slotSetLayerVisible(QVariant var);
 
 private:
     struct FloorInfo
@@ -65,6 +68,7 @@ private:
     qulonglong _currFacilityId = 0;
     uint64_t _currFloor_id = 0;
     QMap<qulonglong, QGraphicsItem *> _itemsOnFloor;
+    QMap<uint64_t, QList<qulonglong> > _itemsInLayers;
     QMap<uint16_t, FloorInfo> _floorsMap;
     QToolButton* _upButton, *_downButton;
     QLabel * _currentFacility;

@@ -17,8 +17,10 @@ public:
     ~DefectGraphicsItem();
     void setItemselected(bool on_off);
     void setItemEnabled(bool on_off);
+    void setItemVisible(bool on_off);
     void centerOnItem();
     quint64 getId();
+    ItemType getItemType();
     void reinit();
 
 protected slots:

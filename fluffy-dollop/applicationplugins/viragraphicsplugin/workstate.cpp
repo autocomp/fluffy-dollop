@@ -75,6 +75,10 @@ void WorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom
                                       qMetaTypeId< quint64 >(),
                                       QString("visualize_system") );
 
+//    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::LayerVisibleChanged, this, SLOT(slotSetLayerVisible(QVariant)),
+//                                      qMetaTypeId< QVariantList >(),
+//                                      QString("visualize_system") );
+
     auto mngr = RegionBizManager::instance();
     mngr->subscribeOnCurrentChange(this, SLOT(slotSelectionItemsChanged(uint64_t,uint64_t)));
     mngr->subscribeCenterOn(this, SLOT(slotCenterOn(uint64_t)));
@@ -94,6 +98,7 @@ void WorkState::reinit()
     foreach(ViraGraphicsItem * item, _items.values())
         delete item;
     _items.clear();
+    _itemsInLayers.clear();
 
     foreach(LocationItem * locationItem, _locationItems.values())
         delete locationItem;
@@ -255,6 +260,7 @@ void WorkState::reinit()
                             graphicsItems.append(_photo360GraphicsItem);
                         }break;
                         }
+                        insertItemToLayer(mark->getLayer(), mark->getId());
 
                         /*
                         if(markInArchive(mark) == false)
@@ -363,6 +369,8 @@ void WorkState::reinit()
                         graphicsItems.append(_photo360GraphicsItem);
                     }break;
                     }
+                    insertItemToLayer(mark->getLayer(), mark->getId());
+
                     /*
                     if(markInArchive(mark) == false)
                     {
@@ -519,6 +527,7 @@ void WorkState::slotAddObject(uint64_t id)
                     locationItem->addItem(_photo360GraphicsItem);
                 }break;
                 }
+                insertItemToLayer(markPtr->getLayer(), markPtr->getId());
 
                 /*
                 QString mark_type_str; //  = QString::fromUtf8("дефект");
@@ -588,6 +597,46 @@ void WorkState::slotDeleteObject(uint64_t id)
         }
         delete markIt.value();
         _items.erase(markIt);
+    }
+}
+
+void WorkState::slotSetLayerVisible(QVariant var)
+{
+    QList<QVariant>list = var.toList();
+    if(list.size() != 3)
+        return;
+
+    uint64_t layerId(list.at(0).toUInt());
+    uint markType(list.at(1).toUInt());
+    bool on_off(list.at(2).toBool());
+    auto layerIt = _itemsInLayers.find(layerId);
+    if(layerIt != _itemsInLayers.end())
+    {
+        foreach(qulonglong itemId, layerIt.value())
+        {
+            auto itemIt = _items.find(itemId);
+            if(itemIt != _items.end())
+            {
+                switch(markType)
+                {
+                case 0 : {
+                    itemIt.value()->setItemVisible(on_off);
+                }break;
+                case 1 : {
+                    if(itemIt.value()->getItemType() == ViraGraphicsItem::ItemType_Defect)
+                        itemIt.value()->setItemVisible(on_off);
+                }break;
+                case 2 : {
+                    if(itemIt.value()->getItemType() == ViraGraphicsItem::ItemType_Foto)
+                        itemIt.value()->setItemVisible(on_off);
+                }break;
+                case 3 : {
+                    if(itemIt.value()->getItemType() == ViraGraphicsItem::ItemType_Foto360)
+                        itemIt.value()->setItemVisible(on_off);
+                }break;
+                }
+            }
+        }
     }
 }
 
@@ -866,6 +915,20 @@ bool WorkState::markInArchive(regionbiz::MarkPtr markPtr)
         }
     }
     return _markInArchive;
+}
+
+void WorkState::insertItemToLayer(regionbiz::LayerPtr ptr, qulonglong itemId)
+{
+    uint64_t layerId(ptr ? ptr->getId() : 0);
+    auto it = _itemsInLayers.find(layerId);
+    if(it == _itemsInLayers.end())
+    {
+        _itemsInLayers.insert(layerId, QList<qulonglong>() << itemId);
+    }
+    else
+    {
+        it.value().append(itemId);
+    }
 }
 
 //!    for second images :

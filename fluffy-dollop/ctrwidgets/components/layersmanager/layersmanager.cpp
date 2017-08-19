@@ -95,8 +95,8 @@ void LayersManager::slotObjectSelectionChanged(uint64_t /*prev_id*/, uint64_t cu
     {
     case BaseEntity::ET_MARK:
     {
-        _currentObject = 0;
-        reset();
+//        _currentObject = 0;
+//        reset();
     }return;
     case BaseEntity::ET_AREA:
     {

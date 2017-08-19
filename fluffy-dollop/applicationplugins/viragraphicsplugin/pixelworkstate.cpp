@@ -98,6 +98,10 @@ void PixelWorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int 
                                       qMetaTypeId< quint64 >(),
                                       QString("visualize_system") );
 
+    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::LayerVisibleChanged, this, SLOT(slotSetLayerVisible(QVariant)),
+                                      qMetaTypeId< QVariantList >(),
+                                      QString("visualize_system") );
+
     auto mngr = RegionBizManager::instance();
     mngr->subscribeOnCurrentChange(this, SLOT(slotSelectionItemsChanged(uint64_t,uint64_t)));
     mngr->subscribeCenterOn(this, SLOT(slotCenterOn(uint64_t)));
@@ -175,17 +179,7 @@ void PixelWorkState::slotAddObject(uint64_t id)
             if(it == _itemsOnFloor.end())
                 return;
 
-//            QString mark_type_str; //  = QString::fromUtf8("дефект");
-//            BaseMetadataPtr markTypePtr = markPtr->getMetadata("mark_type");
-//            if(markTypePtr)
-//            {
-//                QString _mark_type_str = markTypePtr->getValueAsVariant().toString();;
-//                if(_mark_type_str == QString::fromUtf8("фотография") ||
-//                        _mark_type_str == QString::fromUtf8("дефект") ||
-//                        _mark_type_str == QString::fromUtf8("панорамная фотография") )
-//                    mark_type_str = markTypePtr->getValueAsVariant().toString();
-//            }
-//            qDebug() << "slotAddObject, ID:" << id << ", mark_type_str:" << mark_type_str;
+
 
             switch(markPtr->getMarkType())
             {
@@ -217,7 +211,22 @@ void PixelWorkState::slotAddObject(uint64_t id)
                 _itemsOnFloor.insert(markPtr->getId(), _photo360GraphicsItem);
             }break;
             }
+            insertItemToLayer(markPtr->getLayer(), markPtr->getId());
         }
+    }
+}
+
+void PixelWorkState::insertItemToLayer(regionbiz::LayerPtr ptr, qulonglong itemId)
+{
+    uint64_t layerId(ptr ? ptr->getId() : 0);
+    auto it = _itemsInLayers.find(layerId);
+    if(it == _itemsInLayers.end())
+    {
+        _itemsInLayers.insert(layerId, QList<qulonglong>() << itemId);
+    }
+    else
+    {
+        it.value().append(itemId);
     }
 }
 
@@ -397,6 +406,7 @@ void PixelWorkState::setFloor(qulonglong floorId)
     foreach(QGraphicsItem * item, _itemsOnFloor.values())
         delete item;
     _itemsOnFloor.clear();
+    _itemsInLayers.clear();
 
     // NOTE file load path
     QString destPath;
@@ -463,6 +473,13 @@ void PixelWorkState::setFloor(qulonglong floorId)
                         slotAddObject(mark->getId());
             }
         }
+
+        qDebug() << "-------------------------------";
+        for(auto it = _itemsInLayers.begin(); it != _itemsInLayers.end(); ++it)
+        {
+            qDebug() << "Layer Id :" << it.key() << ", all marks :" << it.value();
+        }
+        qDebug() << "-------------------------------";
     }
 }
 
@@ -614,7 +631,8 @@ bool PixelWorkState::mouseDoubleClickEvent(QMouseEvent *e, QPointF scenePos)
         ViraGraphicsItem * viraGraphicsItem = dynamic_cast<ViraGraphicsItem*>(item);
         if(viraGraphicsItem)
         {
-            regionbiz::RegionBizManager::instance()->centerOnEntity(viraGraphicsItem->getId());
+//! !!! pereosmislit eto mesto !!!
+//            regionbiz::RegionBizManager::instance()->centerOnEntity(viraGraphicsItem->getId());
             return true;
         }
     }
@@ -684,6 +702,7 @@ void PixelWorkState::slotSelectItem(qulonglong id, bool centerOnEntity)
     if(_blockGUI == false)
     {
         regionbiz::RegionBizManager::instance()->setCurrentEntity(id);
+//! !!! pereosmislit eto mesto !!!
         if(centerOnEntity)
             regionbiz::RegionBizManager::instance()->centerOnEntity(id);
     }
@@ -715,6 +734,48 @@ void PixelWorkState::slotEditAreaGeometry(QVariant var)
         }
         _editObjectGeometry = 0;
         emit editAreaGeometry(false);
+    }
+}
+
+void PixelWorkState::slotSetLayerVisible(QVariant var)
+{
+    QList<QVariant>list = var.toList();
+    if(list.size() != 3)
+        return;
+
+    uint64_t layerId(list.at(0).toUInt());
+    uint markType(list.at(1).toUInt());
+    bool on_off(list.at(2).toBool());
+    auto layerIt = _itemsInLayers.find(layerId);
+    if(layerIt != _itemsInLayers.end())
+    {
+        foreach(qulonglong itemId, layerIt.value())
+        {
+            auto itemIt = _itemsOnFloor.find(itemId);
+            if(itemIt != _itemsOnFloor.end())
+            {
+                ViraGraphicsItem * viraGraphicsItem = dynamic_cast<ViraGraphicsItem*>(itemIt.value());
+                if(viraGraphicsItem)
+                    switch(markType)
+                    {
+                    case 0 : {
+                        viraGraphicsItem->setItemVisible(on_off);
+                    }break;
+                    case 1 : {
+                        if(viraGraphicsItem->getItemType() == ViraGraphicsItem::ItemType_Defect)
+                            viraGraphicsItem->setItemVisible(on_off);
+                    }break;
+                    case 2 : {
+                        if(viraGraphicsItem->getItemType() == ViraGraphicsItem::ItemType_Foto)
+                            viraGraphicsItem->setItemVisible(on_off);
+                    }break;
+                    case 3 : {
+                        if(viraGraphicsItem->getItemType() == ViraGraphicsItem::ItemType_Foto360)
+                            viraGraphicsItem->setItemVisible(on_off);
+                    }break;
+                    }
+            }
+        }
     }
 }
 

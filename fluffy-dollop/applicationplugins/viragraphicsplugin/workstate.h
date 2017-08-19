@@ -33,6 +33,7 @@ signals:
 protected:
     void centerViewOn(QPointF pos);
     bool markInArchive(regionbiz::MarkPtr markPtr);
+    void insertItemToLayer(regionbiz::LayerPtr ptr, qulonglong itemId);
 
 
 protected slots:
@@ -46,9 +47,11 @@ protected slots:
     void slotObjectChanged(uint64_t id);
     void slotAddObject(uint64_t id);
     void slotDeleteObject(uint64_t id);
+    void slotSetLayerVisible(QVariant var);
 
 private:
     QMap<qulonglong, ViraGraphicsItem*> _items;
+    QMap<uint64_t, QList<qulonglong> > _itemsInLayers;
     QMap<uint64_t, LocationItem *> _locationItems;
 
     QMap<qulonglong, QString> _itemId_facilityFolder;

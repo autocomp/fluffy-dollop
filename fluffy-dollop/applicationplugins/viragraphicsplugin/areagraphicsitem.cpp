@@ -149,6 +149,11 @@ void AreaGraphicsItem::setItemEnabled(bool on_off)
     setEnabled(on_off);
 }
 
+void AreaGraphicsItem::setItemVisible(bool on_off)
+{
+    setVisible(on_off);
+}
+
 void AreaGraphicsItem::centerOnItem()
 {
     if(polygon().isEmpty() == false)

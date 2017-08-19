@@ -11,7 +11,9 @@ public:
     ~Foto360GraphicsItem();
     void setItemselected(bool on_off);
     void setItemEnabled(bool on_off);
+    void setItemVisible(bool on_off);
     void centerOnItem();
+    ItemType getItemType();
     quint64 getId();
     void reinit();
 

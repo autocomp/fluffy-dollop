@@ -12,10 +12,82 @@
 
 using namespace pixmap_transform_state;
 
-LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPixmap &pixmap, QWidget *parent)
-    : QWidget(parent)
-    , _visualizerId(visualizerId)
+LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPixmap &pixmap, QPointF scenePos, double scaleX, double scaleY, double rotate, bool onTop)
+    : _visualizerId(visualizerId)
     , ui(new Ui::LayerInstrumentalForm)
+{
+    init();
+
+    _pixmapTransformState = QSharedPointer<PixmapTransformState>(new PixmapTransformState(pixmap, scenePos, scaleX, scaleY, rotate, onTop));
+    visualize_system::StateInterface * stateInterface = visualize_system::VisualizerManager::instance()->getStateInterface(_visualizerId);
+    connect(_pixmapTransformState.data(), SIGNAL(signalSendColor(QColor)), this, SLOT(setColorOnImage(QColor)));
+    connect(_pixmapTransformState.data(), SIGNAL(signalAreaSetted()), this, SLOT(areaSetted()));
+    connect(_pixmapTransformState.data(), SIGNAL(signalPixmapChanged()), this, SLOT(pixmapChanged()));
+    if(stateInterface)
+        stateInterface->setVisualizerState(_pixmapTransformState);
+
+    QTimer::singleShot(5,this,SLOT(makeAdjustForm()));
+}
+
+LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPixmap &pixmap, bool onTop)
+    : _visualizerId(visualizerId)
+    , ui(new Ui::LayerInstrumentalForm)
+{
+    init();
+
+    QPointF pos(0,0);
+    double originalScale(-1);
+    visualize_system::ViewInterface * viewInterface = visualize_system::VisualizerManager::instance()->getViewInterface(_visualizerId);
+    if(viewInterface->getVisualizerType() == visualize_system::Visualizer2D)
+    {
+        QRectF viewportSceneRect = viewInterface->getViewportSceneRect();
+        double v_W = viewportSceneRect.width() / 5.;
+        double v_H = viewportSceneRect.height() / 5.;
+        viewportSceneRect = QRectF( viewportSceneRect.x() + v_W * 2.,
+                                    viewportSceneRect.y() + v_H * 2.,
+                                    v_W,
+                                    v_H );
+
+        QSize srcSize = pixmap.size();
+
+        double w_inscribeByW = viewportSceneRect.width();
+        double h_inscribeByW = viewportSceneRect.width() * (double)srcSize.height() / (double)srcSize.width();
+
+        double w_inscribeByH = viewportSceneRect.height() * (double)srcSize.width() / (double)srcSize.height();
+        double h_inscribeByH = viewportSceneRect.height();
+
+        double X(0), Y(0), W(0), H(0);
+        if(h_inscribeByW <= viewportSceneRect.height())
+        {
+            X = viewportSceneRect.x();
+            Y = viewportSceneRect.y() + (viewportSceneRect.height() - h_inscribeByW)/2.;
+            W = w_inscribeByW;
+            H = h_inscribeByW;
+            originalScale = W / srcSize.width();
+        }
+        else
+        {
+            X = viewportSceneRect.x() + (viewportSceneRect.width() - w_inscribeByH)/2.;
+            Y = viewportSceneRect.y();
+            W = w_inscribeByH;
+            H = h_inscribeByH;
+            originalScale = W / srcSize.width();
+        }
+        pos = QPointF(X,Y);
+    }
+
+    _pixmapTransformState = QSharedPointer<PixmapTransformState>(new PixmapTransformState(pixmap, pos, onTop, originalScale));
+    visualize_system::StateInterface * stateInterface = visualize_system::VisualizerManager::instance()->getStateInterface(_visualizerId);
+    connect(_pixmapTransformState.data(), SIGNAL(signalSendColor(QColor)), this, SLOT(setColorOnImage(QColor)));
+    connect(_pixmapTransformState.data(), SIGNAL(signalAreaSetted()), this, SLOT(areaSetted()));
+    connect(_pixmapTransformState.data(), SIGNAL(signalPixmapChanged()), this, SLOT(pixmapChanged()));
+    if(stateInterface)
+        stateInterface->setVisualizerState(_pixmapTransformState);
+
+    QTimer::singleShot(5,this,SLOT(makeAdjustForm()));
+}
+
+void LayerInstrumentalForm::init()
 {
     ui->setupUi(this);
 
@@ -69,57 +141,6 @@ LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPixmap &p
 
     connect(ui->setTransparent, SIGNAL(clicked(bool)), this, SLOT(setColorMode(bool)));
     connect(ui->setColor, SIGNAL(clicked(bool)), this, SLOT(setColorMode(bool)));
-
-    QPointF pos(0,0);
-    double originalScale(-1);
-    visualize_system::ViewInterface * viewInterface = visualize_system::VisualizerManager::instance()->getViewInterface(_visualizerId);
-    if(viewInterface->getVisualizerType() == visualize_system::Visualizer2D)
-    {
-        QRectF viewportSceneRect = viewInterface->getViewportSceneRect();
-        double v_W = viewportSceneRect.width() / 5.;
-        double v_H = viewportSceneRect.height() / 5.;
-        viewportSceneRect = QRectF( viewportSceneRect.x() + v_W * 2.,
-                                    viewportSceneRect.y() + v_H * 2.,
-                                    v_W,
-                                    v_H );
-
-        QSize srcSize = pixmap.size();
-
-        double w_inscribeByW = viewportSceneRect.width();
-        double h_inscribeByW = viewportSceneRect.width() * (double)srcSize.height() / (double)srcSize.width();
-
-        double w_inscribeByH = viewportSceneRect.height() * (double)srcSize.width() / (double)srcSize.height();
-        double h_inscribeByH = viewportSceneRect.height();
-
-        double X(0), Y(0), W(0), H(0);
-        if(h_inscribeByW <= viewportSceneRect.height())
-        {
-            X = viewportSceneRect.x();
-            Y = viewportSceneRect.y() + (viewportSceneRect.height() - h_inscribeByW)/2.;
-            W = w_inscribeByW;
-            H = h_inscribeByW;
-            originalScale = W / srcSize.width();
-        }
-        else
-        {
-            X = viewportSceneRect.x() + (viewportSceneRect.width() - w_inscribeByH)/2.;
-            Y = viewportSceneRect.y();
-            W = w_inscribeByH;
-            H = h_inscribeByH;
-            originalScale = W / srcSize.width();
-        }
-        pos = QPointF(X,Y);
-    }
-
-    _pixmapTransformState = QSharedPointer<PixmapTransformState>(new PixmapTransformState(pixmap, pos, originalScale));
-    visualize_system::StateInterface * stateInterface = visualize_system::VisualizerManager::instance()->getStateInterface(_visualizerId);
-    connect(_pixmapTransformState.data(), SIGNAL(signalSendColor(QColor)), this, SLOT(setColorOnImage(QColor)));
-    connect(_pixmapTransformState.data(), SIGNAL(signalAreaSetted()), this, SLOT(areaSetted()));
-    connect(_pixmapTransformState.data(), SIGNAL(signalPixmapChanged()), this, SLOT(pixmapChanged()));
-    if(stateInterface)
-        stateInterface->setVisualizerState(_pixmapTransformState);
-
-    QTimer::singleShot(5,this,SLOT(makeAdjustForm()));
 }
 
 LayerInstrumentalForm::~LayerInstrumentalForm()

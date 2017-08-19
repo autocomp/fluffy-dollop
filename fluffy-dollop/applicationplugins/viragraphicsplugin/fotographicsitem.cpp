@@ -69,6 +69,16 @@ void FotoGraphicsItem::setItemEnabled(bool on_off)
     setEnabled(on_off);
 }
 
+void FotoGraphicsItem::setItemVisible(bool on_off)
+{
+    setVisible(on_off);
+}
+
+ViraGraphicsItem::ItemType FotoGraphicsItem::getItemType()
+{
+    return ItemType_Foto;
+}
+
 void FotoGraphicsItem::centerOnItem()
 {
     foreach(QGraphicsView * view, scene()->views())

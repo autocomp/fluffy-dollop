@@ -61,6 +61,15 @@ void MarkForm::showWidgetAndCreateMark(regionbiz::Mark::MarkType markType, quint
 
 void MarkForm::actulize()
 {
+    ui->layerCB->clear();
+    ui->layerCB->addItem(QString::fromUtf8("базовый"), 0);
+    foreach(LayerPtr layerPtr, RegionBizManager::instance()->getLayers())
+    {
+        QString layerName = layerPtr->getName();
+        ui->layerCB->addItem(layerName,  (uint)layerPtr->getId());
+    }
+    ui->layerCB->setCurrentText(QString::fromUtf8("базовый"));
+
     switch(_markType)
     {
     case Mark::MT_DEFECT :
@@ -159,7 +168,7 @@ void MarkForm::showWidget(quint64 id)
 
             BaseMetadataPtr date = ptr->getMetadata("date");
             if(date)
-                ui->dateEdit->setDate( QDate::fromString(date->getValueAsVariant().toString(), "dd.MM.yy") );
+                ui->dateEdit->setDate( QDate::fromString(date->getValueAsVariant().toString(), "dd.MM.yyyy") );
 
             BaseMetadataPtr priority = ptr->getMetadata("priority");
             if(priority)
@@ -173,6 +182,10 @@ void MarkForm::showWidget(quint64 id)
             if(category)
                 ui->category->setCurrentText(category->getValueAsVariant().toString());
         }
+
+        LayerPtr currLayerPtr = ptr->getLayer();
+        if(currLayerPtr)
+            ui->layerCB->setCurrentText( currLayerPtr->getName() );
 
         QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath");
         if(regionBizInitJson_Path.isValid())
@@ -332,9 +345,8 @@ void MarkForm::closeAndCommit(bool moveToArchive)
 
         if(_markType == Mark::MT_DEFECT)
         {
-//            markPtr->addMetadata("string", "mark_type", QString::fromUtf8("дефект"));
             markPtr->addMetadata("string", "worker", ui->responsible->text());
-            QString dataStr = ui->dateEdit->date().toString("dd.MM.yy");
+            QString dataStr = ui->dateEdit->date().toString("dd.MM.yyyy");
             markPtr->addMetadata("string", "date", dataStr);
             markPtr->addMetadata("string", "priority", ui->importance->currentText());
             markPtr->addMetadata("string", "category", ui->category->currentText());
@@ -345,7 +357,6 @@ void MarkForm::closeAndCommit(bool moveToArchive)
         }
         else if(_markType == Mark::MT_PHOTO)
         {
-//            markPtr->addMetadata("string", "mark_type", QString::fromUtf8("фотография"));
             markPtr->addMetadata("double", "foto_direction", _direction);
         }
         else if(_markType == Mark::MT_PHOTO_3D)
@@ -361,8 +372,39 @@ void MarkForm::closeAndCommit(bool moveToArchive)
                 bool res = QFile::copy(_foto360FilePath, destPath);
                 qDebug() << "copy foto360 from :" << _foto360FilePath << " to :" << destPath << ", res :" << res;
             }
+        }
 
-//            markPtr->addMetadata("string", "mark_type", QString::fromUtf8("панорамная фотография"));
+        uint64_t layerId = ui->layerCB->currentData().toUInt();
+        LayerPtr newLayerPtr = RegionBizManager::instance()->getLayer(layerId);
+        LayerPtr currLayerPtr = markPtr->getLayer();
+        if(currLayerPtr)
+        {
+            if(layerId == 0)
+            {
+                markPtr->leaveLayer();
+                if(currLayerPtr)
+                    currLayerPtr->commit();
+            }
+            else if(currLayerPtr->getId() != layerId)
+            {
+                if(newLayerPtr)
+                {
+                    markPtr->moveToLayer(newLayerPtr);
+                    if(currLayerPtr)
+                        currLayerPtr->commit();
+                    newLayerPtr->commit();
+                }
+            }
+        }
+        else
+        {
+            if(layerId > 0 && newLayerPtr)
+            {
+                markPtr->moveToLayer(newLayerPtr);
+                if(currLayerPtr)
+                    currLayerPtr->commit();
+                newLayerPtr->commit();
+            }
         }
 
         bool commitRes = markPtr->commit();

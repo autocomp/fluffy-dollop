@@ -30,6 +30,26 @@ enum class ItemTypes
     Photo3d
 };
 
+struct CurrentData
+{
+    enum State{NoState, Create, Edit};
+    enum Object{NoObject, Raster, Vector};
+
+    void clear()
+    {
+        state = NoState;
+        object = NoObject;
+        layerId = 0;
+        planPath.clear();
+    }
+
+    uint64_t areaId = 0; //! clear() not change areaId !
+    State state = NoState;
+    Object object = NoObject;
+    uint64_t layerId = 0;
+    QString planPath;
+};
+
 class LayerItem;
 class RasterItem;
 
@@ -56,6 +76,7 @@ private slots:
     void slotDeleteLayer();
     void slotSaved(QString filePath, QPointF scenePos, double scaleW, double scaleH, double rotate);
     void slotFileLoaded(regionbiz::BaseFileKeeperPtr);
+    void slotSyncMarks();
 
 private:
     void syncChechState(QTreeWidgetItem *item, bool setVisible);
@@ -64,27 +85,18 @@ private:
 
     Ui::LayersManagerForm *ui;
     quint64 _embeddedWidgetId = 0;
-    uint64_t _currAreaId = 0;
-    uint64_t _currLayerId = 0;
     QGraphicsView * _geoView = nullptr;
     QGraphicsView * _pixelView = nullptr;
     uint _geoVisId = 0;
     uint _pixelVisId = 0;
     bool _isGeoScene;
+    CurrentData _currentData;
+    bool _blockRecalcLayer = false;
     LayerInstrumentalForm * _instrumentalForm = nullptr;
     EmbIFaceNotifier * _ifaceInstrumentalForm = nullptr;
 
     QMap<uint64_t, LayerItem*> _layers;
     QMap<QString, RasterItem*> _loadingRasters;
-
-//    QTreeWidgetItem * _baseLayer, * _defectLayer, * _photoLayer, * _photo3dLayer ;
-//    QTreeWidgetItem * _axisLayer;
-//    QTreeWidgetItem * _sizesLayer;
-//    QTreeWidgetItem * _waterDisposalLayer;
-//    QTreeWidgetItem * _waterSupplyLayer;
-//    QTreeWidgetItem * _heatingLayer;
-//    QTreeWidgetItem * _electricityLayer;
-//    QTreeWidgetItem * _doorsLayer;
 };
 
 class LayerItem : public QTreeWidgetItem
@@ -107,14 +119,19 @@ class RasterItem : public QTreeWidgetItem
 public:
     RasterItem(QTreeWidgetItem * parentItem, uint64_t entityId, QString path);
     ~RasterItem();
-    void setRaster(QGraphicsPixmapItem * item, QString name = QString());
+    void setRaster(QGraphicsPixmapItem * item, double scW, double scH, double rotate, QString name = QString());
+    void reinit(QString path);
     QGraphicsPixmapItem * getRaster();
     uint64_t getEntityId();
     QString getPath();
+    double getScW();
+    double getScH();
+    double getRotate();
 
 private:
     const uint64_t _entityId;
-    const QString _path;
+    QString _path;
+    double _scW = 1, _scH = 1, _rotate = 1;
     QGraphicsPixmapItem * _pixmapItem = nullptr;
 };
 

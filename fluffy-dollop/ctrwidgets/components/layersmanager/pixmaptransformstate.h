@@ -57,7 +57,8 @@ class PixmapTransformState : public ScrollBaseState
 {
     Q_OBJECT
 public:
-    PixmapTransformState(const QPixmap & pixmap, QPointF pixmapScenePos, double originalScale=-1);
+    PixmapTransformState(const QPixmap & pixmap, QPointF pixmapScenePos, bool onTop, double originalScale = -1);
+    PixmapTransformState(const QPixmap & pixmap, QPointF pixmapScenePos, double scW, double scH, double rotation, bool onTop);
     ~PixmapTransformState();
     virtual void init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom, const double *scale, double frameCoef, uint visualizerId);
     virtual bool wheelEvent(QWheelEvent* e, QPointF scenePos);
@@ -116,6 +117,7 @@ protected:
     StateMode _stateMode=StateMode::TransformImage;
     QPixmap _pixmap;
     QPointF _pixmapScenePos;
+    const bool _onTop;
     bool _blockWheelEvent=false;
     PixmapItem * _pixmapItem=nullptr;
     HandleItem * _handleItemBottomRight, * _handleItemTopCenter, * _handleItemTopLeft, * _handleItemRightCenter, * _handleItemTopRight, * _handleItemBottomCenter, * _handleItemLeftCenter, * _handleItemBottomLeft;
@@ -126,7 +128,7 @@ protected:
     QPointF _lastScenePos, _userHandlePos;
     HandleType _currentHandleType = HandleType::Invalid;
     QList<HandleItem*> _handleItems;
-    double _originalScale=-1, _scW=1, _scH=1, _rotation=0, _scWmax, _scHmax, _originW, _originH, _userHandleLenght, _userHandleSCW, _userHandleSCH;
+    double _originalScale=-1, _scW=-1, _scH=-1, _rotation=0, _scWmax, _scHmax, _originW, _originH, _userHandleLenght, _userHandleSCW, _userHandleSCH;
     QRectF _cropArea;
     FogItem * _fogItem=nullptr;
     QList<LineItem*> _areaLineItems;

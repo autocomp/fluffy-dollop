@@ -103,6 +103,11 @@ void DefectGraphicsItem::setItemEnabled(bool on_off)
     setEnabled(on_off);
 }
 
+void DefectGraphicsItem::setItemVisible(bool on_off)
+{
+    setVisible(on_off);
+}
+
 void DefectGraphicsItem::centerOnItem()
 {
     foreach(QGraphicsView * view, scene()->views())
@@ -116,6 +121,11 @@ void DefectGraphicsItem::centerOnItem()
 quint64 DefectGraphicsItem::getId()
 {
     return _id;
+}
+
+ViraGraphicsItem::ItemType DefectGraphicsItem::getItemType()
+{
+    return ItemType_Defect;
 }
 
 void DefectGraphicsItem::reinit()

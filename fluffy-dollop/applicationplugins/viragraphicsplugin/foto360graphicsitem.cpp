@@ -40,6 +40,11 @@ void Foto360GraphicsItem::setItemEnabled(bool on_off)
     setEnabled(on_off);
 }
 
+void Foto360GraphicsItem::setItemVisible(bool on_off)
+{
+    setVisible(on_off);
+}
+
 void Foto360GraphicsItem::centerOnItem()
 {
     foreach(QGraphicsView * view, scene()->views())
@@ -48,6 +53,11 @@ void Foto360GraphicsItem::centerOnItem()
         if(viewportSceneRect.contains(scenePos()) == false)
             view->centerOn(this);
     }
+}
+
+ViraGraphicsItem::ItemType Foto360GraphicsItem::getItemType()
+{
+    return ItemType_Foto360;
 }
 
 quint64 Foto360GraphicsItem::getId()

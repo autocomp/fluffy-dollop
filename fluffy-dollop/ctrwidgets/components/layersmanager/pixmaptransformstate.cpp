@@ -13,10 +13,21 @@
 
 using namespace pixmap_transform_state;
 
-PixmapTransformState::PixmapTransformState(const QPixmap & pixmap, QPointF pixmapScenePos, double originalScale)
+PixmapTransformState::PixmapTransformState(const QPixmap & pixmap, QPointF pixmapScenePos, bool onTop, double originalScale)
     : _pixmap(pixmap)
     , _pixmapScenePos(pixmapScenePos)
     , _originalScale(originalScale)
+    , _onTop(onTop)
+{
+}
+
+PixmapTransformState::PixmapTransformState(const QPixmap & pixmap, QPointF pixmapScenePos, double scW, double scH, double rotation, bool onTop)
+    : _pixmap(pixmap)
+    , _pixmapScenePos(pixmapScenePos)
+    , _scW(scW)
+    , _scH(scH)
+    , _rotation(rotation)
+    , _onTop(onTop)
 {
 }
 
@@ -158,7 +169,7 @@ void PixmapTransformState::init(QGraphicsScene *scene, QGraphicsView *view, cons
     _originH = _pixmap.height();
 
     _pixmapItem = new PixmapItem(*this);
-    _pixmapItem->setZValue(1000000);
+    _pixmapItem->setZValue(_onTop ? 1000000 : -1000000);
     _pixmapItem->setPixmap(pm);
     _pixmapItem->setPos(_pixmapScenePos);
     _scene->addItem(_pixmapItem);
@@ -226,8 +237,10 @@ void PixmapTransformState::init(QGraphicsScene *scene, QGraphicsView *view, cons
         _originalScale = 1; // = 1. / (pow(2,(*zoom)-1));
         _needSyncSceneRectByItems = true;
     }
-    _scW = _originalScale;
-    _scH = _originalScale;
+    if(_scW < 0)
+        _scW = _originalScale;
+    if(_scH < 0)
+        _scH = _originalScale;
     _pixmapItem->setTransform(QTransform().scale(_scW, _scH));
 
     _pixmapItem->setPos(_handleItemAnchor->scenePos());
