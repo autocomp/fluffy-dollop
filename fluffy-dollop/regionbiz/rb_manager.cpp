@@ -136,14 +136,19 @@ BaseAreaPtr RegionBizManager::addArea( BaseArea::AreaType type,
     switch ( type ) {
     case BaseArea::AT_REGION:
         add_area = addArea< Region >( parent_id );
+        break;
     case BaseArea::AT_LOCATION:
         add_area = addArea< Location >( parent_id );
+        break;
     case BaseArea::AT_FACILITY:
         add_area = addArea< Facility >( parent_id );
+        break;
     case BaseArea::AT_FLOOR:
         add_area = addArea< Floor >( parent_id );
+        break;
     case BaseArea::AT_ROOM:
         add_area = addArea< Room >( parent_id );
+        break;
     default:
         return nullptr;
     }
