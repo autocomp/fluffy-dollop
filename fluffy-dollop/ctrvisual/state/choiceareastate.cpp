@@ -1,6 +1,5 @@
 #include "choiceareastate.h"
 #include <QDebug>
-#include<QGraphicsLineItem>
 #include<QPen>
 
 ChoiceAreaState::ChoiceAreaState(AreaType areaType, QCursor cursor)
@@ -29,7 +28,7 @@ void ChoiceAreaState::setPen(QPen pen)
     _pen.setCosmetic(true);
 }
 
-bool ChoiceAreaState::mouseMoveEvent(QMouseEvent*, QPointF scenePos)
+bool ChoiceAreaState::mouseMoveEvent(QMouseEvent * e, QPointF scenePos)
 {
     if(_boundingArea.isEmpty() == false)
     {
@@ -46,6 +45,26 @@ bool ChoiceAreaState::mouseMoveEvent(QMouseEvent*, QPointF scenePos)
 //    }
 
     _view->setCursor(_cursor);
+
+    if(e)
+        if(e->modifiers() & Qt::ShiftModifier && _lineItems.size() != 0)
+        {
+            QPointF _scenePos = _lineItems.last()->line().p1();
+            QLineF line(_scenePos, scenePos);
+            double angle = ((360 - line.angle()) + 90);
+            while(angle > 360)
+                angle -= 360.0;
+
+            if(angle >= 45  && angle < 135 )                        // RIGHT
+                scenePos = QPointF(scenePos.x(), _scenePos.y());
+            else if(angle >= 135  && angle < 225)                   // DOWN
+                scenePos = QPointF(_scenePos.x(), scenePos.y());
+            else if(angle >= 225  && angle < 315)                   // LEFT
+                scenePos = QPointF(scenePos.x(), _scenePos.y());
+            else                                                    // UP
+                scenePos = QPointF(_scenePos.x(), scenePos.y());
+        }
+
     _lastMousePos = scenePos;
 
     switch(_areaType)
@@ -53,7 +72,6 @@ bool ChoiceAreaState::mouseMoveEvent(QMouseEvent*, QPointF scenePos)
     case POLYLINE :{
         if(_lineItems.size() != 0)
         {
-            _lineItems.last()->setPen(_pen);
             _lineItems.last()->setLine( QLineF( _lineItems.last()->line().p1(), scenePos) );
         }
     }break;
@@ -61,8 +79,6 @@ bool ChoiceAreaState::mouseMoveEvent(QMouseEvent*, QPointF scenePos)
     case POINT_OR_POLYGON :{
         if(_lineItems.size() != 0)
         {
-            _lineItems.first()->setPen(_pen);
-            _lineItems.last()->setPen(_pen);
             _lineItems.first()->setLine( QLineF( _lineItems.first()->line().p1(), scenePos) );
             _lineItems.last()->setLine( QLineF( _lineItems.last()->line().p1(), scenePos) );
         }
@@ -92,6 +108,10 @@ bool ChoiceAreaState::mousePressEvent(QMouseEvent* e, QPointF scenePos)
 
         _polygon.append(scenePos);
 
+        QPointF prevPos(scenePos);
+        if(_lineItems.size() > 0)
+            prevPos = _lineItems.last()->line().p2();
+
         switch(_areaType)
         {
         case POINT :{
@@ -102,11 +122,12 @@ bool ChoiceAreaState::mousePressEvent(QMouseEvent* e, QPointF scenePos)
         }break;
         case POLYGON :
         case POINT_OR_POLYGON :{
-            if(_polygon.size() == 0 || _polygon.size() == 1)
-            {
-                _lineItems.append(createItem(scenePos, scenePos));
-            }
-            _lineItems.append(createItem(scenePos, scenePos));
+            if(_polygon.size() == 1)
+                _lineItems.append(createItem(prevPos, scenePos));
+
+            _lineItems.append(createItem(prevPos, scenePos));
+
+            mouseMoveEvent(0, scenePos);
         }break;
         };
     }
@@ -208,11 +229,11 @@ void ChoiceAreaState::finishChoice()
     emit signalAreaChoiced(polygonInNativeCoords);
 }
 
-QGraphicsLineItem* ChoiceAreaState::createItem(QPointF p1, QPointF p2)
+ChoiceAreaState::LineItem* ChoiceAreaState::createItem(QPointF p1, QPointF p2)
 {
-    QGraphicsLineItem* item = new QGraphicsLineItem(QLineF(p1,p2));
+    LineItem* item = new LineItem(p1,p2);
     item->setZValue(1000);
-    item->setPen(QPen(Qt::NoPen));
+    item->setPen(_pen);
     _scene->addItem(item);
     return item;
 }
@@ -242,16 +263,18 @@ void ChoiceAreaState::statePoppedFromStack()
 {
 }
 
+//-----------------------------------------------------------------
 
+ChoiceAreaState::LineItem::LineItem(QPointF p1, QPointF p2)
+    : QGraphicsLineItem(QLineF(p1,p2))
+{
+}
 
-
-
-
-
-
-
-
-
-
-
-
+void ChoiceAreaState::LineItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+    if(line().isNull() == false)
+    {
+        painter->setRenderHint(QPainter::Antialiasing);
+        QGraphicsLineItem::paint(painter, option, widget);
+    }
+}

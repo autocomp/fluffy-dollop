@@ -396,6 +396,9 @@ void ViewerController::setPrefferZoomForGeoRect(QRectF rect)
 
 void ViewerController::setPrefferZoomForSceneRect(QRectF rect)
 {
+    if(rect.isNull())
+        return;
+
     QRectF viewRect = getViewportRect();
     int z_level = 1;
 

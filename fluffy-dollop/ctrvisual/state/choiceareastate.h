@@ -2,10 +2,14 @@
 #define CHOICEAREASTATE_H
 
 #include <ctrvisual/state/stateobject.h>
+#include<QGraphicsLineItem>
 
 class ChoiceAreaState : public visualize_system::StateObject
 {
     Q_OBJECT
+
+    class LineItem;
+
 public:
     enum AreaType
     {
@@ -36,16 +40,23 @@ signals:
 
 private:
     void finishChoice();
-    QGraphicsLineItem* createItem(QPointF p1, QPointF p2);
+    LineItem *createItem(QPointF p1, QPointF p2);
 
     const AreaType _areaType;
     QCursor _cursor;
     QPolygonF _polygon;
-    QList<QGraphicsLineItem*> _lineItems;
+    QList<LineItem*> _lineItems;
     QPen _pen;
     QPointF _lastMousePos;
     bool _emitAbortAfterPushedToStack;
     QPolygonF _boundingArea;
+
+    class LineItem : public QGraphicsLineItem
+    {
+    public:
+        LineItem(QPointF p1, QPointF p2);
+        virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    };
 };
 
 #endif // CHOICEOBJETCSTATE_H
