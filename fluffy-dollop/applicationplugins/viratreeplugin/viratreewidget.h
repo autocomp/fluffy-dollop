@@ -15,6 +15,9 @@ public:
 public slots:
     void reinit();
 
+protected :
+    virtual void mousePressEvent(QMouseEvent *event);
+
 protected slots:
     void slotItemSelectionChanged();
     void slotItemDoubleClicked(QTreeWidgetItem*,int);
@@ -29,7 +32,7 @@ protected slots:
     void slotSaveItemToDb(const QModelIndex &index);
 
 protected:
-    const int ColumnCount = 4; //8;
+    const int ColumnCount = 5; //8;
 
     void checkMarks(QTreeWidgetItem * item);
     void recalcAreaInFacility(QTreeWidgetItem * facilityItem);

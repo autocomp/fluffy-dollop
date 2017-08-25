@@ -1,6 +1,7 @@
 #include "viratreewidget.h"
 #include "delegate.h"
 #include "area_treewidget_items.h"
+#include "addbaseareaform.h"
 #include <QDebug>
 #include <QHeaderView>
 #include <regionbiz/rb_manager.h>
@@ -9,7 +10,12 @@
 #include <ctrcore/tempinputdata/tempdatacontroller.h>
 #include <ctrcore/bus/common_message_notifier.h>
 #include <ctrcore/bus/bustags.h>
+#include <ctrcore/ctrcore/ctrconfig.h>
 #include <map>
+#include <QMenu>
+#include <QAction>
+#include <QCursor>
+#include <QMessageBox>
 
 using namespace regionbiz;
 
@@ -41,7 +47,7 @@ ViraTreeWidget::ViraTreeWidget(QWidget *parent)
 //    headerItem()->setText((int)ColumnTitle::RENTER, QString::fromUtf8("Арендатор"));
     headerItem()->setText((int)ColumnTitle::TASKS, QString::fromUtf8("Задачи"));
     headerItem()->setText((int)ColumnTitle::COMMENT, QString::fromUtf8("Комментарий"));
-    //headerItem()->setText((int)ColumnTitle::ID, QString::fromUtf8("ID"));
+    headerItem()->setText((int)ColumnTitle::ID, QString::fromUtf8("ID"));
     for(int i(0); i<ColumnCount; ++ i)
         headerItem()->setTextAlignment(i, Qt::AlignCenter);
 
@@ -95,11 +101,18 @@ void ViraTreeWidget::reinit()
     for( RegionPtr regionPtr: regions )
     {
         QTreeWidgetItem * regionItem = new QTreeWidgetItem(this);
-        regionItem->setText((int)ColumnTitle::NAME, regionPtr->getDescription());
+        QString name = regionPtr->getName();
+        if(name.isEmpty())
+            name = regionPtr->getDescription();
+        regionItem->setText((int)ColumnTitle::NAME, name);
         const qulonglong id(regionPtr->getId());
         regionItem->setText((int)ColumnTitle::ID, QString::number(id));
         for(int i(0); i<ColumnCount; ++i) regionItem->setData(i, ID, id);
         for(int i(0); i<ColumnCount; ++i) regionItem->setData(i, TYPE, (int)ItemType::ItemTypeRegion);
+        if(regionPtr->getCoords().isEmpty())
+            for(int i(0); i < ColumnCount; ++i) regionItem->setTextColor(i, _noCoordColor);
+        else
+            for(int i(0); i < ColumnCount; ++i) regionItem->setTextColor(i, _defaultColor);
         _items.insert(id, regionItem);
 
         std::vector<BaseAreaPtr> locations = regionPtr->getChilds( Region::RCF_LOCATIONS );
@@ -109,11 +122,18 @@ void ViraTreeWidget::reinit()
             if(locationPtr)
             {
                 QTreeWidgetItem * locationItem = new QTreeWidgetItem(regionItem);
-                locationItem->setText((int)ColumnTitle::NAME, locationPtr->getDescription());
+                name = locationPtr->getName();
+                if(name.isEmpty())
+                    name = locationPtr->getDescription();
+                locationItem->setText((int)ColumnTitle::NAME, name);
                 const qulonglong id(locationPtr->getId());
                 locationItem->setText((int)ColumnTitle::ID, QString::number(id));
                 for(int i(0); i<ColumnCount; ++i) locationItem->setData(i, ID, id);
                 for(int i(0); i<ColumnCount; ++i) locationItem->setData(i, TYPE, (int)ItemType::ItemTypeLocation);
+                if(locationPtr->getCoords().isEmpty())
+                    for(int i(0); i < ColumnCount; ++i) locationItem->setTextColor(i, _noCoordColor);
+                else
+                    for(int i(0); i < ColumnCount; ++i) locationItem->setTextColor(i, _defaultColor);
                 _items.insert(id, locationItem);
 
                 std::vector< FacilityPtr > facilities = locationPtr->getChilds();
@@ -121,11 +141,18 @@ void ViraTreeWidget::reinit()
                 {
                     QTreeWidgetItem * facilityItem = new QTreeWidgetItem(locationItem);
                     facilityItem->setFlags(facilityItem->flags() | Qt::ItemIsEditable);
-                    facilityItem->setText((int)ColumnTitle::NAME, facilityPtr->getDescription());
+                    name = facilityPtr->getName();
+                    if(name.isEmpty())
+                        name = facilityPtr->getDescription();
+                    facilityItem->setText((int)ColumnTitle::NAME, name);
                     const qulonglong id(facilityPtr->getId());
                     facilityItem->setText((int)ColumnTitle::ID, QString::number(id));
                     for(int i(0); i<ColumnCount; ++i) facilityItem->setData(i, ID, id);
                     for(int i(0); i<ColumnCount; ++i) facilityItem->setData(i, TYPE, (int)ItemType::ItemTypeFacility);
+                    if(facilityPtr->getCoords().isEmpty())
+                        for(int i(0); i < ColumnCount; ++i) facilityItem->setTextColor(i, _noCoordColor);
+                    else
+                        for(int i(0); i < ColumnCount; ++i) facilityItem->setTextColor(i, _defaultColor);
                     _items.insert(id, facilityItem);
 
                     FloorPtrs floors = facilityPtr->getChilds();
@@ -492,12 +519,11 @@ void ViraTreeWidget::slotEditModeFinish(QVariant var)
         auto it = _items.find(id);
         if(it != _items.end())
         {
-            BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(id, BaseArea::AT_ROOM);
-            RoomPtr roomPtr = BaseArea::convert< Room >(ptr);
-            if(roomPtr)
+            BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(id);
+            if(ptr)
             {
                 QTreeWidgetItem* roomItem = it.value();
-                if(roomPtr->getCoords().isEmpty() == false)
+                if(ptr->getCoords().isEmpty() == false)
                     for(int i(0); i < 8; ++i)
                         roomItem->setTextColor(i, _defaultColor);
             }
@@ -525,7 +551,7 @@ void ViraTreeWidget::slotResaclArea(const QModelIndex &index)
 
 void ViraTreeWidget::slotSaveItemToDb(const QModelIndex &index)
 {
-    qDebug() << "---> slotSaveItemToDb" << index.column() << index.row();
+//    qDebug() << "---> slotSaveItemToDb" << index.column() << index.row();
     QTreeWidgetItem * item = itemFromIndex(index);
     if( ! item) return;
 
@@ -617,38 +643,57 @@ void ViraTreeWidget::slotObjectChanged(uint64_t id)
     }
     else
     {
-        QTreeWidgetItem * item(0);
-        auto it = _items.find(id);
-        if(it != _items.end())
-            item = it.value();
+        BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(id);
+        if(! ptr)
+            return;
 
-        RoomPtr room = BaseArea::convert< Room >( RegionBizManager::instance()->getBaseArea(id) );
-        if(room && item)
+        auto it = _items.find(id);
+        if(it == _items.end())
+            return;
+
+        QTreeWidgetItem * item = it.value();
+
+        switch(ptr->getType())
         {
-            item->setText((int)ColumnTitle::NAME, room->getName());
-            if( !room->getDescription().isEmpty() )
-                item->setToolTip( 0, room->getDescription() );
+        case BaseArea::AT_REGION :
+        case BaseArea::AT_LOCATION :
+        case BaseArea::AT_FACILITY :
+        case BaseArea::AT_FLOOR : {
+            QString description = ptr->getDescription();
+            QString name = ptr->getName();
+            if(name.isEmpty())
+                name = description;
+            item->setText((int)ColumnTitle::NAME, name);
+            if( ! description.isEmpty() )
+                item->setToolTip( 0, description );
+            item->setText((int)ColumnTitle::ID, QString::number(id));
+        }break;
+
+        case BaseArea::AT_ROOM : {
+            item->setText((int)ColumnTitle::NAME, ptr->getName());
+            if( !ptr->getDescription().isEmpty() )
+                item->setToolTip( 0, ptr->getDescription() );
             item->setText((int)ColumnTitle::ID, QString::number(id));
 
-            BaseMetadataPtr areaPtr = room->getMetadata("area");
+            BaseMetadataPtr areaPtr = ptr->getMetadata("area");
             if(areaPtr)
             {
                 double area = areaPtr->getValueAsVariant().toDouble();
                 item->setText((int)ColumnTitle::SQUARE, QString::number(area, 'f', 1));
             }
 
-            BaseMetadataPtr baseRentPtr = room->getMetadata("base_rent");
+            BaseMetadataPtr baseRentPtr = ptr->getMetadata("base_rent");
             if(baseRentPtr)
             {
                 double baseRent = baseRentPtr->getValueAsVariant().toDouble();
                 item->setText((int)ColumnTitle::BASE_RENT, QString::number(baseRent, 'f', 2));
             }
 
-            BaseMetadataPtr rentorPtr = room->getMetadata("rentor");
+            BaseMetadataPtr rentorPtr = ptr->getMetadata("rentor");
             if(rentorPtr)
                 item->setText((int)ColumnTitle::RENTER, rentorPtr->getValueAsVariant().toString());
 
-            BaseMetadataPtr statusPtr = room->getMetadata("status");
+            BaseMetadataPtr statusPtr = ptr->getMetadata("status");
             if(statusPtr)
             {
                 QString status = statusPtr->getValueAsVariant().toString();
@@ -660,40 +705,116 @@ void ViraTreeWidget::slotObjectChanged(uint64_t id)
                     item->setText((int)ColumnTitle::STATUS, QString::fromUtf8("Недоступно"));
             }
 
-            BaseMetadataPtr commentPtr = room->getMetadata("comment");
+            BaseMetadataPtr commentPtr = ptr->getMetadata("comment");
             if(commentPtr)
                 item->setText((int)ColumnTitle::COMMENT, commentPtr->getValueAsVariant().toString());
+        }break;
         }
+
+        qDebug() << "slotObjectChanged, id :" << id << ", points :" << ptr->getCoords().size();
     }
 }
 
 void ViraTreeWidget::slotAddObject(uint64_t id)
 {
+    qDebug() << "ViraTreeWidget::slotAddObject, id:" << id;
 
+    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(id);
+    if(! ptr)
+        return;
+
+    QTreeWidgetItem * parentItem(nullptr);
+    uint64_t parentId = ptr->getParentId();
+    auto it = _items.find(parentId);
+    if(it != _items.end())
+        parentItem = it.value();
+
+    QString name;
+    if( ! ptr->getName().isEmpty() )
+        name = ptr->getName();
+    else if( ! ptr->getDescription().isEmpty() )
+        name = ptr->getDescription();
+
+    ItemType itemType;
+    switch(ptr->getType())
+    {
+    case BaseArea::AT_REGION : {
+        if(name.isEmpty())
+            name = QString::fromUtf8("регион");
+        itemType = ItemType::ItemTypeRegion;
+    }break;
+    case BaseArea::AT_LOCATION : {
+        if(name.isEmpty())
+            name = QString::fromUtf8("локация");
+        itemType = ItemType::ItemTypeLocation;
+    }break;
+    case BaseArea::AT_FACILITY : {
+        if(name.isEmpty())
+            name = QString::fromUtf8("здание");
+        itemType = ItemType::ItemTypeFacility;
+    }break;
+    case BaseArea::AT_FLOOR : {
+        if(name.isEmpty())
+            name = QString::fromUtf8("этаж");
+        itemType = ItemType::ItemTypeFloor;
+    }break;
+    case BaseArea::AT_ROOM : {
+        if(name.isEmpty())
+            name = QString::fromUtf8("комната");
+        itemType = ItemType::ItemTypeRoom;
+    }break;
+    }
+
+    QTreeWidgetItem * item = (parentItem ? new QTreeWidgetItem(parentItem) : new QTreeWidgetItem(this));
+    const qulonglong _id(id);
+    item->setText((int)ColumnTitle::NAME, name);
+    item->setText((int)ColumnTitle::ID, QString::number(_id));
+    for(int i(0); i<ColumnCount; ++i)
+    {
+        item->setData(i, ID, _id);
+        item->setData(i, TYPE, (int)itemType);
+        if(ptr->getType() != BaseArea::AT_FLOOR)
+            item->setTextColor(i, _noCoordColor);
+    }
+    _items.insert(_id, item);
+
+    clearSelection();
+    RegionBizManager::instance()->setCurrentEntity(id);
+    scrollToItem(item);
 }
 
 void ViraTreeWidget::slotDeleteObject(uint64_t id)
 {
+    qDebug() << "ViraTreeWidget::slotDeleteObject, id:" << id;
+
     auto it = _items.find(id);
     if(it != _items.end())
     {
-        QTreeWidgetItem * parentItem = it.value()->parent();
-        int itemType = parentItem->data((int)ColumnTitle::NAME, TYPE).toInt();
-        if(itemType == (int)ItemType::ItemTypeLocation)
+        QTreeWidgetItem * item = it.value();
+        _items.erase(it);
+
+        QTreeWidgetItem * parentItem = item->parent();
+        delete item;
+        item = nullptr;
+        if(parentItem)
         {
-            recalcTasksInLocation(parentItem);
-        }
-        else
-        {
-            while(itemType != (int)ItemType::ItemTypeFacility)
+            int itemType = parentItem->data((int)ColumnTitle::NAME, TYPE).toInt();
+            if(itemType == (int)ItemType::ItemTypeLocation)
             {
-                parentItem = parentItem->parent();
-                if( ! parentItem)
-                    break;
-                itemType = parentItem->data((int)ColumnTitle::NAME, TYPE).toInt();
+                recalcTasksInLocation(parentItem);
             }
-            if(parentItem)
-                recalcTasksInFacility(parentItem);
+            else
+            {
+                while(itemType != (int)ItemType::ItemTypeFacility)
+                {
+                    parentItem = parentItem->parent();
+                    if( ! parentItem)
+                        break;
+                    itemType = parentItem->data((int)ColumnTitle::NAME, TYPE).toInt();
+                }
+                if(parentItem)
+                    recalcTasksInFacility(parentItem);
+            }
         }
     }
 }
@@ -744,7 +865,119 @@ void ViraTreeWidget::slotHeaderSectionClicked(int index)
     sortByColumn(index);
 }
 
+void ViraTreeWidget::mousePressEvent(QMouseEvent *event)
+{
+    QTreeWidget::mousePressEvent(event);
 
+    bool layerEditMode(false);
+    QVariant layerEditModeVar = CtrConfig::getValueByName("application_settings.editMode");
+    if(layerEditModeVar.isValid())
+        layerEditMode = layerEditModeVar.toBool();
+    else
+        CtrConfig::setValueByName("application_settings.editMode", false);
+
+    if(event->buttons()&Qt::RightButton && layerEditMode)
+    {
+        uint64_t id = RegionBizManager::instance()->getCurrentEntity();
+        BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(id);
+        if(ptr)
+        {
+            QMenu menu(this);
+            QAction * addRegionAction(nullptr);
+            QAction * addSubAction(nullptr);
+            QAction * delAction(nullptr);
+            QString name = ptr->getName();
+            if(name.isEmpty())
+                name = ptr->getDescription();
+            switch(ptr->getType())
+            {
+            case BaseArea::AT_REGION : {
+                addRegionAction = menu.addAction(QString::fromUtf8("Добавить новый регион"));
+                menu.addSeparator();
+                addSubAction = menu.addAction(QString::fromUtf8("Добавить локацию в регион \"") + name + QString("\""));
+                delAction = menu.addAction(QString::fromUtf8("Удалить регион \"") + name + QString("\""));
+            }break;
+            case BaseArea::AT_LOCATION : {
+                addSubAction = menu.addAction(QString::fromUtf8("Добавить здание в локацию \"") + name + QString("\""));
+                delAction = menu.addAction(QString::fromUtf8("Удалить локацию \"") + name + QString("\""));
+            }break;
+            case BaseArea::AT_FACILITY : {
+                addSubAction = menu.addAction(QString::fromUtf8("Добавить этаж в здание \"") + name + QString("\""));
+                delAction = menu.addAction(QString::fromUtf8("Удалить здание \"") + name + QString("\""));
+            }break;
+            case BaseArea::AT_FLOOR : {
+                addSubAction = menu.addAction(QString::fromUtf8("Добавить комнату в этаж \"") + name + QString("\""));
+                delAction = menu.addAction(QString::fromUtf8("Удалить этаж \"") + name + QString("\""));
+            }break;
+            case BaseArea::AT_ROOM : {
+                delAction = menu.addAction(QString::fromUtf8("Удалить комнату \"") + name + QString("\""));
+            }break;
+            }
+            QAction * res = menu.exec(QCursor::pos());
+            if(res)
+            {
+                if(res == addRegionAction || res == addSubAction)
+                {
+                    BaseArea::AreaType type;
+                    QString addWindowTitle;
+                    if(res == addRegionAction)
+                    {
+                        type = BaseArea::AT_REGION;
+                        addWindowTitle = QString::fromUtf8("Добавить регион");
+                    }
+                    else
+                        switch(ptr->getType())
+                        {
+                        case BaseArea::AT_REGION :
+                            type = BaseArea::AT_LOCATION;
+                            addWindowTitle = QString::fromUtf8("Добавить локацию");
+                            break;
+                        case BaseArea::AT_LOCATION :
+                            type = BaseArea::AT_FACILITY;
+                            addWindowTitle = QString::fromUtf8("Добавить здание");
+                            break;
+                        case BaseArea::AT_FACILITY :
+                            type = BaseArea::AT_FLOOR;
+                            addWindowTitle = QString::fromUtf8("Добавить этаж");
+                            break;
+                        case BaseArea::AT_FLOOR :
+                            type = BaseArea::AT_ROOM;
+                            addWindowTitle = QString::fromUtf8("Добавить комнату");
+                            break;
+                        case BaseArea::AT_ROOM : return;
+                        }
+
+                    AddBaseAreaForm addBaseAreaForm(type, id);
+                    ew::EmbeddedWidgetStruct struc;
+                    ew::EmbeddedHeaderStruct headStr;
+                    headStr.hasCloseButton = true;
+                    headStr.windowTitle = addWindowTitle;
+                    headStr.headerPixmap = QString(":/img/icon_edit_image.png");
+                    struc.widgetTag = "AddBaseAreaForm";
+                    struc.minSize = QSize(100,100);
+                    struc.maxSize = QSize(500,500);
+                    //struc.size = QSize(400,25);
+                    struc.header = headStr;
+                    struc.iface = &addBaseAreaForm;
+                    struc.topOnHint = true;
+                    struc.isModal = true;
+                    ewApp()->createWidget(struc);
+
+                    ewApp()->removeWidget(addBaseAreaForm.id());
+                }
+                else if(res == delAction)
+                {
+                    if(QMessageBox::Yes == QMessageBox::question(this, QString::fromUtf8("Внимание"), delAction->text() + QString(" ?"), QMessageBox::Yes, QMessageBox::No))
+                    {
+                        bool res = RegionBizManager::instance()->deleteArea(ptr);
+                        qDebug() << "deleteArea, id:" << id << ", res:" << res;
+                        clearSelection();
+                    }
+                }
+            }
+        }
+    }
+}
 
 
 

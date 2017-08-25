@@ -23,16 +23,21 @@ HEADERS += \
     viratreeplugin.h \
     viratreewidget.h \
     delegate.h \
-    area_treewidget_items.h
+    area_treewidget_items.h \
+    addbaseareaform.h
 
 SOURCES += \
     viratreeplugin.cpp \
     viratreewidget.cpp \
     delegate.cpp \
-    area_treewidget_items.cpp
+    area_treewidget_items.cpp \
+    addbaseareaform.cpp
 
 RESOURCES += \
     viratreepluginres.qrc
+
+FORMS += \
+    addbaseareaform.ui
 
 
 
