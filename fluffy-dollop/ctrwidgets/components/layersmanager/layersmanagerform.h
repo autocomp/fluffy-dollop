@@ -8,7 +8,9 @@
 
 class QGraphicsView;
 class QGraphicsPixmapItem;
+class QGraphicsSvgItem;
 class LayerInstrumentalForm;
+class SvgEditorForm;
 
 namespace Ui {
 class LayersManagerForm;
@@ -50,8 +52,8 @@ struct CurrentData
     QString planPath;
 };
 
+class DataItem;
 class LayerItem;
-class RasterItem;
 
 class LayersManagerForm : public QWidget
 {
@@ -71,10 +73,11 @@ private slots:
     void slotDeleteEntity();
     void slotSelectionChanged();
     void slotBlockGUI(QVariant);
-    void slotLayerInstrumentalFormClose();
+    void slotEditorFormClose();
     void slotAddLayer();
     void slotDeleteLayer();
-    void slotSaved(QString filePath, QPointF scenePos, double scaleW, double scaleH, double rotate);
+    void slotRasterSaved(QString filePath, QPointF scenePos, double scaleW, double scaleH, double rotate);
+    void slotSvgSaved(QString filePath, QPointF scenePos);
     void slotFileLoaded(regionbiz::BaseFileKeeperPtr);
     void slotSyncMarks();
 
@@ -82,6 +85,7 @@ private:
     void syncChechState(QTreeWidgetItem *item, bool setVisible);
     void reinitLayers();
     void reinitLayer(LayerItem * layerItem);
+    void syncMarks(bool hideAll = false);
 
     Ui::LayersManagerForm *ui;
     quint64 _embeddedWidgetId = 0;
@@ -94,9 +98,9 @@ private:
     bool _blockRecalcLayer = false;
     LayerInstrumentalForm * _instrumentalForm = nullptr;
     EmbIFaceNotifier * _ifaceInstrumentalForm = nullptr;
-
+    SvgEditorForm * _svgEditorForm = nullptr;
     QMap<uint64_t, LayerItem*> _layers;
-    QMap<QString, RasterItem*> _loadingRasters;
+    QMap<QString, DataItem*> _loadingItems;
 };
 
 class LayerItem : public QTreeWidgetItem
@@ -114,7 +118,20 @@ private:
     uint64_t _layerId;
 };
 
-class RasterItem : public QTreeWidgetItem
+class DataItem : public QTreeWidgetItem
+{
+public:
+    DataItem(QTreeWidgetItem * parentItem, uint64_t entityId, QString path, int type);
+    virtual ~DataItem() {}
+    uint64_t getEntityId();
+    QString getPath();
+
+protected:
+    const uint64_t _entityId;
+    QString _path;
+};
+
+class RasterItem : public DataItem
 {
 public:
     RasterItem(QTreeWidgetItem * parentItem, uint64_t entityId, QString path);
@@ -123,16 +140,26 @@ public:
     void reinit(QString path);
     QGraphicsPixmapItem * getRaster();
     uint64_t getEntityId();
-    QString getPath();
     double getScW();
     double getScH();
     double getRotate();
 
 private:
-    const uint64_t _entityId;
-    QString _path;
     double _scW = 1, _scH = 1, _rotate = 1;
     QGraphicsPixmapItem * _pixmapItem = nullptr;
+};
+
+class SvgItem : public DataItem
+{
+public:
+    SvgItem(QTreeWidgetItem * parentItem, uint64_t entityId, QString path);
+    ~SvgItem();
+    void setSvg(QGraphicsSvgItem * svg, QString name = QString());
+    void reinit(QString path);
+    QGraphicsSvgItem * getSvg();
+
+private:
+    QGraphicsSvgItem * _svg = nullptr;
 };
 
 }

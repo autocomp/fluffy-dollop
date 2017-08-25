@@ -1,21 +1,31 @@
 #include "lineitem.h"
 #include <QPen>
 #include <QPainter>
+#include <QGraphicsScene>
+#include <QDebug>
 
 using namespace pixmap_transform_state;
+
+LineItem::LineItem(QGraphicsScene * _scene, QPen pen)
+{
+    setPen(pen);
+    _scene->addItem(this);
+}
 
 LineItem::LineItem(QGraphicsItem *_parent, QPen pen)
     : QGraphicsLineItem(_parent)
 {
-    setFlags(QGraphicsItem::ItemIgnoresParentOpacity);
     setPen(pen);
     setZValue(2);
 }
 
 void LineItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    painter->setRenderHint(QPainter::Antialiasing);
-    QGraphicsLineItem::paint(painter, option, widget);
+    if(line().isNull() == false)
+    {
+        painter->setRenderHint(QPainter::Antialiasing);
+        QGraphicsLineItem::paint(painter, option, widget);
+    }
 }
 
 //-----------------------------------------------------------------

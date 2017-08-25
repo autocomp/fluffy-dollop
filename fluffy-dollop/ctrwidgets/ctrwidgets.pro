@@ -14,7 +14,7 @@ CONFIG += plugin
 
 include($${ROOT_DIR}/pri/common.pri)
 
-QT += core gui sql xml network
+QT += core gui sql xml network svg
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 LIBS += -L$${INSTALL_PATH_LIB} \
@@ -57,6 +57,7 @@ FORMS += \
 #    components/filedialog/previewform.ui \
 #    components/sourcesensorwidget/sourcesensorwidget.ui
     components/layersmanager/layersmanagerform.ui \
-    components/layersmanager/layerinstrumentalform.ui
+    components/layersmanager/layerinstrumentalform.ui \
+    components/layersmanager/svgeditorform.ui \
 
 include ($${ROOT_DIR}/pri/install.pri)

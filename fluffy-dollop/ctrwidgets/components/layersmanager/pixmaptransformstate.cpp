@@ -34,15 +34,6 @@ PixmapTransformState::PixmapTransformState(const QPixmap & pixmap, QPointF pixma
 PixmapTransformState::~PixmapTransformState()
 {
     delete _pixmapItem;
-
-//    if(_needSyncSceneRectByItems)
-//    {
-//        QRectF r = _scene->itemsBoundingRect();
-//        double dW = r.width()*0.2;
-//        double dH = r.height()*0.2;
-//        r = QRectF(r.x()-dW, r.y()-dH, r.width() + 2*dW, r.height() + 2*dH);
-//        _view->setSceneRect(r);
-//    }
 }
 
 void PixmapTransformState::setMode(StateMode stateMode)
@@ -235,7 +226,6 @@ void PixmapTransformState::init(QGraphicsScene *scene, QGraphicsView *view, cons
     if(_originalScale < 0)
     {
         _originalScale = 1; // = 1. / (pow(2,(*zoom)-1));
-        _needSyncSceneRectByItems = true;
     }
     if(_scW < 0)
         _scW = _originalScale;
@@ -268,12 +258,7 @@ void PixmapTransformState::init(QGraphicsScene *scene, QGraphicsView *view, cons
     undoAct.scaleH = _scH;
     _undoStack.push(undoAct);
 
-//    if(_needSyncSceneRectByItems)
-//    {
-//        QRectF r = _scene->itemsBoundingRect();
-//        r.adjust(-r.width()/2., -r.height()/2, r.width()/2., r.height()/2);
-//        _view->setSceneRect(r);
-//    }
+    view->centerOn(_pixmapItem);
 }
 
 bool PixmapTransformState::wheelEvent(QWheelEvent* e, QPointF scenePos)
@@ -536,8 +521,6 @@ bool PixmapTransformState::mouseReleaseEvent(QMouseEvent *e, QPointF scenePos)
         }
     }break;
     case StateMode::TransformImage : {
-//        if(_needSyncSceneRectByItems)
-//            _view->setSceneRect(_scene->itemsBoundingRect());
     }break;
     default : {}
     }
@@ -712,12 +695,6 @@ void PixmapTransformState::resendColor(QColor color)
 void PixmapTransformState::pixmapMoved()
 {
     emit signalPixmapChanged();
-//    if(_needSyncSceneRectByItems)
-//    {
-//        QRectF r = _scene->itemsBoundingRect();
-//        r.adjust(-r.width()/2., -r.height()/2, r.width()/2., r.height()/2);
-//        _view->setSceneRect(r);
-//    }
 }
 
 double PixmapTransformState::lenght(QPointF p1, QPointF p2)

@@ -239,7 +239,7 @@ void LayerInstrumentalForm::setMode(bool on_off)
     if(! ui->transform->isChecked() && ! ui->crop->isChecked() && ! ui->changeColor->isChecked())
     {
         ui->apply->setEnabled(_pixmapTransformState->changed());
-        ui->save->setEnabled(_pixmapTransformState->changed());
+//        ui->save->setEnabled(_pixmapTransformState->changed());
     }
 
     ui->persentSlider->setValue(0);
@@ -372,7 +372,7 @@ void LayerInstrumentalForm::setColorOnImage(QColor color)
     bool changed(true);
     ui->apply->setEnabled(changed);
     ui->undoAction->setEnabled(_pixmapTransformState->changed());
-    ui->save->setEnabled(_pixmapTransformState->changed());
+//    ui->save->setEnabled(_pixmapTransformState->changed());
 }
 
 void LayerInstrumentalForm::setArea(bool on_off)
@@ -390,7 +390,7 @@ void LayerInstrumentalForm::setArea(bool on_off)
 
         ui->apply->setEnabled(false);
         ui->undoAction->setEnabled(_pixmapTransformState->changed());
-        ui->save->setEnabled(_pixmapTransformState->changed());
+//        ui->save->setEnabled(_pixmapTransformState->changed());
     }
     else
     {
@@ -408,7 +408,7 @@ void LayerInstrumentalForm::setArea(bool on_off)
         bool changed(true);
         ui->apply->setEnabled(changed);
         ui->undoAction->setEnabled(_pixmapTransformState->changed());
-        ui->save->setEnabled(_pixmapTransformState->changed());
+//        ui->save->setEnabled(_pixmapTransformState->changed());
     }
 }
 
@@ -422,7 +422,7 @@ void LayerInstrumentalForm::LayerInstrumentalForm::areaSetted()
     bool changed(true);
     ui->apply->setEnabled(changed);
     ui->undoAction->setEnabled(_pixmapTransformState->changed());
-    ui->save->setEnabled(_pixmapTransformState->changed());
+//    ui->save->setEnabled(_pixmapTransformState->changed());
 }
 
 void LayerInstrumentalForm::clearArea()
@@ -460,7 +460,7 @@ void LayerInstrumentalForm::applyForImageOrArea(bool on_off)
 void LayerInstrumentalForm::pixmapChanged()
 {
     ui->undoAction->setEnabled(_pixmapTransformState->changed());
-    ui->save->setEnabled(_pixmapTransformState->changed());
+//    ui->save->setEnabled(_pixmapTransformState->changed());
 }
 
 void LayerInstrumentalForm::undoAction()

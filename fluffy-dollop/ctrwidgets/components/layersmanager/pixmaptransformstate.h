@@ -133,7 +133,6 @@ protected:
     FogItem * _fogItem=nullptr;
     QList<LineItem*> _areaLineItems;
     QPolygonF _areaOnImage;
-    bool _needSyncSceneRectByItems = false;
     QStack<UndoAct> _undoStack;
 };
 

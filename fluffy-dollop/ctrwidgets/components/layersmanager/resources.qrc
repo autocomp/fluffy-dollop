@@ -29,5 +29,8 @@
         <file>img/icon_line_color.png</file>
         <file>img/icon_rect_mode.png</file>
         <file>img/icon_save.png</file>
+        <file>img/icon_ellipse_mode.png</file>
+        <file>img/icon_annotation_mode.png</file>
+        <file>img/icon_textstyle.png</file>
     </qresource>
 </RCC>

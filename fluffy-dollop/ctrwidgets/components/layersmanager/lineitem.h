@@ -9,6 +9,7 @@ namespace pixmap_transform_state
 class LineItem : public QGraphicsLineItem
 {
 public:
+    LineItem(QGraphicsScene * _scene, QPen pen);
     LineItem(QGraphicsItem * _parent, QPen pen);
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 };
