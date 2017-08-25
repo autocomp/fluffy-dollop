@@ -191,12 +191,12 @@ void InfoForm::reloadTasks(regionbiz::BaseAreaPtr area)
 
             std::vector< FacilityPtr > facilities = locationPtr->getChilds();
             for( FacilityPtr facilityPtr: facilities )
-                loadTasks(facilityPtr->getDescription(), QString::fromUtf8("Не определено"), facilityPtr);
+                loadTasks(facilityPtr->getName() /*getDescription()*/, QString::fromUtf8("Не определено"), facilityPtr);
         }
         }break;
 
     case BaseArea::AT_FACILITY:
-        facility = area->getDescription();
+        facility = area->getName() /*getDescription()*/;
         loadTasks(facility, QString::fromUtf8("Не определено"), area);
         break;
 
@@ -437,7 +437,7 @@ void InfoForm::getFloorFullName(QString &facility, regionbiz::BaseAreaPtr area)
 {
     BaseAreaPtr parentArea = area->getParent();
     if(parentArea)
-        facility = parentArea->getDescription();
+        facility = parentArea->getName(); // getDescription();
 }
 
 void InfoForm::getRoomFullName(QString &facility, QString &floor, regionbiz::BaseAreaPtr area)
@@ -448,7 +448,7 @@ void InfoForm::getRoomFullName(QString &facility, QString &floor, regionbiz::Bas
         floor = parentArea->getName();
         BaseAreaPtr grandParentArea = parentArea->getParent();
         if(grandParentArea)
-            facility = grandParentArea->getDescription();
+            facility = grandParentArea->getName(); // getDescription();
     }
 }
 
@@ -459,7 +459,7 @@ QString InfoForm::recursiveGetName(regionbiz::BaseAreaPtr area)
     {
     case BaseArea::AT_LOCATION:
     case BaseArea::AT_FACILITY:
-        name = area->getDescription();
+        name = area->getName(); // getDescription();
         break;
     case BaseArea::AT_REGION:
     case BaseArea::AT_FLOOR:

@@ -144,16 +144,50 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
             showArendators( data, true );
             showTasks( data );
 
-            ui->editObject->show();
             ui->moreInfo->show();
             ui->addDefect->show();
             ui->addFoto->show();
             ui->addFoto360->show();
+            ui->editObject->show();
+            ui->editObject->setDisabled(false);
             ui->editObject->setToolTip(QString::fromUtf8("Редактировать контуры комнаты"));
             break;
         }
         }
+
+        switch( ptr->getType() ) {
+        case BaseArea::AT_REGION:
+            ui->editObject->show();
+            ui->editObject->setDisabled(false);
+            ui->editObject->setToolTip(QString::fromUtf8("Редактировать контуры региона"));
+            break;
+        case BaseArea::AT_LOCATION: {
+            ui->editObject->setToolTip(QString::fromUtf8("Редактировать контуры локации"));
+            ui->editObject->show();
+            ui->editObject->setDisabled(true);
+            if(ptr->getCoords().isEmpty() == false)
+                ui->editObject->setDisabled(false);
+            else if(ptr->getParent())
+            {
+                if(ptr->getParent()->getCoords().isEmpty() == false)
+                    ui->editObject->setDisabled(false);
+            }
+        }break;
+        case BaseArea::AT_FACILITY: {
+            ui->editObject->setToolTip(QString::fromUtf8("Редактировать контуры здания"));
+            ui->editObject->show();
+            ui->editObject->setDisabled(true);
+            if(ptr->getCoords().isEmpty() == false)
+                ui->editObject->setDisabled(false);
+            else if(ptr->getParent())
+            {
+                if(ptr->getParent()->getCoords().isEmpty() == false)
+                    ui->editObject->setDisabled(false);
+            }
+        }break;
+        }
     }
+
     }
 }
 
@@ -220,14 +254,28 @@ void ViraStatusBar::slotAddFoto360(bool on_off)
 
 void ViraStatusBar::slotEditAreaGeometry(bool on_off)
 {
-    quint64 id(on_off ? RegionBizManager::instance()->getCurrentEntity() : 0);
+    uint64_t id = RegionBizManager::instance()->getCurrentEntity();
+    BaseAreaPtr ptr = regionbiz::RegionBizManager::instance()->getBaseArea(id);
+    if( ! ptr)
+        return;
 
-    CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, ((bool)id), QString("visualize_system"));
+    quint64 _id_(on_off ? id : 0);
+    CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, ((bool)_id_), QString("visualize_system"));
 
-    CommonMessageNotifier::send( (uint)visualize_system::BusTags::EditAreaGeometry, QVariant(id), QString("visualize_system"));
-
+    switch(ptr->getType())
+    {
+    case BaseArea::AT_REGION :
+    case BaseArea::AT_LOCATION :
+    case BaseArea::AT_FACILITY : {
+        CommonMessageNotifier::send( (uint)visualize_system::BusTags::EditAreaGeometryOnMap, QVariant(_id_), QString("visualize_system"));
+    }break;
+    case BaseArea::AT_FLOOR :
+    case BaseArea::AT_ROOM : {
+        CommonMessageNotifier::send( (uint)visualize_system::BusTags::EditAreaGeometryOnPlan, QVariant(_id_), QString("visualize_system"));
+    }break;
+    }
     ui->moreInfo->setDisabled(on_off);
-//    ui->addDefect->setDisabled(on_off);
+    //ui->addDefect->setDisabled(on_off);
 }
 
 void ViraStatusBar::slotEditObjectGeometryFinish(QVariant var)
@@ -617,7 +665,7 @@ QString ViraStatusBar::recursiveGetName(BaseAreaPtr area)
     case BaseArea::AT_LOCATION:
     case BaseArea::AT_FACILITY:
     {
-        name = area->getDescription();
+        name = area->getName(); // getDescription();
         break;
     }
 
