@@ -566,43 +566,58 @@ void PixelWorkState::areaGeometryEdited(QPolygonF pol)
 {
     if(_editObjectGeometry > 0)
     {
-        auto it = _itemsOnFloor.find(_editObjectGeometry);
-        if(it != _itemsOnFloor.end())
+        BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(_editObjectGeometry);
+        if(ptr)
         {
-            AreaGraphicsItem * areaGraphicsItem = dynamic_cast<AreaGraphicsItem*>(it.value());
-            if(areaGraphicsItem)
+            QColor roomColor(_roomDefaultColor);
+            BaseMetadataPtr statusPtr = ptr->getMetadata("status");
+            if(statusPtr)
             {
-                if(pol.isEmpty() == false)
+                QString status = statusPtr->getValueAsVariant().toString();
+                if(status == QString::fromUtf8("Свободно"))
+                    roomColor = QColor(86,206,18);
+                else if(status == QString::fromUtf8("В аренде"))
+                    roomColor = QColor(226,224,111);
+                else
+                    roomColor = QColor(_roomDefaultColor);
+            }
+
+            auto it = _itemsOnFloor.find(_editObjectGeometry);
+            if(it != _itemsOnFloor.end())
+            {
+                AreaGraphicsItem * areaGraphicsItem = dynamic_cast<AreaGraphicsItem*>(it.value());
+                if(areaGraphicsItem)
                 {
-                    areaGraphicsItem->setPolygon(pol);
-
-                    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(_editObjectGeometry, BaseArea::AT_ROOM);
-                    RoomPtr room = BaseArea::convert< Room >(ptr);
-                    if(room)
+                    if(pol.isEmpty() == false)
                     {
-                        room->setCoords(pol);
-                        room->commit();
-
-                        QColor roomColor(_roomDefaultColor);
-                        BaseMetadataPtr statusPtr = room->getMetadata("status");
-                        if(statusPtr)
-                        {
-                            QString status = statusPtr->getValueAsVariant().toString();
-                            if(status == QString::fromUtf8("Свободно"))
-                                roomColor = QColor(86,206,18);
-                            else if(status == QString::fromUtf8("В аренде"))
-                                roomColor = QColor(226,224,111);
-                            else
-                                roomColor = QColor(_roomDefaultColor);
-                        }
+                        areaGraphicsItem->setPolygon(pol);
                         areaGraphicsItem->setColor(roomColor);
                     }
+                    areaGraphicsItem->show();
                 }
-                areaGraphicsItem->show();
             }
+            else if(pol.isEmpty() == false)
+            {
+                AreaInitData roomInitData(true, 10000, roomColor);
+
+                AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(pol);
+                areaGraphicsItem->setAcceptHoverEvents(true);
+                roomInitData.id = ptr->getId();
+                areaGraphicsItem->init(roomInitData);
+                _scene->addItem(areaGraphicsItem);
+                connect(areaGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                _itemsOnFloor.insert(ptr->getId(), areaGraphicsItem);
+            }
+
+            if(pol.isEmpty() == false)
+            {
+                ptr->setCoords(pol);
+                ptr->commit();
+            }
+
+            quint64 id(_editObjectGeometry);
+            CommonMessageNotifier::send( (uint)visualize_system::BusTags::EditModeFinish, QVariant(id), QString("visualize_system"));
         }
-        quint64 roomId(_editObjectGeometry);
-        CommonMessageNotifier::send( (uint)visualize_system::BusTags::EditModeFinish, QVariant(roomId), QString("visualize_system"));
     }
     _editObjectGeometry = 0;
 }
