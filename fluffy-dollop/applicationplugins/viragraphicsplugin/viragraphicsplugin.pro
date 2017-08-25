@@ -21,12 +21,12 @@ LIBS += -L$${INSTALL_PATH_LIB} \
 #        -lpoppler-qt5 \
 
 HEADERS += \
+#    scenevirawidget.h \
+#    viraeditorform.h \
+#    viraeditorview.h \
     viragraphicsplugin.h \
-    scenevirawidget.h \
     virapanel.h \
-    viraeditorform.h \
     virapageslistwidget.h \
-    viraeditorview.h \
     types.h \
     xmlreader.h \
     roomgraphicstem.h \
@@ -43,12 +43,12 @@ HEADERS += \
     layersmenu.h \
 
 SOURCES += \
+#    scenevirawidget.cpp \
+#    viraeditorform.cpp \
+#    viraeditorview.cpp \
     viragraphicsplugin.cpp \
-    scenevirawidget.cpp \
     virapanel.cpp \
-    viraeditorform.cpp \
     virapageslistwidget.cpp \
-    viraeditorview.cpp \
     xmlreader.cpp \
     roomgraphicstem.cpp \
     workstate.cpp \
@@ -66,6 +66,6 @@ RESOURCES += \
     viragraphicspluginres.qrc
 
 FORMS += \
-    viraeditorform.ui
+#    viraeditorform.ui
 
 

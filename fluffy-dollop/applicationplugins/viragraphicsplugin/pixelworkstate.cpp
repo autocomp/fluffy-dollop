@@ -94,7 +94,7 @@ void PixelWorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int 
                                       qMetaTypeId< quint64 >(),
                                       QString("visualize_system") );
 
-    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::EditAreaGeometry, this, SLOT(slotEditAreaGeometry(QVariant)),
+    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::EditAreaGeometryOnPlan, this, SLOT(slotEditAreaGeometry(QVariant)),
                                       qMetaTypeId< quint64 >(),
                                       QString("visualize_system") );
 
@@ -474,12 +474,12 @@ void PixelWorkState::setFloor(qulonglong floorId)
             }
         }
 
-        qDebug() << "-------------------------------";
-        for(auto it = _itemsInLayers.begin(); it != _itemsInLayers.end(); ++it)
-        {
-            qDebug() << "Layer Id :" << it.key() << ", all marks :" << it.value();
-        }
-        qDebug() << "-------------------------------";
+//        qDebug() << "-------------------------------";
+//        for(auto it = _itemsInLayers.begin(); it != _itemsInLayers.end(); ++it)
+//        {
+//            qDebug() << "Layer Id :" << it.key() << ", all marks :" << it.value();
+//        }
+//        qDebug() << "-------------------------------";
     }
 }
 
@@ -711,6 +711,7 @@ void PixelWorkState::slotSelectItem(qulonglong id, bool centerOnEntity)
 void PixelWorkState::slotEditAreaGeometry(QVariant var)
 {
     uint id = var.toUInt();
+
     if(id > 0)
     {
         _editObjectGeometry = id;

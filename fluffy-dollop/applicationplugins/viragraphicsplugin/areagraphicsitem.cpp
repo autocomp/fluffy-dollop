@@ -147,6 +147,7 @@ void AreaGraphicsItem::setItemselected(bool on_off)
 void AreaGraphicsItem::setItemEnabled(bool on_off)
 {
     setEnabled(on_off);
+    setAcceptedMouseButtons(on_off ? Qt::AllButtons : Qt::NoButton);
 }
 
 void AreaGraphicsItem::setItemVisible(bool on_off)
@@ -186,10 +187,10 @@ void AreaGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
     {
         if(polygon().containsPoint(event->pos(), Qt::OddEvenFill))
             emit signalSelectItem(_areaInitData.id, false);
-        else
-            QGraphicsPolygonItem::mousePressEvent(event);
+//        else
+//            QGraphicsPolygonItem::mousePressEvent(event);
     }
-    else
+//    else
         QGraphicsPolygonItem::mousePressEvent(event);
 }
 

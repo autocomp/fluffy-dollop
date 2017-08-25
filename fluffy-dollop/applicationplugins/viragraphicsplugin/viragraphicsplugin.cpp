@@ -43,6 +43,7 @@ void ViraGraphicsPlugin::launchWorkState()
     connect(_workState.data(), SIGNAL(switchOnMap()), this, SLOT(switchOnMap()));
     connect(_workState.data(), SIGNAL(switchOnEditor()), this, SLOT(switchOnEditor()));
     connect(_workState.data(), SIGNAL(setMarkOnMap(qulonglong)), this, SLOT(setMarkOnMap(qulonglong)));
+    connect(_workState.data(), SIGNAL(editAreaGeometry(bool)), this, SLOT(editAreaGeometry(bool)));
     visualize_system::VisualizerManager::instance()->getStateInterface(getVisualizerId())->setVisualizerState(_workState);
 
     _pixelVisualizerId = visualize_system::VisualizerManager::instance()->addVisualizer(visualize_system::VisualizerPixel);
@@ -243,8 +244,13 @@ void ViraGraphicsPlugin::editAreaGeometry(bool on_off)
 {
     if(on_off)
     {
+        if(sender() == _workState.data())
+            _editedVisualizerId = getVisualizerId();
+        else if(sender() == _pixelWorkState.data())
+            _editedVisualizerId = _pixelVisualizerId;
+
         _choiceAreaState = QSharedPointer<ChoiceAreaState>(new ChoiceAreaState(ChoiceAreaState::POLYGON, QCursor(QPixmap(":/img/cursor_polygon.png"), 0, 0)));
-        visualize_system::VisualizerManager::instance()->getStateInterface(_pixelVisualizerId)->setVisualizerState(_choiceAreaState);
+        visualize_system::VisualizerManager::instance()->getStateInterface(_editedVisualizerId)->setVisualizerState(_choiceAreaState);
         connect(_choiceAreaState.data(), SIGNAL(signalAreaChoiced(QPolygonF)), this, SLOT(areaGeometryEdited(QPolygonF)));
         connect(_choiceAreaState.data(), SIGNAL(signalAbort()), this, SLOT(areaGeometryEditingAbort()));
     }
@@ -255,6 +261,7 @@ void ViraGraphicsPlugin::editAreaGeometry(bool on_off)
             _choiceAreaState->emit_closeState();
             _choiceAreaState.clear();
         }
+        _editedVisualizerId = 0;
     }
 }
 
@@ -264,7 +271,11 @@ void ViraGraphicsPlugin::areaGeometryEdited(QPolygonF pol)
     {
         _choiceAreaState->emit_closeState();
         _choiceAreaState.clear();
-        _pixelWorkState->areaGeometryEdited(pol);
+
+        if(_editedVisualizerId == getVisualizerId())
+            _workState->areaGeometryEdited(pol);
+        else if(_editedVisualizerId == _pixelVisualizerId)
+            _pixelWorkState->areaGeometryEdited(pol);
     }
 }
 
@@ -274,7 +285,11 @@ void ViraGraphicsPlugin::areaGeometryEditingAbort()
     {
         _choiceAreaState->emit_closeState();
         _choiceAreaState.clear();
-        _pixelWorkState->areaGeometryEdited(QPolygonF());
+
+        if(_editedVisualizerId == getVisualizerId())
+            _workState->areaGeometryEdited(QPolygonF());
+        else if(_editedVisualizerId == _pixelVisualizerId)
+            _pixelWorkState->areaGeometryEdited(QPolygonF());
     }
 }
 

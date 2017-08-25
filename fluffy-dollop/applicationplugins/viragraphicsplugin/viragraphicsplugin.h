@@ -38,7 +38,7 @@ private slots:
 
 private:
     bool _showFirstBaseCover = true;
-    uint _pixelVisualizerId = 0;
+    uint _pixelVisualizerId = 0, _editedVisualizerId = 0;
 
     QSharedPointer<WorkState> _workState;
     QSharedPointer<PixelWorkState> _pixelWorkState;

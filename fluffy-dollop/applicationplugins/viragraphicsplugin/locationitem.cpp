@@ -2,11 +2,11 @@
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
 #include <QDebug>
+#include <regionbiz/rb_manager.h>
 
-LocationItem::LocationItem(qulonglong id, int minZoom, QRectF bSceneRect, const QList<QGraphicsItem*>& items, QGraphicsScene* scene)
+LocationItem::LocationItem(qulonglong id, int minZoom, const QList<QGraphicsItem*>& items, QGraphicsScene* scene)
     : _id(id)
     , _minZoom(minZoom)
-    , _bSceneRect(bSceneRect)
     , _items(items)
 {
     QPixmap pm(":/img/mark_on_map.png");
@@ -14,7 +14,6 @@ LocationItem::LocationItem(qulonglong id, int minZoom, QRectF bSceneRect, const 
     setOffset(-pm.width()/2., -pm.height());
     setFlags(QGraphicsItem::ItemIgnoresTransformations);
     setZValue(1000000);
-    setPos(bSceneRect.center());
     scene->addItem(this);
 
     zoomChanged(0);
@@ -22,8 +21,13 @@ LocationItem::LocationItem(qulonglong id, int minZoom, QRectF bSceneRect, const 
 
 LocationItem::~LocationItem()
 {
-//    foreach(QGraphicsItem * item, _items)
-//        item;
+    //    foreach(QGraphicsItem * item, _items)
+    //        item;
+}
+
+void LocationItem::setMinZoom(int minZoom)
+{
+    _minZoom = minZoom;
 }
 
 void LocationItem::zoomChanged(int zoom)
@@ -85,7 +89,14 @@ void LocationItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 void LocationItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
     emit signalSelectItem(_id, true);
-    emit setViewport(_bSceneRect);
+
+    regionbiz::BaseAreaPtr ptr = regionbiz::RegionBizManager::instance()->getBaseArea(_id);
+    if(ptr)
+    {
+        QPolygonF pol = ptr->getCoords();
+        if(pol.isEmpty() == false)
+            emit setViewport(pol.boundingRect());
+    }
 }
 
 

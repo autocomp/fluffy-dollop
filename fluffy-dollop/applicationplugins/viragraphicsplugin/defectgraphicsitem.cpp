@@ -1,5 +1,4 @@
 #include "defectgraphicsitem.h"
-#include "viraeditorview.h"
 #include <QGraphicsPixmapItem>
 #include <QGraphicsView>
 #include <QDir>
@@ -101,6 +100,7 @@ void DefectGraphicsItem::setItemselected(bool on_off)
 void DefectGraphicsItem::setItemEnabled(bool on_off)
 {
     setEnabled(on_off);
+    setAcceptedMouseButtons(on_off ? Qt::AllButtons : Qt::NoButton);
 }
 
 void DefectGraphicsItem::setItemVisible(bool on_off)

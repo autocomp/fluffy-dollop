@@ -67,6 +67,7 @@ void FotoGraphicsItem::setItemselected(bool on_off)
 void FotoGraphicsItem::setItemEnabled(bool on_off)
 {
     setEnabled(on_off);
+    setAcceptedMouseButtons(on_off ? Qt::AllButtons : Qt::NoButton);
 }
 
 void FotoGraphicsItem::setItemVisible(bool on_off)

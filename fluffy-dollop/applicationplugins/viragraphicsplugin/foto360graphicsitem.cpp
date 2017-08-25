@@ -38,6 +38,7 @@ void Foto360GraphicsItem::setItemselected(bool on_off)
 void Foto360GraphicsItem::setItemEnabled(bool on_off)
 {
     setEnabled(on_off);
+    setAcceptedMouseButtons(on_off ? Qt::AllButtons : Qt::NoButton);
 }
 
 void Foto360GraphicsItem::setItemVisible(bool on_off)

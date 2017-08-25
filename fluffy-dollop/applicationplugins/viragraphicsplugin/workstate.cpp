@@ -1,6 +1,5 @@
 #include "workstate.h"
 #include "xmlreader.h"
-#include "areagraphicsitem.h"
 #include "locationitem.h"
 #include "types.h"
 #include "defectgraphicsitem.h"
@@ -75,6 +74,10 @@ void WorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom
                                       qMetaTypeId< quint64 >(),
                                       QString("visualize_system") );
 
+    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::EditAreaGeometryOnMap, this, SLOT(slotEditAreaGeometry(QVariant)),
+                                      qMetaTypeId< quint64 >(),
+                                      QString("visualize_system") );
+
 //    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::LayerVisibleChanged, this, SLOT(slotSetLayerVisible(QVariant)),
 //                                      qMetaTypeId< QVariantList >(),
 //                                      QString("visualize_system") );
@@ -104,42 +107,8 @@ void WorkState::reinit()
         delete locationItem;
     _locationItems.clear();
 
-    AreaInitData regionInitData;
-    regionInitData.zValue = 100;
-    regionInitData.penNormal.setColor(Qt::green);
-    regionInitData.penNormal.setCosmetic(true);
-    regionInitData.penNormal.setWidth(2);
-    regionInitData.penHoverl = regionInitData.penNormal;
-    regionInitData.penHoverl.setWidth(3);
-    regionInitData.brushNormal.setStyle(Qt::NoBrush);
-    regionInitData.brushHoverl.setStyle(Qt::NoBrush);
-
-    AreaInitData locationInitData;
-    locationInitData.zValue = 1000;
-    locationInitData.penNormal.setColor(Qt::red);
-    locationInitData.penNormal.setCosmetic(true);
-    locationInitData.penNormal.setWidth(2);
-    locationInitData.penHoverl = locationInitData.penNormal;
-    locationInitData.penHoverl.setWidth(3);
-    locationInitData.brushNormal.setStyle(Qt::NoBrush);
-    locationInitData.brushHoverl.setStyle(Qt::NoBrush);
-
-    AreaInitData facInitData;
-    facInitData.zValue = 10000;
-    facInitData.sendDoubleClick = true;
-    facInitData.isSelectableFromMap = true;
-    facInitData.penNormal.setColor(Qt::blue);
-    facInitData.penNormal.setCosmetic(true);
-    facInitData.penNormal.setWidth(2);
-    facInitData.penHoverl = facInitData.penNormal;
-    facInitData.penHoverl.setWidth(3);
-    QColor facBrushColor(Qt::blue);
-    facBrushColor.setAlpha(50);
-    facInitData.brushNormal.setColor(facBrushColor);
-    facInitData.brushNormal.setStyle(Qt::SolidPattern);
-    facBrushColor.setAlpha(50);
-    facInitData.brushHoverl = facInitData.brushNormal;
-    facInitData.brushHoverl.setColor(facBrushColor);
+    AreaInitData regionInitData, locationInitData, facInitData;
+    getAreaInitData(regionInitData, locationInitData, facInitData);
 
     auto mngr = RegionBizManager::instance();
     std::vector<RegionPtr> regions = mngr->getRegions();
@@ -261,62 +230,6 @@ void WorkState::reinit()
                         }break;
                         }
                         insertItemToLayer(mark->getLayer(), mark->getId());
-
-                        /*
-                        if(markInArchive(mark) == false)
-                        {
-                            QString mark_type_str = QString::fromUtf8("дефект");
-                            BaseMetadataPtr mark_type = mark->getMetadata("mark_type");
-                            if(mark_type)
-                            {
-                                QString _mark_type_str = mark_type->getValueAsVariant().toString();
-                                if(_mark_type_str == QString::fromUtf8("фотография") || _mark_type_str == QString::fromUtf8("панорамная фотография"))
-                                    mark_type_str = _mark_type_str;
-                            }
-                            if(mark_type_str == QString::fromUtf8("дефект"))
-                            {
-                                QPointF center = mark->getCenter();
-                                DefectGraphicsItem * _defectGraphicsItem = new DefectGraphicsItem(mark->getId());
-                                _defectGraphicsItem->setProperty("locationId", locationId);
-                                _defectGraphicsItem->setPos(center);
-
-                                _scene->addItem(_defectGraphicsItem);
-                                connect(_defectGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
-                                _items.insert(mark->getId(), _defectGraphicsItem);
-
-                                _defectGraphicsItem->hide();
-                                graphicsItems.append(_defectGraphicsItem);
-                            }
-                            else if(mark_type_str == QString::fromUtf8("фотография"))
-                            {
-                                QPointF center = mark->getCenter();
-                                FotoGraphicsItem * _photoGraphicsItem = new FotoGraphicsItem(mark->getId());
-                                _photoGraphicsItem->setProperty("locationId", locationId);
-                                _photoGraphicsItem->setPos(center);
-
-                                _scene->addItem(_photoGraphicsItem);
-                                connect(_photoGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
-                                _items.insert(mark->getId(), _photoGraphicsItem);
-
-                                _photoGraphicsItem->hide();
-                                graphicsItems.append(_photoGraphicsItem);
-                            }
-                            else if(mark_type_str == QString::fromUtf8("панорамная фотография"))
-                            {
-                                QPointF center = mark->getCenter();
-                                Foto360GraphicsItem * _photo360GraphicsItem = new Foto360GraphicsItem(mark->getId());
-                                _photo360GraphicsItem->setProperty("locationId", locationId);
-                                _photo360GraphicsItem->setPos(center);
-
-                                _scene->addItem(_photo360GraphicsItem);
-                                connect(_photo360GraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
-                                _items.insert(mark->getId(), _photo360GraphicsItem);
-
-                                _photo360GraphicsItem->hide();
-                                graphicsItems.append(_photo360GraphicsItem);
-                            }
-                        }
-                        */
                     }
                 }
 
@@ -370,65 +283,11 @@ void WorkState::reinit()
                     }break;
                     }
                     insertItemToLayer(mark->getLayer(), mark->getId());
-
-                    /*
-                    if(markInArchive(mark) == false)
-                    {
-                        QString mark_type_str = QString::fromUtf8("дефект");
-                        BaseMetadataPtr mark_type = mark->getMetadata("mark_type");
-                        if(mark_type)
-                        {
-                            QString _mark_type_str = mark_type->getValueAsVariant().toString();
-                            if(_mark_type_str == QString::fromUtf8("фотография") || _mark_type_str == QString::fromUtf8("панорамная фотография"))
-                                mark_type_str = _mark_type_str;
-                        }
-                        if(mark_type_str == QString::fromUtf8("дефект"))
-                        {
-                            QPointF center = mark->getCenter();
-                            DefectGraphicsItem * _defectGraphicsItem = new DefectGraphicsItem(mark->getId());
-                            _defectGraphicsItem->setProperty("locationId", locationId);
-                            _defectGraphicsItem->setPos(center);
-
-                            _scene->addItem(_defectGraphicsItem);
-                            connect(_defectGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
-                            _items.insert(mark->getId(), _defectGraphicsItem);
-
-                            _defectGraphicsItem->hide();
-                            graphicsItems.append(_defectGraphicsItem);
-                        }
-                        else if(mark_type_str == QString::fromUtf8("фотография"))
-                        {
-                            QPointF center = mark->getCenter();
-                            FotoGraphicsItem * _photoGraphicsItem = new FotoGraphicsItem(mark->getId());
-                            _photoGraphicsItem->setProperty("locationId", locationId);
-                            _photoGraphicsItem->setPos(center);
-
-                            _scene->addItem(_photoGraphicsItem);
-                            connect(_photoGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
-                            _items.insert(mark->getId(), _photoGraphicsItem);
-
-                            _photoGraphicsItem->hide();
-                            graphicsItems.append(_photoGraphicsItem);
-                        }
-                        else if(mark_type_str == QString::fromUtf8("панорамная фотография"))
-                        {
-                            QPointF center = mark->getCenter();
-                            Foto360GraphicsItem * _photo360GraphicsItem = new Foto360GraphicsItem(mark->getId());
-                            _photo360GraphicsItem->setProperty("locationId", locationId);
-                            _photo360GraphicsItem->setPos(center);
-
-                            _scene->addItem(_photo360GraphicsItem);
-                            connect(_photo360GraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
-                            _items.insert(mark->getId(), _photo360GraphicsItem);
-
-                            _photo360GraphicsItem->hide();
-                            graphicsItems.append(_photo360GraphicsItem);
-                        }
-                    }
-                    */
                 }
 
-                LocationItem * locationItem = new LocationItem(locationPtr->getId(), 16, locationPtr->getCoords().boundingRect(), graphicsItems, _scene);
+                int zLevel = getPrefferZoomForSceneRect(locationPtr->getCoords().boundingRect());
+                LocationItem * locationItem = new LocationItem(locationPtr->getId(), zLevel, graphicsItems, _scene);
+                locationItem->setPos(locationPtr->getCoords().boundingRect().center());
                 connect(locationItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
                 locationItem->setToolTip(locationPtr->getDescription());
                 connect(locationItem, SIGNAL(setViewport(QRectF)), this, SIGNAL(signalSetPrefferZoomForSceneRect(QRectF)));
@@ -528,55 +387,6 @@ void WorkState::slotAddObject(uint64_t id)
                 }break;
                 }
                 insertItemToLayer(markPtr->getLayer(), markPtr->getId());
-
-                /*
-                QString mark_type_str; //  = QString::fromUtf8("дефект");
-                BaseMetadataPtr markTypePtr = markPtr->getMetadata("mark_type");
-                if(markTypePtr)
-                {
-                    QString _mark_type_str = markTypePtr->getValueAsVariant().toString();;
-                    if(_mark_type_str == QString::fromUtf8("фотография") ||
-                            _mark_type_str == QString::fromUtf8("дефект") ||
-                            _mark_type_str == QString::fromUtf8("панорамная фотография") )
-                        mark_type_str = markTypePtr->getValueAsVariant().toString();
-                }
-
-                qDebug() << "slotAddObject, ID:" << id << ", mark_type_str:" << mark_type_str;
-
-                if(mark_type_str == QString::fromUtf8("дефект"))
-                {
-                    QPointF center = markPtr->getCenter();
-                    DefectGraphicsItem * _defectGraphicsItem = new DefectGraphicsItem(markPtr->getId());
-                    _defectGraphicsItem->setProperty("locationId", locationId);
-                    _defectGraphicsItem->setPos(center);
-                    _scene->addItem(_defectGraphicsItem);
-                    connect(_defectGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
-                    _items.insert(markPtr->getId(), _defectGraphicsItem);
-                    locationItem->addItem(_defectGraphicsItem);
-                }
-                else if(mark_type_str == QString::fromUtf8("фотография"))
-                {
-                    QPointF center = markPtr->getCenter();
-                    FotoGraphicsItem * _photoGraphicsItem = new FotoGraphicsItem(markPtr->getId());
-                    _photoGraphicsItem->setProperty("locationId", locationId);
-                    _photoGraphicsItem->setPos(center);
-                    _scene->addItem(_photoGraphicsItem);
-                    connect(_photoGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
-                    _items.insert(markPtr->getId(), _photoGraphicsItem);
-                    locationItem->addItem(_photoGraphicsItem);
-                }
-                else if(mark_type_str == QString::fromUtf8("панорамная фотография"))
-                {
-                    QPointF center = markPtr->getCenter();
-                    Foto360GraphicsItem * _photo360GraphicsItem = new Foto360GraphicsItem(markPtr->getId());
-                    _photo360GraphicsItem->setProperty("locationId", locationId);
-                    _photo360GraphicsItem->setPos(center);
-                    _scene->addItem(_photo360GraphicsItem);
-                    connect(_photo360GraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
-                    _items.insert(markPtr->getId(), _photo360GraphicsItem);
-                    locationItem->addItem(_photo360GraphicsItem);
-                }
-                */
             }
         }
     }
@@ -584,19 +394,23 @@ void WorkState::slotAddObject(uint64_t id)
 
 void WorkState::slotDeleteObject(uint64_t id)
 {
-    auto markIt = _items.find(id);
-    if(markIt != _items.end())
+    auto locationIt = _locationItems.find(id);
+    if(locationIt != _locationItems.end())
+        _locationItems.erase(locationIt);
+
+    auto it = _items.find(id);
+    if(it != _items.end())
     {
         bool ok;
-        qulonglong locationId  = markIt.value()->property("locationId").toULongLong(&ok);
+        qulonglong locationId  = it.value()->property("locationId").toULongLong(&ok);
         if(ok)
         {
             auto locationIt = _locationItems.find(locationId);
             if(locationIt != _locationItems.end())
-                locationIt.value()->removeItem( dynamic_cast<QGraphicsItem*>(markIt.value()) );
+                locationIt.value()->removeItem( dynamic_cast<QGraphicsItem*>(it.value()) );
         }
-        delete markIt.value();
-        _items.erase(markIt);
+        delete it.value();
+        _items.erase(it);
     }
 }
 
@@ -640,6 +454,36 @@ void WorkState::slotSetLayerVisible(QVariant var)
     }
 }
 
+void WorkState::slotEditAreaGeometry(QVariant var)
+{
+    uint id = var.toUInt();
+
+    if(id > 0)
+    {
+        _editObjectGeometry = id;
+        auto it = _items.find(_editObjectGeometry);
+        if(it != _items.end())
+        {
+            AreaGraphicsItem * areaGraphicsItem = dynamic_cast<AreaGraphicsItem*>(it.value());
+            if(areaGraphicsItem)
+                areaGraphicsItem->hide();
+        }
+        emit editAreaGeometry(true);
+    }
+    else
+    {
+        auto it = _items.find(_editObjectGeometry);
+        if(it != _items.end())
+        {
+            AreaGraphicsItem * areaGraphicsItem = dynamic_cast<AreaGraphicsItem*>(it.value());
+            if(areaGraphicsItem)
+                areaGraphicsItem->show();
+        }
+        _editObjectGeometry = 0;
+        emit editAreaGeometry(false);
+    }
+}
+
 void WorkState::slotBlockGUI(QVariant var)
 {
     _blockGUI = var.toBool();
@@ -656,6 +500,7 @@ void WorkState::slotSetMarkPosition(QVariant var)
         {
             it.value()->setItemselected(true);
             QPolygonF pol = it.value()->getPolygon();
+            if(pol.isEmpty() == false)
             centerViewOn(pol.boundingRect().center());
 
             emit setMarkOnMap(type);
@@ -747,7 +592,8 @@ void WorkState::slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_id)
 //                if(ptr->getType() == BaseArea::AT_LOCATION)
 //                {
 //                    QPolygonF pol = it1.value()->polygon();
-//                    centerViewOn(pol.boundingRect().center());
+//                      if(pol.isEmpty() == false)
+//                         centerViewOn(pol.boundingRect().center());
 //                }
             }
 
@@ -758,7 +604,8 @@ void WorkState::slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_id)
                 if(ptr->getType() == BaseArea::AT_LOCATION)
                 {
                     QPolygonF pol = it2.value()->getPolygon();
-                    centerViewOn(pol.boundingRect().center());
+                    if(pol.isEmpty() == false)
+                        centerViewOn(pol.boundingRect().center());
                 }
             }
         }return;
@@ -792,7 +639,8 @@ void WorkState::slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_id)
             {
                 it.value()->setItemselected(true);
                 QPolygonF pol = it.value()->getPolygon();
-                centerViewOn(pol.boundingRect().center());
+                if(pol.isEmpty() == false)
+                    centerViewOn(pol.boundingRect().center());
             }
         }
     }
@@ -821,7 +669,8 @@ void WorkState::slotCenterOn(uint64_t id)
         if(it != _items.end())
         {
             QPolygonF pol = it.value()->getPolygon();
-            setPrefferZoomForSceneRect(pol.boundingRect());
+            if(pol.isEmpty() == false)
+                setPrefferZoomForSceneRect(pol.boundingRect());
             emit switchOnMap();
         }
     }break;
@@ -838,12 +687,14 @@ void WorkState::slotCenterOn(uint64_t id)
                     if(parentIt != _items.end())
                     {
                         QPolygonF pol = parentIt.value()->getPolygon();
-                        setPrefferZoomForSceneRect(pol.boundingRect());
+                        if(pol.isEmpty() == false)
+                            setPrefferZoomForSceneRect(pol.boundingRect());
                     }
                 }
 
             QPolygonF pol = it.value()->getPolygon();
-            _view->centerOn(pol.boundingRect().center());
+            if(pol.isEmpty() == false)
+                _view->centerOn(pol.boundingRect().center());
             facilityId = id;
         }
     }break;
@@ -891,7 +742,7 @@ void WorkState::slotSetItemselect(qulonglong id, bool on_off)
 
 bool WorkState::mousePressEvent(QMouseEvent* e, QPointF scenePos)
 {
-    qDebug() << "mousePressEvent :" << QString::number(scenePos.x(), 'f', 8) << QString::number(scenePos.y(), 'f', 8);
+    //qDebug() << "mousePressEvent :" << QString::number(scenePos.x(), 'f', 8) << QString::number(scenePos.y(), 'f', 8);
     return ScrollBaseState::mousePressEvent(e, scenePos);
 }
 
@@ -931,38 +782,184 @@ void WorkState::insertItemToLayer(regionbiz::LayerPtr ptr, qulonglong itemId)
     }
 }
 
-//!    for second images :
-//    _scaleX = 0.00000382951662997968;
-//    _scaleY = 0.00000382951662997968;
-//    _pixmapItem->setPos(299.30530569955715236574, 148.83659651624239472767);
+void WorkState::areaGeometryEdited(QPolygonF pol)
+{
+    if(_editObjectGeometry > 0)
+    {
+        BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(_editObjectGeometry);
+        if(ptr)
+        {
+            auto it = _items.find(_editObjectGeometry);
+            if(it != _items.end())
+            {
+                AreaGraphicsItem * areaGraphicsItem = dynamic_cast<AreaGraphicsItem*>(it.value());
+                if(areaGraphicsItem)
+                {
+                    if(pol.isEmpty() == false && ptr->getType() == BaseArea::AT_LOCATION)
+                    {
+                        auto locationIt = _locationItems.find(ptr->getId());
+                        if(locationIt != _locationItems.end())
+                            locationIt.value()->setPos(pol.boundingRect().center());
+                    }
 
-//                if(locationPtr->getId() == 5022)
-//                {
-//                    PlanKeeper::PlanParams planParams;
-//                    planParams.x = 298.4673898270;
-//                    planParams.y = 148.0499342829;
-//                    planParams.scale_w = 0.0000073504;
-//                    planParams.scale_h = 0.0000073504;
-//                    planParams.rotate = 0;
-//                    locationPtr->setPlanParams(planParams);
-//                    locationPtr->setPlanPath("0.tiff");
+                    // else this item into location ?!!
 
-//                    QPolygonF pol;
-//                    pol.append(QPointF(298.46761322, 148.05406952));
-//                    locationPtr->setCoords(pol);
-//                    locationPtr->commit();
-//                }
+                    if(pol.isEmpty() == false)
+                        areaGraphicsItem->setPolygon(pol);
 
-//                    if(facilityPtr->getId() == 5023)
-//                    {
-//                        QPolygonF pol;
-//                        pol.append(QPointF(298.46937561, 148.05240631));
-//                        facilityPtr->setCoords(pol);
-//                        facilityPtr->commit();
-//                    }
+                    areaGraphicsItem->show();
+                }
+            }
+            else if(pol.isEmpty() == false)
+            {
+                AreaInitData regionInitData, locationInitData, facInitData;
+                getAreaInitData(regionInitData, locationInitData, facInitData);
 
+                switch(ptr->getType())
+                {
+                case BaseArea::AT_REGION : {
+                    AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(pol);
+                    regionInitData.id = ptr->getId();
+                    areaGraphicsItem->init(regionInitData);
+                    _scene->addItem(areaGraphicsItem);
+                    _items.insert(ptr->getId(), areaGraphicsItem);
+                }break;
+                case BaseArea::AT_LOCATION : {
+                    AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(pol);
+                    locationInitData.id = ptr->getId();
+                    areaGraphicsItem->init(locationInitData);
+                    _scene->addItem(areaGraphicsItem);
+                    _items.insert(ptr->getId(), areaGraphicsItem);
+                    areaGraphicsItem->hide();
 
+                    QList<QGraphicsItem*> itemsInLocation;
+                    itemsInLocation << areaGraphicsItem;
+                    int zLevel = getPrefferZoomForSceneRect(pol.boundingRect());
+                    LocationItem * locationItem = new LocationItem(ptr->getId(), zLevel, itemsInLocation, _scene);
+                    locationItem->setPos(pol.boundingRect().center());
+                    connect(locationItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                    locationItem->setToolTip(ptr->getDescription());
+                    connect(locationItem, SIGNAL(setViewport(QRectF)), this, SIGNAL(signalSetPrefferZoomForSceneRect(QRectF)));
+                    locationItem->zoomChanged(*_zoom);
+                    _locationItems.insert(ptr->getId(), locationItem);
+                }break;
+                case BaseArea::AT_FACILITY : {
+                    AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(pol);
+                    connect(areaGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                    facInitData.id = ptr->getId();
+                    areaGraphicsItem->init(facInitData);
+                    _scene->addItem(areaGraphicsItem);
+                    _items.insert(ptr->getId(), areaGraphicsItem);
+                    areaGraphicsItem->hide();
 
+                    auto locationIt = _locationItems.find(ptr->getParentId());
+                    if(locationIt != _locationItems.end())
+                        locationIt.value()->addItem(areaGraphicsItem);
+                }break;
+                }
+            }
+
+            if(pol.isEmpty() == false)
+            {
+                ptr->setCoords(pol);
+                ptr->commit();
+            }
+
+            quint64 id(_editObjectGeometry);
+            CommonMessageNotifier::send( (uint)visualize_system::BusTags::EditModeFinish, QVariant(id), QString("visualize_system"));
+        }
+    }
+    _editObjectGeometry = 0;
+}
+
+void WorkState::getAreaInitData(AreaInitData & regionInitData, AreaInitData & locationInitData, AreaInitData & facInitData)
+{
+    regionInitData.zValue = 100;
+    regionInitData.penNormal.setColor(Qt::green);
+    regionInitData.penNormal.setCosmetic(true);
+    regionInitData.penNormal.setWidth(2);
+    regionInitData.penHoverl = regionInitData.penNormal;
+    regionInitData.penHoverl.setWidth(3);
+    regionInitData.brushNormal.setStyle(Qt::NoBrush);
+    regionInitData.brushHoverl.setStyle(Qt::NoBrush);
+
+    locationInitData.zValue = 1000;
+    locationInitData.penNormal.setColor(Qt::red);
+    locationInitData.penNormal.setCosmetic(true);
+    locationInitData.penNormal.setWidth(2);
+    locationInitData.penHoverl = locationInitData.penNormal;
+    locationInitData.penHoverl.setWidth(3);
+    locationInitData.brushNormal.setStyle(Qt::NoBrush);
+    locationInitData.brushHoverl.setStyle(Qt::NoBrush);
+
+    facInitData.zValue = 10000;
+    facInitData.sendDoubleClick = true;
+    facInitData.isSelectableFromMap = true;
+    facInitData.penNormal.setColor(Qt::blue);
+    facInitData.penNormal.setCosmetic(true);
+    facInitData.penNormal.setWidth(2);
+    facInitData.penHoverl = facInitData.penNormal;
+    facInitData.penHoverl.setWidth(3);
+    QColor facBrushColor(Qt::blue);
+    facBrushColor.setAlpha(50);
+    facInitData.brushNormal.setColor(facBrushColor);
+    facInitData.brushNormal.setStyle(Qt::SolidPattern);
+    facBrushColor.setAlpha(50);
+    facInitData.brushHoverl = facInitData.brushNormal;
+    facInitData.brushHoverl.setColor(facBrushColor);
+}
+
+int WorkState::getPrefferZoomForSceneRect(QRectF rect)
+{
+    const int zoomMin(1);
+    const int zoomMax(20);
+
+    QSizeF viewSize(1000, 1000);
+    int z_level = 1;
+
+    qreal prefferZoomForWidth = qAbs( (rect.width() / viewSize.width() ) );
+    qreal prefferZoomForHeight = qAbs( (rect.height() / viewSize.height()) );
+
+    qreal zoom = 1;
+    z_level = 1;
+
+    if(prefferZoomForHeight < prefferZoomForWidth)
+        zoom = prefferZoomForWidth;
+    else
+        zoom = prefferZoomForHeight;
+
+    // теперь ищем Z уровень
+
+    if(zoom > 1 )
+    {
+        while( zoom > 1  )
+        {
+            z_level--;
+            zoom = zoom/2;
+        }
+    }
+    else
+    {
+        if(zoom < 1 )
+            while(zoom < 1)
+            {
+                z_level++;
+                zoom = zoom*2;
+            }
+
+        z_level--;
+    }
+
+    z_level -= 2;
+
+    if(z_level > zoomMax)
+        z_level = zoomMax;
+
+    if(z_level < zoomMin)
+        z_level = zoomMin;
+
+    return z_level;
+}
 
 
 

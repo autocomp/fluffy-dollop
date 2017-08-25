@@ -3,6 +3,7 @@
 
 #include <ctrvisual/state/scrollbasestate.h>
 #include <regionbiz/rb_manager.h>
+#include "areagraphicsitem.h"
 
 class LocationItem;
 class AreaGraphicsItem;
@@ -22,6 +23,7 @@ public:
     virtual bool mouseDoubleClickEvent(QMouseEvent *e, QPointF scenePos);
     virtual void init(QGraphicsScene * scene, QGraphicsView * view, const int * zoom, const double * scale, double frameCoef, uint visualizerId);
     virtual void zoomChanged();
+    void areaGeometryEdited(QPolygonF);
 
 signals:
     void showFacility(qulonglong id);
@@ -29,6 +31,7 @@ signals:
     void switchOnEditor();
     void centerEditorOn(qulonglong id);
     void setMarkOnMap(qulonglong markType);
+    void editAreaGeometry(bool on_off);
 
 protected:
     void centerViewOn(QPointF pos);
@@ -48,12 +51,16 @@ protected slots:
     void slotAddObject(uint64_t id);
     void slotDeleteObject(uint64_t id);
     void slotSetLayerVisible(QVariant var);
+    void slotEditAreaGeometry(QVariant var);
 
 private:
+    void getAreaInitData(AreaInitData & regionInitData, AreaInitData & locationInitData, AreaInitData & facInitData);
+    int getPrefferZoomForSceneRect(QRectF rect);
+
     QMap<qulonglong, ViraGraphicsItem*> _items;
     QMap<uint64_t, QList<qulonglong> > _itemsInLayers;
     QMap<uint64_t, LocationItem *> _locationItems;
-
+    uint64_t _editObjectGeometry = 0;
     QMap<qulonglong, QString> _itemId_facilityFolder;
     qulonglong _prevSelectedFacilityId = 0, _prevSelectedLocationId = 0;
     //uint64_t _editObjectGeometry = 0;

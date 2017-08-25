@@ -8,8 +8,9 @@ class LocationItem : public QObject, public QGraphicsPixmapItem
 {
     Q_OBJECT
 public:
-    explicit LocationItem(qulonglong id, int minZoom, QRectF bSceneRect, const QList<QGraphicsItem*>& items, QGraphicsScene* scene);
+    explicit LocationItem(qulonglong id, int minZoom, const QList<QGraphicsItem*>& items, QGraphicsScene* scene);
     ~LocationItem();
+    void setMinZoom(int minZoom);
     void zoomChanged(int zoom);
     void setItemselected(bool on_off);
     bool locationIsVisible();
@@ -29,7 +30,6 @@ private:
     bool _isVisible = true;
     bool _selected = false;
     int _minZoom;
-    QRectF _bSceneRect;
     QList<QGraphicsItem*> _items;
 };
 
