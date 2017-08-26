@@ -49,6 +49,8 @@ enum class BusTags
     //! from ViraInfoPlugin
     //! параметр - QVariantList -> size==3 : list[0] - uint(layer id); list[1] - type (all=0, defect=1, foto=2, foto360=3); list[2] - bool(visible state).
     LayerVisibleChanged,
+    //! параметр - QVariantList -> size==2 : list[0] - int buttonType (plugin_types::PixelVisualizerButtons); list[1] - bool - checkState.
+    ToolButtonInPluginChecked,
 
 };
 }
