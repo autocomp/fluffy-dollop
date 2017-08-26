@@ -4682,6 +4682,41 @@ void ViewerController::slotChangeEntityMode(quint32 cursorId,bool isEditMode,QPi
     }
 }
 
+//void ViewerController::drawForeground(QPainter *painter, const QRectF &r)
+//{
+//    QGraphicsView::drawForeground(painter, r);
+
+//    QPen pen(Qt::red);
+//    pen.setWidth(5);
+//    pen.setCosmetic(true);
+//    painter->setPen(pen);
+//    for(int x(r.x()); x < r.x()+r.width(); x = x+100)
+//    {
+//        painter->drawLine(QPointF(x, r.top()), QPointF(x, r.bottom()));
+//    }
+
+//    qDebug() << "drawForeground, rect :" << r;
+//}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

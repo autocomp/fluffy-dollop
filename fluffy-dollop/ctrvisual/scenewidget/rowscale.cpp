@@ -30,7 +30,7 @@ RowScale::RowScale(QWidget *parent) :
 
 
     pm = QPixmap("qrc:/rowScaleBack1.png");
-    setFixedSize(160,45);
+    setFixedSize(160,50);
     m_scaleWidth = 120;
     m_settingsPanelSize = size();
 
@@ -58,8 +58,8 @@ RowScale::RowScale(QWidget *parent) :
     m_pTextUpLabel->setObjectName("RowScale_TextUpLabel");
     m_pTextDownLabel->setObjectName("RowScale_TextDownLabel");
 
-    m_pTextUpLabel->setFixedSize(160, 14);
-    m_pTextDownLabel->setFixedSize(160, 14);
+    m_pTextUpLabel->setFixedSize(160, 16);
+    m_pTextDownLabel->setFixedSize(160, 16);
 
     m_pTextUpLabel->setAlignment(Qt::AlignCenter);
     m_pTextDownLabel->setAlignment(Qt::AlignCenter);
@@ -145,25 +145,29 @@ QString RowScale::convertMetersToNormString(qreal meters)
     /*переводим в адекватные единицы измерения*/
     if(meters < 0.1)
     {
-        normStr = normStr.setNum( qRound(meters*100),10 ) + QString(" ") + QString(tr("cm"));
+        normStr = normStr.setNum( qRound(meters*100),10 ) + QString(" ") + QString::fromUtf8("см");
     }
-
-
-    if(meters < 1)
+    else if(meters < 1)
     {
-        normStr = normStr.setNum( qRound(meters*10),10 ) + QString(" ")+ QString(tr("dm"));
+        normStr = normStr.setNum( qRound(meters*10),10 ) + QString(" ")+ QString::fromUtf8("дм");
 
     }
-
-    if(meters >= 1)
+    else if(meters >= 1 && meters <= 2)
     {
-        normStr = normStr.setNum( qRound(meters), 10 ) + QString(" ")+ QString(tr("m"));
-
+        QString str = QString::number(meters, 'f', 1);
+        QStringList list = str.split(QString("."));
+        if(list.size() == 2)
+            if(list.last() == QString("0"))
+                str = list.first();
+        normStr = str + QString::fromUtf8(" м");
     }
-
-    if(meters>=1000 )
+    else if(meters > 2 && meters < 1000)
     {
-        normStr = normStr.setNum( qRound(meters/1000.0), 10 ) + QString(" ")+ QString(tr("km"));
+        normStr = normStr.setNum( qRound(meters), 10 ) + QString(" ")+ QString::fromUtf8("м");
+    }
+    else if(meters>=1000 )
+    {
+        normStr = normStr.setNum( qRound(meters/1000.0), 10 ) + QString(" ")+ QString::fromUtf8("км");
     }
 
     return normStr;

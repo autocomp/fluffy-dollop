@@ -50,11 +50,11 @@ void RowScaleInner::drawScale()
 
 
     /*в режиме рисования дистанций*/
-    if(true == m_showDistValue)
-    {
-//        pr.drawText(rect(),Qt::AlignCenter,m_distStr);
-        return;
-    }
+//    if(true == m_showDistValue)
+//    {
+////        pr.drawText(rect(),Qt::AlignCenter,m_distStr);
+//        return;
+//    }
 
 
     /*в режиме рисования линейки*/

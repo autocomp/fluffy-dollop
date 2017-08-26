@@ -10,7 +10,7 @@
 #include "parallelcursor.h"
 #include <QPointF>
 #include <QGraphicsItem>
-#include <ctrvisual/state//stateobject.h>
+#include <ctrvisual/state/stateobject.h>
 #include <ctrcore/visual/basescenelayer.h>
 #include <QStack>
 #include <QTimer>
@@ -298,6 +298,8 @@ protected:
     virtual void keyPressEvent(QKeyEvent * e);
     virtual void closeEvent(QCloseEvent * e);
     virtual void showEvent(QShowEvent *e);
+//    virtual void drawForeground(QPainter *painter, const QRectF &rect);
+
 
     bool eventFilter(QObject *obj, QEvent *event);
 
