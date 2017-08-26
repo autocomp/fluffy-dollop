@@ -239,10 +239,9 @@ bool ThreadSql::deleteArea( uint64_t id )
                           " WHERE id = " + QString::number( id );
     tryQuery( delete_area );
 
-//!    САША !!! Закомментировано специально чтобы проходило удаление бейсЭриа !
-//!    QString delete_files = "DELETE FROM files "
-//!                           " WHERE id = " + QString::number( id );
-//!    tryQuery( delete_files );
+    QString delete_files = "DELETE FROM files "
+                           " WHERE entity_id = " + QString::number( id );
+    tryQuery( delete_files );
 
     // TODO delete relations
 
