@@ -10,6 +10,9 @@
 #include <ctrcore/ctrcore/ctrconfig.h>
 #include <ctrcore/bus/common_message_notifier.h>
 #include <ctrcore/bus/bustags.h>
+#include <ctrcore/visual/visualizermanager.h>
+#include <ctrcore/visual/viewinterface.h>
+#include <ctrwidgets/components/layersmanager/commontypes.h>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsPolygonItem>
 #include <QFileInfo>
@@ -52,6 +55,9 @@ PixelWorkState::PixelWorkState(uint pixelVisualizerId)
     int g = strCol.mid(2,2).toInt(0,16);
     int b = strCol.mid(4,2).toInt(0,16);
     _roomDefaultColor = QColor(r,g,b);
+
+    _rowScale = new RowScale();
+    _rowScale->hide();
 }
 
 PixelWorkState::~PixelWorkState()
@@ -102,12 +108,18 @@ void PixelWorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int 
                                       qMetaTypeId< QVariantList >(),
                                       QString("visualize_system") );
 
+    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::ToolButtonInPluginChecked, this, SLOT(slotToolButtonInPluginChecked(QVariant)),
+                                      qMetaTypeId< QVariantList >(),
+                                      QString("visualize_system") );
+
     auto mngr = RegionBizManager::instance();
     mngr->subscribeOnCurrentChange(this, SLOT(slotSelectionItemsChanged(uint64_t,uint64_t)));
     mngr->subscribeCenterOn(this, SLOT(slotCenterOn(uint64_t)));
     mngr->subscribeOnChangeEntity(this, SLOT(slotObjectChanged(uint64_t)));
     mngr->subscribeOnAddEntity(this, SLOT(slotAddObject(uint64_t)));
     mngr->subscribeOnDeleteEntity(this, SLOT(slotDeleteObject(uint64_t)));
+
+    QVBoxLayout* vLayout = new QVBoxLayout;
 
     QHBoxLayout* hLayout = new QHBoxLayout;
     hLayout->addStretch();
@@ -118,7 +130,20 @@ void PixelWorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int 
     hLayout->addWidget(_downButton);
     hLayout->setAlignment( _downButton, Qt::AlignTop );
     hLayout->addStretch();
-    _view->setLayout(hLayout);
+    vLayout->addLayout(hLayout);
+
+    vLayout->addSpacerItem(new QSpacerItem(0,0, QSizePolicy::Expanding, QSizePolicy::Expanding));
+
+    hLayout = new QHBoxLayout;
+    hLayout->addWidget(_rowScale);
+    hLayout->setAlignment( _rowScale, Qt::AlignBottom );
+    vLayout->addLayout(hLayout);
+
+    _view->setLayout(vLayout);
+
+    visualize_system::VisualizerManager * visMng = visualize_system::VisualizerManager::instance();
+    connect(visMng->getViewInterface(visualizerId), SIGNAL(signalZoomChanged(int)), this, SLOT(slotZoomChanged(int)));
+    slotZoomChanged(1);
 
     reinit();
 }
@@ -792,6 +817,41 @@ void PixelWorkState::slotSetLayerVisible(QVariant var)
                     }
             }
         }
+    }
+}
+
+void PixelWorkState::slotZoomChanged(int zoomLevel)
+{
+    qreal metersBeetwinPixels = 0.01;
+    switch(zoomLevel)
+    {
+    case 5  : metersBeetwinPixels /= 16; break;
+    case 4  : metersBeetwinPixels /= 8;  break;
+    case 3  : metersBeetwinPixels /= 4;  break;
+    case 2  : metersBeetwinPixels /= 2;  break;
+    //case 1  :  break;
+    case 0  : metersBeetwinPixels *= 2;  break;
+    case -1 : metersBeetwinPixels *= 4;  break;
+    case -2 : metersBeetwinPixels *= 8;  break;
+    case -3 : metersBeetwinPixels *= 16; break;
+    case -4 : metersBeetwinPixels *= 32; break;
+    case -5 : metersBeetwinPixels *= 64; break;
+    }
+
+    _rowScale->setInterpixelDistance(metersBeetwinPixels);
+}
+
+void PixelWorkState::slotToolButtonInPluginChecked(QVariant var)
+{
+    QList<QVariant> list = var.toList();
+    if(list.size() != 2)
+        return;
+
+    plugin_types::PixelVisualizerButtons button = (plugin_types::PixelVisualizerButtons)list.first().toInt();
+    if(button == plugin_types::SCALE_WIDGET)
+    {
+        bool checked = list.last().toBool();
+        _rowScale->setVisible(checked);
     }
 }
 

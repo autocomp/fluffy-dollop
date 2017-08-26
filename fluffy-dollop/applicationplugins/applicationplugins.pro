@@ -5,6 +5,7 @@ SUBDIRS = \
     viragraphicsplugin \
     viratreeplugin \
     virainfoplugin \
+    pixelvisbuttonsplugin \
 #    pdfimportplugin \
 #    inputlocationplugin \
 #    imagectrlplugin \

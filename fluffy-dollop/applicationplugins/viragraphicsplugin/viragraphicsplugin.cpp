@@ -48,6 +48,7 @@ void ViraGraphicsPlugin::launchWorkState()
 
     _pixelVisualizerId = visualize_system::VisualizerManager::instance()->addVisualizer(visualize_system::VisualizerPixel);
      visualize_system::ViewInterface * pixelVisualizerViewInterface = visualize_system::VisualizerManager::instance()->getViewInterface(_pixelVisualizerId);
+     pixelVisualizerViewInterface->setVisualizerWindowId(getVisualizerWindowId());
 
     _pixelWorkState = QSharedPointer<PixelWorkState>(new PixelWorkState(_pixelVisualizerId));
     connect(_pixelWorkState.data(), SIGNAL(setMarkOnPlan(qulonglong, QPolygonF)), this, SLOT(setMarkOnPlan(qulonglong, QPolygonF)));

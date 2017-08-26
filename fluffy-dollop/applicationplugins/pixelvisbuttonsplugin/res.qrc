@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>img/grid_icon.png</file>
+        <file>img/tools_metr_icon.png</file>
+    </qresource>
+</RCC>

@@ -2,6 +2,7 @@
 #define PIXELWORKSTATE_H
 
 #include <ctrvisual/state/scrollbasestate.h>
+#include <ctrvisual/scenewidget/rowscale.h>
 #include <regionbiz/rb_manager.h>
 
 class LocationItem;
@@ -56,6 +57,8 @@ protected slots:
     void slotFloorDown();
     void slotEditAreaGeometry(QVariant var);
     void slotSetLayerVisible(QVariant var);
+    void slotZoomChanged(int zoomLevel);
+    void slotToolButtonInPluginChecked(QVariant var);
 
 private:
     struct FloorInfo
@@ -75,6 +78,7 @@ private:
     QColor _roomDefaultColor;
     bool _blockGUI = false;
     uint64_t _editObjectGeometry = 0;
+    RowScale * _rowScale;
 
 
 //    QMap<qulonglong, ViraGraphicsItem*> _items;
