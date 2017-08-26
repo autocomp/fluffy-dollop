@@ -19,6 +19,7 @@
 #include <ctrcore/ctrcore/ctrconfig.h>
 #include <dmanager/embeddedstruct.h>
 #include <dmanager/embeddedapp.h>
+#include <ctrwidgets/components/layersmanager/commontypes.h>
 #include <QDebug>
 
 using namespace regionbiz;
@@ -33,6 +34,10 @@ LayersManagerForm::LayersManagerForm(QWidget *parent) :
 
     CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::BlockGUI, this, SLOT(slotBlockGUI(QVariant)),
                                       qMetaTypeId< bool >(),
+                                      QString("visualize_system") );
+
+    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::ToolButtonInPluginChecked, this, SLOT(slotToolButtonInPluginChecked(QVariant)),
+                                      qMetaTypeId< QVariantList >(),
                                       QString("visualize_system") );
 
     ui->setupUi(this);
@@ -80,8 +85,11 @@ LayersManagerForm::LayersManagerForm(QWidget *parent) :
         {
             _pixelVisId = id;
             _pixelView = visMng->getViewInterface(id)->graphicsView();
+            connect(visMng->getViewInterface(id), SIGNAL(signalZoomChanged(int)), this, SLOT(slotZoomChanged(int)));
             break;
         }
+
+    redrawItems(100);
 
     reinitLayers();
 }
@@ -205,13 +213,7 @@ void LayersManagerForm::slotFileLoaded(regionbiz::BaseFileKeeperPtr baseFileKeep
                 connect(ui->treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(slotItemChanged(QTreeWidgetItem*,int)));
 
                 if( ! _isGeoScene && _loadingItems.isEmpty())
-                {
-                    QRectF r = _scene->itemsBoundingRect();
-                    double shW(r.width() / 4.), shH(r.height() / 4.);
-                    r = QRectF(r.x()-shW, r.y()-shH, r.width() + shW*2, r.height() + shH*2);
-                    qDebug() << "===> setSceneRect" << r;
-                    _pixelView->setSceneRect(r);
-                }
+                    calcSceneRect();
                 else
                     qDebug() << "---> loadingRasters.size() :" << _loadingItems.size();
             }
@@ -238,13 +240,7 @@ void LayersManagerForm::slotFileLoaded(regionbiz::BaseFileKeeperPtr baseFileKeep
             connect(ui->treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(slotItemChanged(QTreeWidgetItem*,int)));
 
             if( ! _isGeoScene && _loadingItems.isEmpty())
-            {
-                QRectF r = _scene->itemsBoundingRect();
-                double shW(r.width() / 4.), shH(r.height() / 4.);
-                r = QRectF(r.x()-shW, r.y()-shH, r.width() + shW*2, r.height() + shH*2);
-                qDebug() << "===> setSceneRect" << r;
-                _pixelView->setSceneRect(r);
-            }
+                calcSceneRect();
             else
                 qDebug() << "---> loadingRasters.size() :" << _loadingItems.size();
         }
@@ -346,6 +342,82 @@ void LayersManagerForm::slotSyncMarks()
 {
     syncMarks();
 }
+
+void LayersManagerForm::slotZoomChanged(int zoomLevel)
+{
+    if(zoomLevel > 0)
+    {
+        if(_zoomState != ZoomState::OneMeter)
+        {
+            _zoomState = ZoomState::OneMeter;
+            redrawItems(100);
+        }
+    }
+    else if(zoomLevel > -3)
+    {
+        if(_zoomState != ZoomState::TenMeter)
+        {
+            _zoomState = ZoomState::TenMeter;
+            redrawItems(1000);
+        }
+    }
+    else
+    {
+        if(_zoomState != ZoomState::HundredMeter)
+        {
+            _zoomState = ZoomState::HundredMeter;
+            redrawItems(10000);
+        }
+    }
+    qDebug() << "LayersManagerForm::slotZoomChanged, zoomLevel : " << zoomLevel;
+}
+
+void LayersManagerForm::redrawItems(int pixelDelta)
+{
+    _pixelDelta = pixelDelta;
+
+    QTime t;
+    t.start();
+
+    foreach(QGraphicsLineItem * item, _lineItems)
+        delete item;
+    _lineItems.clear();
+
+    QColor col(Qt::black);
+    col.setAlpha(150);
+    QPen pen1(col);
+    pen1.setCosmetic(true);
+    pen1.setWidth(1);
+
+    col.setAlpha(60);
+    QPen pen2(col);
+    pen2.setCosmetic(true);
+    pen2.setWidth(1);
+
+    int min(-50000), max(50000);
+    for(int x(min); x <= max; x = x+(pixelDelta/10))
+    {
+        QGraphicsLineItem * itemH = new QGraphicsLineItem(QLineF(x, min, x, max));
+        itemH->setPen(x%pixelDelta == 0 ? pen1 : pen2);
+        itemH->setZValue(-50);
+        itemH->setVisible(_lineItemsVisible);
+        _pixelView->scene()->addItem(itemH);
+        _lineItems.append(itemH);
+    }
+
+    for(int y(min); y <= max; y = y+(pixelDelta/10))
+    {
+        QGraphicsLineItem * itemV = new QGraphicsLineItem(QLineF(min, y, max, y));
+        itemV->setPen(y%pixelDelta == 0 ? pen1 : pen2);
+        itemV->setZValue(-50);
+        itemV->setVisible(_lineItemsVisible);
+        _pixelView->scene()->addItem(itemV);
+        _lineItems.append(itemV);
+    }
+
+    qDebug() << "*** elapsed :" << t.elapsed();
+}
+
 void LayersManagerForm::syncMarks(bool hideAll)
 {
     for(int a(0); a < ui->treeWidget->topLevelItemCount(); ++a)
@@ -648,7 +720,8 @@ void LayersManagerForm::slotAddEntity()
 
                 if( ! _isGeoScene)
                 {
-                    QRectF r(QPointF(INT_MIN, INT_MIN), QPointF(INT_MAX, INT_MAX));
+                    int min(-50000), max(50000);
+                    QRectF r(QPointF(min, min), QPointF(max, max));
                     qDebug() << "===> setSceneRect" << r;
                     _pixelView->setSceneRect(r);
                 }
@@ -696,7 +769,8 @@ void LayersManagerForm::slotAddEntity()
 
         if( ! _isGeoScene)
         {
-            QRectF r(QPointF(INT_MIN, INT_MIN), QPointF(INT_MAX, INT_MAX));
+            int min(-50000), max(50000);
+            QRectF r(QPointF(min, min), QPointF(max, max));
             qDebug() << "===> setSceneRect" << r;
             _pixelView->setSceneRect(r);
         }
@@ -1080,17 +1154,26 @@ void LayersManagerForm::slotEditorFormClose()
     syncMarks();
 
     if( ! _isGeoScene)
-    {
-        QRectF r = _pixelView->scene()->itemsBoundingRect();
-        double shW(r.width() / 4.), shH(r.height() / 4.);
-        r = QRectF(r.x()-shW, r.y()-shH, r.width() + shW*2, r.height() + shH*2);
-        qDebug() << "===> setSceneRect" << r;
-        _pixelView->setSceneRect(r);
-    }
+        calcSceneRect();
 
     bool block(false);
     CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(block), QString("visualize_system"));
     ewApp()->setVisible(_embeddedWidgetId, true);
+}
+
+void LayersManagerForm::calcSceneRect()
+{
+    foreach(QGraphicsLineItem * item, _lineItems)
+        delete item;
+    _lineItems.clear();
+
+    QRectF r = _pixelView->scene()->itemsBoundingRect();
+    double shW(r.width() / 4.), shH(r.height() / 4.);
+    r = QRectF(r.x()-shW, r.y()-shH, r.width() + shW*2, r.height() + shH*2);
+    qDebug() << "===> setSceneRect" << r;
+    _pixelView->setSceneRect(r);
+
+    redrawItems(_pixelDelta);
 }
 
 void LayersManagerForm::syncChechState(QTreeWidgetItem *item, bool setVisible)
@@ -1160,6 +1243,24 @@ void LayersManagerForm::slotDeleteLayer()
             }
     }
 }
+
+void LayersManagerForm::slotToolButtonInPluginChecked(QVariant var)
+{
+    QList<QVariant> list = var.toList();
+    if(list.size() != 2)
+        return;
+
+    plugin_types::PixelVisualizerButtons button = (plugin_types::PixelVisualizerButtons)list.first().toInt();
+    if(button == plugin_types::GRID)
+    {
+        bool checked = list.last().toBool();
+        _lineItemsVisible = checked;
+
+        foreach(QGraphicsLineItem * item, _lineItems)
+            item->setVisible(_lineItemsVisible);
+    }
+}
+
 
 ///-----------------------------------------------
 

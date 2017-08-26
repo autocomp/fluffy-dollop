@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QTreeWidgetItem>
+#include <QGraphicsLineItem>
 #include <regionbiz/rb_manager.h>
 #include <ctrcore/plugin/embifacenotifier.h>
 
@@ -30,6 +31,14 @@ enum class ItemTypes
     Defect,
     Photo,
     Photo3d
+};
+
+enum class ZoomState
+{
+    TenCentimeters,
+    OneMeter,
+    TenMeter,
+    HundredMeter
 };
 
 struct CurrentData
@@ -80,12 +89,16 @@ private slots:
     void slotSvgSaved(QString filePath, QPointF scenePos);
     void slotFileLoaded(regionbiz::BaseFileKeeperPtr);
     void slotSyncMarks();
+    void slotZoomChanged(int zoomLevel);
+    void slotToolButtonInPluginChecked(QVariant var);
 
 private:
     void syncChechState(QTreeWidgetItem *item, bool setVisible);
     void reinitLayers();
     void reinitLayer(LayerItem * layerItem);
     void syncMarks(bool hideAll = false);
+    void calcSceneRect();
+    void redrawItems(int pixelDelta);
 
     Ui::LayersManagerForm *ui;
     quint64 _embeddedWidgetId = 0;
@@ -101,6 +114,11 @@ private:
     SvgEditorForm * _svgEditorForm = nullptr;
     QMap<uint64_t, LayerItem*> _layers;
     QMap<QString, DataItem*> _loadingItems;
+
+    QList<QGraphicsLineItem*> _lineItems;
+    ZoomState _zoomState = ZoomState::OneMeter;
+    int _pixelDelta;
+    bool _lineItemsVisible = false;
 };
 
 class LayerItem : public QTreeWidgetItem

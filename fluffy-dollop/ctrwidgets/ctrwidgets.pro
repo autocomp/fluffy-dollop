@@ -41,6 +41,7 @@ HEADERS += \
     $$files(components/waitdialog/*.h) \
     $$files(components/layersmanager/*.h) \
     $$files(components/slidewindow/*.h) \
+    components/layersmanager/commontypes.h
 
 OTHER_FILES += \
 
