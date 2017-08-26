@@ -100,6 +100,7 @@ void PixelVisualizer::init(uint visualizerId)
     m_viewerController->getMinimap()->show();
 
     connect(m_controller, SIGNAL(signalShowCoords(QString,QString,QString)), m_scene2dWidget, SLOT(slotSetCurrentCoords(QString,QString,QString)));
+    connect(m_viewerController, SIGNAL(signalScaleChanged(qreal,int)), this, SLOT(slotScaleChanged(qreal,int)));
 
 //    connect(m_viewerController, SIGNAL(signalSetAngle(qreal)), m_scene2dWidget->getKompasWidget(), SLOT(slotSetRotateAngle(qreal)));
 //    connect(m_viewerController, SIGNAL(signalRotateBlocked(bool)), m_scene2dWidget->getKompasWidget(), SLOT(slotRotationBlocked(bool)));
@@ -396,6 +397,11 @@ void PixelVisualizer::panelVisibleChanged(bool tf)
     key = visualize_system::VisualizerManager::convertVisualizerType(getVisualizerType()).toLower()+"_control_panel.menuSettings.visiblity";
     QString visiblity = (tf)?"showed":"hidden";
     CtrConfig::setValueByName(key, visiblity);
+}
+
+void PixelVisualizer::slotScaleChanged(qreal scale, int zoom)
+{
+    emit signalZoomChanged(zoom);
 }
 
 void PixelVisualizer::loadPluginCategory(QString pluginType)

@@ -116,6 +116,7 @@ private slots:
     void slotPluginChecked(const QString &buttonName,bool checked);
     void sceneWidgetSizeChanged(int newW, int newH);
     void panelVisibleChanged(bool tf);
+    void slotScaleChanged(qreal scale, int zoom);
 };
 }
 
