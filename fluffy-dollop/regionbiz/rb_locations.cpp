@@ -87,10 +87,19 @@ MarksHolderPtr BaseArea::convertToMarksHolder()
     return MarksHolderPtr( new MarksHolder( 0 ));
 }
 
+LocalTransformKeeperPtr BaseArea::convertToLocalTransformHolder()
+{
+    auto holder = convert< LocalTransformKeeper >();
+    if( holder )
+        return holder;
+
+    return LocalTransformKeeperPtr( new LocalTransformKeeper( 0 ));
+}
+
 bool BaseArea::commit()
 {
     auto mngr = RegionBizManager::instance();
-    bool comm_res =  mngr->commitArea( _id );
+    bool comm_res = mngr->commitArea( _id );
 
     return comm_res;
 }
@@ -241,6 +250,8 @@ bool MarksHolder::checkHolderId()
     return false;
 }
 
+//------------------------------------------
+
 Region::Region(uint64_t id):
     BaseArea( id )
 {}
@@ -370,9 +381,40 @@ std::vector<FloorPtr> Facility::getChilds()
     return floors;
 }
 
+bool Facility::isHaveTransform()
+{
+    auto mngr = RegionBizManager::instance();
+    return mngr->isHaveTransform( _id );
+}
+
+bool Facility::setTransform(QTransform transform)
+{
+    auto mngr = RegionBizManager::instance();
+    return mngr->setTransform( _id, transform );
+}
+
+QTransform Facility::getTransform()
+{
+    auto mngr = RegionBizManager::instance();
+    return mngr->getTransform( _id );
+}
+
+void Facility::resetTransform()
+{
+    auto mngr = RegionBizManager::instance();
+    mngr->resetTransform( _id );
+}
+
+bool Facility::commitTransformMatrix()
+{
+    auto mngr = RegionBizManager::instance();
+    return mngr->commitTransformOfFacility( _id );
+}
+
 Floor::Floor(uint64_t id):
     BizRelationKepper( id ),
-    MarksHolder( id )
+    MarksHolder( id ),
+    LocalTransformKeeper( id )
 {}
 
 BaseArea::AreaType Floor::getType()
@@ -406,10 +448,86 @@ RoomPtrs Floor::getChilds()
 
 Room::Room(uint64_t id):
     BizRelationKepper( id ),
-    MarksHolder( id )
+    MarksHolder( id ),
+    LocalTransformKeeper( id )
 {}
 
 BaseArea::AreaType Room::getType()
 {
     return AT_ROOM;
+}
+
+//-----------------------------
+
+
+LocalTransformKeeper::LocalTransformKeeper(uint64_t id)
+{
+    _holder_id = id;
+}
+
+bool LocalTransformKeeper::isHaveTransform()
+{
+    auto facil = getFacilityParent();
+    if( !facil )
+        return false;
+
+    auto mngr = RegionBizManager::instance();
+    return mngr->isHaveTransform( facil->getId() );
+}
+
+bool LocalTransformKeeper::setTransform(QTransform transform)
+{
+    auto facil = getFacilityParent();
+    if( !facil )
+        return false;
+
+    auto mngr = RegionBizManager::instance();
+    return mngr->setTransform( facil->getId(), transform );
+}
+
+QTransform LocalTransformKeeper::getTransform()
+{
+    auto facil = getFacilityParent();
+    if( !facil )
+        return QTransform();
+
+    auto mngr = RegionBizManager::instance();
+    return mngr->getTransform( facil->getId() );
+}
+
+void LocalTransformKeeper::resetTransform()
+{
+    auto facil = getFacilityParent();
+    if( !facil )
+        return;
+
+    auto mngr = RegionBizManager::instance();
+    mngr->resetTransform( facil->getId() );
+}
+
+bool LocalTransformKeeper::commitTransformMatrix()
+{
+    auto facil = getFacilityParent();
+    if( !facil )
+        return false;
+
+    return facil->commitTransformMatrix();
+}
+
+FacilityPtr LocalTransformKeeper::getFacilityParent()
+{
+    auto mngr = RegionBizManager::instance();
+
+    BaseAreaPtr this_area = mngr->getBaseArea( _holder_id );
+    if( !this_area )
+        return nullptr;
+
+    while( this_area->getType() != BaseArea::AT_FACILITY
+           || !this_area )
+        this_area = this_area->getParent();
+
+    if( this_area )
+        return this_area->convert< Facility >();
+
+    return nullptr;
 }

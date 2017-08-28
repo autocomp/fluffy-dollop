@@ -67,6 +67,10 @@ private:
     bool commitLayers();
     bool deleteLayer( LayerPtr layer );
 
+    // transform matrixes
+    TransformById loadTransformMatrixes();
+    bool commitTransformMatrix( FacilityPtr facility );
+
     // support functions
     template< typename LocTypePtr >
     bool loadCoordinate( std::vector< LocTypePtr >& vector );

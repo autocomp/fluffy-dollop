@@ -1,4 +1,5 @@
-hostname = 'localhost'
+hostname = '217.148.208.59'
+#hostname = 'localhost'
 username = 'vira'
 password = 'zaebobr'
 database = 'vira'
@@ -26,9 +27,9 @@ def createVersionTable( conn ) :
 def checkVersion( conn, use_force ) :
     need_create = 0
     with conn.cursor() as cur:
-	res = cur.execute( "SELECT oid FROM ( SELECT to_regclass('public.versions') as oid ) \
-				       as oid_sel where oid is not null;" )
-	if cur.rowcount > 0:
+	#res = cur.execute( "SELECT oid FROM ( SELECT to_regclass('public.versions') as oid ) \
+	#			       as oid_sel where oid is not null;" )
+	if 1:#cur.rowcount > 0:
 	    cur.execute( "SELECT count(version), max(version) from versions" )
 	    count, max = cur.fetchone()
 	    if count > 0:

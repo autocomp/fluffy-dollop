@@ -24,6 +24,9 @@ typedef std::shared_ptr< GroupEntity > GroupEntityPtr;
 class MarksHolder;
 typedef std::shared_ptr< MarksHolder > MarksHolderPtr;
 
+class LocalTransformKeeper;
+typedef std::shared_ptr< LocalTransformKeeper > LocalTransformKeeperPtr;
+
 class BaseArea: public BaseEntity
 {
     friend class BaseDataTranslator;
@@ -63,6 +66,7 @@ public:
 
     // converts
     MarksHolderPtr convertToMarksHolder();
+    LocalTransformKeeperPtr convertToLocalTransformHolder();
 
     template< typename Type >
     static std::shared_ptr< Type > convert( BaseAreaPtr base )
@@ -120,7 +124,31 @@ private:
     uint64_t _holder_id;
 };
 
-//----------------------------------------------
+//----------------------------------------
+
+class Facility;
+typedef std::shared_ptr< Facility > FacilityPtr;
+
+class LocalTransformKeeper
+{
+public:
+    // need id
+    LocalTransformKeeper( uint64_t id );
+
+    // transform matrixes
+    bool isHaveTransform();
+    bool setTransform( QTransform transform );
+    QTransform getTransform();
+    void resetTransform();
+    bool commitTransformMatrix();
+
+private:
+    FacilityPtr getFacilityParent();
+
+    uint64_t _holder_id;
+};
+
+//---------------------------------------------
 
 class Region: public BaseArea
 {
@@ -144,9 +172,6 @@ typedef std::shared_ptr< Region > RegionPtr;
 typedef std::vector< RegionPtr > RegionPtrs;
 
 //----------------------------------------------
-
-class Facility;
-typedef std::shared_ptr< Facility > FacilityPtr;
 
 class Location: public BaseArea, public MarksHolder
 {
@@ -185,6 +210,13 @@ public:
 
     // getters
     std::vector< FloorPtr > getChilds();
+
+    // transform matrixes
+    bool isHaveTransform();
+    bool setTransform( QTransform transform );
+    QTransform getTransform();
+    void resetTransform();
+    bool commitTransformMatrix();
 };
 typedef std::vector< FacilityPtr > FacilityPtrs;
 
@@ -193,7 +225,9 @@ typedef std::vector< FacilityPtr > FacilityPtrs;
 class Room;
 typedef std::shared_ptr< Room > RoomPtr;
 
-class Floor: public BizRelationKepper, public MarksHolder
+class Floor: public BizRelationKepper,
+        public MarksHolder,
+        public LocalTransformKeeper
 {
 public:
     Floor( uint64_t id );
@@ -213,7 +247,9 @@ typedef std::vector< FloorPtr > FloorPtrs;
 
 //-----------------------------------------------
 
-class Room: public BizRelationKepper, public MarksHolder
+class Room: public BizRelationKepper,
+        public MarksHolder,
+        public LocalTransformKeeper
 {
 public:
     Room( uint64_t id );
@@ -221,6 +257,8 @@ public:
     AreaType getType() override;
 };
 typedef std::vector< RoomPtr > RoomPtrs;
+
+//----------------------------------------------
 
 }
 

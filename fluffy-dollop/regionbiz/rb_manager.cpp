@@ -695,6 +695,44 @@ void RegionBizManager::subscribeLayerChangeShowed(QObject *obj, const char *slot
     getLayerManager()->subscribeLayerChangeShowed( obj, slot, queue );
 }
 
+TransformMatrixManagerPtr RegionBizManager::getTransformManager()
+{
+    return TransformMatrixManager::instance();
+}
+
+bool RegionBizManager::isHaveTransform(uint64_t facility_id)
+{
+    return getTransformManager()->isHaveTransform( facility_id );
+}
+
+QTransform RegionBizManager::getTransform(uint64_t facility_id)
+{
+    return getTransformManager()->getTransform( facility_id );
+}
+
+bool RegionBizManager::setTransform(uint64_t facility_id, QTransform transform)
+{
+    return getTransformManager()->setTransform( facility_id, transform );
+}
+
+void RegionBizManager::resetTransform(uint64_t facility_id)
+{
+    getTransformManager()->resetTransform( facility_id );
+}
+
+bool RegionBizManager::commitTransformOfFacility( uint64_t facility_id )
+{
+    auto facil = getBaseArea( facility_id )->convert< Facility >();
+    return commitTransformOfFacility( facil );
+}
+
+bool RegionBizManager::commitTransformOfFacility(FacilityPtr facility)
+{
+    if( facility )
+        return _data_translator->commitTransformMatrix( facility );
+    return false;
+}
+
 BaseFileKeeperPtrs RegionBizManager::getFilesByEntity(uint64_t id)
 {
     BaseFileKeeperPtrs files_keepers =
@@ -1163,6 +1201,9 @@ void RegionBizManager::loadDataByTranslator()
 
     // layers
     _data_translator->loadLayers();
+
+    // transform
+    _data_translator->loadTransformMatrixes();
 }
 
 void RegionBizManager::clearCurrentData( bool clear_entitys )

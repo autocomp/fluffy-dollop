@@ -15,6 +15,7 @@
 #include "rb_files.h"
 #include "rb_group.h"
 #include "rb_layers.h"
+#include "rb_transform_matrix.h"
 
 namespace regionbiz {
 
@@ -72,6 +73,10 @@ public:
     bool commitLayers();
     bool deleteLayer( LayerPtr layer );
 
+    // transform matrixes
+    TransformById loadTransformMatrixes();
+    bool commitTransformMatrix( FacilityPtr facility );
+
 protected:
     void setParentForBaseLocation( BaseAreaPtr loc, uint64_t parent_id );
     void setAreaForBaseRalation( BaseBizRelationPtr relation, uint64_t id );
@@ -115,6 +120,10 @@ protected:
     std::function< LayerPtrs( void ) > _load_layers;
     std::function< bool() > _commit_layers;
     std::function< bool( LayerPtr ) > _delete_layer;
+
+    // transform matrixes
+    std::function< TransformById() > _load_transform_matrix;
+    std::function< bool( FacilityPtr ) > _commit_transform_matrix;
 
 private:
     /**

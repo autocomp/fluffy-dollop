@@ -26,7 +26,8 @@ SOURCES  += \
     rb_data_translator.cpp \
     rb_meta_constraints.cpp \
     rb_group.cpp \
-    rb_layers.cpp
+    rb_layers.cpp \
+    rb_transform_matrix.cpp
 
 HEADERS  += \
     rb_manager.h \
@@ -44,7 +45,8 @@ HEADERS  += \
     rb_translator.h \
     rb_meta_constraints.h \
     rb_group.h \
-    rb_layers.h
+    rb_layers.h \
+    rb_transform_matrix.h
 
 win32 {
     DEFINES += STACKWALKER

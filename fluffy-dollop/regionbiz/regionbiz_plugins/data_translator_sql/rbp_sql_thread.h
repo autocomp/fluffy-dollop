@@ -24,7 +24,8 @@ public:
         C_COMMIT_GROUP,
         C_DELETE_GROUP,
         C_COMMIT_LAYERS,
-        C_DELETE_LAYER
+        C_DELETE_LAYER,
+        C_COMMIT_TRANSFORM_MATRIX
     };
 
     ThreadSql();
@@ -56,6 +57,7 @@ private:
     bool deleteGroup( uint64_t id );
     bool commitLayers();
     bool deleteLayer( uint64_t id );
+    bool commitTransformMatrix( uint64_t facility_id );
 
     // commit small elements
     template< typename EntType >

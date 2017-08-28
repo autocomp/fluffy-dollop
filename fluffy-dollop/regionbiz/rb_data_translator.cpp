@@ -282,6 +282,25 @@ bool BaseDataTranslator::deleteLayer(LayerPtr layer)
             return true;
         }
     }
+
+    return false;
+}
+
+TransformById BaseDataTranslator::loadTransformMatrixes()
+{
+    if( _load_transform_matrix )
+    {
+        auto matrixes = _load_transform_matrix();
+        return matrixes;
+    }
+    else
+        return TransformById();
+}
+
+bool BaseDataTranslator::commitTransformMatrix(FacilityPtr facility)
+{
+    if( _commit_transform_matrix )
+        return _commit_transform_matrix( facility );
     else
         return false;
 }

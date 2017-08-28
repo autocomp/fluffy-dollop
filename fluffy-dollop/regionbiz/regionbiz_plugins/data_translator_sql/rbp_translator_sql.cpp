@@ -72,6 +72,11 @@ void SqlTranslator::loadFunctions()
     _load_layers = std::bind( &SqlTranslator::loadLayers, this );
     _commit_layers = std::bind( &SqlTranslator::commitLayers, this );
     _delete_layer = std::bind( &SqlTranslator::deleteLayer, this, std::placeholders::_1 );
+
+    // transform
+    _load_transform_matrix = std::bind( &SqlTranslator::loadTransformMatrixes, this );
+    _commit_transform_matrix = std::bind( &SqlTranslator::commitTransformMatrix, this,
+                                          std::placeholders::_1 );
 }
 
 std::vector< RegionPtr > SqlTranslator::loadRegions()
@@ -456,6 +461,8 @@ LayerPtrs SqlTranslator::loadLayers()
 
     // unlock
     db.commit();
+
+    // empty layers
     return layers;
 }
 
@@ -470,6 +477,47 @@ bool SqlTranslator::deleteLayer(LayerPtr layer)
 {
     // WARNING test multithread commit
     _thread_sql.appendCommand( ThreadSql::C_DELETE_LAYER, layer->getId() );
+    return true;
+}
+
+TransformById SqlTranslator::loadTransformMatrixes()
+{
+    TransformById matrixes;
+    auto mngr = RegionBizManager::instance();
+
+    // lock database
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    QSqlQuery query( db );
+
+    QString select_matrixes = "SELECT facility_id, (rotate_scale).m11, (rotate_scale).m12, "
+                              "(rotate_scale).m21, (rotate_scale).m22, "
+                              "(shift).s1, (shift).s2 FROM transform_matrix";
+    query.setForwardOnly( true );
+    bool res = query.exec( select_matrixes );
+    if( res )
+        for( query.first(); query.isValid(); query.next() )
+        {
+            uint64_t id = query.value( 0 ).toULongLong();
+            double m11 = query.value( 1 ).toDouble();
+            double m12 = query.value( 2 ).toDouble();
+            double m21 = query.value( 3 ).toDouble();
+            double m22 = query.value( 4 ).toDouble();
+            double s1 = query.value( 5 ).toDouble();
+            double s2 = query.value( 6 ).toDouble();
+
+            QTransform trans = mngr->getTransformManager()
+                    ->createTransform( m11, m12, m21, m22, s1, s2 );
+            mngr->setTransform( id, trans );
+        }
+
+    // empty matrixes
+    return matrixes;
+}
+
+bool SqlTranslator::commitTransformMatrix( FacilityPtr facility )
+{
+    // WARNING test multithread commit
+    _thread_sql.appendCommand( ThreadSql::C_COMMIT_TRANSFORM_MATRIX, facility->getId() );
     return true;
 }
 

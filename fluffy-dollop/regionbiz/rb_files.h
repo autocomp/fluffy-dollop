@@ -49,6 +49,7 @@ public:
     uint64_t getEntityId();
     void setName( QString name );
     QString getName();
+    QString getId();
 
     // convert
     template< typename Type >

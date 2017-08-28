@@ -29,6 +29,14 @@ QString BaseFileKeeper::getName()
     return _name;
 }
 
+QString BaseFileKeeper::getId()
+{
+    QRegExp rx( "\\{.*\\}" );
+    if( rx.indexIn( _path ) != -1 )
+        return rx.cap( 0 );
+    return "";
+}
+
 QFilePtr BaseFileKeeper::getLocalFile()
 {
     auto mngr = RegionBizManager::instance();

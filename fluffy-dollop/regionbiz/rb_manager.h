@@ -12,6 +12,7 @@
 #include "rb_marks.h"
 #include "rb_group.h"
 #include "rb_layers.h"
+#include "rb_transform_matrix.h"
 
 #define FIND_IF( cont, func ) std::find_if( cont.begin(), cont.end(), func );
 
@@ -164,6 +165,15 @@ public:
     void subscribeLayerChangeShowed( QObject* obj,
                                      const char *slot,
                                      bool queue = false);
+
+    // transform matrixes
+    static TransformMatrixManagerPtr getTransformManager();
+    bool isHaveTransform( uint64_t facility_id );
+    QTransform getTransform( uint64_t facility_id );
+    bool setTransform( uint64_t facility_id, QTransform transform );
+    void resetTransform( uint64_t facility_id );
+    bool commitTransformOfFacility( uint64_t facility_id );
+    bool commitTransformOfFacility( FacilityPtr facility );
 
     // files
     BaseFileKeeperPtrs getFilesByEntity( uint64_t id );

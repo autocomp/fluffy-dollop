@@ -119,9 +119,15 @@ void ThreadSql::processQueueOfCommand()
             no_error = commitLayers();
             break;
         }
+
         case C_DELETE_LAYER:
             no_error = deleteLayer( id );
             break;
+
+        case C_COMMIT_TRANSFORM_MATRIX:
+            no_error = commitTransformMatrix( id );
+            break;
+
         }
 
         if( !no_error )
@@ -540,6 +546,56 @@ bool ThreadSql::deleteLayer(uint64_t id )
     QString delete_layer = "DELETE FROM layers WHERE id = " + id_str + ";"
                            "DELETE FROM layers_elements WHERE layer_id = " + id_str + ";";
     tryQuery( delete_layer );
+
+    // unlock
+    db.commit();
+    return true;
+}
+
+bool ThreadSql::commitTransformMatrix( uint64_t facility_id )
+{
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    // lock
+    db.transaction();
+    QSqlQuery query( db );
+
+    // delete transform
+    QString id_str = QString::number( facility_id );
+    QString delete_layer = "DELETE FROM transform_matrix WHERE facility_id = " + id_str + ";";
+    tryQuery( delete_layer );
+
+    // get transform
+    auto mngr = RegionBizManager::instance();
+    bool have = mngr->isHaveTransform( facility_id );
+    if( have )
+    {
+        QString insert_coords = "INSERT INTO transform_matrix (facility_id, "
+                                "rotate_scale.m11, rotate_scale.m12, "
+                                "rotate_scale.m21, rotate_scale.m22, "
+                                "shift.s1, shift.s2) "
+                                "VALUES( ?,?,?,?,?,?,? )";
+        query.prepare( insert_coords );
+
+        QVariant id = (quint64) facility_id;
+
+        QTransform trans = mngr->getTransform( facility_id );
+        QVariant m11 = trans.m11();
+        QVariant m12 = trans.m12();
+        QVariant m21 = trans.m21();
+        QVariant m22 = trans.m22();
+        QVariant s1 = trans.dx();
+        QVariant s2 = trans.dy();
+
+        query.bindValue( 0, id );
+        query.bindValue( 1, m11 );
+        query.bindValue( 2, m12 );
+        query.bindValue( 3, m21 );
+        query.bindValue( 4, m22 );
+        query.bindValue( 5, s1 );
+        query.bindValue( 6, s2 );
+
+        tryQuery()
+    }
 
     // unlock
     db.commit();
