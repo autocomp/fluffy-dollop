@@ -217,6 +217,12 @@ public:
     QTransform getTransform();
     void resetTransform();
     bool commitTransformMatrix();
+
+    // etalon image
+    bool isHaveEtalonPlan();
+    BaseFileKeeperPtr getEtalonPlan();
+    bool setEtalonPlan( BaseFileKeeperPtr file );
+    void resetEtalonFile();
 };
 typedef std::vector< FacilityPtr > FacilityPtrs;
 

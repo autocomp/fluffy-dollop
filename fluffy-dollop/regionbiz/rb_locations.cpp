@@ -411,6 +411,49 @@ bool Facility::commitTransformMatrix()
     return mngr->commitTransformOfFacility( _id );
 }
 
+bool Facility::isHaveEtalonPlan()
+{
+    return getEtalonPlan() != nullptr;
+}
+
+#define ETALON_PLAN "etalon_plan"
+BaseFileKeeperPtr Facility::getEtalonPlan()
+{
+    bool check = isMetadataPresent( ETALON_PLAN );
+    if( !check )
+        return nullptr;
+
+    QString id_file = getMetadata( ETALON_PLAN )->getValueAsString();
+    auto plans = getFilesByType( BaseFileKeeper::FT_PLAN );
+    for( BaseFileKeeperPtr file: plans )
+        if( id_file == file->getId() )
+            return file;
+
+    return nullptr;
+}
+
+bool Facility::setEtalonPlan( BaseFileKeeperPtr file )
+{
+    if( !file
+            || file->getEntityId() != _id
+            || file->getType() != BaseFileKeeper::FT_PLAN )
+        return false;
+
+    bool has = isMetadataPresent( ETALON_PLAN );
+    if( has )
+        return setMetadataValue( ETALON_PLAN, file->getId() );
+    else
+        return addMetadata( "string", ETALON_PLAN, file->getId() );
+}
+
+void Facility::resetEtalonFile()
+{
+    bool has = isMetadataPresent( ETALON_PLAN );
+    if( has )
+        setMetadataValue( ETALON_PLAN, "" );
+}
+#undef ETALON_PLAN
+
 Floor::Floor(uint64_t id):
     BizRelationKepper( id ),
     MarksHolder( id ),
