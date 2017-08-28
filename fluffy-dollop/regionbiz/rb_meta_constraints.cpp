@@ -1,6 +1,7 @@
 #include "rb_meta_constraints.h"
 
 #include "rb_base_entity.h"
+#include "rb_locations.h"
 #include "rb_marks.h"
 
 using namespace regionbiz;
@@ -50,36 +51,23 @@ QString Constraint::separator()
 
 //-----------------------------------
 
-void ConstraintsManager::init( QString /*aim*/ )
+void ConstraintsManager::init( QString aim )
 {
-    Constraint cons( "area", "0:" );
-    addConstraint( BaseEntity::ET_AREA, cons );
+    // metadata that always need
+    Constraint cons( "number", "0:" );
+    addConstraint( BaseArea::AT_FLOOR, cons );
 
-    // TODO add constraint by aim and by file
+    // for rent
+    if( aim == "rent" )
+    {
+        Constraint cons( "area", "0:" );
+        addConstraint( BaseEntity::ET_AREA, cons );
+    }
+    else if( aim == "file" )
+    {
+        // TODO add constraint by file
+    }
 }
 
-template<typename Type>
-void ConstraintsManager::addConstraint(Type type, Constraint constr)
-{
-    auto contaier = ConstraintsManager::containerInstance< Type >();
-    contaier[ type ].push_back( constr );
-}
 
-template<typename Type>
-std::map< Type, std::vector< Constraint >> &ConstraintsManager::containerInstance()
-{
-    static std::map< Type, std::vector< Constraint >> contaier;
-    return contaier;
-}
 
-template<typename Type>
-std::vector<Constraint> ConstraintsManager::getConstraints(Type type)
-{
-    std::vector<Constraint> res;
-
-    auto contaier = ConstraintsManager::containerInstance< Type >();
-    if( contaier.find( type ) != contaier.end() )
-        res = contaier[ type ];
-
-    return res;
-}

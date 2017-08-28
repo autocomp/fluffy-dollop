@@ -74,6 +74,72 @@ std::recursive_mutex& BaseMetadata::getMutex()
     return mutex;
 }
 
+std::vector< Constraint > BaseMetadata::getConstraints()
+{
+    auto empty = std::vector< Constraint >();
+
+    auto mngr = RegionBizManager::instance();
+    auto entity = mngr->getBaseEntity( _parent_id );
+    if( ! entity )
+        return empty;
+
+    switch( entity->getEntityType() )
+    {
+    case BaseEntity::ET_AREA:
+    {
+        auto area = entity->convert< BaseArea >();
+        return ConstraintsManager::getConstraints( area->getType() );
+    }
+
+    case BaseEntity::ET_MARK:
+    {
+        auto mark = entity->convert< Mark >();
+        return ConstraintsManager::getConstraints( mark->getMarkType() );
+    }
+
+    case BaseEntity::ET_GROUP:
+        return ConstraintsManager::getConstraints( BaseEntity::ET_GROUP );
+
+    case BaseEntity::ET_RELATION:
+    {
+        // TODO Constrait get for type of relation
+        static_assert( true, "Not realised constrait for Relation" );
+    }
+
+    }
+
+    return empty;
+}
+
+void BaseMetadata::printIncorrectConstraint(Constraint cons)
+{
+    std::cerr << "Incorrect constrait of " << getName().toUtf8().data()
+              << " metadata of type " << getType().toUtf8().data()
+              << ": " << cons.getConstraint().toUtf8().data() << std::endl;
+}
+
+void BaseMetadata::printWrongCheckConstraints()
+{
+    std::cerr << "Incorrect check constrait of " << getName().toUtf8().data()
+              << " metadata of type " << getType().toUtf8().data() << std::endl;
+}
+
+BaseMetadataPtr BaseMetadata::getItself()
+{
+    BaseMetadataPtr itself;
+
+    getMutex().lock();
+    if( getMetadatas().find( _parent_id ) != getMetadatas().end() )
+    {
+        auto metadatas = getMetadatas()[ _parent_id ];
+        if( metadatas.find( _name ) != metadatas.end() )
+            itself = metadatas[ _name ];
+    }
+    getMutex().unlock();
+
+    return itself;
+}
+
 //-------------------------------------------
 
 DoubleMetadata::DoubleMetadata(uint64_t parent_id):
@@ -90,9 +156,9 @@ QString DoubleMetadata::getValueAsString()
     return QString::number(  _value );
 }
 
-void DoubleMetadata::setValueByString( QString val )
+bool DoubleMetadata::setValueByString( QString val )
 {
-    _value = val.toDouble();
+    return setValue( val.toDouble() );
 }
 
 QVariant DoubleMetadata::getValueAsVariant()
@@ -100,9 +166,9 @@ QVariant DoubleMetadata::getValueAsVariant()
     return _value;
 }
 
-void DoubleMetadata::setValueByVariant( QVariant val )
+bool DoubleMetadata::setValueByVariant( QVariant val )
 {
-    _value = val.toDouble();
+    return setValue( val.toDouble() );
 }
 
 double DoubleMetadata::getValue()
@@ -110,9 +176,54 @@ double DoubleMetadata::getValue()
     return _value;
 }
 
-void DoubleMetadata::setValue(double val)
+bool DoubleMetadata::setValue(double val)
 {
+    if( !checkConstraitsByVariant( val ))
+    {
+        printWrongCheckConstraints();
+        return false;
+    }
+
     _value = val;
+
+    return true;
+}
+
+bool DoubleMetadata::checkConstraits()
+{
+    return checkConstraitsByVariant( _value );
+}
+
+bool DoubleMetadata::checkConstraitsByVariant(QVariant new_value)
+{
+    if( new_value.isNull() )
+        return false;
+
+    auto constraits = getConstraints();
+    for( Constraint cons: constraits )
+    {
+        auto min_max = cons.getConstraintAsList();
+        if( min_max.size() != 2 )
+        {
+            printIncorrectConstraint( cons );
+            continue;
+        }
+
+        if( min_max[ 0 ].isValid() )
+        {
+            double min = min_max[ 0 ].toDouble();
+            if( new_value.toDouble() < min )
+                return false;
+        }
+        if( min_max[ 1 ].isValid() )
+        {
+            double max = min_max[ 1 ].toDouble();
+            if( new_value.toDouble() > max )
+                return false;
+        }
+    }
+
+    return true;
 }
 
 //----------------------------------------------
@@ -126,14 +237,33 @@ QString StringMetadata::getType()
     return "string";
 }
 
+bool StringMetadata::checkConstraits()
+{
+    return checkConstraitsByVariant( _value );
+}
+
+bool StringMetadata::checkConstraitsByVariant(QVariant new_value)
+{
+    auto constraits = getConstraints();
+    for( Constraint cons: constraits )
+    {
+        QString reg_exp = cons.getConstraint();
+        QRegExp re( reg_exp );
+        if( !re.exactMatch( new_value.toString() ))
+            return false;
+    }
+
+    return true;
+}
+
 QString StringMetadata::getValueAsString()
 {
     return _value;
 }
 
-void StringMetadata::setValueByString(QString val)
+bool StringMetadata::setValueByString(QString val)
 {
-    _value = val;
+    return setValue( val );
 }
 
 QVariant StringMetadata::getValueAsVariant()
@@ -141,9 +271,9 @@ QVariant StringMetadata::getValueAsVariant()
     return _value;
 }
 
-void StringMetadata::setValueByVariant(QVariant val)
+bool StringMetadata::setValueByVariant(QVariant val)
 {
-    _value = val.toString();
+    return setValue( val.toString() );
 }
 
 QString StringMetadata::getValue()
@@ -151,9 +281,17 @@ QString StringMetadata::getValue()
     return _value;
 }
 
-void StringMetadata::setValue(QString val)
+bool StringMetadata::setValue(QString val)
 {
+    if( !checkConstraitsByVariant( val ))
+    {
+        printWrongCheckConstraints();
+        return false;
+    }
+
     _value = val;
+
+    return true;
 }
 
 //----------------------------------------------
@@ -167,14 +305,51 @@ QString IntegerMetadata::getType()
     return "int";
 }
 
+bool IntegerMetadata::checkConstraits()
+{
+    return checkConstraitsByVariant( _value );
+}
+
+bool IntegerMetadata::checkConstraitsByVariant(QVariant new_value)
+{
+    if( new_value.isNull() )
+        return false;
+
+    auto constraits = getConstraints();
+    for( Constraint cons: constraits )
+    {
+        auto min_max = cons.getConstraintAsList();
+        if( min_max.size() != 2 )
+        {
+            printIncorrectConstraint( cons );
+            continue;
+        }
+
+        if( min_max[ 0 ].isValid() )
+        {
+            int min = min_max[ 0 ].toInt();
+            if( new_value.toInt() < min )
+                return false;
+        }
+        if( min_max[ 1 ].isValid() )
+        {
+            int max = min_max[ 1 ].toInt();
+            if( new_value.toInt() > max )
+                return false;
+        }
+    }
+
+    return true;
+}
+
 QString IntegerMetadata::getValueAsString()
 {
     return QString::number( _value );
 }
 
-void IntegerMetadata::setValueByString(QString val)
+bool IntegerMetadata::setValueByString(QString val)
 {
-    _value = val.toInt();
+    return setValue( val.toInt() );
 }
 
 QVariant IntegerMetadata::getValueAsVariant()
@@ -182,9 +357,9 @@ QVariant IntegerMetadata::getValueAsVariant()
     return _value;
 }
 
-void IntegerMetadata::setValueByVariant(QVariant val)
+bool IntegerMetadata::setValueByVariant(QVariant val)
 {
-    _value = val.toInt();
+    setValue( val.toInt() );
 }
 
 int IntegerMetadata::getValue()
@@ -192,9 +367,17 @@ int IntegerMetadata::getValue()
     return _value;
 }
 
-void IntegerMetadata::setValue(int val)
+bool IntegerMetadata::setValue(int val)
 {
+    if( !checkConstraitsByVariant( val ))
+    {
+        printWrongCheckConstraints();
+        return false;
+    }
+
     _value = val;
+
+    return true;
 }
 
 //----------------------------------------------------
@@ -227,16 +410,32 @@ QString EmptyMetadata::getType()
     return "";
 }
 
+bool EmptyMetadata::checkConstraits()
+{
+    static_assert( true, "Why are you check constraints "
+                         "of empty metadata?" );
+    return false;
+}
+
+bool EmptyMetadata::checkConstraitsByVariant( QVariant /*new_value*/ )
+{
+    static_assert( true, "Why are you check constraints "
+                         "of empty metadata?" );
+    return false;
+}
+
 QString EmptyMetadata::getValueAsString()
 {
     return "";
 }
 
-void EmptyMetadata::setValueByString(QString val)
+bool EmptyMetadata::setValueByString(QString val)
 {
     std::cerr << "Set value for empty metadata: "
               << val.toUtf8().data() << std::endl;
     static_assert( true, "Set value for empty metadata" );
+
+    return false;
 }
 
 QVariant EmptyMetadata::getValueAsVariant()
@@ -244,11 +443,13 @@ QVariant EmptyMetadata::getValueAsVariant()
     return QVariant();
 }
 
-void EmptyMetadata::setValueByVariant(QVariant val)
+bool EmptyMetadata::setValueByVariant(QVariant val)
 {
     std::cerr << "Set value for empty metadata: "
               << val.toString().toUtf8().data() << std::endl;
     static_assert( true, "Set value for empty metadata" );
+
+    return false;
 }
 
 bool EmptyMetadata::isEmpty()

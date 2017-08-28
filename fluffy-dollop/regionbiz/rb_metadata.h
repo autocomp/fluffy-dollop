@@ -8,6 +8,8 @@
 #include <QString>
 #include <QVariant>
 
+#include "rb_meta_constraints.h"
+
 namespace regionbiz {
 
 class Layer;
@@ -29,11 +31,15 @@ public:
     // type
     virtual QString getType() = 0;
 
+    // constraits
+    virtual bool checkConstraits() = 0;
+    virtual bool checkConstraitsByVariant( QVariant new_value ) = 0;
+
     // value
     virtual QString getValueAsString() = 0;
-    virtual void setValueByString( QString val ) = 0;
+    virtual bool setValueByString( QString val ) = 0;
     virtual QVariant getValueAsVariant() = 0;
-    virtual void setValueByVariant( QVariant val ) = 0;
+    virtual bool setValueByVariant( QVariant val ) = 0;
     virtual bool isEmpty();
 
     // getters
@@ -52,14 +58,24 @@ public:
     {
         return std::dynamic_pointer_cast< Type >( base );
     }
+    template< typename Type >
+    std::shared_ptr< Type > convert()
+    {
+        return convert< Type >( getItself() );
+    }
 
 protected:
+    std::vector< Constraint > getConstraints();
+    void printIncorrectConstraint( Constraint cons );
+    void printWrongCheckConstraints();
+    BaseMetadataPtr getItself();
+
     uint64_t _parent_id;
     QString _name;
 
 private:
     static void removeForEntity( uint64_t id );
-    static void addForEntityByName(BaseMetadataPtr data);
+    static void addForEntityByName( BaseMetadataPtr data );
     static MetadataById& getMetadatas();
     static std::recursive_mutex& getMutex();
 };
@@ -75,13 +91,17 @@ public:
     // type
     QString getType() override;
 
+    // constraits
+    bool checkConstraits() override;
+    bool checkConstraitsByVariant( QVariant new_value ) override;
+
     // value
     QString getValueAsString() override;
-    void setValueByString( QString val ) override;
+    bool setValueByString( QString val ) override;
     QVariant getValueAsVariant() override;
-    void setValueByVariant( QVariant val );
+    bool setValueByVariant( QVariant val );
     double getValue();
-    void setValue( double val );
+    bool setValue( double val );
 
 private:
     double _value;
@@ -99,13 +119,17 @@ public:
     // type
     QString getType() override;
 
+    // constraits
+    bool checkConstraits() override;
+    bool checkConstraitsByVariant( QVariant new_value ) override;
+
     // value
     QString getValueAsString() override;
-    void setValueByString( QString val ) override;
+    bool setValueByString( QString val ) override;
     QVariant getValueAsVariant() override;
-    void setValueByVariant( QVariant val );
+    bool setValueByVariant( QVariant val );
     QString getValue();
-    void setValue(QString val );
+    bool setValue(QString val );
 
 private:
     QString _value;
@@ -123,13 +147,17 @@ public:
     // type
     QString getType() override;
 
+    // constraits
+    bool checkConstraits() override;
+    bool checkConstraitsByVariant( QVariant new_value ) override;
+
     // value
     QString getValueAsString() override;
-    void setValueByString( QString val ) override;
+    bool setValueByString( QString val ) override;
     QVariant getValueAsVariant() override;
-    void setValueByVariant( QVariant val );
+    bool setValueByVariant( QVariant val );
     int getValue();
-    void setValue(int val );
+    bool setValue( int val );
 
 private:
     int _value;
@@ -150,11 +178,15 @@ public:
     // type
     QString getType() override;
 
+    // constraits
+    bool checkConstraits() override;
+    bool checkConstraitsByVariant( QVariant new_value ) override;
+
     // value
     QString getValueAsString() override;
-    void setValueByString(QString) override;
+    bool setValueByString(QString) override;
     QVariant getValueAsVariant() override;
-    void setValueByVariant( QVariant val ) override;
+    bool setValueByVariant( QVariant val ) override;
     bool isEmpty() override;
 
 private:
@@ -162,6 +194,7 @@ private:
 };
 
 //--------------------------------------------------
+
 class MetadataFabric
 {
 public:
