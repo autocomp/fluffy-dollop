@@ -2,6 +2,7 @@
 #define FTP_CHECKER_H
 
 #include <QTimer>
+#include <QFileInfo>
 
 #include <regionbiz/rb_manager.h>
 #include <regionbiz/rb_entity_filter.h>
@@ -61,6 +62,7 @@ private Q_SLOTS:
         }
 
         BaseFileKeeperPtr file = files.at( 0 );
+        auto path = file->getId();
         auto state = file->getFileState();
         std::cerr << "State of file after: " << state << std::endl;
 
@@ -69,7 +71,9 @@ private Q_SLOTS:
         else if ( state == BaseFileKeeper::FS_SYNC )
         {
             QFilePtr file_ptr = file->getLocalFile();
-            bool open = file_ptr->open( QFile::ReadOnly );
+            QFileInfo info( *(file_ptr.get()) );
+            QString path = info.absoluteFilePath();
+            bool open = file_ptr->parent();
             QByteArray data = file_ptr->readAll();
             std::cerr << "Synced file: " << data.data() << std::endl;
 

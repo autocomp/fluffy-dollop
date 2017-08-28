@@ -8,6 +8,7 @@
 #include <regionbiz/rb_manager.h>
 #include <regionbiz/rb_entity_filter.h>
 #include <regionbiz/rb_files_translator.h>
+#include <regionbiz/rb_transform_matrix.h>
 
 #include "test_reciver.h"
 #include "ftp_checker.h"
@@ -400,7 +401,7 @@ void init()
 
     //! init
     auto mngr = RegionBizManager::instance();
-    QString str = "config/regionbiz.json";
+    QString str = "config/regionbiz_inet.json";
     bool inited = mngr->init( str );
 }
 
@@ -531,6 +532,36 @@ void checkLayers()
     }
 }
 
+void checkTransform()
+{
+    using namespace regionbiz;
+
+    // load
+    auto mngr = RegionBizManager::instance();
+    FacilityPtr facil = mngr->getBaseArea( 3 )->convert< Facility >();
+
+    // create new transform
+    // rotate 45, shift (10,10)
+    QTransform trans = TransformMatrixManager::createTransform( 1, 1, 45, 10, 10 );
+
+    // set and commit
+    facil->setTransform( trans );
+    qDebug() << "Comm:"
+             << facil->commitTransformMatrix();
+
+    // check on floor
+    auto transform_holder = mngr->getBaseArea( 5 )->convertToLocalTransformHolder();
+    qDebug() << "Have on floor:"
+             << transform_holder->isHaveTransform();
+    qDebug() << "Trans on floor:"
+             << transform_holder->getTransform();
+
+    // reset and commit
+    facil->resetTransform();
+    qDebug() << "Comm:"
+             << facil->commitTransformMatrix();
+}
+
 int main( int argc, char** argv )
 {
     QApplication app( argc, argv );
@@ -554,7 +585,7 @@ int main( int argc, char** argv )
     //selectManagment();
 
     //! check ftp
-    //checkFtp();
+    // checkFtp();
 
     //! check marks coords
     // checkMarksCoords();
@@ -566,11 +597,10 @@ int main( int argc, char** argv )
     //checkGroups();
 
     //! check layers
-    checkLayers();
+    //checkLayers();
 
-    // for check close program
-    //QWidget* wgt = new QWidget();
-    //wgt->show();
+    //! check transform
+    checkTransform();
 
     return app.exec();
 }
