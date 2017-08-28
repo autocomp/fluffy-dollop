@@ -554,12 +554,49 @@ void checkTransform()
     qDebug() << "Have on floor:"
              << transform_holder->isHaveTransform();
     qDebug() << "Trans on floor:"
-             << transform_holder->getTransform();
+             << transform_holder->getTransform().inverted();
 
     // reset and commit
     facil->resetTransform();
     qDebug() << "Comm:"
              << facil->commitTransformMatrix();
+}
+
+void checkEtalonFiles()
+{
+    using namespace regionbiz;
+
+    // load
+    auto mngr = RegionBizManager::instance();
+    FacilityPtr facil = mngr->getBaseArea( 3 )->convert< Facility >();
+
+    // get files
+    auto files = facil->getFilesByType( BaseFileKeeper::FT_PLAN );
+    qDebug() << "Have files:" << files.size();
+
+    // set free
+    for( auto file: files )
+        mngr->deleteFile( file );
+
+    // set ivalid
+    qDebug() << "Invalid set:" << facil->setEtalonPlan( nullptr );
+
+    // create and check
+    mngr->addFile( "images/photo.jpg", BaseFileKeeper::FT_PLAN, facil->getId() );
+    files = facil->getFilesByType( BaseFileKeeper::FT_PLAN );
+    qDebug() << "Have files after create:" << files.size();
+
+    qDebug() << "Set valid:" << facil->setEtalonPlan( files[0] );
+    auto etalon = facil->getEtalonPlan();
+    qDebug() << "Etalon get:" << etalon->getId();
+
+    // commit
+    facil->commit();
+
+    // reset and commit
+    facil->resetEtalonFile();
+    mngr->deleteFile( files[0] );
+    facil->commit();
 }
 
 int main( int argc, char** argv )
@@ -601,6 +638,9 @@ int main( int argc, char** argv )
 
     //! check transform
     checkTransform();
+
+    //! check etalon files
+    checkEtalonFiles();
 
     return app.exec();
 }
