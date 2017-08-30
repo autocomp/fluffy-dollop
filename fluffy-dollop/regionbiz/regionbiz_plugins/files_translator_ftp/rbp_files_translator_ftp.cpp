@@ -216,6 +216,8 @@ void FilesTranslatorFtp::onConnect()
     // start to load files from previous session
     auto files = _load_manager.getFilesForLoad();
     for( auto file: files )
+    {
         _ftp_wrapper.putFile( file, file->getType() );
+    }
 }
 

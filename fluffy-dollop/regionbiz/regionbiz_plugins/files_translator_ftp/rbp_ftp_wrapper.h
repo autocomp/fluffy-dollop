@@ -40,6 +40,7 @@ class FtpWrapper: public QObject
     Q_OBJECT
 public:
     FtpWrapper();
+    ~FtpWrapper();
 
     QString getFullPath(BaseFileKeeperPtr file_ptr, bool local );
     void connectByUrl( QUrl url );
@@ -79,7 +80,9 @@ private:
     void recursiveReadFromFile(QJsonObject obj, FtpTreeNodePtr node );
     void recursiveSaveToFile( QJsonObject& obj, FtpTreeNodePtr node );
 
-    QFtp _ftp;
+    void initFtp();
+
+    QFtp* _ftp = nullptr;
     FtpTreeNodePtr _root_node = nullptr;
     FtpTreeNodePtr _current_node = nullptr;
     uint _current_node_num = 0;

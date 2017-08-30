@@ -11,29 +11,37 @@ using namespace regionbiz;
 
 FtpWrapper::FtpWrapper()
 {
-    QObject::connect( &_ftp, SIGNAL( commandFinished( int, bool )),
-                      this, SLOT( ftpCommandFinished( int, bool )));
-    QObject::connect( &_ftp, SIGNAL(listInfo(QUrlInfo)),
-                      this, SLOT(addToList(QUrlInfo)));
+    initFtp();
 
     // NOTE can't indicate ftp loading process
     // connect(ftp, SIGNAL(dataTransferProgress(qint64,qint64)),
-    //         this, SLOT(updateDataTransferProgress(qint64,qint64)));
+            //         this, SLOT(updateDataTransferProgress(qint64,qint64)));
+}
+
+FtpWrapper::~FtpWrapper()
+{
+    if( _ftp )
+        delete _ftp;
 }
 
 void FtpWrapper::loginByUrl(QUrl url)
 {
+    //std::cerr << "Login: " << url.userName().toLatin1().data()
+    //          << " " << url.password().toLatin1().data() << std::endl;
+
     int id;
     if (!url.userName().isEmpty())
-        id = _ftp.login(QUrl::fromPercentEncoding(url.userName().toLatin1()), url.password());
+        id = _ftp->login(QUrl::fromPercentEncoding(url.userName().toLatin1()), url.password());
     else
-        id = _ftp.login();
+        id = _ftp->login();
     _commands[ id ] = QFtp::Login;
 }
 
 void FtpWrapper::connectByUrl(QUrl url)
 {
-    int id_conn = _ftp.connectToHost( url.host(), url.port(21) );
+    initFtp();
+
+    int id_conn = _ftp->connectToHost( url.host(), url.port(21) );
     _commands[ id_conn ] = QFtp::ConnectToHost;
 }
 
@@ -58,7 +66,7 @@ void FtpWrapper::ftpCommandFinished( int id, bool error )
         if( error )
         {
             std::cerr << "Can't connect to Ftp host: "
-                      << _ftp.errorString().toUtf8().data() << std::endl;
+                      << _ftp->errorString().toUtf8().data() << std::endl;
             break;
         }
         else
@@ -75,12 +83,15 @@ void FtpWrapper::ftpCommandFinished( int id, bool error )
         if( error )
         {
             std::cerr << "Can't login to Ftp host: "
-                      << _ftp.errorString().toUtf8().data() << std::endl;
+                      << _ftp->errorString().toUtf8().data() << std::endl;
             break;
-        }
 
-        // say about connect
-        _callback_connect();
+            // connect again
+            closeConnection();
+        }
+        else
+            // say about connect
+            _callback_connect();
 
         break;
     }
@@ -90,7 +101,7 @@ void FtpWrapper::ftpCommandFinished( int id, bool error )
         if( error )
         {
             std::cerr << "Can't list on Ftp: "
-                      << _ftp.errorString().toUtf8().data() << std::endl;
+                      << _ftp->errorString().toUtf8().data() << std::endl;
             break;
         }
 
@@ -113,11 +124,11 @@ void FtpWrapper::ftpCommandFinished( int id, bool error )
                         child->startUpdateChilds();
 
                         QString path_child = getFullPath( child );
-                        int id_cd = _ftp.cd( path_child );
+                        int id_cd = _ftp->cd( path_child );
                         _commands[ id_cd ] = QFtp::Cd;
                         _current_node = child;
 
-                        int id = _ftp.list();
+                        int id = _ftp->list();
                         _commands[ id ] = QFtp::List;
 
                         find_dir = true;
@@ -158,13 +169,14 @@ void FtpWrapper::ftpCommandFinished( int id, bool error )
 
     case QFtp::Put:
     {
+        auto iter = _put_get_files.find( id );
+        auto file = (*iter).second;
+        _put_get_files.erase( iter );
+
         if( !error )
         {
-            auto iter = _put_get_files.find( id );
             if( iter != _put_get_files.end() )
             {
-                auto file = (*iter).second;
-                _put_get_files.erase( iter );
                 if( _callback_add )
                     _callback_add( file );
             }
@@ -172,7 +184,10 @@ void FtpWrapper::ftpCommandFinished( int id, bool error )
         else
         {
             std::cerr << "Can't put on Ftp: "
-                      << _ftp.errorString().toUtf8().data() << std::endl;
+                      << _ftp->errorString().toUtf8().data() << std::endl;
+
+            deleteFile( file );
+            putFile( file, file->getType() );
         }
         break;
     }
@@ -194,7 +209,7 @@ void FtpWrapper::ftpCommandFinished( int id, bool error )
         else
         {
             std::cerr << "Can't get on Ftp: "
-                      << _ftp.errorString().toUtf8().data() << std::endl;
+                      << _ftp->errorString().toUtf8().data() << std::endl;
         }
 
         // close input file
@@ -216,6 +231,11 @@ void FtpWrapper::ftpCommandFinished( int id, bool error )
                     _callback_del( file );
             }
         }
+        else
+        {
+            std::cerr << "Some wrong with Rmdir: "
+                      << _ftp->errorString().toUtf8().data() << std::endl;
+        }
 
         break;
     }
@@ -230,15 +250,23 @@ void FtpWrapper::ftpCommandFinished( int id, bool error )
         if( error )
         {
             std::cerr << "Some wrong with Ftp: "
-                      << _ftp.errorString().toUtf8().data() << std::endl;
+                      << _ftp->errorString().toUtf8().data() << std::endl;
             break;
         }
+        break;
     }
 
     case QFtp::Mkdir:
     case QFtp::Rename:
     {
         // TODO add this Ftp options
+        if( error )
+        {
+            std::cerr << "Some wrong with Ftp: "
+                      << _ftp->errorString().toUtf8().data() << std::endl;
+            error = false;
+        }
+
         break;
     }
 
@@ -259,11 +287,11 @@ void FtpWrapper::restartSync()
     loginByUrl( _url );
 
     //_commands.clear();
-    int id_cd = _ftp.cd( "/" );
+    int id_cd = _ftp->cd( "/" );
     _commands[ id_cd ] = QFtp::Cd;
 
     // show root dir
-    int id = _ftp.list( "/" );
+    int id = _ftp->list( "/" );
     _commands[ id ] = QFtp::List;
 
     // init nodes
@@ -318,13 +346,14 @@ void FtpWrapper::putFile(BaseFileKeeperPtr file, BaseFileKeeper::FileType type)
 
     // TODO use specific ftp wrapper
     QString category = getFileCategoryByType( type );
-    int id_cd = _ftp.cd( SEPARATOR + category );
+    int id_cd = _ftp->cd( SEPARATOR + category );
     _commands[ id_cd ] = QFtp::Cd;
-    int make_id = _ftp.mkdir( file->getPath().split( "/", QString::SkipEmptyParts ).at( 0 ));
+
+    int make_id = _ftp->mkdir( file->getPath().split( "/", QString::SkipEmptyParts ).at( 0 ));
     _commands[ make_id ] = QFtp::Mkdir;
 
     QString outer_path = getFullPath( file, !local );
-    int id = _ftp.put( data, outer_path );
+    int id = _ftp->put( data, outer_path );
     _commands[ id ] = QFtp::Put;
     _put_get_files[ id ] = file;
 }
@@ -344,13 +373,13 @@ void FtpWrapper::deleteFile( BaseFileKeeperPtr file )
     }
     QString ftp_dir = ftp_path.left( pos_separator );
     QString ftp_file = ftp_path.right( ftp_path.size() - pos_separator - 1 );
-    int id_cd = _ftp.cd( ftp_dir );
+    int id_cd = _ftp->cd( ftp_dir );
     _commands[ id_cd ] = QFtp::Cd;
 
-    int id_del = _ftp.remove( ftp_file );
+    int id_del = _ftp->remove( ftp_file );
     _commands[ id_del ] = QFtp::Remove;
 
-    int id_rm = _ftp.rmdir( ftp_dir );
+    int id_rm = _ftp->rmdir( ftp_dir );
     _commands[ id_rm ] = QFtp::Rmdir;
 
     _put_get_files[ id_rm ] = file;
@@ -376,7 +405,7 @@ void FtpWrapper::getFile( BaseFileKeeperPtr file )
     }
     QString ftp_dir = ftp_path.left( pos_separator );
     QString ftp_file = ftp_path.right( ftp_path.size() - pos_separator - 1 );
-    int id_cd = _ftp.cd( ftp_dir );
+    int id_cd = _ftp->cd( ftp_dir );
     _commands[ id_cd ] = QFtp::Cd;
 
     // create and open file
@@ -384,7 +413,7 @@ void FtpWrapper::getFile( BaseFileKeeperPtr file )
     _input_file.open( QFile::WriteOnly );
 
     // start geting
-    int id = _ftp.get( ftp_file, &_input_file );
+    int id = _ftp->get( ftp_file, &_input_file );
     _commands[ id ] = QFtp::Get;
     _put_get_files[ id ] = file;
 }
@@ -409,7 +438,7 @@ void FtpWrapper::closeConnection()
     _block_update = false;
 
     // close connect
-    int id = _ftp.close();
+    int id = _ftp->close();
     _commands[ id ] = QFtp::Close;
 }
 
@@ -553,6 +582,18 @@ void FtpWrapper::recursiveSaveToFile(QJsonObject &obj, FtpTreeNodePtr node)
         obj["size"] = node->getInfo().size();
         obj["last_modify"] = node->getInfo().lastModified().toString();
     }
+}
+
+void FtpWrapper::initFtp()
+{
+    if( _ftp )
+        delete _ftp;
+    _ftp = new QFtp();
+
+    QObject::connect( _ftp, SIGNAL( commandFinished( int, bool )),
+                      this, SLOT( ftpCommandFinished( int, bool )));
+    QObject::connect( _ftp, SIGNAL(listInfo(QUrlInfo)),
+                      this, SLOT(addToList(QUrlInfo)));
 }
 
 void FtpWrapper::appendElement( QStringList names,
