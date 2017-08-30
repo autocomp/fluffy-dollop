@@ -7,10 +7,13 @@
 #include <regionbiz/rb_plugin_register.h>
 
 #include "rbp_ftp_wrapper.h"
+#include "rbp_file_load_manager.h"
 
+#define TOTAL_DIFF_MILLISECS 60000
 #define DEFAULT_CACHE_DIR "ftp_cache"
 #define DEFAULT_TREE_FILE "tree_file.json"
 #define DEFAULT_UPDATE_DELAY 10000
+#define DEFAULT_LOAD_FILE_LIST "load_list.json"
 
 namespace regionbiz {
 
@@ -36,7 +39,12 @@ private:
                                BaseFileKeeper::FileType type , uint64_t entity_id);
     void deleteFile( BaseFileKeeperPtr file );
 
+    // need to manage file load order
+    void onAddFile( BaseFileKeeperPtr file );
+    void onConnect();
+
     FtpWrapper _ftp_wrapper;
+    FileLoadManager _load_manager;
 };
 
 }

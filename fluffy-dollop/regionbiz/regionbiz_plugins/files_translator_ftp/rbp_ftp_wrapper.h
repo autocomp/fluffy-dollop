@@ -51,9 +51,12 @@ public:
     void putFile( BaseFileKeeperPtr file, BaseFileKeeper::FileType type );
     void deleteFile( BaseFileKeeperPtr file );
 
+    void appendElement(QStringList names, QDateTime last_modif, uint64_t size );
+
     std::function< void( BaseFileKeeperPtr ) > _callback_add;
     std::function< void( BaseFileKeeperPtr ) > _callback_sync;
     std::function< void( BaseFileKeeperPtr ) > _callback_del;
+    std::function< void() > _callback_connect;
 
     QDir _cache_dir;
     QString _tree_file;

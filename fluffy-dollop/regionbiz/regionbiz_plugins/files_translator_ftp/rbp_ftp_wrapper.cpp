@@ -79,6 +79,9 @@ void FtpWrapper::ftpCommandFinished( int id, bool error )
             break;
         }
 
+        // say about connect
+        _callback_connect();
+
         break;
     }
 
@@ -454,7 +457,7 @@ QString FtpWrapper::getFullPath(BaseFileKeeperPtr file_ptr, bool local)
 void FtpWrapper::loadTreeFromFile()
 {
     // read data from file
-    QFile json_file( _cache_dir.path() + SEPARATOR + _tree_file );
+    QFile json_file( _cache_dir.path() + QDir::separator() + _tree_file );
     if( !json_file.open( QFile::ReadOnly ))
         return;
     QByteArray json_data = json_file.readAll();
@@ -517,7 +520,7 @@ void FtpWrapper::saveTreeToFile()
 
     // write to file
     QByteArray json_data = doc.toJson();
-    QFile json_file( _cache_dir.path() + SEPARATOR + _tree_file );
+    QFile json_file( _cache_dir.path() + QDir::separator() + _tree_file );
     if( json_file.open( QFile::WriteOnly ))
     {
         json_file.write( json_data );
@@ -550,6 +553,48 @@ void FtpWrapper::recursiveSaveToFile(QJsonObject &obj, FtpTreeNodePtr node)
         obj["size"] = node->getInfo().size();
         obj["last_modify"] = node->getInfo().lastModified().toString();
     }
+}
+
+void FtpWrapper::appendElement( QStringList names,
+                                QDateTime last_modif,
+                                uint64_t size )
+{
+    FtpTreeNodePtr node = _root_node;
+
+    while( names.size() )
+    {
+        QString name = names.front();
+        names.pop_front();
+
+        // if dir
+        if( names.size() )
+        {
+            QUrlInfo info;
+            info.setDir( true );
+            info.setName( name );
+            node->appendUrlInfo( info, node );
+
+            auto vec = node->getChilds();
+            for( FtpTreeNodePtr ch: *vec )
+                if( ch->getInfo().name() == info.name() )
+                {
+                    node = ch;
+                    break;
+                }
+        }
+        // if file
+        else
+        {
+            QUrlInfo info;
+            info.setFile( true );
+            info.setName( name );
+            info.setLastModified( last_modif );
+            info.setSize( size );
+            node->appendUrlInfo( info, node );
+        }
+    }
+
+    saveTreeToFile();
 }
 
 void FtpTreeNode::appendUrlInfo( QUrlInfo info, FtpTreeNodePtr current_node )

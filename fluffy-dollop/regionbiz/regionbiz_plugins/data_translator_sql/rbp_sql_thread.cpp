@@ -55,8 +55,8 @@ void ThreadSql::appendCommand(ThreadSql::Command cmnd, uint64_t id)
 
 void ThreadSql::onAppendNewCommand( ThreadSql::Command cmnd, uint64_t id )
 {
-    std::cerr << "Append new SQL command: " << cmnd
-              << " (" << id << ")" << std::endl;
+    //std::cerr << "Append new SQL command: " << cmnd
+    //          << " (" << id << ")" << std::endl;
 
     _commands.push( { cmnd, id } );
 

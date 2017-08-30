@@ -13,6 +13,7 @@ FilesTranslatorFtp::FilesTranslatorFtp()
     _ftp_wrapper._callback_add = std::bind( &FilesTranslatorFtp::onAddFile, this, std::placeholders::_1 );
     _ftp_wrapper._callback_sync = std::bind( &FilesTranslatorFtp::onSyncFile, this, std::placeholders::_1 );
     _ftp_wrapper._callback_del = std::bind( &FilesTranslatorFtp::onDeleteFile, this, std::placeholders::_1 );
+    _ftp_wrapper._callback_connect = std::bind( &FilesTranslatorFtp::onConnect, this );
 }
 
 QString FilesTranslatorFtp::getTranslatorName()
@@ -34,18 +35,26 @@ void FilesTranslatorFtp::loadFunctions()
 
 bool regionbiz::FilesTranslatorFtp::initBySettings(QVariantMap settings)
 {
+    QString cache_dir_str;
     if( settings.contains( "cache_dir" ))
     {
-        QString cache_dir_str = settings[ "cache_dir" ].toString();
-        _ftp_wrapper._cache_dir = QDir( cache_dir_str );
+        cache_dir_str = settings[ "cache_dir" ].toString();
     }
     else
-        _ftp_wrapper._cache_dir = QDir( DEFAULT_CACHE_DIR );
+        cache_dir_str = DEFAULT_CACHE_DIR;
+    _ftp_wrapper._cache_dir = QDir( cache_dir_str );
 
     if( settings.contains( "tree_file" ))
         _ftp_wrapper._tree_file = settings[ "tree_file" ].toString();
     else
         _ftp_wrapper._tree_file = DEFAULT_TREE_FILE;
+
+    QString load_file_list;
+    if( settings.contains( "load_file_list" ))
+        load_file_list = settings[ "load_file_list" ].toString();
+    else
+        load_file_list = DEFAULT_LOAD_FILE_LIST;
+    _load_manager.init( load_file_list, cache_dir_str );
 
     if( !settings.contains( "url" ))
         return false;
@@ -90,6 +99,10 @@ QFilePtr FilesTranslatorFtp::getFile( BaseFileKeeperPtr file_ptr )
 
 BaseFileKeeper::FileState FilesTranslatorFtp::getFileState( BaseFileKeeperPtr file )
 {
+    // check for loading to server
+    if( _load_manager.isFileOnLoad( file ))
+        return BaseFileKeeper::FS_SYNC;
+
     // check for valid
     if( !_ftp_wrapper.isValid() )
         return BaseFileKeeper::FS_INVALID;
@@ -115,7 +128,8 @@ BaseFileKeeper::FileState FilesTranslatorFtp::getFileState( BaseFileKeeperPtr fi
     QDateTime last_modified_local = file_info.lastModified();
     uint64_t size_on_ftp = cur_node->getInfo().size();
     uint64_t size_local = file_info.size();
-    if( last_modified_on_ftp <= last_modified_local
+    if( last_modified_on_ftp.msecsTo( last_modified_local )
+            > -TOTAL_DIFF_MILLISECS
             && size_local == size_on_ftp )
         return BaseFileKeeper::FS_SYNC;
     else
@@ -160,7 +174,10 @@ BaseFileKeeperPtr FilesTranslatorFtp::addFile( QString local_path, QString inner
         if( !inner_info.dir().exists() )
             inner_info.dir().mkpath( "." );
         if( local_file.copy( inner_local_path ))
+        {
             _ftp_wrapper.putFile( file, type );
+            _load_manager.addFileOnLoad( file );
+        }
     }
     return file;
 }
@@ -176,5 +193,29 @@ void FilesTranslatorFtp::deleteFile( BaseFileKeeperPtr file )
 
     // delete on ftp
     _ftp_wrapper.deleteFile( file );
+}
+
+void FilesTranslatorFtp::onAddFile(BaseFileKeeperPtr file)
+{
+    // manage queue of files
+    _load_manager.stopFileLoad( file );
+    QString path = _ftp_wrapper.getFullPath( file, false );
+    QFileInfo info( *getFile( file ));
+    QStringList names = path.split( QDir::separator(),
+                                    QString::SkipEmptyParts );
+    _ftp_wrapper.appendElement( names,
+                                info.lastModified(),
+                                (uint64_t) info.size() );
+
+    // send signal
+    BaseFilesTranslator::onAddFile( file );
+}
+
+void FilesTranslatorFtp::onConnect()
+{
+    // start to load files from previous session
+    auto files = _load_manager.getFilesForLoad();
+    for( auto file: files )
+        _ftp_wrapper.putFile( file, file->getType() );
 }
 

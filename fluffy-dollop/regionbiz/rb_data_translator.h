@@ -5,7 +5,6 @@
 #include <vector>
 #include <memory>
 #include <QVariantMap>
-#include <QSqlDatabase>
 
 #include "rb_translator.h"
 #include "rb_locations.h"
