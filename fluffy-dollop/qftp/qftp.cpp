@@ -987,6 +987,10 @@ bool QFtpPI::processReply()
 
     int replyCodeInt = 100*replyCode[0] + 10*replyCode[1] + replyCode[2];
 
+    // WARNING set 550 to 257 code. Mkdir error ignore
+    if( replyCodeInt == 550 )
+        replyCodeInt = 557;
+
     // process 226 replies ("Closing Data Connection") only when the data
     // connection is really closed to avoid short reads of the DTP
     if (replyCodeInt == 226 || (replyCodeInt == 250 && currentCmd.startsWith(QLatin1String("RETR")))) {
@@ -1024,6 +1028,7 @@ bool QFtpPI::processReply()
             // reply codes not starting with 1 or 2 are not handled.
             return true;
         case Waiting:
+        {
             if (static_cast<signed char>(replyCode[0]) < 0 || replyCode[0] > 5)
                 state = Failure;
             else
@@ -1039,6 +1044,7 @@ bool QFtpPI::processReply()
             else
                 state = table[replyCode[0] - 1];
 #endif
+        }
             break;
         default:
             // ignore unrequested message
@@ -2308,6 +2314,7 @@ void QFtpPrivate::_q_piError(int errorCode, const QString &text)
         return;
     }
 
+    bool clear_cmds = true;
     error = QFtp::Error(errorCode);
     switch (q->currentCommand()) {
         case QFtp::ConnectToHost:
@@ -2339,8 +2346,12 @@ void QFtpPrivate::_q_piError(int errorCode, const QString &text)
                           .arg(text);
             break;
         case QFtp::Mkdir:
+        {
             errorString = QString::fromLatin1(QT_TRANSLATE_NOOP("QFtp", "Creating directory failed:\n%1"))
                           .arg(text);
+
+            clear_cmds = false;
+        }
             break;
         case QFtp::Rmdir:
             errorString = QString::fromLatin1(QT_TRANSLATE_NOOP("QFtp", "Removing directory failed:\n%1"))
@@ -2351,9 +2362,12 @@ void QFtpPrivate::_q_piError(int errorCode, const QString &text)
             break;
     }
 
-    pi.clearPendingCommands();
-    q->clearPendingCommands();
-    emit q->commandFinished(c->id, true);
+    if( clear_cmds )
+    {
+        pi.clearPendingCommands();
+        q->clearPendingCommands();
+    }
+    emit q->commandFinished(c->id, true && clear_cmds );
 
     pending.removeFirst();
     delete c;
