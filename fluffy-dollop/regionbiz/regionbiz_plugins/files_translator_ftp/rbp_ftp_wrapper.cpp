@@ -21,7 +21,9 @@ FtpWrapper::FtpWrapper()
 FtpWrapper::~FtpWrapper()
 {
     if( _ftp )
+    {
         delete _ftp;
+    }
 }
 
 void FtpWrapper::loginByUrl(QUrl url)
@@ -592,7 +594,14 @@ void FtpWrapper::recursiveSaveToFile(QJsonObject &obj, FtpTreeNodePtr node)
 void FtpWrapper::initFtp()
 {
     if( _ftp )
+    {
+        QObject::disconnect( _ftp, SIGNAL( commandFinished( int, bool )),
+                             this, SLOT( ftpCommandFinished( int, bool )));
+        QObject::disconnect( _ftp, SIGNAL(listInfo(QUrlInfo)),
+                             this, SLOT(addToList(QUrlInfo)));
+
         delete _ftp;
+    }
     _ftp = new QFtp();
 
     QObject::connect( _ftp, SIGNAL( commandFinished( int, bool )),
