@@ -4,7 +4,7 @@
 #include <QGraphicsScene>
 #include <QDebug>
 
-using namespace pixmap_transform_state;
+using namespace transform_state;
 
 LineItem::LineItem(QGraphicsScene * _scene, QPen pen)
 {

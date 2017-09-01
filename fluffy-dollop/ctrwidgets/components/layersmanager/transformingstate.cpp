@@ -1,5 +1,5 @@
-#include "pixmaptransformstate.h"
-#include "pixmapitem.h"
+#include "transformingstate.h"
+#include "transformingitem.h"
 #include "handleitem.h"
 #include "lineitem.h"
 #include "fogitem.h"
@@ -11,32 +11,45 @@
 #include <QDir>
 #include <QDebug>
 
-using namespace pixmap_transform_state;
+using namespace transform_state;
 
-PixmapTransformState::PixmapTransformState(const QPixmap & pixmap, QPointF pixmapScenePos, bool onTop, double originalScale)
-    : _pixmap(pixmap)
+TransformingState::TransformingState(const QPixmap & pixmap, QPointF pixmapScenePos, int zValue, double originalScale)
+    : _transformingItemType(TransformingItem::PixmapItem)
+    , _pixmap(pixmap)
     , _pixmapScenePos(pixmapScenePos)
     , _originalScale(originalScale)
-    , _onTop(onTop)
+    , _zValue(zValue)
 {
 }
 
-PixmapTransformState::PixmapTransformState(const QPixmap & pixmap, QPointF pixmapScenePos, double scW, double scH, double rotation, bool onTop)
-    : _pixmap(pixmap)
+TransformingState::TransformingState(const QPixmap & pixmap, QPointF pixmapScenePos, double scW, double scH, double rotation, int zValue)
+    : _transformingItemType(TransformingItem::PixmapItem)
+    , _pixmap(pixmap)
     , _pixmapScenePos(pixmapScenePos)
     , _scW(scW)
     , _scH(scH)
     , _rotation(rotation)
-    , _onTop(onTop)
+    , _zValue(zValue)
 {
 }
 
-PixmapTransformState::~PixmapTransformState()
+TransformingState::TransformingState(const QPolygonF & polygon, int zValue)
+    : _transformingItemType(TransformingItem::PolygonItem)
+    , _polygon(polygon)
+    , _scW(1)
+    , _scH(1)
+    , _rotation(0)
+    , _zValue(zValue)
 {
-    delete _pixmapItem;
+
 }
 
-void PixmapTransformState::setMode(StateMode stateMode)
+TransformingState::~TransformingState()
+{
+    delete _transformingItem;
+}
+
+void TransformingState::setMode(StateMode stateMode)
 {
     if(stateMode == _stateMode)
         return;
@@ -44,10 +57,10 @@ void PixmapTransformState::setMode(StateMode stateMode)
     switch(_stateMode)
     {
     case StateMode::TransformImage : {
-        QPointF scenePos =_pixmapItem->mapToScene(QPointF(0,0));
-        _pixmapItem->setPos(scenePos);
+        QPointF scenePos =_transformingItem->mapToScene(QPointF(0,0));
+        _transformingItem->setPos(scenePos);
         _handleItemAnchor->setPos(QPointF(0,0));
-        _pixmapItem->setTransform(QTransform().rotate(_rotation).scale(_scW, _scH).translate(-_handleItemAnchor->x(), -_handleItemAnchor->y()));
+        _transformingItem->setTransform(QTransform().rotate(_rotation).scale(_scW, _scH).translate(-_handleItemAnchor->x(), -_handleItemAnchor->y()));
     }break;
     case StateMode::CropImage : {
         delete _fogItem;
@@ -65,10 +78,13 @@ void PixmapTransformState::setMode(StateMode stateMode)
         _handleItemRotater->setPos(_originW/2.,-_originH/4.);
         _handleItemAnchor->setPos(_originW/2., _originH/2.);
 
-        _topLine->setLine(QLineF(_handleItemTopLeft->pos(), _handleItemTopRight->pos()));
-        _bottomLine->setLine(QLineF(_handleItemBottomLeft->pos(), _handleItemBottomRight->pos()));
-        _leftLine->setLine(QLineF(_handleItemTopLeft->pos(), _handleItemBottomLeft->pos()));
-        _rightLine->setLine(QLineF(_handleItemTopRight->pos(), _handleItemBottomRight->pos()));
+        if(_transformingItemType != TransformingItem::PolygonItem)
+        {
+            _topLine->setLine(QLineF(_handleItemTopLeft->pos(), _handleItemTopRight->pos()));
+            _bottomLine->setLine(QLineF(_handleItemBottomLeft->pos(), _handleItemBottomRight->pos()));
+            _leftLine->setLine(QLineF(_handleItemTopLeft->pos(), _handleItemBottomLeft->pos()));
+            _rightLine->setLine(QLineF(_handleItemTopRight->pos(), _handleItemBottomRight->pos()));
+        }
         _rotaterLine->setLine(_handleItemAnchor->pos(), _handleItemRotater->pos());
     }break;
     case StateMode::GetAreaOnImage : {
@@ -80,7 +96,7 @@ void PixmapTransformState::setMode(StateMode stateMode)
     // если были изменения - уложить в стек последнее
 
     _stateMode = stateMode;
-    _pixmapItem->setCursor(QCursor(Qt::ArrowCursor));
+    _transformingItem->setCursor(QCursor(Qt::ArrowCursor));
 
     switch(_stateMode)
     {
@@ -91,10 +107,10 @@ void PixmapTransformState::setMode(StateMode stateMode)
         clearAreaOnImage();
         setHandlesVisible(true);
 
-        _pixmapItem->setCursor(QCursor(QPixmap("://img/cross_cursor.png")));
+        _transformingItem->setCursor(QCursor(QPixmap("://img/cross_cursor.png")));
         _handleItemAnchor->setPos(_originW/2., _originH/2.);
-        _pixmapItem->setPos(_handleItemAnchor->scenePos());
-        _pixmapItem->setTransform(QTransform().rotate(_rotation).scale(_scW, _scH).translate(-_handleItemAnchor->x(), -_handleItemAnchor->y()));
+        _transformingItem->setPos(_handleItemAnchor->scenePos());
+        _transformingItem->setTransform(QTransform().rotate(_rotation).scale(_scW, _scH).translate(-_handleItemAnchor->x(), -_handleItemAnchor->y()));
         _handleItemRotater->setPos(_originW/2.,-_originH/4.);
         _rotaterLine->setLine(_handleItemAnchor->pos(), _handleItemRotater->pos());
     }break;
@@ -107,93 +123,137 @@ void PixmapTransformState::setMode(StateMode stateMode)
         _rotaterLine->setVisible(false);
 
         _cropArea = QRectF(0, 0, _originW, _originH);
-        _fogItem = new FogItem(_pixmapItem, _cropArea);
+        _fogItem = new FogItem(_transformingItem->castToGraphicsItem(), _cropArea);
     }break;
     case StateMode::GetColorOnImage : {
         setHandlesVisible(false);
 
-        _pixmapItem->setCursor(QCursor(QPixmap("://img/getcolor_cursor.png"), 0, 0));
+        _transformingItem->setCursor(QCursor(QPixmap("://img/getcolor_cursor.png"), 0, 0));
     }break;
     case StateMode::GetAreaOnImage : {
         clearAreaOnImage();
         setHandlesVisible(false);
 
         QRectF imageArea = QRectF(0, 0, _originW, _originH);
-        _fogItem = new FogItem(_pixmapItem, imageArea);
+        _fogItem = new FogItem(_transformingItem->castToGraphicsItem(), imageArea);
         _fogItem->setArea(QPolygonF());
-        _pixmapItem->setCursor(QCursor(QPixmap("://img/polygon_cursor.png"), 0, 0));
+        _transformingItem->setCursor(QCursor(QPixmap("://img/polygon_cursor.png"), 0, 0));
     }break;
     }
 
 }
 
-StateMode PixmapTransformState::mode()
+StateMode TransformingState::mode()
 {
     return _stateMode;
 }
 
-void PixmapTransformState::setTransparentBackgroundForPixmapItem(bool on_off)
+void TransformingState::setTransparentBackgroundForPixmapItem(bool on_off)
 {
-    _pixmapItem->setTransparentBackground(on_off);
+    PixmapTransformingItem * pixmapTransformingItem = dynamic_cast<PixmapTransformingItem*>(_transformingItem);
+    if(pixmapTransformingItem)
+        pixmapTransformingItem->setTransparentBackground(on_off);
 }
 
-void PixmapTransformState::setHandlesVisible(bool on_off)
+void TransformingState::setHandlesVisible(bool on_off)
 {
-    foreach(HandleItem* item, _handleItems)
-        item->setVisible(on_off);
+    if(on_off == false || _modeMoveAndRotateOnly == false)
+    {
+        foreach(HandleItem* item, _handleItems)
+            item->setVisible(on_off);
+    }
+    else
+    {
+        foreach(HandleItem* item, _handleItems)
+            switch (item->getHandleType())
+            {
+            case HandleType::Rotater :
+            case HandleType::Anchor :
+                item->setVisible(true);
+                break;
+            }
+    }
 
     _rotaterLine->setVisible(on_off);
-
 }
 
-void PixmapTransformState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom, const double *scale, double frameCoef, uint visualizerId)
+void TransformingState::init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom, const double *scale, double frameCoef, uint visualizerId)
 {
     ScrollBaseState::init(scene, view, zoom, scale, frameCoef, visualizerId);
     setActiveForScene(true);
 
-    QPixmap pm(_pixmap.size());
-    pm.fill(QColor(0,0,0,1));
-    QPainter painter(&pm);
-    painter.drawPixmap(0,0,_pixmap);
+    switch (_transformingItemType)
+    {
+    case TransformingItem::PolygonItem : {
 
-    _originW = _pixmap.width();
-    _originH = _pixmap.height();
+//        QRectF boundingRect = _polygon.boundingRect();
+//        _pixmapScenePos = boundingRect.topLeft();
+        _originW = _polygon.boundingRect().width();
+        _originH = _polygon.boundingRect().height();
 
-    _pixmapItem = new PixmapItem(*this);
-    _pixmapItem->setZValue(_onTop ? 1000000 : -1000000);
-    _pixmapItem->setPixmap(pm);
-    _pixmapItem->setPos(_pixmapScenePos);
-    _scene->addItem(_pixmapItem);
+//        QPolygonF polygon;
+//        foreach(QPointF p, _polygon)
+//            polygon.append(p - _pixmapScenePos);
 
-    _handleItemTopLeft = new HandleItem(*this, HandleType::TopLeft, _scene, _pixmapItem);
+        PolygonTransformingItem * transformingPolygonItem = new PolygonTransformingItem(*this);
+        transformingPolygonItem->setPolygon(_polygon); //polygon);
+
+        _transformingItem = transformingPolygonItem;
+
+    }break;
+
+    case TransformingItem::PixmapItem : {
+        PixmapTransformingItem * transformingPixmapItem = new PixmapTransformingItem(*this);
+        QPixmap pm(_pixmap.size());
+        pm.fill(QColor(0,0,0,1));
+        QPainter painter(&pm);
+        painter.drawPixmap(0,0,_pixmap);
+        transformingPixmapItem->setPixmap(pm);
+
+        _originW = _pixmap.width();
+        _originH = _pixmap.height();
+
+        _transformingItem = transformingPixmapItem;
+        _transformingItem->setPos(_pixmapScenePos);
+    }break;
+
+    case TransformingItem::SvgItem : {
+
+    }break;
+    }
+
+    _transformingItem->setZValue(_zValue);
+    _scene->addItem(_transformingItem->castToGraphicsItem());
+
+    _handleItemTopLeft = new HandleItem(*this, HandleType::TopLeft, _scene, _transformingItem->castToGraphicsItem());
     _handleItemTopLeft->setPos(0,0);
     _handleItems.append(_handleItemTopLeft);
 
-    _handleItemTopRight = new HandleItem(*this, HandleType::TopRight, _scene, _pixmapItem);
+    _handleItemTopRight = new HandleItem(*this, HandleType::TopRight, _scene, _transformingItem->castToGraphicsItem());
     _handleItemTopRight->setPos(_originW,0);
     _handleItems.append(_handleItemTopRight);
 
-    _handleItemBottomRight = new HandleItem(*this, HandleType::BottomRight, _scene, _pixmapItem);
+    _handleItemBottomRight = new HandleItem(*this, HandleType::BottomRight, _scene, _transformingItem->castToGraphicsItem());
     _handleItemBottomRight->setPos(_originW, _originH);
     _handleItems.append(_handleItemBottomRight);
 
-    _handleItemBottomLeft = new HandleItem(*this, HandleType::BottomLeft, _scene, _pixmapItem);
+    _handleItemBottomLeft = new HandleItem(*this, HandleType::BottomLeft, _scene, _transformingItem->castToGraphicsItem());
     _handleItemBottomLeft->setPos(0, _originH);
     _handleItems.append(_handleItemBottomLeft);
 
-    _handleItemTopCenter = new HandleItem(*this, HandleType::TopCenter, _scene, _pixmapItem);
+    _handleItemTopCenter = new HandleItem(*this, HandleType::TopCenter, _scene, _transformingItem->castToGraphicsItem());
     _handleItemTopCenter->setPos(_originW/2.,0);
     _handleItems.append(_handleItemTopCenter);
 
-    _handleItemBottomCenter = new HandleItem(*this, HandleType::BottomCenter, _scene, _pixmapItem);
+    _handleItemBottomCenter = new HandleItem(*this, HandleType::BottomCenter, _scene, _transformingItem->castToGraphicsItem());
     _handleItemBottomCenter->setPos(_originW/2., _originH);
     _handleItems.append(_handleItemBottomCenter);
 
-    _handleItemLeftCenter = new HandleItem(*this, HandleType::LeftCenter, _scene, _pixmapItem);
+    _handleItemLeftCenter = new HandleItem(*this, HandleType::LeftCenter, _scene, _transformingItem->castToGraphicsItem());
     _handleItemLeftCenter->setPos(0, _originH/2);
     _handleItems.append(_handleItemLeftCenter);
 
-    _handleItemRightCenter = new HandleItem(*this, HandleType::RightCenter, _scene, _pixmapItem);
+    _handleItemRightCenter = new HandleItem(*this, HandleType::RightCenter, _scene, _transformingItem->castToGraphicsItem());
     _handleItemRightCenter->setPos(_originW, _originH/2);
     _handleItems.append(_handleItemRightCenter);
 
@@ -203,23 +263,26 @@ void PixmapTransformState::init(QGraphicsScene *scene, QGraphicsView *view, cons
     pen.setCosmetic(true);
     pen.setWidth(2);
 
-    _topLine = new LineItem(_pixmapItem, pen);
-    _topLine->setLine(QLineF(_handleItemTopLeft->pos(), _handleItemTopRight->pos()));
+    if(_transformingItemType != TransformingItem::PolygonItem)
+    {
+        _topLine = new LineItem(_transformingItem->castToGraphicsItem(), pen);
+        _topLine->setLine(QLineF(_handleItemTopLeft->pos(), _handleItemTopRight->pos()));
 
-    _bottomLine = new LineItem(_pixmapItem, pen);
-    _bottomLine->setLine(QLineF(_handleItemBottomLeft->pos(), _handleItemBottomRight->pos()));
+        _bottomLine = new LineItem(_transformingItem->castToGraphicsItem(), pen);
+        _bottomLine->setLine(QLineF(_handleItemBottomLeft->pos(), _handleItemBottomRight->pos()));
 
-    _leftLine = new LineItem(_pixmapItem, pen);
-    _leftLine->setLine(QLineF(_handleItemTopLeft->pos(), _handleItemBottomLeft->pos()));
+        _leftLine = new LineItem(_transformingItem->castToGraphicsItem(), pen);
+        _leftLine->setLine(QLineF(_handleItemTopLeft->pos(), _handleItemBottomLeft->pos()));
 
-    _rightLine = new LineItem(_pixmapItem, pen);
-    _rightLine->setLine(QLineF(_handleItemTopRight->pos(), _handleItemBottomRight->pos()));
+        _rightLine = new LineItem(_transformingItem->castToGraphicsItem(), pen);
+        _rightLine->setLine(QLineF(_handleItemTopRight->pos(), _handleItemBottomRight->pos()));
+    }
 
-    _handleItemAnchor = new AnchorHandleItem(*this, _scene, _pixmapItem);
+    _handleItemAnchor = new AnchorHandleItem(*this, _scene, _transformingItem->castToGraphicsItem());
     _handleItemAnchor->setPos(_originW/2., _originH/2.);
     _handleItems.append(_handleItemAnchor);
 
-    _handleItemRotater = new RotaterHandleItem(*this, _originH * 0.75, _scene, _pixmapItem);
+    _handleItemRotater = new RotaterHandleItem(*this, _originH * 0.75, _scene, _transformingItem->castToGraphicsItem());
     _handleItemRotater->setPos(_handleItemAnchor->pos().x(), _handleItemAnchor->pos().y() - _handleItemRotater->deltaByVertical() ); // _handleItemRotater->setPos(_originW/2.,-_originH/4.);
     _handleItems.append(_handleItemRotater);
 
@@ -231,10 +294,10 @@ void PixmapTransformState::init(QGraphicsScene *scene, QGraphicsView *view, cons
         _scW = _originalScale;
     if(_scH < 0)
         _scH = _originalScale;
-    _pixmapItem->setTransform(QTransform().scale(_scW, _scH));
+    _transformingItem->castToGraphicsItem()->setTransform(QTransform().scale(_scW, _scH));
 
-    _pixmapItem->setPos(_handleItemAnchor->scenePos());
-    _pixmapItem->setTransform(QTransform().rotate(_rotation).scale(_scW, _scH).translate(-_handleItemAnchor->x(), -_handleItemAnchor->y()));
+    _transformingItem->castToGraphicsItem()->setPos(_handleItemAnchor->scenePos());
+    _transformingItem->castToGraphicsItem()->setTransform(QTransform().rotate(_rotation).scale(_scW, _scH).translate(-_handleItemAnchor->x(), -_handleItemAnchor->y()));
 
     pen.setWidth(1);
     pen.setStyle(Qt::DashLine);
@@ -243,7 +306,7 @@ void PixmapTransformState::init(QGraphicsScene *scene, QGraphicsView *view, cons
     pen2.setCosmetic(true);
     pen2.setWidth(1);
 
-    _rotaterLine = new RotaterLineItem(_pixmapItem, pen2, pen);
+    _rotaterLine = new RotaterLineItem(_transformingItem->castToGraphicsItem(), pen2, pen);
     _rotaterLine->setLine(_handleItemAnchor->pos(), _handleItemRotater->pos());
 
     setMode(StateMode::ScrollMap);
@@ -258,10 +321,10 @@ void PixmapTransformState::init(QGraphicsScene *scene, QGraphicsView *view, cons
     undoAct.scaleH = _scH;
     _undoStack.push(undoAct);
 
-    view->centerOn(_pixmapItem);
+    view->centerOn(_transformingItem->castToGraphicsItem());
 }
 
-bool PixmapTransformState::wheelEvent(QWheelEvent* e, QPointF scenePos)
+bool TransformingState::wheelEvent(QWheelEvent* e, QPointF scenePos)
 {
     if(_blockWheelEvent)
         return false;
@@ -269,7 +332,7 @@ bool PixmapTransformState::wheelEvent(QWheelEvent* e, QPointF scenePos)
         return ScrollBaseState::wheelEvent(e, scenePos);
 }
 
-bool PixmapTransformState::mouseMoveEvent(QMouseEvent *event, QPointF scenePos)
+bool TransformingState::mouseMoveEvent(QMouseEvent *event, QPointF scenePos)
 {
     switch(_stateMode)
     {
@@ -279,7 +342,7 @@ bool PixmapTransformState::mouseMoveEvent(QMouseEvent *event, QPointF scenePos)
 
     case StateMode::CropImage : {
 
-        QPointF pos =_pixmapItem->mapFromScene(scenePos);
+        QPointF pos =_transformingItem->mapFromScene(scenePos);
 
         if(pos.x() < 0)
             pos.setX(0);
@@ -330,10 +393,13 @@ bool PixmapTransformState::mouseMoveEvent(QMouseEvent *event, QPointF scenePos)
             foreach(HandleItem* item, _handleItems)
                 item->updatePos();
 
-            _topLine->setLine(QLineF(_handleItemTopLeft->pos(), _handleItemTopRight->pos()));
-            _bottomLine->setLine(QLineF(_handleItemBottomLeft->pos(), _handleItemBottomRight->pos()));
-            _leftLine->setLine(QLineF(_handleItemTopLeft->pos(), _handleItemBottomLeft->pos()));
-            _rightLine->setLine(QLineF(_handleItemTopRight->pos(), _handleItemBottomRight->pos()));
+            if(_transformingItemType != TransformingItem::PolygonItem)
+            {
+                _topLine->setLine(QLineF(_handleItemTopLeft->pos(), _handleItemTopRight->pos()));
+                _bottomLine->setLine(QLineF(_handleItemBottomLeft->pos(), _handleItemBottomRight->pos()));
+                _leftLine->setLine(QLineF(_handleItemTopLeft->pos(), _handleItemBottomLeft->pos()));
+                _rightLine->setLine(QLineF(_handleItemTopRight->pos(), _handleItemBottomRight->pos()));
+            }
 
             if(_fogItem)
                 _fogItem->setArea(_cropArea);
@@ -411,7 +477,7 @@ bool PixmapTransformState::mouseMoveEvent(QMouseEvent *event, QPointF scenePos)
         }break;
 
         case HandleType::Rotater: {
-            QPointF pos = _pixmapItem->mapFromScene(scenePos);
+            QPointF pos = _transformingItem->mapFromScene(scenePos);
             double l = lenght(_handleItemAnchor->pos(), pos);
             _handleItemRotater->setDeltaByVertical(l);
 
@@ -428,7 +494,7 @@ bool PixmapTransformState::mouseMoveEvent(QMouseEvent *event, QPointF scenePos)
                     r += 1;
                 _rotation = r * 45;
             }
-            _pixmapItem->setTransform(QTransform().rotate(_rotation).scale(_scW, _scH).translate(-_handleItemAnchor->x(), -_handleItemAnchor->y()));
+            _transformingItem->setTransform(QTransform().rotate(_rotation).scale(_scW, _scH).translate(-_handleItemAnchor->x(), -_handleItemAnchor->y()));
 
             if( (event->modifiers() & Qt::ShiftModifier) == false )
                 _handleItemRotater->setPos(_handleItemAnchor->pos().x(), _handleItemAnchor->pos().y() - l);
@@ -445,7 +511,7 @@ bool PixmapTransformState::mouseMoveEvent(QMouseEvent *event, QPointF scenePos)
 
         if(processed)
         {
-            _pixmapItem->setFlags(0);
+            _transformingItem->setFlags(0);
             if(_scW > _scWmax || _scH > _scHmax)
             {
                 _scW = scW;
@@ -453,15 +519,15 @@ bool PixmapTransformState::mouseMoveEvent(QMouseEvent *event, QPointF scenePos)
             }
             else
             {
-                _pixmapItem->setTransform(QTransform().rotate(_rotation).scale(_scW, _scH).translate(-_handleItemAnchor->x(), -_handleItemAnchor->y()));
+                _transformingItem->setTransform(QTransform().rotate(_rotation).scale(_scW, _scH).translate(-_handleItemAnchor->x(), -_handleItemAnchor->y()));
             }
             return false;
         }
     }break;
 
     case StateMode::GetAreaOnImage : {
-        QPointF pos = _pixmapItem->mapFromScene(scenePos);
-        if(_pixmapItem->contains(pos))
+        QPointF pos = _transformingItem->mapFromScene(scenePos);
+        if(_transformingItem->contains(pos))
         {
             if(_fogItem)
             {
@@ -485,13 +551,13 @@ bool PixmapTransformState::mouseMoveEvent(QMouseEvent *event, QPointF scenePos)
     return ScrollBaseState::mouseMoveEvent(event, scenePos);
 }
 
-bool PixmapTransformState::mousePressEvent(QMouseEvent *e, QPointF scenePos)
+bool TransformingState::mousePressEvent(QMouseEvent *e, QPointF scenePos)
 {
     switch(_stateMode)
     {
     case StateMode::GetAreaOnImage : {
-        QPointF pos = _pixmapItem->mapFromScene(scenePos);
-        if( _pixmapItem->contains(pos) && (e->modifiers() & Qt::ControlModifier) == false )
+        QPointF pos = _transformingItem->mapFromScene(scenePos);
+        if( _transformingItem->contains(pos) && (e->modifiers() & Qt::ControlModifier) == false )
         {
             _areaOnImage.append(pos);
 
@@ -509,12 +575,12 @@ bool PixmapTransformState::mousePressEvent(QMouseEvent *e, QPointF scenePos)
     return ScrollBaseState::mousePressEvent(e, scenePos);
 }
 
-bool PixmapTransformState::mouseReleaseEvent(QMouseEvent *e, QPointF scenePos)
+bool TransformingState::mouseReleaseEvent(QMouseEvent *e, QPointF scenePos)
 {
     switch(_stateMode)
     {
     case StateMode::GetAreaOnImage : {
-        if( _pixmapItem->contains( _pixmapItem->mapFromScene(scenePos) ) && (e->modifiers() & Qt::ControlModifier) == false )
+        if( _transformingItem->contains( _transformingItem->mapFromScene(scenePos) ) && (e->modifiers() & Qt::ControlModifier) == false )
         {
 
 
@@ -530,18 +596,18 @@ bool PixmapTransformState::mouseReleaseEvent(QMouseEvent *e, QPointF scenePos)
 
     _blockWheelEvent = false;
     _currentHandleType = HandleType::Invalid;
-    _pixmapItem->setFlags(QGraphicsItem::ItemIsMovable);
+    _transformingItem->setFlags(QGraphicsItem::ItemIsMovable);
 
     return ScrollBaseState::mouseReleaseEvent(e, scenePos);
 }
 
-bool PixmapTransformState::mouseDoubleClickEvent(QMouseEvent *e, QPointF scenePos)
+bool TransformingState::mouseDoubleClickEvent(QMouseEvent *e, QPointF scenePos)
 {
     switch(_stateMode)
     {
     case StateMode::GetAreaOnImage : {
-        QPointF pos = _pixmapItem->mapFromScene(scenePos);
-        if( _pixmapItem->contains(pos) && _areaLineItems.size() > 2)
+        QPointF pos = _transformingItem->mapFromScene(scenePos);
+        if( _transformingItem->contains(pos) && _areaLineItems.size() > 2)
             emit signalAreaSetted();
     }break;
     default : {}
@@ -550,33 +616,37 @@ bool PixmapTransformState::mouseDoubleClickEvent(QMouseEvent *e, QPointF scenePo
     return ScrollBaseState::mouseDoubleClickEvent(e, scenePos);
 }
 
-QString PixmapTransformState::stateName()
+QString TransformingState::stateName()
 {
-    return QString("PixmapTransformState");
+    return QString("TransformingState");
 }
 
-void PixmapTransformState::statePushedToStack()
+void TransformingState::statePushedToStack()
 {
 }
 
-void PixmapTransformState::statePoppedFromStack()
+void TransformingState::statePoppedFromStack()
 {
     setActiveForScene(true);
 }
 
-void PixmapTransformState::setOpacity(double val)
+void TransformingState::setOpacity(double val)
 {
-    if(val < 0.01)
-        val = 0.01;
-    _pixmapItem->setOpacity(val);
+    PixmapTransformingItem * pixmapTransformingItem = dynamic_cast<PixmapTransformingItem*>(_transformingItem);
+    if(pixmapTransformingItem)
+    {
+        if(val < 0.01)
+            val = 0.01;
+        pixmapTransformingItem->setOpacity(val);
+    }
 }
 
-void PixmapTransformState::setTransparency(int percent)
+void TransformingState::setTransparency(int percent)
 {
     setOpacity(1 - percent / 100.);
 }
 
-QPolygonF PixmapTransformState::getPixmapCorners()
+QPolygonF TransformingState::getPixmapCorners()
 {
     QPolygonF cornersInSceneCoords;
     cornersInSceneCoords.append(_handleItemTopLeft->scenePos());
@@ -586,22 +656,26 @@ QPolygonF PixmapTransformState::getPixmapCorners()
     return cornersInSceneCoords;
 }
 
-bool PixmapTransformState::changed()
+bool TransformingState::changed()
 {
     return _undoStack.size() > 1; //! первое состояние устанавливается в ините и берется не стека не QStack::pop(), a QStack::top() !
 }
 
-QRectF PixmapTransformState::getCropArea()
+QRectF TransformingState::getCropArea()
 {
     return _cropArea;
 }
 
-bool PixmapTransformState::cropPixmap()
+bool TransformingState::cropPixmap()
 {
     if(_stateMode != StateMode::CropImage)
         return false;
 
     if(_cropArea.width() < 1 || _cropArea.height() < 1)
+        return false;
+
+    PixmapTransformingItem * pixmapTransformingItem = dynamic_cast<PixmapTransformingItem*>(_transformingItem);
+    if( ! pixmapTransformingItem)
         return false;
 
     QPixmap pm = _pixmap.copy(_cropArea.toRect());
@@ -613,9 +687,9 @@ bool PixmapTransformState::cropPixmap()
     _originW = _pixmap.width();
     _originH = _pixmap.height();
 
-    QPointF scenePos = _pixmapItem->mapToScene(_cropArea.topLeft());
-    _pixmapItem->setPos(scenePos);
-    _pixmapItem->setPixmap(_pixmap);
+    QPointF scenePos = pixmapTransformingItem->mapToScene(_cropArea.topLeft());
+    pixmapTransformingItem->setPos(scenePos);
+    pixmapTransformingItem->setPixmap(_pixmap);
 
     //-----------------------
 
@@ -631,21 +705,24 @@ bool PixmapTransformState::cropPixmap()
     _handleItemRotater->setPos(_originW/2.,-_originH/4.);
     _handleItemAnchor->setPos(_originW/2., _originH/2.);
 
-    _topLine->setLine(QLineF(_handleItemTopLeft->pos(), _handleItemTopRight->pos()));
-    _bottomLine->setLine(QLineF(_handleItemBottomLeft->pos(), _handleItemBottomRight->pos()));
-    _leftLine->setLine(QLineF(_handleItemTopLeft->pos(), _handleItemBottomLeft->pos()));
-    _rightLine->setLine(QLineF(_handleItemTopRight->pos(), _handleItemBottomRight->pos()));
+    if(_transformingItemType != TransformingItem::PolygonItem)
+    {
+        _topLine->setLine(QLineF(_handleItemTopLeft->pos(), _handleItemTopRight->pos()));
+        _bottomLine->setLine(QLineF(_handleItemBottomLeft->pos(), _handleItemBottomRight->pos()));
+        _leftLine->setLine(QLineF(_handleItemTopLeft->pos(), _handleItemBottomLeft->pos()));
+        _rightLine->setLine(QLineF(_handleItemTopRight->pos(), _handleItemBottomRight->pos()));
+    }
     _rotaterLine->setLine(_handleItemAnchor->pos(), _handleItemRotater->pos());
 
     _cropArea = QRectF(0, 0, _originW, _originH);
     if(_fogItem)
         delete _fogItem;
-    _fogItem = new FogItem(_pixmapItem, _cropArea);
+    _fogItem = new FogItem(pixmapTransformingItem, _cropArea);
 
     return true;
 }
 
-void PixmapTransformState::pressHandle(HandleType handleType)
+void TransformingState::pressHandle(HandleType handleType)
 {
     if(handleType != HandleType::Invalid)
     {
@@ -659,55 +736,58 @@ void PixmapTransformState::pressHandle(HandleType handleType)
         undoAct.rotation = _rotation;
         _undoStack.push(undoAct);
 
-        emit signalPixmapChanged();
+        emit signalItemChanged();
     }
     _currentHandleType = handleType;
 }
 
-void PixmapTransformState::anchorMoved()
+void TransformingState::anchorMoved()
 {
     _handleItemRotater->setPos(_handleItemAnchor->pos().x(), _handleItemAnchor->pos().y() - _handleItemRotater->deltaByVertical() );
     _rotaterLine->setLine(_handleItemAnchor->pos(), _handleItemRotater->pos());
 }
 
-void PixmapTransformState::anchorReplaced()
+void TransformingState::anchorReplaced()
 {
-    _pixmapItem->setPos(_handleItemAnchor->scenePos());
-    _pixmapItem->setTransform(QTransform().rotate(_rotation).scale(_scW, _scH).translate(-_handleItemAnchor->x(), -_handleItemAnchor->y()));
+    _transformingItem->setPos(_handleItemAnchor->scenePos());
+    _transformingItem->setTransform(QTransform().rotate(_rotation).scale(_scW, _scH).translate(-_handleItemAnchor->x(), -_handleItemAnchor->y()));
 }
 
-void PixmapTransformState::createUserHandler(QPointF scenePos)
+void TransformingState::createUserHandler(QPointF scenePos)
 {
-    _userHandlePos = scenePos;
-    _currentHandleType = HandleType::UserHandle;
-    _userHandleLenght = lenght(_handleItemAnchor->scenePos(), scenePos);
-    _userHandleSCW = _scW;
-    _userHandleSCH = _scH;
-    _scWmax = _scW*15;
-    _scHmax = _scH*15;
+    if(_modeMoveAndRotateOnly == false)
+    {
+        _userHandlePos = scenePos;
+        _currentHandleType = HandleType::UserHandle;
+        _userHandleLenght = lenght(_handleItemAnchor->scenePos(), scenePos);
+        _userHandleSCW = _scW;
+        _userHandleSCH = _scH;
+        _scWmax = _scW*15;
+        _scHmax = _scH*15;
+    }
 }
 
-void PixmapTransformState::resendColor(QColor color)
+void TransformingState::resendColor(QColor color)
 {
     emit signalSendColor(color);
 }
 
-void PixmapTransformState::pixmapMoved()
+void TransformingState::pixmapMoved()
 {
-    emit signalPixmapChanged();
+    emit signalItemChanged();
 }
 
-double PixmapTransformState::lenght(QPointF p1, QPointF p2)
+double TransformingState::lenght(QPointF p1, QPointF p2)
 {
     return sqrt( (p1.x() - p2.x()) * (p1.x() - p2.x()) + (p1.y() - p2.y()) * (p1.y() - p2.y()) );
 }
 
-double PixmapTransformState::lenght(QColor c1, QColor c2)
+double TransformingState::lenght(QColor c1, QColor c2)
 {
     return sqrt( (c1.red() - c2.red()) * (c1.red() - c2.red()) + (c1.green() - c2.green()) * (c1.green() - c2.green()) + (c1.blue() - c2.blue()) * (c1.blue() - c2.blue()) );
 }
 
-void PixmapTransformState::clearAreaOnImage()
+void TransformingState::clearAreaOnImage()
 {
     foreach(LineItem * item, _areaLineItems)
         delete item;
@@ -720,7 +800,16 @@ void PixmapTransformState::clearAreaOnImage()
     }
 }
 
-UndoAct PixmapTransformState::getCurrentParams()
+void TransformingState::getCurrentVertex(QPolygonF &vertex, double &pixmapWidth, double &pixmapHeight)
+{
+    // QRectF brect = _transformingItem->boundingRect();
+    pixmapWidth = _pixmap.width();
+    pixmapHeight = _pixmap.height();
+
+    vertex << _handleItemTopLeft->scenePos() << _handleItemTopRight->scenePos() << _handleItemBottomRight->scenePos() << _handleItemBottomLeft->scenePos();
+}
+
+UndoAct TransformingState::getCurrentParams()
 {
     QString filePath = TempDirController::createTempDirForCurrentUser() + QDir::separator() + "temp.tif";
     bool res = _pixmap.save(filePath, "TIF");
@@ -733,7 +822,7 @@ UndoAct PixmapTransformState::getCurrentParams()
     return currentParams;
 }
 
-LineItem* PixmapTransformState::createAreaLineItem(QPointF p1, QPointF p2)
+LineItem* TransformingState::createAreaLineItem(QPointF p1, QPointF p2)
 {
     QColor penColor(Qt::magenta);
     penColor.setAlpha(100);
@@ -741,14 +830,18 @@ LineItem* PixmapTransformState::createAreaLineItem(QPointF p1, QPointF p2)
     pen.setCosmetic(true);
     pen.setWidth(1);
 
-    LineItem* item = new LineItem(_pixmapItem, pen);
+    LineItem* item = new LineItem(_transformingItem->castToGraphicsItem(), pen);
     item->setLine(QLineF(p1, p2));
     return item;
 }
 
-void PixmapTransformState::changeImageColor(QColor inColor, QColor outColor, int sensitivity)
+void TransformingState::changeImageColor(QColor inColor, QColor outColor, int sensitivity)
 {
     if(_pixmap.isNull())
+        return;
+
+    PixmapTransformingItem * pixmapTransformingItem = dynamic_cast<PixmapTransformingItem*>(_transformingItem);
+    if( ! pixmapTransformingItem)
         return;
 
     if(inColor.isValid() && outColor.isValid())
@@ -763,7 +856,7 @@ void PixmapTransformState::changeImageColor(QColor inColor, QColor outColor, int
     undoAct.scaleH = _scH;
     undoAct.rotation = _rotation;
     _undoStack.push(undoAct);
-    emit signalPixmapChanged();
+    emit signalItemChanged();
 
     QString text;
     if(_areaOnImage.isEmpty()) // всё изображени
@@ -814,11 +907,25 @@ void PixmapTransformState::changeImageColor(QColor inColor, QColor outColor, int
     }
 
     _pixmap = QPixmap::fromImage(image);
-    _pixmapItem->setPixmap(_pixmap);
+    pixmapTransformingItem->setPixmap(_pixmap);
 }
 
+int TransformingState::getTransformingItemType() const
+{
+    return _transformingItemType;
+}
 
-void PixmapTransformState::undoAction()
+void TransformingState::setModeMoveAndRotateOnly()
+{
+    _modeMoveAndRotateOnly = true;
+}
+
+bool TransformingState::isModeMoveAndRotateOnly()
+{
+    return _modeMoveAndRotateOnly;
+}
+
+void TransformingState::undoAction()
 {
     if(_undoStack.isEmpty())
         return;
@@ -831,20 +938,24 @@ void PixmapTransformState::undoAction()
 
     if(undoAct.filePath.isEmpty() == false)
     {
-        _pixmap = QPixmap(undoAct.filePath);
+        PixmapTransformingItem * pixmapTransformingItem = dynamic_cast<PixmapTransformingItem*>(_transformingItem);
+        if(pixmapTransformingItem)
+        {
+            _pixmap = QPixmap(undoAct.filePath);
 
-        QPixmap pm(_pixmap.size());
-        pm.fill(QColor(0,0,0,1));
-        QPainter painter(&pm);
-        painter.drawPixmap(0,0,_pixmap);
+            QPixmap pm(_pixmap.size());
+            pm.fill(QColor(0,0,0,1));
+            QPainter painter(&pm);
+            painter.drawPixmap(0,0,_pixmap);
 
-        _pixmapItem->setPixmap(pm);
+            pixmapTransformingItem->setPixmap(pm);
+        }
     }
 
     _originW = _pixmap.width();
     _originH = _pixmap.height();
 
-    _pixmapItem->setPos(undoAct.scenePos);
+    _transformingItem->setPos(undoAct.scenePos);
 
     _handleItemTopLeft->setPos(0,0);
     _handleItemTopRight->setPos(_originW,0);
@@ -855,10 +966,13 @@ void PixmapTransformState::undoAction()
     _handleItemLeftCenter->setPos(0, _originH/2);
     _handleItemRightCenter->setPos(_originW, _originH/2);
 
-    _topLine->setLine(QLineF(_handleItemTopLeft->pos(), _handleItemTopRight->pos()));
-    _bottomLine->setLine(QLineF(_handleItemBottomLeft->pos(), _handleItemBottomRight->pos()));
-    _leftLine->setLine(QLineF(_handleItemTopLeft->pos(), _handleItemBottomLeft->pos()));
-    _rightLine->setLine(QLineF(_handleItemTopRight->pos(), _handleItemBottomRight->pos()));
+    if(_transformingItemType != TransformingItem::PolygonItem)
+    {
+        _topLine->setLine(QLineF(_handleItemTopLeft->pos(), _handleItemTopRight->pos()));
+        _bottomLine->setLine(QLineF(_handleItemBottomLeft->pos(), _handleItemBottomRight->pos()));
+        _leftLine->setLine(QLineF(_handleItemTopLeft->pos(), _handleItemBottomLeft->pos()));
+        _rightLine->setLine(QLineF(_handleItemTopRight->pos(), _handleItemBottomRight->pos()));
+    }
 
     if(undoAct.anchorPos.isNull())
         _handleItemAnchor->setPos(_originW/2., _originH/2.);
@@ -871,16 +985,16 @@ void PixmapTransformState::undoAction()
     _scH = undoAct.scaleH;
     _rotation = undoAct.rotation;
 
-    _pixmapItem->setTransform(QTransform().scale(_scW, _scH));
-    _pixmapItem->setPos(_handleItemAnchor->scenePos());
-    _pixmapItem->setTransform(QTransform().rotate(_rotation).scale(_scW, _scH).translate(-_handleItemAnchor->x(), -_handleItemAnchor->y()));
+    _transformingItem->setTransform(QTransform().scale(_scW, _scH));
+    _transformingItem->setPos(_handleItemAnchor->scenePos());
+    _transformingItem->setTransform(QTransform().rotate(_rotation).scale(_scW, _scH).translate(-_handleItemAnchor->x(), -_handleItemAnchor->y()));
 
     _rotaterLine->setLine(_handleItemAnchor->pos(), _handleItemRotater->pos());
 
     if(_fogItem)
         _fogItem->setArea(QRectF(0, 0, _pixmap.width(), _pixmap.height()));
 
-    emit signalPixmapChanged();
+    emit signalItemChanged();
 }
 
 

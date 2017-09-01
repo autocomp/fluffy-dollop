@@ -3,7 +3,7 @@
 
 #include <QGraphicsLineItem>
 
-namespace pixmap_transform_state
+namespace transform_state
 {
 
 class LineItem : public QGraphicsLineItem

@@ -1,12 +1,12 @@
-#ifndef PIXMAPTRANSFORMSTATE_H
-#define PIXMAPTRANSFORMSTATE_H
+#ifndef TRANSFORMINGSTATE_H
+#define TRANSFORMINGSTATE_H
 
 #include <ctrvisual/state/scrollbasestate.h>
 #include <QGraphicsLineItem>
 #include <QPixmap>
 #include <QStack>
 
-namespace pixmap_transform_state
+namespace transform_state
 {
 
 enum class StateMode
@@ -45,7 +45,7 @@ struct UndoAct               // структара описывает состо
     // double rotaterLenght=-1; // если >0, устанавливаем хендл поворота на это расстояние от хендла якоря. Если <0 - устанавливаем на 0.75 от хендла якоря.
 };
 
-class PixmapItem;
+class TransformingItem;
 class HandleItem;
 class AnchorHandleItem;
 class RotaterHandleItem;
@@ -53,13 +53,14 @@ class LineItem;
 class RotaterLineItem;
 class FogItem;
 
-class PixmapTransformState : public ScrollBaseState
+class TransformingState : public ScrollBaseState
 {
     Q_OBJECT
 public:
-    PixmapTransformState(const QPixmap & pixmap, QPointF pixmapScenePos, bool onTop, double originalScale = -1);
-    PixmapTransformState(const QPixmap & pixmap, QPointF pixmapScenePos, double scW, double scH, double rotation, bool onTop);
-    ~PixmapTransformState();
+    TransformingState(const QPixmap & pixmap, QPointF pixmapScenePos, int zValue, double originalScale = -1);
+    TransformingState(const QPixmap & pixmap, QPointF pixmapScenePos, double scW, double scH, double rotation, int zValue);
+    TransformingState(const QPolygonF & polygon, int zValue);
+    ~TransformingState();
     virtual void init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom, const double *scale, double frameCoef, uint visualizerId);
     virtual bool wheelEvent(QWheelEvent* e, QPointF scenePos);
     virtual bool mouseMoveEvent(QMouseEvent *e, QPointF scenePos);
@@ -78,7 +79,9 @@ public:
      * @param sensitivity - порог чувствительности, максимальное расстояние между точкам входного и выходного цвета в координатах трёх векторов цветов (RGB), задается в диапазоне от [1..50].
      */
     void changeImageColor(QColor inColor, QColor outColor, int sensitivity = 1);
-
+    int getTransformingItemType() const;
+    void setModeMoveAndRotateOnly();
+    bool isModeMoveAndRotateOnly();
     void setMode(StateMode stateMode);
     StateMode mode();
     void setTransparentBackgroundForPixmapItem(bool on_off);
@@ -92,6 +95,7 @@ public:
     void setAreaOnImagefinish();
     void undoAction();
     UndoAct getCurrentParams();
+    void getCurrentVertex(QPolygonF &vertex, double &pixmapWidth, double &pixmapHeight);
 
     // все методы ниже вызываются только из хендлов !
     void pressHandle(HandleType handleType);
@@ -102,7 +106,7 @@ public:
     void pixmapMoved();
 
 signals:
-    void signalPixmapChanged();
+    void signalItemChanged();
     void signalSendColor(QColor color);
     void signalAreaSetted();
     
@@ -114,17 +118,23 @@ protected:
     void setHandlesVisible(bool on_off);
     LineItem* createAreaLineItem(QPointF p1, QPointF p2);
 
+    const int _transformingItemType;
+    bool _modeMoveAndRotateOnly=false;
     StateMode _stateMode=StateMode::TransformImage;
     QPixmap _pixmap;
+    QPolygonF _polygon;
     QPointF _pixmapScenePos;
-    const bool _onTop;
+    const int _zValue;
     bool _blockWheelEvent=false;
-    PixmapItem * _pixmapItem=nullptr;
+    TransformingItem * _transformingItem=nullptr;
     HandleItem * _handleItemBottomRight, * _handleItemTopCenter, * _handleItemTopLeft, * _handleItemRightCenter, * _handleItemTopRight, * _handleItemBottomCenter, * _handleItemLeftCenter, * _handleItemBottomLeft;
     AnchorHandleItem * _handleItemAnchor;
     RotaterHandleItem * _handleItemRotater;
     RotaterLineItem * _rotaterLine;
-    LineItem * _topLine, * _bottomLine, * _leftLine, * _rightLine;
+    LineItem * _topLine = nullptr;
+    LineItem * _bottomLine = nullptr;
+    LineItem * _leftLine = nullptr;
+    LineItem * _rightLine = nullptr;
     QPointF _lastScenePos, _userHandlePos;
     HandleType _currentHandleType = HandleType::Invalid;
     QList<HandleItem*> _handleItems;
@@ -138,7 +148,7 @@ protected:
 
 }
 
-#endif // PIXMAPTRANSFORMSTATE_H
+#endif
 
 
 

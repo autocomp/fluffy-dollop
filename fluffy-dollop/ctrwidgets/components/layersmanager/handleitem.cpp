@@ -1,8 +1,8 @@
 #include "handleitem.h"
 
-using namespace pixmap_transform_state;
+using namespace transform_state;
 
-HandleItem::HandleItem(PixmapTransformState &controller, HandleType handleType, QGraphicsScene *scene, QGraphicsItem * _parent)
+HandleItem::HandleItem(TransformingState &controller, HandleType handleType, QGraphicsScene *scene, QGraphicsItem * _parent)
     : QGraphicsPixmapItem(_parent)
     , _controller(controller)
     , _handleType(handleType)
@@ -108,7 +108,7 @@ void HandleItem::updatePos()
 
 //----------------------------------------------------------------------------------------------------------
 
-AnchorHandleItem::AnchorHandleItem(PixmapTransformState &controller, QGraphicsScene *scene, QGraphicsItem *_parent)
+AnchorHandleItem::AnchorHandleItem(TransformingState &controller, QGraphicsScene *scene, QGraphicsItem *_parent)
     : HandleItem(controller, HandleType::Anchor, scene, _parent)
 {
     setZValue(5);
@@ -154,7 +154,7 @@ QVariant AnchorHandleItem::itemChange(GraphicsItemChange change, const QVariant 
 
 //----------------------------------------------------------------------------------------------------------
 
-RotaterHandleItem::RotaterHandleItem(PixmapTransformState &controller, int _deltaByVertical_, QGraphicsScene *scene, QGraphicsItem *_parent)
+RotaterHandleItem::RotaterHandleItem(TransformingState &controller, int _deltaByVertical_, QGraphicsScene *scene, QGraphicsItem *_parent)
     : HandleItem(controller, HandleType::Rotater, scene, _parent)
     , _deltaByVertical(_deltaByVertical_)
 {

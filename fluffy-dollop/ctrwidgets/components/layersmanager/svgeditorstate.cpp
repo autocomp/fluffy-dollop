@@ -278,7 +278,7 @@ void SvgEditorState::setDefaultStrokeParams(const StrokeParams & strokeParams)
     case StateMode::AddLineMode :
     case StateMode::AddPolygonMode :
     case StateMode::AddRectMode : {
-        foreach(pixmap_transform_state::LineItem * item, _lineItems)
+        foreach(transform_state::LineItem * item, _lineItems)
             item->setPen(strokeParams.getLinePen());
         if(_polygonItem)
         {
@@ -341,7 +341,7 @@ void SvgEditorState::deleteSelectedItem()
 
 void SvgEditorState::clearTempItems()
 {
-    foreach(pixmap_transform_state::LineItem * item, _lineItems)
+    foreach(transform_state::LineItem * item, _lineItems)
         delete item;
 
     if(_polygonItem)
@@ -353,12 +353,12 @@ void SvgEditorState::clearTempItems()
     _lineItems.clear();
 }
 
-pixmap_transform_state::LineItem* SvgEditorState::createLineItem(QPointF p1, QPointF p2)
+transform_state::LineItem* SvgEditorState::createLineItem(QPointF p1, QPointF p2)
 {
     StrokeParams strokeParams;
     emit getDefaultStrokeParams(strokeParams);
 
-    pixmap_transform_state::LineItem* item = new pixmap_transform_state::LineItem(_scene, strokeParams.getLinePen());
+    transform_state::LineItem* item = new transform_state::LineItem(_scene, strokeParams.getLinePen());
     item->setLine(QLineF(p1, p2));
     item->setZValue(100000);
     return item;

@@ -3,14 +3,16 @@
 
 #include <QWidget>
 #include <QTreeWidgetItem>
+#include <QTimer>
 #include <QGraphicsLineItem>
 #include <regionbiz/rb_manager.h>
+#include <regionbiz/rb_locations.h>
 #include <ctrcore/plugin/embifacenotifier.h>
+#include "layerinstrumentalform.h"
 
 class QGraphicsView;
 class QGraphicsPixmapItem;
 class QGraphicsSvgItem;
-class LayerInstrumentalForm;
 class SvgEditorForm;
 
 namespace Ui {
@@ -20,17 +22,26 @@ class LayersManagerForm;
 namespace layers_manager_form
 {
 
+enum class LayerTypes
+{
+    Base = 1,
+    Etalon,
+    Other
+};
+
 enum class ItemTypes
 {
     Layer = 1,
-    Rasters, // [1..N] Raster
+    Rasters, // [0..N] Raster
     Raster,
-    Vectors, // [1..N] Vector
+    Vectors, // [0..N] Vector
     Vector,
-    Marks, // [1..N] Defect and\or Photo and\orPhoto3d
+    Marks, // [0..N] Defect and\or Photo and\orPhoto3d
     Defect,
     Photo,
-    Photo3d
+    Photo3d,
+    FacilityEtalonRaster,
+    FacilityPolygonOnPlan
 };
 
 enum class ZoomState
@@ -54,7 +65,8 @@ struct CurrentData
         planPath.clear();
     }
 
-    uint64_t areaId = 0; //! clear() not change areaId !
+    regionbiz::BaseAreaPtr areaPtr; //! clear() not change areaPtr !
+    uint64_t facilityId = 0; //! clear() not change areaPtr !
     State state = NoState;
     Object object = NoObject;
     uint64_t layerId = 0;
@@ -72,7 +84,7 @@ public:
     explicit LayersManagerForm(QWidget *parent = 0);
     ~LayersManagerForm();
     void setEmbeddedWidgetId(quint64 id);
-    void reset();
+    void reset(bool showEtalonNode = false);
     void reload(regionbiz::BaseAreaPtr ptr, bool isGeoScene);
 
 private slots:
@@ -85,20 +97,22 @@ private slots:
     void slotEditorFormClose();
     void slotAddLayer();
     void slotDeleteLayer();
-    void slotRasterSaved(QString filePath, QPointF scenePos, double scaleW, double scaleH, double rotate);
+    void slotRasterSaved(RasterSaveDatad data);
+    void slotEtalotRasterSaved(RasterSaveDatad data);
     void slotSvgSaved(QString filePath, QPointF scenePos);
     void slotFileLoaded(regionbiz::BaseFileKeeperPtr);
     void slotSyncMarks();
     void slotZoomChanged(int zoomLevel);
     void slotToolButtonInPluginChecked(QVariant var);
+    void slotCalcSceneRect();
 
 private:
     void syncChechState(QTreeWidgetItem *item, bool setVisible);
     void reinitLayers();
     void reinitLayer(LayerItem * layerItem);
     void syncMarks(bool hideAll = false);
-    void calcSceneRect();
     void redrawItems(int pixelDelta);
+    LayerItem *getTopLevelItem(LayerTypes type);
 
     Ui::LayersManagerForm *ui;
     quint64 _embeddedWidgetId = 0;
@@ -119,21 +133,24 @@ private:
     ZoomState _zoomState = ZoomState::OneMeter;
     int _pixelDelta;
     bool _lineItemsVisible = false;
+    QTimer _recalcSceneRectTimer;
+
+    QGraphicsPolygonItem * _facilitiCoordsOnFloorItem = nullptr;
 };
 
 class LayerItem : public QTreeWidgetItem
 {
 public:
-    LayerItem(QTreeWidget * parentItem);                                  //! for base layer only !!!
+    LayerItem(QTreeWidget * parentItem, LayerTypes layerType);           //! for base & etalon layers only !!!
     LayerItem(QTreeWidget * parentItem, QString name, uint64_t layerId);  //! for other layers !!!
     uint64_t getLayerId();
-    bool isBaseLayer();
+    LayerTypes getLayerType();
     void clearData();
-    QTreeWidgetItem * rasterItems();
-    QTreeWidgetItem * vectorItems();
+    QTreeWidgetItem * getChild(ItemTypes itemTypes);
 
 private:
-    uint64_t _layerId;
+    const LayerTypes _layerType;
+    uint64_t _layerId = 0;
 };
 
 class DataItem : public QTreeWidgetItem
@@ -152,7 +169,7 @@ protected:
 class RasterItem : public DataItem
 {
 public:
-    RasterItem(QTreeWidgetItem * parentItem, uint64_t entityId, QString path);
+    RasterItem(QTreeWidgetItem * parentItem, uint64_t entityId, QString path, ItemTypes itemType = ItemTypes::Raster);
     ~RasterItem();
     void setRaster(QGraphicsPixmapItem * item, double scW, double scH, double rotate, QString name = QString());
     void reinit(QString path);

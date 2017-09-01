@@ -1,35 +1,36 @@
 #include "layerinstrumentalform.h"
+#include "transformingitem.h"
 #include "ui_layerinstrumentalform.h"
 #include <QTimer>
 #include <QPixmap>
 #include <QDebug>
 #include <QColorDialog>
-#include "pixmaptransformstate.h"
+#include "transformingstate.h"
 #include <ctrcore/visual/visualizermanager.h>
 #include <ctrcore/visual/viewinterface.h>
 #include <ctrcore/visual/stateinterface.h>
 #include <libembeddedwidgets/embeddedapp.h>
 
-using namespace pixmap_transform_state;
+using namespace transform_state;
 
-LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPixmap &pixmap, QPointF scenePos, double scaleX, double scaleY, double rotate, bool onTop)
+LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPixmap &pixmap, QPointF scenePos, double scaleX, double scaleY, double rotate, int zValue)
     : _visualizerId(visualizerId)
     , ui(new Ui::LayerInstrumentalForm)
 {
     init();
 
-    _pixmapTransformState = QSharedPointer<PixmapTransformState>(new PixmapTransformState(pixmap, scenePos, scaleX, scaleY, rotate, onTop));
+    _transformingState = QSharedPointer<TransformingState>(new TransformingState(pixmap, scenePos, scaleX, scaleY, rotate, zValue));
     visualize_system::StateInterface * stateInterface = visualize_system::VisualizerManager::instance()->getStateInterface(_visualizerId);
-    connect(_pixmapTransformState.data(), SIGNAL(signalSendColor(QColor)), this, SLOT(setColorOnImage(QColor)));
-    connect(_pixmapTransformState.data(), SIGNAL(signalAreaSetted()), this, SLOT(areaSetted()));
-    connect(_pixmapTransformState.data(), SIGNAL(signalPixmapChanged()), this, SLOT(pixmapChanged()));
+    connect(_transformingState.data(), SIGNAL(signalSendColor(QColor)), this, SLOT(setColorOnImage(QColor)));
+    connect(_transformingState.data(), SIGNAL(signalAreaSetted()), this, SLOT(areaSetted()));
+    connect(_transformingState.data(), SIGNAL(signalItemChanged()), this, SLOT(itemChanged()));
     if(stateInterface)
-        stateInterface->setVisualizerState(_pixmapTransformState);
+        stateInterface->setVisualizerState(_transformingState);
 
     QTimer::singleShot(5,this,SLOT(makeAdjustForm()));
 }
 
-LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPixmap &pixmap, bool onTop)
+LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPixmap &pixmap, int zValue)
     : _visualizerId(visualizerId)
     , ui(new Ui::LayerInstrumentalForm)
 {
@@ -76,13 +77,30 @@ LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPixmap &p
         pos = QPointF(X,Y);
     }
 
-    _pixmapTransformState = QSharedPointer<PixmapTransformState>(new PixmapTransformState(pixmap, pos, onTop, originalScale));
+    _transformingState = QSharedPointer<TransformingState>(new TransformingState(pixmap, pos, zValue, originalScale));
     visualize_system::StateInterface * stateInterface = visualize_system::VisualizerManager::instance()->getStateInterface(_visualizerId);
-    connect(_pixmapTransformState.data(), SIGNAL(signalSendColor(QColor)), this, SLOT(setColorOnImage(QColor)));
-    connect(_pixmapTransformState.data(), SIGNAL(signalAreaSetted()), this, SLOT(areaSetted()));
-    connect(_pixmapTransformState.data(), SIGNAL(signalPixmapChanged()), this, SLOT(pixmapChanged()));
+    connect(_transformingState.data(), SIGNAL(signalSendColor(QColor)), this, SLOT(setColorOnImage(QColor)));
+    connect(_transformingState.data(), SIGNAL(signalAreaSetted()), this, SLOT(areaSetted()));
+    connect(_transformingState.data(), SIGNAL(signalItemChanged()), this, SLOT(itemChanged()));
     if(stateInterface)
-        stateInterface->setVisualizerState(_pixmapTransformState);
+        stateInterface->setVisualizerState(_transformingState);
+
+    QTimer::singleShot(5,this,SLOT(makeAdjustForm()));
+}
+
+LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPolygonF &polygon, int zValue)
+    : _visualizerId(visualizerId)
+    , ui(new Ui::LayerInstrumentalForm)
+{
+    init();
+
+    _transformingState = QSharedPointer<TransformingState>(new TransformingState(polygon, zValue));
+    visualize_system::StateInterface * stateInterface = visualize_system::VisualizerManager::instance()->getStateInterface(_visualizerId);
+    connect(_transformingState.data(), SIGNAL(signalItemChanged()), this, SLOT(itemChanged()));
+    if(stateInterface)
+        stateInterface->setVisualizerState(_transformingState);
+
+    setModeMoveAndRotateOnly();
 
     QTimer::singleShot(5,this,SLOT(makeAdjustForm()));
 }
@@ -147,16 +165,39 @@ LayerInstrumentalForm::~LayerInstrumentalForm()
 {
     delete ui;
 
-    if(_pixmapTransformState)
+    if(_transformingState)
     {
-        _pixmapTransformState->emit_closeState();
-        _pixmapTransformState.clear();
+        _transformingState->emit_closeState();
+        _transformingState.clear();
     }
 }
 
 void LayerInstrumentalForm::setEmbeddedWidgetId(quint64 id)
 {
     _embeddedWidgetId = id;
+
+    switch (_transformingState->getTransformingItemType())
+    {
+    case TransformingItem::PolygonItem : {
+        ewApp()->setWidgetTitle(id, QString("Контур здания"));
+    }break;
+    case TransformingItem::PixmapItem : {
+        if(_transformingState->isModeMoveAndRotateOnly())
+            ewApp()->setWidgetTitle(id, QString("Опорное изображение"));
+    }break;
+    case TransformingItem::SvgItem : {
+        ewApp()->setWidgetTitle(id, QString("Векторные данные"));
+    }break;
+    }
+}
+
+void LayerInstrumentalForm::setModeMoveAndRotateOnly()
+{
+    ui->crop->hide();
+    ui->changeColor->hide();
+    ui->undoAction->hide();
+
+    _transformingState->setModeMoveAndRotateOnly();
 }
 
 //QWidget *LayerInstrumentalForm::getWidget()
@@ -181,7 +222,7 @@ void LayerInstrumentalForm::setMode(bool on_off)
         if(ui->transform == sender())
         {
             ui->apply->setEnabled(false);
-            _pixmapTransformState->setMode(StateMode::TransformImage);
+            _transformingState->setMode(StateMode::TransformImage);
         }
         else
             ui->transform->setChecked(false);
@@ -189,7 +230,7 @@ void LayerInstrumentalForm::setMode(bool on_off)
         if(ui->crop == sender())
         {
             ui->apply->setEnabled(true);
-            _pixmapTransformState->setMode(StateMode::CropImage);
+            _transformingState->setMode(StateMode::CropImage);
         }
         else
             ui->crop->setChecked(false);
@@ -197,7 +238,7 @@ void LayerInstrumentalForm::setMode(bool on_off)
         if(ui->changeColor == sender())
         {
             ui->apply->setEnabled(true);
-            _pixmapTransformState->setMode(StateMode::ScrollMap);
+            _transformingState->setMode(StateMode::ScrollMap);
         }
         else
         {
@@ -212,15 +253,15 @@ void LayerInstrumentalForm::setMode(bool on_off)
     else
     {
         if(ui->crop == sender())
-            _pixmapTransformState->cropPixmap();
+            _transformingState->cropPixmap();
 
-        _pixmapTransformState->setMode(StateMode::ScrollMap);
+        _transformingState->setMode(StateMode::ScrollMap);
         changeColorModeOff = true;
     }
 
     if(changeColorModeOff)
     {
-        _pixmapTransformState->clearAreaOnImage();
+        _transformingState->clearAreaOnImage();
         ui->setColorInFromImage->setChecked(false);
         ui->setColorOutFromImage->setChecked(false);
         ui->setArea->setChecked(false);
@@ -234,22 +275,23 @@ void LayerInstrumentalForm::setMode(bool on_off)
         ui->setColor->setText(QString::fromUtf8("на цвет"));
     }
 
-    ui->undoAction->setEnabled(_pixmapTransformState->changed());
+    ui->undoAction->setEnabled(_transformingState->changed());
 
     if(! ui->transform->isChecked() && ! ui->crop->isChecked() && ! ui->changeColor->isChecked())
     {
-        ui->apply->setEnabled(_pixmapTransformState->changed());
-//        ui->save->setEnabled(_pixmapTransformState->changed());
+        ui->apply->setEnabled(_transformingState->changed());
+//        ui->save->setEnabled(_transformingState->changed());
     }
 
     ui->persentSlider->setValue(0);
     setOpacityValue(0);
 
-    ui->persentFrame->setVisible(ui->transform->isChecked());
+    if(_transformingState->isModeMoveAndRotateOnly() == false)
+        ui->persentFrame->setVisible(ui->transform->isChecked());
 
     ui->colorFrame->setVisible( ui->changeColor->isChecked() );
 
-    _pixmapTransformState->setTransparentBackgroundForPixmapItem( ui->changeColor->isChecked() );
+    _transformingState->setTransparentBackgroundForPixmapItem( ui->changeColor->isChecked() );
 
     QTimer::singleShot(50,this,SLOT(makeAdjustForm()));
 }
@@ -269,7 +311,7 @@ void LayerInstrumentalForm::makeAdjustForm()
 
 void LayerInstrumentalForm::setOpacityValue(int precent)
 {
-    _pixmapTransformState->setTransparency(precent);
+    _transformingState->setTransparency(precent);
 }
 
 void LayerInstrumentalForm::apply()
@@ -281,23 +323,23 @@ void LayerInstrumentalForm::apply()
     }
     else if(ui->crop->isChecked())
     {
-        _pixmapTransformState->cropPixmap();
+        _transformingState->cropPixmap();
     }
     else if(ui->changeColor->isChecked())
     {
         if(ui->changeColorRB->isChecked())
         {
             if(ui->setColor->isChecked())
-                _pixmapTransformState->changeImageColor(_colorIn, _colorOut, ui->sensSlider->value());
+                _transformingState->changeImageColor(_colorIn, _colorOut, ui->sensSlider->value());
             else if(ui->setTransparent->isChecked())
-                _pixmapTransformState->changeImageColor(QColor(), _colorOut, ui->sensSlider->value());
+                _transformingState->changeImageColor(QColor(), _colorOut, ui->sensSlider->value());
         }
         else if(ui->fillRB->isChecked())
         {
             if(ui->setColor->isChecked())
-                _pixmapTransformState->changeImageColor(_colorIn, QColor());
+                _transformingState->changeImageColor(_colorIn, QColor());
             else if(ui->setTransparent->isChecked())
-                _pixmapTransformState->changeImageColor(QColor(), QColor());
+                _transformingState->changeImageColor(QColor(), QColor());
         }
     }
 }
@@ -308,19 +350,19 @@ void LayerInstrumentalForm::GetColorOnImage(bool on_off)
     {
         if(sender() == ui->setColorOutFromImage)
         {
-            _pixmapTransformState->setMode(StateMode::GetColorOnImage);
+            _transformingState->setMode(StateMode::GetColorOnImage);
             if(ui->setColorInFromImage->isChecked())
                 ui->setColorInFromImage->setChecked(false);
         }
         if(sender() == ui->setColorInFromImage)
         {
-            _pixmapTransformState->setMode(StateMode::GetColorOnImage);
+            _transformingState->setMode(StateMode::GetColorOnImage);
             if(ui->setColorOutFromImage->isChecked())
                 ui->setColorOutFromImage->setChecked(false);
         }
         if(ui->setArea->isChecked())
         {
-            _pixmapTransformState->clearAreaOnImage();
+            _transformingState->clearAreaOnImage();
             ui->setArea->setChecked(false);
             ui->setClearArea->setEnabled(false);
 
@@ -337,11 +379,11 @@ void LayerInstrumentalForm::GetColorOnImage(bool on_off)
     }
     else
     {
-        _pixmapTransformState->setMode(StateMode::ScrollMap);
+        _transformingState->setMode(StateMode::ScrollMap);
 
         bool changed(true);
         ui->apply->setEnabled(changed);
-        ui->undoAction->setEnabled(_pixmapTransformState->changed());
+        ui->undoAction->setEnabled(_transformingState->changed());
     }
 }
 
@@ -367,19 +409,19 @@ void LayerInstrumentalForm::setColorOnImage(QColor color)
             ui->setColorOutFromImage->setChecked(false);
         }
     }
-    _pixmapTransformState->setMode(StateMode::ScrollMap);
+    _transformingState->setMode(StateMode::ScrollMap);
 
     bool changed(true);
     ui->apply->setEnabled(changed);
-    ui->undoAction->setEnabled(_pixmapTransformState->changed());
-//    ui->save->setEnabled(_pixmapTransformState->changed());
+    ui->undoAction->setEnabled(_transformingState->changed());
+//    ui->save->setEnabled(_transformingState->changed());
 }
 
 void LayerInstrumentalForm::setArea(bool on_off)
 {
     if(on_off)
     {
-        _pixmapTransformState->setMode(StateMode::GetAreaOnImage);
+        _transformingState->setMode(StateMode::GetAreaOnImage);
         ui->setClearArea->setEnabled(false);
 
         if(ui->setColorOutFromImage->isChecked())
@@ -389,14 +431,14 @@ void LayerInstrumentalForm::setArea(bool on_off)
            ui->setColorInFromImage->setChecked(false);
 
         ui->apply->setEnabled(false);
-        ui->undoAction->setEnabled(_pixmapTransformState->changed());
-//        ui->save->setEnabled(_pixmapTransformState->changed());
+        ui->undoAction->setEnabled(_transformingState->changed());
+//        ui->save->setEnabled(_transformingState->changed());
     }
     else
     {
-        _pixmapTransformState->clearAreaOnImage();
+        _transformingState->clearAreaOnImage();
         ui->setClearArea->setEnabled(false);
-        _pixmapTransformState->setMode(StateMode::ScrollMap);
+        _transformingState->setMode(StateMode::ScrollMap);
 
         changeColorRBdependElementsEnabled(true);
         ui->fillRB->setChecked(false);
@@ -407,27 +449,27 @@ void LayerInstrumentalForm::setArea(bool on_off)
 
         bool changed(true);
         ui->apply->setEnabled(changed);
-        ui->undoAction->setEnabled(_pixmapTransformState->changed());
-//        ui->save->setEnabled(_pixmapTransformState->changed());
+        ui->undoAction->setEnabled(_transformingState->changed());
+//        ui->save->setEnabled(_transformingState->changed());
     }
 }
 
 void LayerInstrumentalForm::LayerInstrumentalForm::areaSetted()
 {
-    _pixmapTransformState->setMode(StateMode::ScrollMap);
+    _transformingState->setMode(StateMode::ScrollMap);
     ui->setArea->setChecked(false);
     ui->setClearArea->setEnabled(true);
     ui->fillRB->setEnabled(true);
 
     bool changed(true);
     ui->apply->setEnabled(changed);
-    ui->undoAction->setEnabled(_pixmapTransformState->changed());
-//    ui->save->setEnabled(_pixmapTransformState->changed());
+    ui->undoAction->setEnabled(_transformingState->changed());
+//    ui->save->setEnabled(_transformingState->changed());
 }
 
 void LayerInstrumentalForm::clearArea()
 {
-    _pixmapTransformState->clearAreaOnImage();
+    _transformingState->clearAreaOnImage();
     ui->setClearArea->setEnabled(false);
 
     changeColorRBdependElementsEnabled(true);
@@ -457,21 +499,46 @@ void LayerInstrumentalForm::applyForImageOrArea(bool on_off)
     }
 }
 
-void LayerInstrumentalForm::pixmapChanged()
+void LayerInstrumentalForm::itemChanged()
 {
-    ui->undoAction->setEnabled(_pixmapTransformState->changed());
-//    ui->save->setEnabled(_pixmapTransformState->changed());
+    ui->undoAction->setEnabled(_transformingState->changed());
+//    ui->save->setEnabled(_transformingState->changed());
 }
 
 void LayerInstrumentalForm::undoAction()
 {
-    _pixmapTransformState->undoAction();
+    _transformingState->undoAction();
 }
 
 void LayerInstrumentalForm::save()
 {
-    UndoAct currentParams = _pixmapTransformState->getCurrentParams();
-    emit signalSaved(currentParams.filePath, currentParams.scenePos, currentParams.scaleW, currentParams.scaleH, currentParams.rotation);
+    switch (_transformingState->getTransformingItemType())
+    {
+    case TransformingItem::PolygonItem : {
+
+    }break;
+
+    case TransformingItem::PixmapItem : {
+
+        RasterSaveDatad data;
+
+        UndoAct currentParams = _transformingState->getCurrentParams();
+        data.filePath = currentParams.filePath;
+        data.scenePos = currentParams.scenePos;
+        data.scaleW = currentParams.scaleW;
+        data.scaleH = currentParams.scaleH;
+        data.rotate = currentParams.rotation;
+
+        _transformingState->getCurrentVertex(data.vertex, data.pixmapWidth, data.pixmapHeight);
+
+        emit signalRasterSaved(data);
+
+    }break;
+
+    case TransformingItem::SvgItem : {
+
+    }break;
+    }
 }
 
 void LayerInstrumentalForm::changeColorRBdependElementsEnabled(bool on_off)

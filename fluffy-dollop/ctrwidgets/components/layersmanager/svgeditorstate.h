@@ -4,7 +4,7 @@
 #include <ctrvisual/state/scrollbasestate.h>
 #include "svgeditortypes.h"
 
-namespace pixmap_transform_state {
+namespace transform_state {
 class LineItem;
 }
 
@@ -59,14 +59,14 @@ protected slots:
     void slotClickOnItem(bool withControl);
 
 protected:
-    pixmap_transform_state::LineItem* createLineItem(QPointF p1, QPointF p2);
+    transform_state::LineItem* createLineItem(QPointF p1, QPointF p2);
     void repaintRectArea(QPointF secondPoint);
     void clearTempItems();
 
     bool _onTop;
     StateMode _stateMode=StateMode::SelectMode;
     bool _blockWheelEvent=false;
-    QList<pixmap_transform_state::LineItem*> _lineItems;
+    QList<transform_state::LineItem*> _lineItems;
     QPolygonF _linePoints;
     QList<SvgItem*> _svgLineItems;
     PolygonItem * _polygonItem = nullptr;

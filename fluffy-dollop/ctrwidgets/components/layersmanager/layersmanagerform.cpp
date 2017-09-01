@@ -1,6 +1,5 @@
 #include "layersmanagerform.h"
 #include "ui_layersmanagerform.h"
-#include "layerinstrumentalform.h"
 #include "svgeditorform.h"
 #include <QFile>
 #include <QDir>
@@ -17,9 +16,12 @@
 #include <ctrcore/bus/common_message_notifier.h>
 #include <ctrcore/bus/bustags.h>
 #include <ctrcore/ctrcore/ctrconfig.h>
+#include <ctrwidgets/components/waitdialog/waitdialog.h>
 #include <dmanager/embeddedstruct.h>
 #include <dmanager/embeddedapp.h>
 #include <ctrwidgets/components/layersmanager/commontypes.h>
+#include <ctrcore/ctrcore/tempdircontroller.h>
+#include <ctrcore/visual/geographicutils.h>
 #include <QDebug>
 
 using namespace regionbiz;
@@ -27,8 +29,11 @@ using namespace layers_manager_form;
 
 LayersManagerForm::LayersManagerForm(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::LayersManagerForm)
+    ui(new Ui::LayersManagerForm),
+    _recalcSceneRectTimer(this)
 {
+    connect(&_recalcSceneRectTimer, SIGNAL(timeout()), this, SLOT(slotCalcSceneRect()));
+
     auto mngr = RegionBizManager::instance();
     mngr->subscribeFileSynced( this, SLOT(slotFileLoaded(regionbiz::BaseFileKeeperPtr)));
 
@@ -89,8 +94,6 @@ LayersManagerForm::LayersManagerForm(QWidget *parent) :
             break;
         }
 
-    redrawItems(100);
-
     reinitLayers();
 }
 
@@ -129,9 +132,16 @@ void LayersManagerForm::reinitLayers()
     _layers.clear();
     ui->treeWidget->clear();
 
-    LayerItem * baseLayerItem = new LayerItem(ui->treeWidget);
+    LayerItem * baseLayerItem = new LayerItem(ui->treeWidget, LayerTypes::Base);
     reinitLayer(baseLayerItem);
     _layers.insert(0, baseLayerItem);
+
+    LayerItem * etalonLayerItem = new LayerItem(ui->treeWidget, LayerTypes::Etalon);
+    etalonLayerItem->setCheckState(0, Qt::Checked);
+//    QTreeWidgetItem * etalonRaster = new QTreeWidgetItem(etalonLayerItem, QStringList() << QString::fromUtf8("опорное изображение"), (int)ItemTypes::FacilityEtalonRasters);
+//    etalonRaster->setCheckState(0, Qt::Checked);
+//    QTreeWidgetItem * polygonOnPlan = new QTreeWidgetItem(etalonLayerItem, QStringList() << QString::fromUtf8("контур здания"), (int)ItemTypes::FacilityPolygonOnPlans);
+//    polygonOnPlan->setCheckState(0, Qt::Checked);
 
     foreach(LayerPtr layerPtr, RegionBizManager::instance()->getLayers())
     {
@@ -149,18 +159,42 @@ void LayersManagerForm::setEmbeddedWidgetId(quint64 id)
     _embeddedWidgetId = id;
 }
 
-void LayersManagerForm::reset()
+void LayersManagerForm::reset(bool showEtalonNode)
 {
-    _currentData.areaId = 0;
+    ui->treeWidget->clearSelection();
+
+    _currentData.areaPtr.reset();
     _currentData.clear();
     _loadingItems.clear();
+
+    if(_facilitiCoordsOnFloorItem)
+    {
+        delete _facilitiCoordsOnFloorItem;
+        _facilitiCoordsOnFloorItem = nullptr;
+    }
 
     disconnect(ui->treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(slotItemChanged(QTreeWidgetItem*,int)));
     for(int a(0); a < ui->treeWidget->topLevelItemCount(); ++a)
     {
         LayerItem * layerItem = dynamic_cast<LayerItem*>(ui->treeWidget->topLevelItem(a));
         if(layerItem)
-            layerItem->clearData();
+        {
+            if(layerItem->getLayerType() == LayerTypes::Etalon)
+            {
+                QList<QTreeWidgetItem*> items;
+                for(int i(0); i < layerItem->childCount(); ++i)
+                    items.append(layerItem->child(i));
+
+                foreach(QTreeWidgetItem* item, items)
+                    delete item;
+
+                layerItem->setHidden( ! showEtalonNode );
+            }
+            else
+            {
+                layerItem->clearData();
+            }
+        }
     }
     connect(ui->treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(slotItemChanged(QTreeWidgetItem*,int)));
 }
@@ -198,12 +232,38 @@ void LayersManagerForm::slotFileLoaded(regionbiz::BaseFileKeeperPtr baseFileKeep
                 QGraphicsPixmapItem * pixmapRasterItem = new QGraphicsPixmapItem(pm);
                 pixmapRasterItem->setTransformationMode(Qt::SmoothTransformation);
                 PlanFileKeeper::PlanParams planParams = planFileKeeperPtr->getPlanParams();
-                pixmapRasterItem->setPos(QPointF(planParams.x, planParams.y));
-                pixmapRasterItem->setTransform(QTransform().scale(planParams.scale_w,planParams.scale_h).rotate(planParams.rotate));
 
+                int zValue(90);
+                QPointF scenePos(planParams.x, planParams.y);
+                bool setTransform(true);
                 LayerItem * layerItem = dynamic_cast<LayerItem*>(rasterTreeWidgetItem->parent()->parent());
                 if(layerItem)
-                    pixmapRasterItem->setZValue(layerItem->isBaseLayer() ? -100 : -10);
+                {
+                    if(layerItem->getLayerType() == LayerTypes::Base)
+                        zValue = 80;
+                }
+                else if(rasterTreeWidgetItem->type() == (int)ItemTypes::FacilityEtalonRaster)
+                {
+                    zValue = 70;
+
+                    if(_currentData.areaPtr->getType() == BaseArea::AT_FLOOR)
+                    {
+                        BaseMetadataPtr posStrPtr = _currentData.areaPtr->getParent()->getMetadata("position_etalon_image_on_plan_floor");
+                        if(posStrPtr)
+                        {
+                            setTransform = false;
+
+                            QString posStr = posStrPtr->getValueAsString();
+                            QStringList list = posStr.split(QString(" "));
+                            if(list.size() == 2)
+                                scenePos = QPointF(list.first().toDouble(), list.last().toDouble());
+                        }
+                    }
+                }
+                pixmapRasterItem->setZValue(zValue);
+                pixmapRasterItem->setPos(scenePos);
+                if(setTransform)
+                    pixmapRasterItem->setTransform(QTransform().scale(planParams.scale_w,planParams.scale_h).rotate(planParams.rotate));
 
                 QGraphicsScene * _scene = (_isGeoScene ? _geoView->scene() : _pixelView->scene());
                 _scene->addItem(pixmapRasterItem);
@@ -212,10 +272,11 @@ void LayersManagerForm::slotFileLoaded(regionbiz::BaseFileKeeperPtr baseFileKeep
                 rasterTreeWidgetItem->setRaster(pixmapRasterItem, planParams.scale_w, planParams.scale_h, planParams.rotate);
                 connect(ui->treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(slotItemChanged(QTreeWidgetItem*,int)));
 
-                if( ! _isGeoScene && _loadingItems.isEmpty())
-                    calcSceneRect();
-                else
-                    qDebug() << "---> loadingRasters.size() :" << _loadingItems.size();
+                if( ! _isGeoScene )
+                {
+                    _recalcSceneRectTimer.stop();
+                    _recalcSceneRectTimer.start(1000);
+                }
             }
         }
 
@@ -230,7 +291,7 @@ void LayersManagerForm::slotFileLoaded(regionbiz::BaseFileKeeperPtr baseFileKeep
             svgItem->setPos(QPointF(planParams.x, planParams.y));
             LayerItem * layerItem = dynamic_cast<LayerItem*>(svgTreeWidgetItem->parent()->parent());
             if(layerItem)
-                svgItem->setZValue(layerItem->isBaseLayer() ? -99 : -9);
+                svgItem->setZValue(layerItem->getLayerType() == LayerTypes::Base ? 95 : 85);
 
             QGraphicsScene * _scene = (_isGeoScene ? _geoView->scene() : _pixelView->scene());
             _scene->addItem(svgItem);
@@ -239,21 +300,108 @@ void LayersManagerForm::slotFileLoaded(regionbiz::BaseFileKeeperPtr baseFileKeep
             svgTreeWidgetItem->setSvg(svgItem);
             connect(ui->treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(slotItemChanged(QTreeWidgetItem*,int)));
 
-            if( ! _isGeoScene && _loadingItems.isEmpty())
-                calcSceneRect();
-            else
-                qDebug() << "---> loadingRasters.size() :" << _loadingItems.size();
+            if( ! _isGeoScene )
+            {
+                _recalcSceneRectTimer.stop();
+                _recalcSceneRectTimer.start(1000);
+            }
         }
     }
 }
 
 void LayersManagerForm::reload(BaseAreaPtr ptr, bool isGeoScene)
 {
-    reset();
+    bool showEtalonNode = false;
+    BaseAreaPtr facilityPtr;
+    switch(ptr->getType())
+    {
+    case BaseArea::AT_FLOOR :
+        facilityPtr = ptr->getParent();
+        showEtalonNode = true;
+        break;
+    case BaseArea::AT_FACILITY :
+        facilityPtr = ptr;
+        showEtalonNode = true;
+        break;
+    }
+    if(facilityPtr)
+    {
+        if(_currentData.facilityId != facilityPtr->getId())
+        {
+            qDebug() << "====> NEW FACILITY !!!";
+        }
+        _currentData.facilityId = facilityPtr->getId();
+    }
+    else
+    {
+        _currentData.facilityId = 0;
+    }
+
+//-------------------------------------------
+    reset(showEtalonNode);
     setDisabled(false);
-    _currentData.areaId = ptr->getId();
+    _currentData.areaPtr = ptr;
     _isGeoScene = isGeoScene;
-    //    QGraphicsScene * _scene = (_isGeoScene ? _geoView->scene() : _pixelView->scene());
+//-------------------------------------------
+
+    QString etalonFilePath;
+    if(facilityPtr)
+    {
+        auto facility = BaseArea::convert<Facility>(facilityPtr);
+        if(facility)
+        {
+            BaseFileKeeperPtr currEtalonFile = facility->getEtalonPlan();
+            if(currEtalonFile)
+            {
+                PlanFileKeeperPtr planFileKeeperPtr = BaseFileKeeper::convert<PlanFileKeeper>(currEtalonFile);
+                if(planFileKeeperPtr)
+                {
+                    etalonFilePath = planFileKeeperPtr->getPath();
+
+                    LayerItem * etalonNode = getTopLevelItem(LayerTypes::Etalon);
+                    RasterItem * rasterItem = new RasterItem(etalonNode, currEtalonFile->getEntityId(), etalonFilePath, ItemTypes::FacilityEtalonRaster);
+
+                    BaseFileKeeper::FileState fileState = planFileKeeperPtr->getFileState();
+                    switch(fileState)
+                    {
+                    case BaseFileKeeper::FS_UNSYNC : {
+                        qDebug() << "reload, etalon file state : FS_UNSYNC";
+                         rasterItem->setText(0, "FS_UNSYNC");
+                        _loadingItems.insert(etalonFilePath, rasterItem);
+                        planFileKeeperPtr->syncFile();
+                    }break;
+                    case BaseFileKeeper::FS_SYNC : {
+                        qDebug() << "reload, etalon file state : FS_SYNC";
+                        _loadingItems.insert(etalonFilePath, rasterItem);
+                        slotFileLoaded(planFileKeeperPtr);
+                    }break;
+                    case BaseFileKeeper::FS_INVALID : {
+                        qDebug() << "reload, etalon file state : FS_INVALID";
+                        rasterItem->setText(0, "FS_INVALID");
+                        _loadingItems.insert(etalonFilePath, rasterItem);
+                        slotFileLoaded(planFileKeeperPtr);
+                    }break;
+                    }
+
+                    if(ptr->getType() == BaseArea::AT_FLOOR && facility->getCoords().isEmpty() == false && facility->isHaveTransform())
+                    {
+                        QTransform transform = facility->getTransform();
+                        QPolygonF facilitiCoordsOnFloor = transform.map(facility->getCoords());
+
+                        QPen pen(Qt::red);
+                        pen.setCosmetic(true);
+                        pen.setWidth(4);
+                        _facilitiCoordsOnFloorItem = new QGraphicsPolygonItem(facilitiCoordsOnFloor);
+                        _facilitiCoordsOnFloorItem->setZValue(1000);
+                        _facilitiCoordsOnFloorItem->setPen(pen);
+                        _pixelView->scene()->addItem(_facilitiCoordsOnFloorItem);
+                    }
+                }
+            }
+        }
+    }
+
+//-------------------------------------------
 
     BaseFileKeeperPtrs baseFileKeeperPtrs = ptr->getFilesByType(BaseFileKeeper::FT_PLAN);
     qDebug() << "LayersManagerForm::reload, baseFileKeeperPtrs.size :" << baseFileKeeperPtrs.size();
@@ -262,7 +410,12 @@ void LayersManagerForm::reload(BaseAreaPtr ptr, bool isGeoScene)
         PlanFileKeeperPtr planFileKeeperPtr = BaseFileKeeper::convert<PlanFileKeeper>(baseFileKeeperPtr);
         if(planFileKeeperPtr)
         {
-            QString suffix = QFileInfo(planFileKeeperPtr->getPath()).suffix();
+            QString filePath = planFileKeeperPtr->getPath();
+            //! эталонный файл для здания так же приезжает как обычные файлы, поэтому его не надо обрабатывать !
+            if( ! etalonFilePath.isEmpty() && filePath == etalonFilePath)
+                continue;
+
+            QString suffix = QFileInfo(filePath).suffix();
             uint64_t layerId(0);
             LayerPtr layerPtr = planFileKeeperPtr->getLayer();
             if(layerPtr)
@@ -274,19 +427,20 @@ void LayersManagerForm::reload(BaseAreaPtr ptr, bool isGeoScene)
             {
                 if(suffix == QString("svg"))
                 {
-                    QTreeWidgetItem * parentItem = it.value()->vectorItems();
-                    dataItem = new SvgItem(parentItem, baseFileKeeperPtr->getEntityId(), planFileKeeperPtr->getPath());
+                    QTreeWidgetItem * parentItem = it.value()->getChild(ItemTypes::Vectors);
+                    dataItem = new SvgItem(parentItem, baseFileKeeperPtr->getEntityId(), filePath);
                 }
                 else
                 {
-                    QTreeWidgetItem * parentItem = it.value()->rasterItems();
-                    dataItem = new RasterItem(parentItem, baseFileKeeperPtr->getEntityId(), planFileKeeperPtr->getPath());
+                    QTreeWidgetItem * parentItem = it.value()->getChild(ItemTypes::Rasters);
+                    dataItem = new RasterItem(parentItem, baseFileKeeperPtr->getEntityId(), filePath);
                 }
             }
             if( ! dataItem)
                 continue;
 
-            qDebug() << "EntityId:" << baseFileKeeperPtr->getEntityId() << ", suffix:" << suffix << ", getPath:" << planFileKeeperPtr->getPath();
+            QString baseName = QFileInfo(filePath).baseName();
+            qDebug() << "EntityId:" << baseFileKeeperPtr->getEntityId() << ", baseName:" << baseName << ", suffix:" << suffix << ", getPath:" << filePath;
 
             BaseFileKeeper::FileState fileState = planFileKeeperPtr->getFileState();
             switch(fileState)
@@ -294,42 +448,17 @@ void LayersManagerForm::reload(BaseAreaPtr ptr, bool isGeoScene)
             case BaseFileKeeper::FS_UNSYNC : {
                 qDebug() << "reload, FS_UNSYNC";
                 dataItem->setText(0, "FS_UNSYNC");
-                _loadingItems.insert(planFileKeeperPtr->getPath(), dataItem);
+                _loadingItems.insert(filePath, dataItem);
                 planFileKeeperPtr->syncFile();
             }break;
             case BaseFileKeeper::FS_SYNC : {
                 qDebug() << "reload, FS_SYNC";
-                _loadingItems.insert(planFileKeeperPtr->getPath(), dataItem);
+                _loadingItems.insert(filePath, dataItem);
                 slotFileLoaded(planFileKeeperPtr);
             }break;
             case BaseFileKeeper::FS_INVALID : {
                 qDebug() << "reload, FS_INVALID";
                 dataItem->setText(0, "FS_INVALID");
-
-//                QString filePath = QString("/home/sergey/projects/vira_02/bin/ftp_cache/") + planFileKeeperPtr->getPath();
-//                QPixmap pm(filePath);
-//                qDebug() << "reload, FS_INVALID, filePath:" << filePath << ", pm.isNull() :" << pm.isNull();
-//                if(pm.isNull() == false)
-//                {
-//                    qDebug() << "reload, FS_INVALID, HENDLE LOADING !!!";
-
-//                    QGraphicsPixmapItem * pixmapRasterItem = new QGraphicsPixmapItem(pm);
-//                    pixmapRasterItem->setTransformationMode(Qt::SmoothTransformation);
-//                    PlanFileKeeper::PlanParams planParams = planFileKeeperPtr->getPlanParams();
-//                    pixmapRasterItem->setPos(QPointF(planParams.x, planParams.y));
-//                    pixmapRasterItem->setTransform(QTransform().scale(planParams.scale_w,planParams.scale_h).rotate(planParams.rotate));
-
-//                    LayerItem * layerItem = dynamic_cast<LayerItem*>(dataItem->parent()->parent());
-//                    if(layerItem)
-//                        pixmapRasterItem->setZValue(layerItem->isBaseLayer() ? -100 : -10);
-
-//                    QGraphicsScene * _scene = (_isGeoScene ? _geoView->scene() : _pixelView->scene());
-//                    _scene->addItem(pixmapRasterItem);
-
-//                    disconnect(ui->treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(slotItemChanged(QTreeWidgetItem*,int)));
-//                    dataItem->setRaster(pixmapRasterItem);
-//                    connect(ui->treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(slotItemChanged(QTreeWidgetItem*,int)));
-//                }
             }break;
             }
         }
@@ -376,46 +505,47 @@ void LayersManagerForm::redrawItems(int pixelDelta)
 {
     _pixelDelta = pixelDelta;
 
-    QTime t;
-    t.start();
-
-    foreach(QGraphicsLineItem * item, _lineItems)
-        delete item;
-    _lineItems.clear();
-
-    QColor col(Qt::black);
-    col.setAlpha(150);
-    QPen pen1(col);
-    pen1.setCosmetic(true);
-    pen1.setWidth(1);
-
-    col.setAlpha(60);
-    QPen pen2(col);
-    pen2.setCosmetic(true);
-    pen2.setWidth(1);
-
-    int min(-50000), max(50000);
-    for(int x(min); x <= max; x = x+(pixelDelta/10))
+    if(_lineItemsVisible)
     {
-        QGraphicsLineItem * itemH = new QGraphicsLineItem(QLineF(x, min, x, max));
-        itemH->setPen(x%pixelDelta == 0 ? pen1 : pen2);
-        itemH->setZValue(-50);
-        itemH->setVisible(_lineItemsVisible);
-        _pixelView->scene()->addItem(itemH);
-        _lineItems.append(itemH);
-    }
+        QTime t;
+        t.start();
 
-    for(int y(min); y <= max; y = y+(pixelDelta/10))
-    {
-        QGraphicsLineItem * itemV = new QGraphicsLineItem(QLineF(min, y, max, y));
-        itemV->setPen(y%pixelDelta == 0 ? pen1 : pen2);
-        itemV->setZValue(-50);
-        itemV->setVisible(_lineItemsVisible);
-        _pixelView->scene()->addItem(itemV);
-        _lineItems.append(itemV);
-    }
+        foreach(QGraphicsLineItem * item, _lineItems)
+            delete item;
+        _lineItems.clear();
 
-    qDebug() << "*** elapsed :" << t.elapsed();
+        QColor col(Qt::black);
+        col.setAlpha(150);
+        QPen pen1(col);
+        pen1.setCosmetic(true);
+        pen1.setWidth(1);
+
+        col.setAlpha(60);
+        QPen pen2(col);
+        pen2.setCosmetic(true);
+        pen2.setWidth(1);
+
+        int min(-50000), max(50000);
+        for(int x(min); x <= max; x = x+(pixelDelta/10))
+        {
+            QGraphicsLineItem * itemH = new QGraphicsLineItem(QLineF(x, min, x, max));
+            itemH->setPen(x%pixelDelta == 0 ? pen1 : pen2);
+            itemH->setZValue(89);
+            _pixelView->scene()->addItem(itemH);
+            _lineItems.append(itemH);
+        }
+
+        for(int y(min); y <= max; y = y+(pixelDelta/10))
+        {
+            QGraphicsLineItem * itemV = new QGraphicsLineItem(QLineF(min, y, max, y));
+            itemV->setPen(y%pixelDelta == 0 ? pen1 : pen2);
+            itemV->setZValue(89);
+            _pixelView->scene()->addItem(itemV);
+            _lineItems.append(itemV);
+        }
+
+        qDebug() << "*** elapsed :" << t.elapsed();
+    }
 }
 
 void LayersManagerForm::syncMarks(bool hideAll)
@@ -521,7 +651,8 @@ void LayersManagerForm::slotItemChanged(QTreeWidgetItem *item, int /*column*/)
         bool setVisible(item->checkState(0) == Qt::Checked);
         switch(item->type())
         {
-        case (int)ItemTypes::Rasters : {
+        case (int)ItemTypes::Rasters :
+        {
             for(int a(0); a<item->childCount() ; ++a)
             {
                 RasterItem * subItem = dynamic_cast<RasterItem *>(item->child(a));
@@ -535,7 +666,8 @@ void LayersManagerForm::slotItemChanged(QTreeWidgetItem *item, int /*column*/)
             if(item->childCount() > 0)
                 recalcLayer = true;
         }break;
-        case (int)ItemTypes::Raster : {
+        case (int)ItemTypes::Raster :
+        {
             RasterItem * subItem = dynamic_cast<RasterItem *>(item);
             if(subItem)
             {
@@ -595,6 +727,25 @@ void LayersManagerForm::slotItemChanged(QTreeWidgetItem *item, int /*column*/)
             CommonMessageNotifier::send( (uint)visualize_system::BusTags::LayerVisibleChanged, list, QString("visualize_system"));
             recalcParent = true;
         }break;
+
+        case (int)ItemTypes::FacilityEtalonRaster : {
+        {
+            RasterItem * subItem = dynamic_cast<RasterItem *>(item);
+            if(subItem)
+            {
+                subItem->setCheckState(0, setVisible ? Qt::Checked : Qt::Unchecked);
+                if(subItem->getRaster())
+                    subItem->getRaster()->setVisible(setVisible);
+            }
+            recalcLayer = true;
+        }break;
+
+        }break;
+        case (int)ItemTypes::FacilityPolygonOnPlan : {
+
+
+        }break;
+
         }
 
         if(recalcParent)
@@ -663,12 +814,14 @@ void LayersManagerForm::slotAddEntity()
         return;
 
     QTreeWidgetItem* item = list.first();
-    LayerItem * layerItem = dynamic_cast<LayerItem*>(item->parent());
-    if( ! layerItem)
-        return;
-
-    if(item->type() == (int)ItemTypes::Rasters)
+    switch(item->type())
     {
+    case (int)ItemTypes::Rasters : {
+
+        LayerItem * layerItem = dynamic_cast<LayerItem*>(item->parent());
+        if( ! layerItem)
+            return;
+
         QString filePath = QFileDialog::getOpenFileName(this, QString::fromUtf8("Выберите изображение для слоя \"") + layerItem->text(0) + QString("\""));
         if(filePath.isEmpty() == false)
         {
@@ -684,12 +837,12 @@ void LayersManagerForm::slotAddEntity()
                 _currentData.clear();
                 _currentData.state = CurrentData::Create;
                 _currentData.object = CurrentData::Raster;
-                if(layerItem->isBaseLayer() == false)
+                if(layerItem->getLayerType() == LayerTypes::Other)
                     _currentData.layerId = layerItem->getLayerId();
 
-                _instrumentalForm = new LayerInstrumentalForm( (_isGeoScene ? _geoVisId : _pixelVisId ), pixmap, _currentData.layerId != 0);
-                connect(_instrumentalForm, SIGNAL(signalSaved(QString,QPointF,double,double,double)),
-                        this, SLOT(slotRasterSaved(QString,QPointF,double,double,double)));
+                int zValue(_currentData.layerId != 0 ? 1000000 : 86);
+                _instrumentalForm = new LayerInstrumentalForm( (_isGeoScene ? _geoVisId : _pixelVisId ), pixmap, zValue);
+                connect(_instrumentalForm, SIGNAL(signalRasterSaved(RasterSaveDatad)), this, SLOT(slotRasterSaved(RasterSaveDatad)));
 
                 _ifaceInstrumentalForm = new EmbIFaceNotifier(_instrumentalForm);
 
@@ -730,15 +883,19 @@ void LayersManagerForm::slotAddEntity()
                 CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(block), QString("visualize_system"));
             }
         }
-    }
-    else if(item->type() == (int)ItemTypes::Vectors)
-    {
+    }break;
+    case (int)ItemTypes::Vectors : {
+
+        LayerItem * layerItem = dynamic_cast<LayerItem*>(item->parent());
+        if( ! layerItem)
+            return;
+
         syncMarks(true);
 
         _currentData.clear();
         _currentData.state = CurrentData::Create;
         _currentData.object = CurrentData::Vector;
-        if(layerItem->isBaseLayer() == false)
+        if(layerItem->getLayerType() == LayerTypes::Other)
             _currentData.layerId = layerItem->getLayerId();
 
         _svgEditorForm = new SvgEditorForm( (_isGeoScene ? _geoVisId : _pixelVisId ), _currentData.layerId != 0);
@@ -777,10 +934,200 @@ void LayersManagerForm::slotAddEntity()
 
         bool block(true);
         CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(block), QString("visualize_system"));
+    }break;
+    default : {
+
+        LayerItem * layerItem = dynamic_cast<LayerItem*>(item);
+        if( ! layerItem)
+            return;
+
+        if(layerItem->getLayerType() == LayerTypes::Etalon) //! формирование опорного изображения
+        {
+            bool hasVisibleItems(false);
+            for(int a(0); a < ui->treeWidget->topLevelItemCount(); ++a)
+            {
+                LayerItem * layerItem = dynamic_cast<LayerItem*>(ui->treeWidget->topLevelItem(a));
+                if(layerItem)
+                {
+                    QTreeWidgetItem * rastersItem = layerItem->getChild(ItemTypes::Rasters);
+                    if(rastersItem)
+                        for(int b(0); b < rastersItem->childCount(); ++b)
+                            if(rastersItem->child(b)->checkState(0) == Qt::Checked)
+                            {
+                                hasVisibleItems = true;
+                                break;
+                            }
+
+                    QTreeWidgetItem * vectorsItem = layerItem->getChild(ItemTypes::Vectors);
+                    if(vectorsItem)
+                        for(int b(0); b < vectorsItem->childCount(); ++b)
+                            if(vectorsItem->child(b)->checkState(0) == Qt::Checked)
+                            {
+                                hasVisibleItems = true;
+                                break;
+                            }
+
+                    if(hasVisibleItems)
+                        break;
+                }
+            }
+            if(hasVisibleItems == false)
+            {
+                QMessageBox::information(this, QString::fromUtf8("Внимание"), QString::fromUtf8("На плане этажа нет изображений или векторных данных или для них не выставлена видимость !"));
+                return;
+            }
+
+            QString text = QString::fromUtf8("Сформировать опорное изображение для здания из видимых слоев данного этажа ?");
+            if(QMessageBox::Yes != QMessageBox::question(this, QString::fromUtf8("Внимание"), text, QMessageBox::Yes, QMessageBox::No))
+                return;
+
+            WaitDialogUnlimited waitDialogUnlimited;
+            QTime t;
+            t.start();
+            while(t.elapsed() < 1000)
+                qApp->processEvents();
+
+            RasterItem * facilityEtalonRaster = dynamic_cast<RasterItem*>(layerItem->getChild(ItemTypes::FacilityEtalonRaster));
+            if(facilityEtalonRaster)
+            {
+                _loadingItems.remove(facilityEtalonRaster->getPath());
+                disconnect(ui->treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(slotItemChanged(QTreeWidgetItem*,int)));
+                delete facilityEtalonRaster;
+                connect(ui->treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(slotItemChanged(QTreeWidgetItem*,int)));
+            }
+
+            // hide marks, lines and rooms
+            bool isVisible(false);
+            CommonMessageNotifier::send( (uint)visualize_system::BusTags::SetRoomVisibleOnFloor, QVariant(isVisible), QString("visualize_system"));
+            syncMarks(true);
+            if(_lineItemsVisible)
+            {
+                foreach(QGraphicsLineItem * item, _lineItems)
+                    delete item;
+                _lineItems.clear();
+            }
+            if(_facilitiCoordsOnFloorItem)
+            {
+                delete _facilitiCoordsOnFloorItem;
+                _facilitiCoordsOnFloorItem = nullptr;
+            }
+
+            //------------------------------------------
+
+            QRectF rectOnScene = _pixelView->scene()->itemsBoundingRect();
+            QPixmap pixmap(rectOnScene.size().toSize());
+            {
+                QPainter painter(&pixmap);
+                _pixelView->scene()->render(&painter, QRectF(QPointF(0,0), pixmap.size()) , rectOnScene);
+                bool resPainterEnd = painter.end();
+                qDebug() << "-----------> resPainterEnd :" << resPainterEnd << ", rectOnScene :" << rectOnScene;
+            }
+            if(pixmap.isNull())
+            {
+                qDebug() << "-----------> pixmap.isNull() !!! , rectOnScene :" << rectOnScene;
+            }
+            else
+            {
+                QString filePath = TempDirController::createTempDirForCurrentUser() + QDir::separator() + "etalon.tif";
+                bool res = pixmap.save(filePath, "TIF");
+                if(res)
+                {
+                    BaseAreaPtr facilityPtr = _currentData.areaPtr->getParent();
+
+                    QPolygonF locationPolygon;
+                    BaseAreaPtr locationPtr = facilityPtr->getParent();
+                    if(locationPtr)
+                        locationPolygon = locationPtr->getCoords();
+
+                    PlanFileKeeper::PlanParams planParams;
+
+                    if(locationPolygon.isEmpty() == false)
+                    {
+                        double lenghtOnPlanFlorCoord = rectOnScene.width();
+                        QPointF locationInMapCoordCenter = locationPolygon.boundingRect().center();
+                        double meterInMapCoord = GeographicUtils::meterInSceneCoord(locationInMapCoordCenter);
+                        double widthFacilityInMeters = lenghtOnPlanFlorCoord / 100.;
+                        double lenghtOnGeoSceneCoord = meterInMapCoord * widthFacilityInMeters;
+
+                        double scale = lenghtOnGeoSceneCoord / lenghtOnPlanFlorCoord;
+
+                        planParams.scale_w = scale;
+                        planParams.scale_h = scale;
+                        planParams.rotate = 0;
+                        planParams.x = locationInMapCoordCenter.x();
+                        planParams.y = locationInMapCoordCenter.y();
+
+                        QString posOnPlanFloor = QString::number(rectOnScene.x(), 'f', 5) + QString(" ") + QString::number(rectOnScene.y(), 'f', 5);
+                        facilityPtr->addMetadata("string", "position_etalon_image_on_plan_floor", posOnPlanFloor);
+                    }
+
+
+                    BaseFileKeeperPtr basePlan = RegionBizManager::instance()->addFile(filePath, BaseFileKeeper::FT_PLAN, facilityPtr->getId());
+                    PlanFileKeeperPtr plan = BaseFileKeeper::convert<PlanFileKeeper>(basePlan);
+                    if( ! plan)
+                        return;
+
+                    plan->setPlanParams(planParams);
+                    bool resCommit = basePlan->commit();
+
+                    auto facility = BaseArea::convert<Facility>(facilityPtr);
+                    if(facility)
+                    {
+                        BaseFileKeeperPtr currEtalonFile = facility->getEtalonPlan();
+                        if(currEtalonFile)
+                            RegionBizManager::instance()->deleteFile(currEtalonFile);
+
+                        facility->setEtalonPlan(basePlan);
+
+                        facility->resetTransform();
+                        facility->commitTransformMatrix();
+
+                        resCommit = facility->commit();
+                    }
+
+                    LayerItem * etalonNode = getTopLevelItem(LayerTypes::Etalon);
+                    if(etalonNode)
+                    {
+                        RasterItem * rasterTreeWidgetItem = new RasterItem(etalonNode, plan->getEntityId(), plan->getPath());
+                        etalonNode->setExpanded(true);
+                        //rasterTreeWidgetItem->setSelected(true);
+
+                        BaseFileKeeper::FileState fileState = plan->getFileState();
+                        switch(fileState)
+                        {
+                        case BaseFileKeeper::FS_UNSYNC : {
+                            qDebug() << "slotRasterSaved, FS_UNSYNC";
+                            rasterTreeWidgetItem->setText(0, "FS_UNSYNC");
+                            _loadingItems.insert(plan->getPath(), rasterTreeWidgetItem);
+                            plan->syncFile();
+                        }break;
+                        case BaseFileKeeper::FS_SYNC : {
+                            qDebug() << "slotRasterSaved, FS_SYNC";
+                            _loadingItems.insert(plan->getPath(), rasterTreeWidgetItem);
+                            slotFileLoaded(plan);
+                        }break;
+                        case BaseFileKeeper::FS_INVALID : {
+                            qDebug() << "slotRasterSaved, FS_INVALID";
+                            rasterTreeWidgetItem->setText(0, "FS_INVALID");
+                        }break;
+                        }
+                    }
+                }
+            }
+
+            //------------------------------------------
+
+            // sync visible for marks, lines and rooms
+            isVisible = true;
+            CommonMessageNotifier::send( (uint)visualize_system::BusTags::SetRoomVisibleOnFloor, QVariant(isVisible), QString("visualize_system"));
+            syncMarks();
+            redrawItems(_pixelDelta);
+        }
+    }
     }
 }
 
-void LayersManagerForm::slotRasterSaved(QString filePath, QPointF scenePos, double scaleW, double scaleH, double rotate)
+void LayersManagerForm::slotRasterSaved(RasterSaveDatad data)
 {
     auto it = _layers.find(_currentData.layerId);
     if(it == _layers.end())
@@ -795,17 +1142,17 @@ void LayersManagerForm::slotRasterSaved(QString filePath, QPointF scenePos, doub
     if( ! rastersNode)
         return;
 
-    BaseFileKeeperPtr basePlan = RegionBizManager::instance()->addFile(filePath, BaseFileKeeper::FT_PLAN, _currentData.areaId);
+    BaseFileKeeperPtr basePlan = RegionBizManager::instance()->addFile(data.filePath, BaseFileKeeper::FT_PLAN, _currentData.areaPtr->getId());
     PlanFileKeeperPtr plan = BaseFileKeeper::convert<PlanFileKeeper>(basePlan);
     if( ! plan)
         return;
 
     PlanFileKeeper::PlanParams planParams;
-    planParams.scale_w = scaleW;
-    planParams.scale_h = scaleH;
-    planParams.rotate = rotate;
-    planParams.x = scenePos.x();
-    planParams.y = scenePos.y();
+    planParams.scale_w = data.scaleW;
+    planParams.scale_h = data.scaleH;
+    planParams.rotate = data.rotate;
+    planParams.x = data.scenePos.x();
+    planParams.y = data.scenePos.y();
     plan->setPlanParams(planParams);
 
     LayerPtr layer = RegionBizManager::instance()->getLayer(_currentData.layerId);
@@ -823,8 +1170,7 @@ void LayersManagerForm::slotRasterSaved(QString filePath, QPointF scenePos, doub
     }
     else if(_currentData.state == CurrentData::Edit)
     {
-        BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(_currentData.areaId);
-        BaseFileKeeperPtrs baseFileKeeperPtrs = ptr->getFilesByType(BaseFileKeeper::FT_PLAN);
+        BaseFileKeeperPtrs baseFileKeeperPtrs = _currentData.areaPtr->getFilesByType(BaseFileKeeper::FT_PLAN);
         foreach (BaseFileKeeperPtr baseFileKeeperPtr, baseFileKeeperPtrs)
             if(baseFileKeeperPtr->getPath() == _currentData.planPath)
             {
@@ -850,7 +1196,94 @@ void LayersManagerForm::slotRasterSaved(QString filePath, QPointF scenePos, doub
     if(rasterTreeWidgetItem)
     {
         rastersNode->setExpanded(true);
-        rasterTreeWidgetItem->setSelected(true);
+        //rasterTreeWidgetItem->setSelected(true);
+
+        BaseFileKeeper::FileState fileState = plan->getFileState();
+        switch(fileState)
+        {
+        case BaseFileKeeper::FS_UNSYNC : {
+            qDebug() << "slotRasterSaved, FS_UNSYNC";
+            rasterTreeWidgetItem->setText(0, "FS_UNSYNC");
+            _loadingItems.insert(plan->getPath(), rasterTreeWidgetItem);
+            plan->syncFile();
+        }break;
+        case BaseFileKeeper::FS_SYNC : {
+            qDebug() << "slotRasterSaved, FS_SYNC";
+            _loadingItems.insert(plan->getPath(), rasterTreeWidgetItem);
+            slotFileLoaded(plan);
+        }break;
+        case BaseFileKeeper::FS_INVALID : {
+            qDebug() << "slotRasterSaved, FS_INVALID";
+            rasterTreeWidgetItem->setText(0, "FS_INVALID");
+        }break;
+        }
+    }
+}
+
+void LayersManagerForm::slotEtalotRasterSaved(RasterSaveDatad data)
+{
+    BaseFileKeeperPtr basePlan = RegionBizManager::instance()->addFile(data.filePath, BaseFileKeeper::FT_PLAN, _currentData.areaPtr->getId());
+    PlanFileKeeperPtr plan = BaseFileKeeper::convert<PlanFileKeeper>(basePlan);
+    if( ! plan)
+        return;
+
+    PlanFileKeeper::PlanParams planParams;
+    planParams.scale_w = data.scaleW;
+    planParams.scale_h = data.scaleH;
+    planParams.rotate = data.rotate;
+    planParams.x = data.scenePos.x();
+    planParams.y = data.scenePos.y();
+    plan->setPlanParams(planParams);
+    plan->commit();
+
+    RasterItem * rasterTreeWidgetItem(nullptr);
+    LayerItem * layerItem = getTopLevelItem(LayerTypes::Etalon);
+    if(layerItem)
+        rasterTreeWidgetItem = dynamic_cast<RasterItem*>(layerItem->getChild(ItemTypes::FacilityEtalonRaster));
+
+    auto facility = BaseArea::convert<Facility>(_currentData.areaPtr);
+    if(facility)
+    {
+        BaseFileKeeperPtr currEtalonFile = facility->getEtalonPlan();
+        if(currEtalonFile)
+            RegionBizManager::instance()->deleteFile(currEtalonFile);
+
+        facility->setEtalonPlan(basePlan);
+        bool resCommit = facility->commit();
+
+        QPolygonF planOfFloorPolygon;
+        BaseMetadataPtr posStrPtr = _currentData.areaPtr->getMetadata("position_etalon_image_on_plan_floor");
+        if(posStrPtr)
+        {
+            QString posStr = posStrPtr->getValueAsString();
+            QStringList list = posStr.split(QString(" "));
+            if(list.size() == 2)
+            {
+                QPointF planOfFloorPos = QPointF(list.first().toDouble(), list.last().toDouble());
+                planOfFloorPolygon << planOfFloorPos
+                                   << QPointF(planOfFloorPos.x() + data.pixmapWidth, planOfFloorPos.y())
+                                   << QPointF(planOfFloorPos.x() + data.pixmapWidth, planOfFloorPos.y()  + data.pixmapHeight)
+                                   << QPointF(planOfFloorPos.x(), planOfFloorPos.y()  + data.pixmapHeight);
+            }
+        }
+        if(planOfFloorPolygon.isEmpty() == false)
+        {
+            QTransform transform;
+            QPolygonF geoScenePolygon = data.vertex;
+            if(QTransform::quadToQuad(geoScenePolygon, planOfFloorPolygon, transform))
+            {
+                facility->setTransform(transform);
+                resCommit = facility->commitTransformMatrix();
+            }
+        }
+    }
+
+    _currentData.clear();
+    slotEditorFormClose();
+
+    if(rasterTreeWidgetItem)
+    {
+        rasterTreeWidgetItem->reinit(plan->getPath());
 
         BaseFileKeeper::FileState fileState = plan->getFileState();
         switch(fileState)
@@ -889,7 +1322,7 @@ void LayersManagerForm::slotSvgSaved(QString filePath, QPointF scenePos)
     if( ! vectorsNode)
         return;
 
-    BaseFileKeeperPtr basePlan = RegionBizManager::instance()->addFile(filePath, BaseFileKeeper::FT_PLAN, _currentData.areaId);
+    BaseFileKeeperPtr basePlan = RegionBizManager::instance()->addFile(filePath, BaseFileKeeper::FT_PLAN, _currentData.areaPtr->getId());
     PlanFileKeeperPtr plan = BaseFileKeeper::convert<PlanFileKeeper>(basePlan);
     if( ! plan)
         return;
@@ -944,7 +1377,7 @@ void LayersManagerForm::slotSvgSaved(QString filePath, QPointF scenePos)
     if(svgItem)
     {
         vectorsNode->setExpanded(true);
-        svgItem->setSelected(true);
+        //svgItem->setSelected(true);
 
         BaseFileKeeper::FileState fileState = plan->getFileState();
         switch(fileState)
@@ -975,7 +1408,7 @@ void LayersManagerForm::slotEditEntity()
         return;
 
     QTreeWidgetItem* item = list.first();
-    if(item->type() == (int)ItemTypes::Raster)
+    if(item->type() == (int)ItemTypes::Raster || item->type() == (int)ItemTypes::FacilityEtalonRaster)
     {
         RasterItem * rasterItem = dynamic_cast<RasterItem*>(item);
         if( ! rasterItem)
@@ -995,12 +1428,26 @@ void LayersManagerForm::slotEditEntity()
 
         LayerItem * layerItem = dynamic_cast<LayerItem*>(item->parent()->parent());
         if(layerItem)
-            if(layerItem->isBaseLayer() == false)
+            if(layerItem->getLayerType() == LayerTypes::Other)
                 _currentData.layerId = layerItem->getLayerId();
 
-        _instrumentalForm = new LayerInstrumentalForm( (_isGeoScene ? _geoVisId : _pixelVisId ), graphicsPixmapItem->pixmap(), graphicsPixmapItem->scenePos(), rasterItem->getScW(), rasterItem->getScH(), rasterItem->getRotate(), _currentData.layerId != 0);
-        connect(_instrumentalForm, SIGNAL(signalSaved(QString,QPointF,double,double,double)),
-                this, SLOT(slotRasterSaved(QString,QPointF,double,double,double)));
+        int zValue(_currentData.layerId != 0 ? 1000000 : 86);
+        if(item->type() == (int)ItemTypes::Raster)
+        {
+//            _instrumentalForm = new LayerInstrumentalForm( (_isGeoScene ? _geoVisId : _pixelVisId ), graphicsPixmapItem->pixmap(), graphicsPixmapItem->scenePos(), rasterItem->getScW(), rasterItem->getScH(), rasterItem->getRotate(), zValue);
+//            connect(_instrumentalForm, SIGNAL(signalRasterSaved(RasterSaveDatad)), this, SLOT(slotRasterSaved(RasterSaveDatad)));
+
+            //_facilitiCoordsOnFloorItem->hide();
+            QPolygonF polygon = _facilitiCoordsOnFloorItem->polygon();
+            _instrumentalForm = new LayerInstrumentalForm(_pixelVisId, polygon, 1000000);
+
+        }
+        if(item->type() == (int)ItemTypes::FacilityEtalonRaster)
+        {
+            _instrumentalForm = new LayerInstrumentalForm( (_isGeoScene ? _geoVisId : _pixelVisId ), graphicsPixmapItem->pixmap(), graphicsPixmapItem->scenePos(), rasterItem->getScW(), rasterItem->getScH(), rasterItem->getRotate(), zValue);
+            _instrumentalForm->setModeMoveAndRotateOnly();
+            connect(_instrumentalForm, SIGNAL(signalRasterSaved(RasterSaveDatad)), this, SLOT(slotEtalotRasterSaved(RasterSaveDatad)));
+        }
 
         _ifaceInstrumentalForm = new EmbIFaceNotifier(_instrumentalForm);
 
@@ -1024,6 +1471,7 @@ void LayersManagerForm::slotEditEntity()
             //visualize_system::ViewInterface * viewInterface = visualize_system::VisualizerManager::instance()->getViewInterface(_geoVisId);
             widgetId = ewApp()->createWidget(struc); //, viewInterface->getVisualizerWindowId());
         }
+        ewApp()->setWidgetTitle(widgetId, QString("Изображение"));
         _instrumentalForm->setEmbeddedWidgetId(widgetId);
         connect(_ifaceInstrumentalForm, SIGNAL(signalClosed()), this, SLOT(slotEditorFormClose()));
         ewApp()->setVisible(_ifaceInstrumentalForm->id(), true);
@@ -1060,6 +1508,7 @@ void LayersManagerForm::slotDeleteEntity()
                         {
                             bool res = mngr->deleteFile(baseFileKeeperPtr);
                             qDebug() << "slotDeleteEntity, getPath :" << dataItem->getPath() << ", res:" << res;
+                            _loadingItems.remove(dataItem->getPath());
                             delete item;
 
                             break;
@@ -1078,14 +1527,19 @@ void LayersManagerForm::slotSelectionChanged()
     ui->deleteLayer->setDisabled(true);
 
     QList<QTreeWidgetItem*> list = ui->treeWidget->selectedItems();
-    if(list.isEmpty() == false)
+    if(list.isEmpty() == false && _currentData.areaPtr)
     {
         QTreeWidgetItem* item = list.first();
 
         LayerItem * layerItem = dynamic_cast<LayerItem*>(item);
         if(layerItem)
-            if(layerItem->isBaseLayer() == false)
+        {
+            if(_currentData.areaPtr->getType() == BaseArea::AT_FLOOR && layerItem->getLayerType() == LayerTypes::Etalon)
+                ui->addEntity->setEnabled(true);
+
+            if(layerItem->getLayerType() == LayerTypes::Other)
                 ui->deleteLayer->setEnabled(true);
+        }
 
         if(item->type() == (int)ItemTypes::Rasters || item->type() == (int)ItemTypes::Vectors)
             ui->addEntity->setEnabled(true);
@@ -1094,6 +1548,30 @@ void LayersManagerForm::slotSelectionChanged()
         {
             ui->editEntity->setEnabled(true);
             ui->deleteEntity->setEnabled(true);
+        }
+
+        if(_currentData.areaPtr->getType() == BaseArea::AT_FACILITY)
+        {
+            if(item->type() == (int)ItemTypes::FacilityEtalonRaster)
+                ui->editEntity->setEnabled(true);
+
+            if(item->type() == (int)ItemTypes::FacilityEtalonRaster)
+            {
+                ui->editEntity->setEnabled(true);
+                ui->deleteEntity->setEnabled(true);
+            }
+        }
+
+        if(_currentData.areaPtr->getType() == BaseArea::AT_FLOOR)
+        {
+            if(item->type() == (int)ItemTypes::FacilityEtalonRaster)
+            {
+                ui->editEntity->setEnabled(true);
+                ui->deleteEntity->setEnabled(true);
+            }
+
+            if(item->type() == (int)ItemTypes::FacilityPolygonOnPlan)
+                ui->editEntity->setEnabled(true);
         }
     }
 }
@@ -1154,18 +1632,23 @@ void LayersManagerForm::slotEditorFormClose()
     syncMarks();
 
     if( ! _isGeoScene)
-        calcSceneRect();
+        slotCalcSceneRect();
 
     bool block(false);
     CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(block), QString("visualize_system"));
     ewApp()->setVisible(_embeddedWidgetId, true);
 }
 
-void LayersManagerForm::calcSceneRect()
+void LayersManagerForm::slotCalcSceneRect()
 {
-    foreach(QGraphicsLineItem * item, _lineItems)
-        delete item;
-    _lineItems.clear();
+    _recalcSceneRectTimer.stop();
+
+    if(_lineItemsVisible)
+    {
+        foreach(QGraphicsLineItem * item, _lineItems)
+            delete item;
+        _lineItems.clear();
+    }
 
     QRectF r = _pixelView->scene()->itemsBoundingRect();
     double shW(r.width() / 4.), shH(r.height() / 4.);
@@ -1231,7 +1714,7 @@ void LayersManagerForm::slotDeleteLayer()
         QTreeWidgetItem* item = list.first();
         LayerItem * layerItem = dynamic_cast<LayerItem*>(item);
         if(layerItem)
-            if(layerItem->isBaseLayer() == false)
+            if(layerItem->getLayerType() == LayerTypes::Other)
             {
                 QString text = QString::fromUtf8("Удалить слой \"") + layerItem->text(0) + QString("\" ?");
                 if(QMessageBox::question(this, QString::fromUtf8("Внимание"), text, QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
@@ -1253,25 +1736,48 @@ void LayersManagerForm::slotToolButtonInPluginChecked(QVariant var)
     plugin_types::PixelVisualizerButtons button = (plugin_types::PixelVisualizerButtons)list.first().toInt();
     if(button == plugin_types::GRID)
     {
-        bool checked = list.last().toBool();
-        _lineItemsVisible = checked;
-
-        foreach(QGraphicsLineItem * item, _lineItems)
-            item->setVisible(_lineItemsVisible);
+        _lineItemsVisible = list.last().toBool();
+        if(_lineItemsVisible)
+        {
+            redrawItems(_pixelDelta);
+        }
+        else
+        {
+            foreach(QGraphicsLineItem * item, _lineItems)
+                delete item;
+            _lineItems.clear();
+        }
     }
+}
+
+LayerItem * LayersManagerForm::getTopLevelItem(LayerTypes type)
+{
+    if(type == LayerTypes::Base || type == LayerTypes::Etalon)
+        for(int a(0); a < ui->treeWidget->topLevelItemCount(); ++a)
+        {
+            LayerItem * layerItem = dynamic_cast<LayerItem*>(ui->treeWidget->topLevelItem(a));
+            if(layerItem)
+                if(layerItem->getLayerType() == type)
+                    return layerItem;
+        }
+
+    return nullptr;
 }
 
 
 ///-----------------------------------------------
 
-LayerItem::LayerItem(QTreeWidget * parent)
-    : QTreeWidgetItem(parent, QStringList() << QString::fromUtf8("базовый"), (int)ItemTypes::Layer)
-    , _layerId(0)
+LayerItem::LayerItem(QTreeWidget * parent, LayerTypes layerType)
+    : QTreeWidgetItem(parent,
+                      ( layerType == LayerTypes::Base ? QStringList() << QString::fromUtf8("базовый") : QStringList() << QString::fromUtf8("опорный") )
+                      , (int)ItemTypes::Layer)
+    , _layerType(layerType)
 {
 }
 
 LayerItem::LayerItem(QTreeWidget * parent, QString name, uint64_t layerId)
     : QTreeWidgetItem(parent, QStringList() << name, (int)ItemTypes::Layer)
+    , _layerType(LayerTypes::Other)
     , _layerId(layerId)
 {
 }
@@ -1281,9 +1787,9 @@ uint64_t LayerItem::getLayerId()
     return _layerId;
 }
 
-bool LayerItem::isBaseLayer()
+LayerTypes LayerItem::getLayerType()
 {
-    return _layerId == 0;
+    return _layerType;
 }
 
 void LayerItem::clearData()
@@ -1291,7 +1797,10 @@ void LayerItem::clearData()
     for(int i(0); i < childCount(); ++i)
     {
         QTreeWidgetItem * children = child(i);
-        if(children->type() == (int)ItemTypes::Rasters || children->type() == (int)ItemTypes::Vectors)
+        switch(children->type())
+        {
+        case (int)ItemTypes::Rasters :
+        case (int)ItemTypes::Vectors :
         {
             if(children->checkState(0) == Qt::PartiallyChecked)
                 children->setCheckState(0, Qt::Checked);
@@ -1302,6 +1811,7 @@ void LayerItem::clearData()
 
             foreach(QTreeWidgetItem* item, items)
                 delete item;
+        }break;
         }
     }
 
@@ -1324,19 +1834,12 @@ void LayerItem::clearData()
         setCheckState(0, Qt::Checked);
 }
 
-QTreeWidgetItem *LayerItem::rasterItems()
+QTreeWidgetItem *LayerItem::getChild(ItemTypes itemTypes)
 {
     for(int i(0); i<childCount(); ++i)
-        if(child(i)->text(0) == QString::fromUtf8("изображения"))
+        if(child(i)->type() == (int)itemTypes)
             return child(i);
-    return nullptr;
-}
 
-QTreeWidgetItem *LayerItem::vectorItems()
-{
-    for(int i(0); i<childCount(); ++i)
-        if(child(i)->text(0) == QString::fromUtf8("векторные данные"))
-            return child(i);
     return nullptr;
 }
 
@@ -1363,8 +1866,8 @@ QString DataItem::getPath()
 
 ///-----------------------------------------------
 
-RasterItem::RasterItem(QTreeWidgetItem *parentItem, uint64_t entityId, QString path)
-    : DataItem(parentItem, entityId, path, (int)ItemTypes::Raster)
+RasterItem::RasterItem(QTreeWidgetItem *parentItem, uint64_t entityId, QString path, ItemTypes itemType)
+    : DataItem(parentItem, entityId, path, (int)itemType)
 {
 }
 
@@ -1381,9 +1884,14 @@ void RasterItem::setRaster(QGraphicsPixmapItem *item, double scW, double scH, do
     _rotate = rotate;
     _pixmapItem = item;
     if(name.isEmpty())
-        setText(0, QString::fromUtf8("изображение"));
-    else
-        setText(0, name);
+    {
+        name = QString::fromUtf8("изображение");
+        LayerItem * layerItem = dynamic_cast<LayerItem*>(parent());
+        if(layerItem)
+            if(layerItem->getLayerType() == LayerTypes::Etalon)
+                name = QString::fromUtf8("опорное изображение");
+    }
+    setText(0, name);
 
     Qt::CheckState checkState = parent()->checkState(0);
     setCheckState(0, checkState);

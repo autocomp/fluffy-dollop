@@ -4,27 +4,44 @@
 #include <QWidget>
 #include <QLabel>
 #include <QMouseEvent>
+#include <QPolygonF>
 
 namespace Ui {
 class LayerInstrumentalForm;
 }
 
-namespace pixmap_transform_state {
-class PixmapTransformState;
+namespace transform_state {
+class TransformingState;
 }
+
+struct RasterSaveDatad
+{
+   QString filePath;
+   QPointF scenePos;
+   double scaleW = 1;
+   double scaleH = 1;
+   double rotate = 0;
+   QPolygonF vertex;
+   double pixmapWidth = 0;
+   double pixmapHeight = 0;
+};
 
 class LayerInstrumentalForm : public QWidget
 {
     Q_OBJECT
     
 public:
-    LayerInstrumentalForm(uint visualizerId, const QPixmap &pixmap, bool onTop);
-    LayerInstrumentalForm(uint visualizerId, const QPixmap &pixmap, QPointF scenePos, double scaleX, double scaleY, double rotate, bool onTop);
+    LayerInstrumentalForm(uint visualizerId, const QPixmap &pixmap, int zValue);
+    LayerInstrumentalForm(uint visualizerId, const QPixmap &pixmap, QPointF scenePos, double scaleX, double scaleY, double rotate, int zValue);
+
+    LayerInstrumentalForm(uint visualizerId, const QPolygonF &polygon, int zValue);
+
     ~LayerInstrumentalForm();
     void setEmbeddedWidgetId(quint64 id);
+    void setModeMoveAndRotateOnly();
 
 signals:
-    void signalSaved(QString filePath, QPointF scenePos, double scaleW, double scaleH, double rotate);
+    void signalRasterSaved(RasterSaveDatad data);
 
 private slots:
     void setMode(bool);
@@ -39,7 +56,7 @@ private slots:
     void areaSetted();
     void clearArea();
     void applyForImageOrArea(bool on_off);
-    void pixmapChanged();
+    void itemChanged();
     void undoAction();
     void save();
     
@@ -51,7 +68,7 @@ private:
     uint _visualizerId;
     Ui::LayerInstrumentalForm *ui;
     QColor _colorIn, _colorOut;
-    QSharedPointer<pixmap_transform_state::PixmapTransformState> _pixmapTransformState;
+    QSharedPointer<transform_state::TransformingState> _transformingState;
     bool _changed = false;
 };
 

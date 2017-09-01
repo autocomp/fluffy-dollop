@@ -3,7 +3,7 @@
 
 #include <QGraphicsRectItem>
 
-namespace pixmap_transform_state
+namespace transform_state
 {
 
 class FogItem : public QGraphicsRectItem

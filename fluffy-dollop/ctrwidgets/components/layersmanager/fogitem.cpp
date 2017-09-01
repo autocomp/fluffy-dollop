@@ -1,7 +1,7 @@
 #include "fogitem.h"
 #include <QPainter>
 
-using namespace pixmap_transform_state;
+using namespace transform_state;
 
 FogItem::FogItem(QGraphicsItem *parent, QRectF pixmapArea)
     : QGraphicsRectItem(pixmapArea, parent)

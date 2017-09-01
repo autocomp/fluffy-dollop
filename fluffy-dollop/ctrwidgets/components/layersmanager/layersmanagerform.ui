@@ -253,7 +253,7 @@
      </property>
      <column>
       <property name="text">
-       <string>Наименование</string>
+       <string>Наименование слоя</string>
       </property>
      </column>
     </widget>
