@@ -133,6 +133,12 @@ bool BaseEntity::addMetadata(BaseMetadataPtr data)
     return false;
 }
 
+bool BaseEntity::deleteMetadata(QString name)
+{
+    auto mngr = RegionBizManager::instance();
+    return mngr->deleteMetadata( _id, name );
+}
+
 BaseFileKeeperPtrs BaseEntity::getFiles()
 {
     auto mngr = RegionBizManager::instance();

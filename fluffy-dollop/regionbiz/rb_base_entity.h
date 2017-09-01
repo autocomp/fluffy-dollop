@@ -52,6 +52,7 @@ public:
     bool setMetadataValue( QString name , QVariant val );
     bool addMetadata( QString type, QString name, QVariant val = QVariant() );
     bool addMetadata( BaseMetadataPtr data );
+    bool deleteMetadata( QString name );
 
     // files
     BaseFileKeeperPtrs getFiles();

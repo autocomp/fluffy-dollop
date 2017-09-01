@@ -335,6 +335,19 @@ bool RegionBizManager::addMetadata( BaseMetadataPtr data )
     return false;
 }
 
+bool RegionBizManager::deleteMetadata( uint64_t id, QString name )
+{
+    if( !isMetadataPresent( id, name ))
+       return false;
+
+    BaseMetadata::getMutex().lock();
+    auto it = BaseMetadata::getMetadatas()[id].find( name );
+    BaseMetadata::getMetadatas()[id].erase( it );
+    BaseMetadata::getMutex().unlock();
+
+    return true;
+}
+
 MarkPtr RegionBizManager::getMark( uint64_t id )
 {
     auto entity = BaseEntity::getEntity( id );

@@ -95,6 +95,7 @@ public:
     bool  addMetadata( uint64_t id, QString type,
                       QString name, QVariant val = QVariant() );
     bool addMetadata( BaseMetadataPtr data );
+    bool deleteMetadata( uint64_t id, QString name );
 
     // marks
     MarkPtr getMark( uint64_t id );
