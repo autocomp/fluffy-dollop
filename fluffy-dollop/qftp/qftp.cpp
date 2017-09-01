@@ -2404,6 +2404,22 @@ void QFtpPrivate::_q_piFtpReply(int code, const QString &text)
 */
 QFtp::~QFtp()
 {
+    disconnect(&d->pi, SIGNAL(connectState(int)),
+            this, SLOT(_q_piConnectState(int)));
+    disconnect(&d->pi, SIGNAL(finished(QString)),
+            this, SLOT(_q_piFinished(QString)));
+    disconnect(&d->pi, SIGNAL(error(int,QString)),
+            this, SLOT(_q_piError(int,QString)));
+    disconnect(&d->pi, SIGNAL(rawFtpReply(int,QString)),
+            this, SLOT(_q_piFtpReply(int,QString)));
+
+    disconnect(&d->pi.dtp, SIGNAL(readyRead()),
+            this, SIGNAL(readyRead()));
+    disconnect(&d->pi.dtp, SIGNAL(dataTransferProgress(qint64,qint64)),
+            this, SIGNAL(dataTransferProgress(qint64,qint64)));
+    disconnect(&d->pi.dtp, SIGNAL(listInfo(QUrlInfo)),
+            this, SIGNAL(listInfo(QUrlInfo)));
+
     abort();
     close();
 }
