@@ -295,7 +295,7 @@ void FtpWrapper::restartSync()
     _commands[ id ] = QFtp::List;
 
     // init nodes
-    if( !_root_node )
+    if( !isValid() )
         _root_node = FtpTreeNodePtr( new FtpTreeNode );
     _current_node = _root_node;
 }
@@ -314,6 +314,8 @@ FtpTreeNodePtr FtpWrapper::getNodeByPath(QString ftp_path)
 {
     QStringList node_names = ftp_path.split( SEPARATOR,
                                              QString::SkipEmptyParts );
+    if( !isValid() )
+        _root_node = FtpTreeNodePtr( new FtpTreeNode() );
     FtpTreeNodePtr cur_node = _root_node;
     for( QString name: node_names )
     {
@@ -493,7 +495,7 @@ void FtpWrapper::loadTreeFromFile()
     json_file.close();
 
     // init root node
-    if( !_root_node )
+    if( !isValid() )
         _root_node = FtpTreeNodePtr( new FtpTreeNode );
 
     // read json
@@ -532,6 +534,9 @@ void FtpWrapper::recursiveReadFromFile(QJsonObject obj, FtpTreeNodePtr node)
 
 void FtpWrapper::saveTreeToFile()
 {
+    if( !isValid() )
+        _root_node = FtpTreeNodePtr( new FtpTreeNode() );
+
     QJsonArray main_array;
     for( FtpTreeNodePtr main_node: *( _root_node->getChilds() ) )
     {
@@ -600,6 +605,9 @@ void FtpWrapper::appendElement( QStringList names,
                                 QDateTime last_modif,
                                 uint64_t size )
 {
+    if( !_root_node )
+        _root_node = FtpTreeNodePtr( new FtpTreeNode );
+
     FtpTreeNodePtr node = _root_node;
 
     while( names.size() )
