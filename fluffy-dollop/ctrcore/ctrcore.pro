@@ -40,7 +40,7 @@ HEADERS += \
 
 LIBS += -L$${INSTALL_PATH_LIB} \
         -lembeddedwidgets \
-#        -lGeographic \
+        -lGeographic \
 #        -lgdal \
 #        -lunilog \
 #        -lobjrepr \

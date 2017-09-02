@@ -51,7 +51,8 @@ enum class BusTags
     LayerVisibleChanged,
     //! параметр - QVariantList -> size==2 : list[0] - int buttonType (plugin_types::PixelVisualizerButtons); list[1] - bool - checkState.
     ToolButtonInPluginChecked,
-
+    //! параметр - bool
+    SetRoomVisibleOnFloor,
 };
 }
 
