@@ -21,6 +21,8 @@ LIBS += -L$${INSTALL_PATH_LIB} \
         -lctrcore \
         -lctrvisual \
         -lregionbiz \
+        -lembeddedwidgets \
+        -lGeographic \
 #        -ldpf_sfm \
 #        -ldpf_io_base \
 #        -ldpf_core \
@@ -28,7 +30,6 @@ LIBS += -L$${INSTALL_PATH_LIB} \
 #        -ldpf_math \
 #        -ldpf_improc \
 #        -ldpf_srv_sfm \
-        -lembeddedwidgets
 
 SOURCES += \
 #    components/filedialog/*.cpp \
@@ -41,7 +42,6 @@ HEADERS += \
     $$files(components/waitdialog/*.h) \
     $$files(components/layersmanager/*.h) \
     $$files(components/slidewindow/*.h) \
-    components/layersmanager/commontypes.h
 
 OTHER_FILES += \
 

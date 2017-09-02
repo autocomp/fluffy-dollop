@@ -286,7 +286,8 @@ void LayerInstrumentalForm::setMode(bool on_off)
     ui->persentSlider->setValue(0);
     setOpacityValue(0);
 
-    if(_transformingState->isModeMoveAndRotateOnly() == false)
+    // must hiiden in polygon edit mode !
+    if(_transformingState->isModeMoveAndRotateOnly() == false && _transformingState->getTransformingItemType() != TransformingItem::PolygonItem)
         ui->persentFrame->setVisible(ui->transform->isChecked());
 
     ui->colorFrame->setVisible( ui->changeColor->isChecked() );
@@ -515,7 +516,10 @@ void LayerInstrumentalForm::save()
     switch (_transformingState->getTransformingItemType())
     {
     case TransformingItem::PolygonItem : {
-
+        QPolygonF polygon;
+        double W, H;
+        _transformingState->getCurrentVertex(polygon, W, H);
+        emit signalPolygonSaved(polygon);
     }break;
 
     case TransformingItem::PixmapItem : {

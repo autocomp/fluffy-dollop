@@ -185,21 +185,12 @@ void TransformingState::init(QGraphicsScene *scene, QGraphicsView *view, const i
     switch (_transformingItemType)
     {
     case TransformingItem::PolygonItem : {
+        PolygonTransformingItem * transformingPolygonItem = new PolygonTransformingItem(*this);
+        transformingPolygonItem->setPolygon(_polygon);
 
-//        QRectF boundingRect = _polygon.boundingRect();
-//        _pixmapScenePos = boundingRect.topLeft();
         _originW = _polygon.boundingRect().width();
         _originH = _polygon.boundingRect().height();
-
-//        QPolygonF polygon;
-//        foreach(QPointF p, _polygon)
-//            polygon.append(p - _pixmapScenePos);
-
-        PolygonTransformingItem * transformingPolygonItem = new PolygonTransformingItem(*this);
-        transformingPolygonItem->setPolygon(_polygon); //polygon);
-
         _transformingItem = transformingPolygonItem;
-
     }break;
 
     case TransformingItem::PixmapItem : {
@@ -212,7 +203,6 @@ void TransformingState::init(QGraphicsScene *scene, QGraphicsView *view, const i
 
         _originW = _pixmap.width();
         _originH = _pixmap.height();
-
         _transformingItem = transformingPixmapItem;
         _transformingItem->setPos(_pixmapScenePos);
     }break;
@@ -321,7 +311,7 @@ void TransformingState::init(QGraphicsScene *scene, QGraphicsView *view, const i
     undoAct.scaleH = _scH;
     _undoStack.push(undoAct);
 
-    view->centerOn(_transformingItem->castToGraphicsItem());
+    //view->centerOn(_transformingItem->castToGraphicsItem());
 }
 
 bool TransformingState::wheelEvent(QWheelEvent* e, QPointF scenePos)
@@ -802,10 +792,8 @@ void TransformingState::clearAreaOnImage()
 
 void TransformingState::getCurrentVertex(QPolygonF &vertex, double &pixmapWidth, double &pixmapHeight)
 {
-    // QRectF brect = _transformingItem->boundingRect();
     pixmapWidth = _pixmap.width();
     pixmapHeight = _pixmap.height();
-
     vertex << _handleItemTopLeft->scenePos() << _handleItemTopRight->scenePos() << _handleItemBottomRight->scenePos() << _handleItemBottomLeft->scenePos();
 }
 

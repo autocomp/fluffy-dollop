@@ -11,11 +11,6 @@ enum PixelVisualizerButtons
 
 };
 
-
-
-
-
-
 }
 
 #endif // COMMONTYPES_H

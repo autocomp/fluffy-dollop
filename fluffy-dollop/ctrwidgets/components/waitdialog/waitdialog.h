@@ -60,7 +60,7 @@ class WaitDialogUnlimited : public QDialog
     Q_OBJECT
 public:
     WaitDialogUnlimited( QString descriptionText = "", QString userButtonText = "", uint maxWgtWidth = 150,
-                         QWidget *parent = 0, QString gifResourcePath = ":/img/loading.gif" );
+                         QWidget *parent = 0, QString gifResourcePath = QString("://img/loading.gif") );
     ~WaitDialogUnlimited();
 
 private:

@@ -42,6 +42,7 @@ public:
 
 signals:
     void signalRasterSaved(RasterSaveDatad data);
+    void signalPolygonSaved(QPolygonF);
 
 private slots:
     void setMode(bool);
