@@ -25,8 +25,8 @@ QList<InitPluginData> PixelVisButtonsPlugin::getInitPluginData()
     InitPluginData initPluginData_1;
     initPluginData_1.buttonName = QString("PixelVisButtonsPlugin_SCALE_WIDGET");
     initPluginData_1.translateButtonName = QString::fromUtf8("масштабная линейка");
-    initPluginData_1.iconForButtonOn = QIcon("://img/grid_icon.png");
-    initPluginData_1.iconForButtonOff = QIcon("://img/grid_icon.png");
+    initPluginData_1.iconForButtonOn = QIcon("://img/tools_metr_icon.png");
+    initPluginData_1.iconForButtonOff = QIcon("://img/tools_metr_icon.png");
     initPluginData_1.tooltip = QString::fromUtf8("масштабная линейка");
     initPluginData_1.isCheckable = true;
     list.append(initPluginData_1);
@@ -34,8 +34,8 @@ QList<InitPluginData> PixelVisButtonsPlugin::getInitPluginData()
     InitPluginData initPluginData_2;
     initPluginData_2.buttonName = QString("PixelVisButtonsPlugin_GRID");
     initPluginData_2.translateButtonName = QString::fromUtf8("масштабная сетка");
-    initPluginData_2.iconForButtonOn = QIcon("://img/tools_metr_icon.png");
-    initPluginData_2.iconForButtonOff = QIcon("://img/tools_metr_icon.png");
+    initPluginData_2.iconForButtonOn = QIcon("://img/grid_icon.png");
+    initPluginData_2.iconForButtonOff = QIcon("://img/grid_icon.png");
     initPluginData_2.tooltip = QString::fromUtf8("масштабная сетка");
     initPluginData_2.isCheckable = true;
     list.append(initPluginData_2);

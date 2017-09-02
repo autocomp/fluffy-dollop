@@ -59,6 +59,7 @@ protected slots:
     void slotSetLayerVisible(QVariant var);
     void slotZoomChanged(int zoomLevel);
     void slotToolButtonInPluginChecked(QVariant var);
+    void slotSetRoomVisibleOnFloor(QVariant var);
 
 private:
     struct FloorInfo

@@ -112,6 +112,10 @@ void PixelWorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int 
                                       qMetaTypeId< QVariantList >(),
                                       QString("visualize_system") );
 
+    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::SetRoomVisibleOnFloor, this, SLOT(slotSetRoomVisibleOnFloor(QVariant)),
+                                      qMetaTypeId< bool >(),
+                                      QString("visualize_system") );
+
     auto mngr = RegionBizManager::instance();
     mngr->subscribeOnCurrentChange(this, SLOT(slotSelectionItemsChanged(uint64_t,uint64_t)));
     mngr->subscribeCenterOn(this, SLOT(slotCenterOn(uint64_t)));
@@ -141,9 +145,11 @@ void PixelWorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int 
 
     _view->setLayout(vLayout);
 
+    setZlevel(-2);
+
     visualize_system::VisualizerManager * visMng = visualize_system::VisualizerManager::instance();
     connect(visMng->getViewInterface(visualizerId), SIGNAL(signalZoomChanged(int)), this, SLOT(slotZoomChanged(int)));
-    slotZoomChanged(1);
+    slotZoomChanged(-2);
 
     reinit();
 }
@@ -855,7 +861,16 @@ void PixelWorkState::slotToolButtonInPluginChecked(QVariant var)
     }
 }
 
-
+void PixelWorkState::slotSetRoomVisibleOnFloor(QVariant var)
+{
+    bool isVisible = var.toBool();
+    for(auto it = _itemsOnFloor.begin(); it != _itemsOnFloor.end(); ++it)
+    {
+        AreaGraphicsItem * item = dynamic_cast<AreaGraphicsItem*>(it.value());
+        if(item)
+            item->setItemVisible(isVisible);
+    }
+}
 
 
 

@@ -186,11 +186,15 @@ void AreaGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
     if(_areaInitData.isSelectableFromMap)
     {
         if(polygon().containsPoint(event->pos(), Qt::OddEvenFill))
+        {
+            //event->accept();
             emit signalSelectItem(_areaInitData.id, false);
-//        else
-//            QGraphicsPolygonItem::mousePressEvent(event);
+            qDebug() << "AreaGraphicsItem::mousePressEvent, pos:" << event->pos() << "isAccepted:" << event->isAccepted();
+        }
+        else
+            QGraphicsPolygonItem::mousePressEvent(event);
     }
-//    else
+    else
         QGraphicsPolygonItem::mousePressEvent(event);
 }
 

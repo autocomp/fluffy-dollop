@@ -135,29 +135,29 @@ void WorkState::reinit()
                 const qulonglong locationId(locationPtr->getId());
                 QList<QGraphicsItem*> graphicsItems;
 
-                QString planPath = "";
-                auto plans = locationPtr->getFilesByType( BaseFileKeeper::FT_PLAN );
-                if( plans.size() )
-                {
-                    BaseFileKeeperPtr plan = plans.at( 0 );
-                    QFileInfo info( *( plan->getLocalFile().get() ));
-                    planPath = info.filePath();
-                }
-                if(planPath.isEmpty() == false)
-                {
-                    QGraphicsPixmapItem * pixmapItem = new QGraphicsPixmapItem(QPixmap(planPath));
+//                QString planPath = "";
+//                auto plans = locationPtr->getFilesByType( BaseFileKeeper::FT_PLAN );
+//                if( plans.size() )
+//                {
+//                    BaseFileKeeperPtr plan = plans.at( 0 );
+//                    QFileInfo info( *( plan->getLocalFile().get() ));
+//                    planPath = info.filePath();
+//                }
+//                if(planPath.isEmpty() == false)
+//                {
+//                    QGraphicsPixmapItem * pixmapItem = new QGraphicsPixmapItem(QPixmap(planPath));
 
-                    BaseFileKeeperPtr base_plan = plans.at( 0 );
-                    PlanFileKeeperPtr plan = BaseFileKeeper::convert< PlanFileKeeper >( base_plan );
-                    PlanFileKeeper::PlanParams planParams = plan->getPlanParams();
-                    pixmapItem->setTransform(QTransform().scale(planParams.scale_w, planParams.scale_h));
-                    pixmapItem->setPos(planParams.x, planParams.y);
-                    pixmapItem->setZValue(100);
-                    pixmapItem->setOpacity(0.5);
-                    pixmapItem->hide();
-                    _scene->addItem(pixmapItem);
-                    graphicsItems.append(pixmapItem);
-                }
+//                    BaseFileKeeperPtr base_plan = plans.at( 0 );
+//                    PlanFileKeeperPtr plan = BaseFileKeeper::convert< PlanFileKeeper >( base_plan );
+//                    PlanFileKeeper::PlanParams planParams = plan->getPlanParams();
+//                    pixmapItem->setTransform(QTransform().scale(planParams.scale_w, planParams.scale_h));
+//                    pixmapItem->setPos(planParams.x, planParams.y);
+//                    pixmapItem->setZValue(100);
+//                    pixmapItem->setOpacity(0.5);
+//                    pixmapItem->hide();
+//                    _scene->addItem(pixmapItem);
+//                    graphicsItems.append(pixmapItem);
+//                }
 
                 //qDebug() << "locationPtr :" << QString::fromStdString(locationPtr->getDescription());
                 AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(locationPtr->getCoords());
@@ -742,7 +742,7 @@ void WorkState::slotSetItemselect(qulonglong id, bool on_off)
 
 bool WorkState::mousePressEvent(QMouseEvent* e, QPointF scenePos)
 {
-    //qDebug() << "mousePressEvent :" << QString::number(scenePos.x(), 'f', 8) << QString::number(scenePos.y(), 'f', 8);
+    qDebug() << "mousePressEvent :" << QString::number(scenePos.x(), 'f', 8) << QString::number(scenePos.y(), 'f', 8);
     return ScrollBaseState::mousePressEvent(e, scenePos);
 }
 
