@@ -40,7 +40,7 @@ LIBS += -L$${ROOT_DIR}bin/lib \
         -lctrcore \
         -lctrrasterrender \
         -lembeddedwidgets \
-#        -lGeographic \
+        -lGeographic \
 #        -ldpf_core \
 #        -ldpf_geo \
 #        -ldpf_io_base \

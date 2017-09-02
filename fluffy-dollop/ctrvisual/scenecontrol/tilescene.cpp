@@ -53,7 +53,10 @@ void TileScene::mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent)
 void TileScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent)
 {
     if(isActive)
+    {
+        qDebug() << "TileScene::mousePressEvent, pos:" << mouseEvent->pos() << "isAccepted:" << mouseEvent->isAccepted();
         QGraphicsScene::mousePressEvent(mouseEvent);
+    }
 }
 
 void TileScene::mouseReleaseEvent(QGraphicsSceneMouseEvent * mouseEvent)

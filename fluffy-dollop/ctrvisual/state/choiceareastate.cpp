@@ -85,7 +85,7 @@ bool ChoiceAreaState::mouseMoveEvent(QMouseEvent * e, QPointF scenePos)
     }break;
     };
 
-    return false;
+    return true;
 }
 
 bool ChoiceAreaState::mousePressEvent(QMouseEvent* e, QPointF scenePos)
@@ -106,7 +106,7 @@ bool ChoiceAreaState::mousePressEvent(QMouseEvent* e, QPointF scenePos)
 //            return false;
 //        }
 
-        _polygon.append(scenePos);
+        _polygon.append(_lastMousePos);
 
         QPointF prevPos(scenePos);
         if(_lineItems.size() > 0)
