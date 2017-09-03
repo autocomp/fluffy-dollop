@@ -26,7 +26,7 @@ class LayerItem;
 struct CurrentData
 {
     enum State{NoState, Create, Edit};
-    enum Object{NoObject, Raster, Vector, Polygon};
+    enum Object{NoObject, Raster, EtalonRaster, Vector, Polygon};
 
     void clear()
     {
@@ -100,7 +100,7 @@ private:
 
     QList<QGraphicsLineItem*> _lineItems;
     ZoomState _zoomState = ZoomState::OneMeter;
-    int _pixelDelta;
+    int _pixelDelta = 1000; // tot level, kotoriy stoit v PixelWorkState::init ---> setZlevel(-2) !!!
     bool _lineItemsVisible = false;
     QTimer _recalcSceneRectTimer;
 

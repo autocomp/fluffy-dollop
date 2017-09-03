@@ -4,6 +4,8 @@
 namespace layers_manager_form
 {
 
+const int DepthScenePixelInMeter = 100;
+
 enum class LayerTypes
 {
     Base = 1,

@@ -200,11 +200,11 @@ void TransformingState::init(QGraphicsScene *scene, QGraphicsView *view, const i
         QPainter painter(&pm);
         painter.drawPixmap(0,0,_pixmap);
         transformingPixmapItem->setPixmap(pm);
+        transformingPixmapItem->setPos(_pixmapScenePos);
 
         _originW = _pixmap.width();
         _originH = _pixmap.height();
         _transformingItem = transformingPixmapItem;
-        _transformingItem->setPos(_pixmapScenePos);
     }break;
 
     case TransformingItem::SvgItem : {
@@ -253,6 +253,7 @@ void TransformingState::init(QGraphicsScene *scene, QGraphicsView *view, const i
     pen.setCosmetic(true);
     pen.setWidth(2);
 
+    QPointF handleItemAnchorPos(_originW/2., _originH/2.);
     if(_transformingItemType != TransformingItem::PolygonItem)
     {
         _topLine = new LineItem(_transformingItem->castToGraphicsItem(), pen);
@@ -267,9 +268,15 @@ void TransformingState::init(QGraphicsScene *scene, QGraphicsView *view, const i
         _rightLine = new LineItem(_transformingItem->castToGraphicsItem(), pen);
         _rightLine->setLine(QLineF(_handleItemTopRight->pos(), _handleItemBottomRight->pos()));
     }
+    else
+    {
+        handleItemAnchorPos = _polygon.boundingRect().center();
+        if(_polygon.containsPoint(handleItemAnchorPos, Qt::OddEvenFill) == false)
+            handleItemAnchorPos = _polygon.first();
+    }
 
     _handleItemAnchor = new AnchorHandleItem(*this, _scene, _transformingItem->castToGraphicsItem());
-    _handleItemAnchor->setPos(_originW/2., _originH/2.);
+    _handleItemAnchor->setPos(handleItemAnchorPos);
     _handleItems.append(_handleItemAnchor);
 
     _handleItemRotater = new RotaterHandleItem(*this, _originH * 0.75, _scene, _transformingItem->castToGraphicsItem());
@@ -284,7 +291,9 @@ void TransformingState::init(QGraphicsScene *scene, QGraphicsView *view, const i
         _scW = _originalScale;
     if(_scH < 0)
         _scH = _originalScale;
-    _transformingItem->castToGraphicsItem()->setTransform(QTransform().scale(_scW, _scH));
+
+    _transformingItem->castToGraphicsItem()->setTransform(QTransform().rotate(_rotation).scale(_scW, _scH));
+    //_transformingItem->castToGraphicsItem()->setTransform(QTransform().scale(_scW, _scH));
 
     _transformingItem->castToGraphicsItem()->setPos(_handleItemAnchor->scenePos());
     _transformingItem->castToGraphicsItem()->setTransform(QTransform().rotate(_rotation).scale(_scW, _scH).translate(-_handleItemAnchor->x(), -_handleItemAnchor->y()));

@@ -286,8 +286,8 @@ void LayerInstrumentalForm::setMode(bool on_off)
     ui->persentSlider->setValue(0);
     setOpacityValue(0);
 
-    // must hiiden in polygon edit mode !
-    if(_transformingState->isModeMoveAndRotateOnly() == false && _transformingState->getTransformingItemType() != TransformingItem::PolygonItem)
+    // must hidden in polygon edit mode !
+    if(_transformingState->getTransformingItemType() != TransformingItem::PolygonItem)
         ui->persentFrame->setVisible(ui->transform->isChecked());
 
     ui->colorFrame->setVisible( ui->changeColor->isChecked() );

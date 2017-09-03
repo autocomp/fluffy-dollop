@@ -141,10 +141,6 @@ void LayersManagerForm::reinitLayers()
 
     LayerItem * etalonLayerItem = new LayerItem(ui->treeWidget, LayerTypes::Etalon);
     etalonLayerItem->setCheckState(0, Qt::Checked);
-//    QTreeWidgetItem * etalonRaster = new QTreeWidgetItem(etalonLayerItem, QStringList() << QString::fromUtf8("опорное изображение"), (int)ItemTypes::FacilityEtalonRasters);
-//    etalonRaster->setCheckState(0, Qt::Checked);
-//    QTreeWidgetItem * polygonOnPlan = new QTreeWidgetItem(etalonLayerItem, QStringList() << QString::fromUtf8("контур здания"), (int)ItemTypes::FacilityPolygonOnPlans);
-//    polygonOnPlan->setCheckState(0, Qt::Checked);
 
     foreach(LayerPtr layerPtr, RegionBizManager::instance()->getLayers())
     {
@@ -165,6 +161,7 @@ void LayersManagerForm::setEmbeddedWidgetId(quint64 id)
 void LayersManagerForm::reset(bool showEtalonNode)
 {
     ui->treeWidget->clearSelection();
+    slotSelectionChanged();
 
     _currentData.areaPtr.reset();
     _currentData.clear();
@@ -356,7 +353,7 @@ void LayersManagerForm::reload(BaseAreaPtr ptr, bool isGeoScene)
                     QPolygonF facilityCoordsOnFloorPlan;
                     foreach(QPointF p, facilityCoords)
                     {
-                        p = ( (p - facilityBoundingRectOnMapScene.topLeft()) / meterInMapCoord ) * 100;
+                        p = ( (p - facilityBoundingRectOnMapScene.topLeft()) / meterInMapCoord ) * DepthScenePixelInMeter;
                         facilityCoordsOnFloorPlan.append(p);
                     }
 
@@ -1020,9 +1017,10 @@ void LayersManagerForm::slotAddEntity()
                 return;
 
             // hide marks, lines and rooms (and facility polygon on floor plan)
-            QTreeWidgetItem * facilityPolygonOnPlan = etalonNode->getChild(ItemTypes::FacilityPolygonOnPlan);
-            if(facilityPolygonOnPlan)
-                delete facilityPolygonOnPlan;
+            FacilityPolygonItem * facilityPolygon = dynamic_cast<FacilityPolygonItem*>(etalonNode->getChild(ItemTypes::FacilityPolygonOnPlan));
+            if(facilityPolygon)
+                facilityPolygon->getPolygonItem()->hide();
+
             bool isVisible(false);
             CommonMessageNotifier::send( (uint)visualize_system::BusTags::SetRoomVisibleOnFloor, QVariant(isVisible), QString("visualize_system"));
             syncMarks(true);
@@ -1051,64 +1049,96 @@ void LayersManagerForm::slotAddEntity()
             {
                 QString filePath = TempDirController::createTempDirForCurrentUser() + QDir::separator() + "etalon.tif";
                 bool res = pixmap.save(filePath, "TIF");
-                if(res)
+                auto facility = BaseArea::convert<Facility>(_currentData.areaPtr->getParent());
+                if(res && facility)
                 {
-                    BaseAreaPtr facilityPtr = _currentData.areaPtr->getParent();
-
-                    QPolygonF locationPolygon;
-                    BaseAreaPtr locationPtr = facilityPtr->getParent();
-                    if(locationPtr)
-                        locationPolygon = locationPtr->getCoords();
-
-                    PlanFileKeeper::PlanParams planParams;
-
-                    if(locationPolygon.isEmpty() == false)
-                    {
-                        double lenghtOnPlanFlorCoord = rectOnScene.width();
-                        QPointF locationInMapCoordCenter = locationPolygon.boundingRect().center();
-                        double meterInMapCoord = GeographicUtils::meterInSceneCoord(locationInMapCoordCenter);
-                        double widthFacilityInMeters = lenghtOnPlanFlorCoord / 100.;
-                        double lenghtOnGeoSceneCoord = meterInMapCoord * widthFacilityInMeters;
-
-                        double scale = lenghtOnGeoSceneCoord / lenghtOnPlanFlorCoord;
-
-                        planParams.scale_w = scale;
-                        planParams.scale_h = scale;
-                        planParams.rotate = 0;
-                        planParams.x = locationInMapCoordCenter.x();
-                        planParams.y = locationInMapCoordCenter.y();
-
-                        QString posOnPlanFloor = QString::number(rectOnScene.x(), 'f', 5) + QString(" ") + QString::number(rectOnScene.y(), 'f', 5);
-                        facilityPtr->addMetadata("string", "position_etalon_image_on_plan_floor", posOnPlanFloor);
-                    }
-
-
-                    BaseFileKeeperPtr basePlan = RegionBizManager::instance()->addFile(filePath, BaseFileKeeper::FT_PLAN, facilityPtr->getId());
+                    BaseFileKeeperPtr basePlan = RegionBizManager::instance()->addFile(filePath, BaseFileKeeper::FT_PLAN, facility->getId());
                     PlanFileKeeperPtr plan = BaseFileKeeper::convert<PlanFileKeeper>(basePlan);
                     if( ! plan)
                         return;
 
-                    plan->setPlanParams(planParams);
-                    bool resCommit = basePlan->commit();
-
-                    auto facility = BaseArea::convert<Facility>(facilityPtr);
-                    if(facility)
+                    if(facility->isHaveTransform())
                     {
+                        bool ok;
+                        QTransform planToMapTransformer = facility->getTransform().inverted(&ok);
+                        QPointF facilityTopLeftOnMap = planToMapTransformer.map(rectOnScene.topLeft());
+                        QPointF facilityTopRightOnMap = planToMapTransformer.map(rectOnScene.topRight());
+                        double lenghtOnMapCoord = GeographicUtils::lenght(facilityTopLeftOnMap, facilityTopRightOnMap);
+                        double lenghtOnPlanFlorCoord = rectOnScene.width();
+                        double scale = lenghtOnMapCoord / lenghtOnPlanFlorCoord;
+
+                        PlanFileKeeper::PlanParams planParams;
+                        planParams.scale_w = scale;
+                        planParams.scale_h = scale;
+                        planParams.x = facilityTopLeftOnMap.x();
+                        planParams.y = facilityTopLeftOnMap.y();
+
+                        QLineF line(facilityTopLeftOnMap, facilityTopRightOnMap);
+                        planParams.rotate = (360 - line.angle());
+                        while(planParams.rotate > 360)
+                            planParams.rotate -= 360.0;
+
+                        plan->setPlanParams(planParams);
+                        basePlan->commit();
+
+                        QString posOnPlanFloor = QString::number(rectOnScene.x(), 'f', 5) + QString(" ") + QString::number(rectOnScene.y(), 'f', 5);
+                        facility->addMetadata("string", "position_etalon_image_on_plan_floor", posOnPlanFloor);
+
                         BaseFileKeeperPtr currEtalonFile = facility->getEtalonPlan();
                         if(currEtalonFile)
                             RegionBizManager::instance()->deleteFile(currEtalonFile);
 
                         facility->setEtalonPlan(basePlan);
+                        facility->commit();
+                    }
+                    else
+                    {
+                        QPolygonF locationPolygon;
+                        BaseAreaPtr locationPtr = facility->getParent();
+                        if(locationPtr)
+                            locationPolygon = locationPtr->getCoords();
 
-                        facility->resetTransform();
-                        facility->commitTransformMatrix();
+                        if(locationPolygon.isEmpty())
+                        {
+                            return;
+                        }
+                        else
+                        {
+                            double lenghtOnPlanFlorCoord = rectOnScene.width();
+                            QPointF locationInMapCoordCenter = locationPolygon.boundingRect().center();
+                            double meterInMapCoord = GeographicUtils::meterInSceneCoord(locationInMapCoordCenter);
+                            double widthFacilityInMeters = lenghtOnPlanFlorCoord / DepthScenePixelInMeter;
+                            double lenghtOnGeoSceneCoord = meterInMapCoord * widthFacilityInMeters;
 
-                        resCommit = facility->commit();
+                            double scale = lenghtOnGeoSceneCoord / lenghtOnPlanFlorCoord;
+
+                            PlanFileKeeper::PlanParams planParams;
+                            planParams.scale_w = scale;
+                            planParams.scale_h = scale;
+                            planParams.rotate = 0;
+                            planParams.x = locationInMapCoordCenter.x();
+                            planParams.y = locationInMapCoordCenter.y();
+                            plan->setPlanParams(planParams);
+                            basePlan->commit();
+
+                            QString posOnPlanFloor = QString::number(rectOnScene.x(), 'f', 5) + QString(" ") + QString::number(rectOnScene.y(), 'f', 5);
+                            facility->addMetadata("string", "position_etalon_image_on_plan_floor", posOnPlanFloor);
+
+                            BaseFileKeeperPtr currEtalonFile = facility->getEtalonPlan();
+                            if(currEtalonFile)
+                                RegionBizManager::instance()->deleteFile(currEtalonFile);
+
+                            facility->setEtalonPlan(basePlan);
+
+                            facility->resetTransform();
+                            facility->commitTransformMatrix();
+
+                            facility->commit();
+                        }
                     }
 
-                    RasterItem * rasterTreeWidgetItem = new RasterItem(etalonNode, plan->getEntityId(), plan->getPath());
+                    RasterItem * rasterTreeWidgetItem = new RasterItem(etalonNode, plan->getEntityId(), plan->getPath(), ItemTypes::FacilityEtalonRaster);
                     etalonNode->setExpanded(true);
-                    //rasterTreeWidgetItem->setSelected(true);
 
                     BaseFileKeeper::FileState fileState = plan->getFileState();
                     switch(fileState)
@@ -1135,6 +1165,10 @@ void LayersManagerForm::slotAddEntity()
             //------------------------------------------
 
             // sync visible for marks, lines and rooms
+            if(facilityPolygon)
+                if(facilityPolygon->checkState(0) == Qt::Checked)
+                    facilityPolygon->getPolygonItem()->show();
+
             isVisible = true;
             CommonMessageNotifier::send( (uint)visualize_system::BusTags::SetRoomVisibleOnFloor, QVariant(isVisible), QString("visualize_system"));
             syncMarks();
@@ -1213,7 +1247,6 @@ void LayersManagerForm::slotRasterSaved(RasterSaveDatad data)
     if(rasterTreeWidgetItem)
     {
         rastersNode->setExpanded(true);
-        //rasterTreeWidgetItem->setSelected(true);
 
         BaseFileKeeper::FileState fileState = plan->getFileState();
         switch(fileState)
@@ -1417,7 +1450,6 @@ void LayersManagerForm::slotSvgSaved(QString filePath, QPointF scenePos)
     if(svgItem)
     {
         vectorsNode->setExpanded(true);
-        //svgItem->setSelected(true);
 
         BaseFileKeeper::FileState fileState = plan->getFileState();
         switch(fileState)
@@ -1481,10 +1513,15 @@ void LayersManagerForm::slotEditEntity()
             connect(_instrumentalForm, SIGNAL(signalRasterSaved(RasterSaveDatad)), this, SLOT(slotRasterSaved(RasterSaveDatad)));
         }break;
         case (int)ItemTypes::FacilityEtalonRaster : {
-            _currentData.object = CurrentData::Raster;
+            _currentData.object = CurrentData::EtalonRaster;
             RasterItem * rasterItem = dynamic_cast<RasterItem*>(item);
             QGraphicsPixmapItem * graphicsPixmapItem = rasterItem->getRaster();
             graphicsPixmapItem->hide();
+
+//            auto facility = BaseArea::convert<Facility>(_currentData.areaPtr);
+//            PlanFileKeeperPtr planFileKeeperPtr = BaseFileKeeper::convert<PlanFileKeeper>(facility->getEtalonPlan());
+//            PlanFileKeeper::PlanParams planParams = planFileKeeperPtr->getPlanParams();
+//            QPointF scenePos(planParams.x, planParams.y); // = graphicsPixmapItem->scenePos();
 
             _instrumentalForm = new LayerInstrumentalForm( (_isGeoScene ? _geoVisId : _pixelVisId ), graphicsPixmapItem->pixmap(), graphicsPixmapItem->scenePos(), rasterItem->getScW(), rasterItem->getScH(), rasterItem->getRotate(), zValue);
             _instrumentalForm->setModeMoveAndRotateOnly();
@@ -1544,6 +1581,14 @@ void LayersManagerForm::slotEditEntity()
         QMessageBox::information(this, QString::fromUtf8("Внимание"), QString::fromUtf8("Редактирование данных в разработке ! :)"));
 
     }
+
+    if( ! _isGeoScene)
+    {
+        int min(-50000), max(50000);
+        QRectF r(QPointF(min, min), QPointF(max, max));
+        qDebug() << "===> setSceneRect" << r;
+        _pixelView->setSceneRect(r);
+    }
 }
 
 void LayersManagerForm::slotDeleteEntity()
@@ -1564,9 +1609,27 @@ void LayersManagerForm::slotDeleteEntity()
 
     switch (item->type())
     {
+    case (int)ItemTypes::FacilityPolygonOnPlan : {
+
+        auto facility = BaseArea::convert<Facility>(ptr);
+        if( ! facility)
+            return;
+
+        if(QMessageBox::Yes != QMessageBox::question(this, QString::fromUtf8("Внимание"), QString::fromUtf8("Вы хотите удалить контур здания ?"), QMessageBox::Yes, QMessageBox::No))
+            return;
+
+        facility->setCoords(QPolygonF());
+        facility->resetTransform();
+        facility->commit();
+
+    }break;
+
     case (int)ItemTypes::FacilityEtalonRaster : {
         auto facility = BaseArea::convert<Facility>(ptr);
         if( ! facility)
+            return;
+
+        if(QMessageBox::Yes != QMessageBox::question(this, QString::fromUtf8("Внимание"), QString::fromUtf8("Вы хотите удалить опорное изображение ?"), QMessageBox::Yes, QMessageBox::No))
             return;
 
         facility->deleteMetadata("position_etalon_image_on_plan_floor");
@@ -1582,6 +1645,13 @@ void LayersManagerForm::slotDeleteEntity()
         foreach(BaseFileKeeperPtr baseFileKeeperPtr, baseFileKeeperPtrs)
             if(baseFileKeeperPtr->getPath() == dataItem->getPath())
             {
+                if(item->type() != (int)ItemTypes::FacilityEtalonRaster)
+                {
+                    QString text = ( item->type() == (int)ItemTypes::Raster ? QString::fromUtf8("Вы хотите удалить изображение ?") : QString::fromUtf8("Вы хотите удалить векторные данные ?") );
+                    if(QMessageBox::Yes != QMessageBox::question(this, QString::fromUtf8("Внимание"), text, QMessageBox::Yes, QMessageBox::No))
+                        return;
+                }
+
                 mngr->deleteFile(baseFileKeeperPtr);
                 _loadingItems.remove(dataItem->getPath());
                 delete item;
@@ -1590,6 +1660,9 @@ void LayersManagerForm::slotDeleteEntity()
             }
     }break;
     }
+
+    reload(_currentData.areaPtr, _isGeoScene);
+    ui->treeWidget->clearSelection();
 }
 
 void LayersManagerForm::slotSelectionChanged()
@@ -1641,7 +1714,10 @@ void LayersManagerForm::slotSelectionChanged()
                 ui->deleteEntity->setEnabled(true);
 
             if(item->type() == (int)ItemTypes::FacilityPolygonOnPlan)
+            {
                 ui->editEntity->setEnabled(true);
+                ui->deleteEntity->setEnabled(true);
+            }
         }
     }
 }
@@ -1709,6 +1785,18 @@ void LayersManagerForm::slotEditorFormClose()
                         }
                         break;
                     }
+        }break;
+        case CurrentData::EtalonRaster : {
+            LayerItem * etalonNode = getTopLevelItem(LayerTypes::Etalon);
+            if(etalonNode)
+            {
+                RasterItem * rasterItem = dynamic_cast<RasterItem*>(etalonNode->getChild(ItemTypes::FacilityEtalonRaster));
+                if(rasterItem)
+                {
+                    if(rasterItem->checkState(0) == Qt::Checked)
+                        rasterItem->getRaster()->show();
+                }
+            }
         }break;
         case CurrentData::Vector : {
 

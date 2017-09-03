@@ -125,6 +125,7 @@ PixmapTransformingItem::PixmapTransformingItem(TransformingState &controller)
     : TransformingItem(controller)
     , _transparentBrush(QPixmap("://img/transparent_background.png"))
 {
+    setTransformationMode(Qt::SmoothTransformation);
 }
 
 TransformingItem::TransformingItemType PixmapTransformingItem::getTransformingItemType() const

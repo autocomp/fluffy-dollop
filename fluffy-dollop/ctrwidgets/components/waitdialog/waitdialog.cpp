@@ -177,11 +177,12 @@ WaitDialogUnlimited::WaitDialogUnlimited(QString descriptionText, QString userBu
     }
 
     QLabel *tmpLabel = new QLabel(this);
-    m_movie = new QMovie(this);
-    m_movie->setCacheMode(QMovie::CacheAll);
+    m_movie = new QMovie("://img/loading.gif", QByteArray(), this);
+    //m_movie->setCacheMode(QMovie::CacheAll);
     m_movie->setScaledSize(QSize(defaultMaxWidth,defaultMaxWidth));
-    m_movie->setFileName(gifResourcePath);      //":/img/loading.gif"
-    m_movie->setSpeed(300);
+    m_movie->start();
+    //m_movie->setFileName(gifResourcePath);
+    //m_movie->setSpeed(300);
     tmpLabel->setMovie(m_movie);
     pMainVBLayout->addWidget(tmpLabel);
 
@@ -216,7 +217,7 @@ WaitDialogUnlimited::WaitDialogUnlimited(QString descriptionText, QString userBu
     ewApp()->setVisible(_iface->id(), true);
     connect(_iface, SIGNAL(signalClosed()), this, SLOT(slotEmbWidgetClose()));
 
-    startWaiting();
+//    startWaiting();
 }
 
 WaitDialogUnlimited::~WaitDialogUnlimited()
