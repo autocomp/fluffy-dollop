@@ -2,6 +2,7 @@
 #include <GeographicLib/PolygonArea.hpp>
 #include <GeographicLib/Geodesic.hpp>
 #include <GeographicLib/Constants.hpp>
+#include <QLineF>
 #include <math.h>
 
 double GeographicUtils::SceneW = 512;
@@ -55,6 +56,33 @@ double GeographicUtils::meterInSceneCoord(const QPointF &scenePos)
     double distanceByHorInMeter = getDistanceBetweenWgs84Points(left, right);
     return deltaByScene / distanceByHorInMeter;
 }
+
+double GeographicUtils::lenght(const QPointF & p1, const QPointF & p2)
+{
+    return sqrt( (p1.x()-p2.x())*(p1.x()-p2.x()) + (p1.y()-p2.y())*(p1.y()-p2.y()) );
+}
+
+double GeographicUtils::angle(const QPointF &p1, const QPointF &p2)
+{
+    QLineF line(p1, p2);
+    double angle = ((360 - line.angle()) + 90);
+    while(angle > 360)
+        angle -= 360.0;
+    return angle;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

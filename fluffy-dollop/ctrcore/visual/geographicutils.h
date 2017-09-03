@@ -27,8 +27,11 @@ public:
 
     static double meterInSceneCoord(const QPointF &scenePos);
 
-private:
+    static double lenght(const QPointF & p1, const QPointF & p2);
 
+    static double angle(const QPointF &p1, const QPointF &p2);
+
+private:
     static double SceneW;
     static double SceneH;
 };
