@@ -53,7 +53,8 @@ BaseFileKeeperPtr BaseFilesTranslator::addFile( QString file_path,
     }
 
     QString uuid = QUuid::createUuid().toString();
-    QString inner_path = uuid + SEPARATOR + info.fileName();
+    // WARNING without file name
+    QString inner_path = uuid;// + SEPARATOR + info.fileName();
 
     if( _add_file )
     {

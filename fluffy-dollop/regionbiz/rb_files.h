@@ -37,7 +37,8 @@ public:
     {
         FS_SYNC,
         FS_UNSYNC,
-        FS_INVALID
+        FS_INVALID,
+        FS_UPLOAD
     };
 
     // base
