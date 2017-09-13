@@ -6,6 +6,7 @@ SUBDIRS = \
     dmanager \
     qtxlsx  \
     qftp \
+    qwebdavlib \
     regionbiz \
     regionbiz/regionbiz_plugins \
     ctrcore \

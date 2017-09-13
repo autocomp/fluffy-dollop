@@ -1,13 +1,13 @@
 {
     "main_translators":{
 		"data":"psql",
-		"files":"ftp"
+		"files":"webdav"
 	},
     "translators":[
 	{
-		"name":"psql",
+	    "name":"psql",
 	    "params":{
-			"host":"217.148.208.59",
+			"host":"localhost",
 			"db_name":"vira",
 			"user":"vira",
 			"pass":"zaebobr"
@@ -23,11 +23,16 @@
 	    }
 	},
 	{
-	    "name":"ftp",
+	    "name":"webdav",
 	    "params":{
-		    "url":"ftp://vira:zaebobr@217.148.208.59",
-			"cache_dir":"ftp_cache",
-			"update_delay":"60000"
+		    "host":"webdav.yandex.ru",
+			"user":"loadbot",
+			"pass":"AlgisOthal",
+			"path":"/webdav/",
+			"port":443,
+			"cache_dir":"webdav_cache",
+			"queue_size":1,
+			"updaete_delay_sec":"10"
 	    }
 	}
     ],
