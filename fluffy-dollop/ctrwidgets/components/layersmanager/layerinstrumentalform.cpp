@@ -5,6 +5,7 @@
 #include <QPixmap>
 #include <QDebug>
 #include <QColorDialog>
+#include <QDomDocument>
 #include "transformingstate.h"
 #include <ctrcore/visual/visualizermanager.h>
 #include <ctrcore/visual/viewinterface.h>
@@ -38,44 +39,7 @@ LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPixmap &p
 
     QPointF pos(0,0);
     double originalScale(-1);
-    visualize_system::ViewInterface * viewInterface = visualize_system::VisualizerManager::instance()->getViewInterface(_visualizerId);
-    if(viewInterface->getVisualizerType() == visualize_system::Visualizer2D)
-    {
-        QRectF viewportSceneRect = viewInterface->getViewportSceneRect();
-        double v_W = viewportSceneRect.width() / 5.;
-        double v_H = viewportSceneRect.height() / 5.;
-        viewportSceneRect = QRectF( viewportSceneRect.x() + v_W * 2.,
-                                    viewportSceneRect.y() + v_H * 2.,
-                                    v_W,
-                                    v_H );
-
-        QSize srcSize = pixmap.size();
-
-        double w_inscribeByW = viewportSceneRect.width();
-        double h_inscribeByW = viewportSceneRect.width() * (double)srcSize.height() / (double)srcSize.width();
-
-        double w_inscribeByH = viewportSceneRect.height() * (double)srcSize.width() / (double)srcSize.height();
-        double h_inscribeByH = viewportSceneRect.height();
-
-        double X(0), Y(0), W(0), H(0);
-        if(h_inscribeByW <= viewportSceneRect.height())
-        {
-            X = viewportSceneRect.x();
-            Y = viewportSceneRect.y() + (viewportSceneRect.height() - h_inscribeByW)/2.;
-            W = w_inscribeByW;
-            H = h_inscribeByW;
-            originalScale = W / srcSize.width();
-        }
-        else
-        {
-            X = viewportSceneRect.x() + (viewportSceneRect.width() - w_inscribeByH)/2.;
-            Y = viewportSceneRect.y();
-            W = w_inscribeByH;
-            H = h_inscribeByH;
-            originalScale = W / srcSize.width();
-        }
-        pos = QPointF(X,Y);
-    }
+    inscribeSizeToGeoViewport(pixmap.size(), pos, originalScale);
 
     _transformingState = QSharedPointer<TransformingState>(new TransformingState(pixmap, pos, zValue, originalScale));
     visualize_system::StateInterface * stateInterface = visualize_system::VisualizerManager::instance()->getStateInterface(_visualizerId);
@@ -88,19 +52,71 @@ LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPixmap &p
     QTimer::singleShot(5,this,SLOT(makeAdjustForm()));
 }
 
-LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPolygonF &polygon, int zValue)
+LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPolygonF &polygon, const QRectF &bRectOnMapScene, const QTransform &transformer, int zValue)
     : _visualizerId(visualizerId)
     , ui(new Ui::LayerInstrumentalForm)
 {
     init();
 
-    _transformingState = QSharedPointer<TransformingState>(new TransformingState(polygon, zValue));
+    _transformingState = QSharedPointer<TransformingState>(new TransformingState(polygon, bRectOnMapScene, transformer, zValue));
     visualize_system::StateInterface * stateInterface = visualize_system::VisualizerManager::instance()->getStateInterface(_visualizerId);
     connect(_transformingState.data(), SIGNAL(signalItemChanged()), this, SLOT(itemChanged()));
     if(stateInterface)
         stateInterface->setVisualizerState(_transformingState);
 
-    setModeMoveAndRotateOnly();
+    setGlobalMode(GlobalMode::MoveAndRotateOnly);
+
+    QTimer::singleShot(5,this,SLOT(makeAdjustForm()));
+}
+
+LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QString &svgFilePath, int zValue)
+    : _visualizerId(visualizerId)
+    , ui(new Ui::LayerInstrumentalForm)
+{
+    init();
+
+    QSize svgSize;
+    QDomDocument doc;
+    QFile fileIn(svgFilePath);
+    if(fileIn.open(QIODevice::ReadOnly))
+        if(doc.setContent(&fileIn))
+        {
+            QDomElement docElem = doc.documentElement();
+            QStringList viewBoxStrParams = docElem.attribute("viewBox").split(QString(" "));
+            if(viewBoxStrParams.size() == 4)
+                svgSize = QSize(viewBoxStrParams.at(2).toDouble(), viewBoxStrParams.at(3).toDouble());
+        }
+    fileIn.close();
+
+    QPointF pos(0,0);
+    double originalScale(-1);
+    if(svgSize != QSize())
+        inscribeSizeToGeoViewport(svgSize, pos, originalScale);
+
+    _transformingState = QSharedPointer<TransformingState>(new TransformingState(svgFilePath, pos, zValue, originalScale));
+    visualize_system::StateInterface * stateInterface = visualize_system::VisualizerManager::instance()->getStateInterface(_visualizerId);
+    connect(_transformingState.data(), SIGNAL(signalItemChanged()), this, SLOT(itemChanged()));
+    if(stateInterface)
+        stateInterface->setVisualizerState(_transformingState);
+
+    setGlobalMode(GlobalMode::MoveRotateAndCropOnly);
+
+    QTimer::singleShot(5,this,SLOT(makeAdjustForm()));
+}
+
+LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QString &svgFilePath, QPointF scenePos, double scaleX, double scaleY, double rotate, int zValue)
+    : _visualizerId(visualizerId)
+    , ui(new Ui::LayerInstrumentalForm)
+{
+    init();
+
+    _transformingState = QSharedPointer<TransformingState>(new TransformingState(svgFilePath, scenePos, scaleX, scaleY, rotate, zValue));
+    visualize_system::StateInterface * stateInterface = visualize_system::VisualizerManager::instance()->getStateInterface(_visualizerId);
+    connect(_transformingState.data(), SIGNAL(signalItemChanged()), this, SLOT(itemChanged()));
+    if(stateInterface)
+        stateInterface->setVisualizerState(_transformingState);
+
+    setGlobalMode(GlobalMode::MoveRotateAndCropOnly);
 
     QTimer::singleShot(5,this,SLOT(makeAdjustForm()));
 }
@@ -176,28 +192,42 @@ void LayerInstrumentalForm::setEmbeddedWidgetId(quint64 id)
 {
     _embeddedWidgetId = id;
 
+    QString title = QString("Изображение");
+    QString iconPath = ":/img/icon_edit_image.png";
     switch (_transformingState->getTransformingItemType())
     {
     case TransformingItem::PolygonItem : {
-        ewApp()->setWidgetTitle(id, QString("Контур здания"));
+        title = QString("Контур здания");
+        iconPath = ":/img/icon_edit_svg.png";
     }break;
     case TransformingItem::PixmapItem : {
-        if(_transformingState->isModeMoveAndRotateOnly())
-            ewApp()->setWidgetTitle(id, QString("Опорное изображение"));
+        if(_transformingState->getGlobalMode() == GlobalMode::MoveAndRotateOnly)
+            title = QString("Опорное изображение");
     }break;
     case TransformingItem::SvgItem : {
-        ewApp()->setWidgetTitle(id, QString("Векторные данные"));
+        title = QString("Векторные данные");
+        iconPath = ":/img/icon_edit_svg.png";
     }break;
     }
+    ewApp()->setWidgetTitle(id, title);
+    ewApp()->setWidgetIcon(id, iconPath);
 }
 
-void LayerInstrumentalForm::setModeMoveAndRotateOnly()
+void LayerInstrumentalForm::setGlobalMode(transform_state::GlobalMode mode)
 {
-    ui->crop->hide();
-    ui->changeColor->hide();
-    ui->undoAction->hide();
-
-    _transformingState->setModeMoveAndRotateOnly();
+    switch(mode)
+    {
+    case GlobalMode::MoveAndRotateOnly : {
+        ui->crop->hide();
+        ui->changeColor->hide();
+        ui->undoAction->hide();
+    }break;
+    case GlobalMode::MoveRotateAndCropOnly : {
+        ui->changeColor->hide();
+        ui->undoAction->hide();
+    }break;
+    }
+    _transformingState->setGlobalMode(mode);
 }
 
 //QWidget *LayerInstrumentalForm::getWidget()
@@ -253,7 +283,7 @@ void LayerInstrumentalForm::setMode(bool on_off)
     else
     {
         if(ui->crop == sender())
-            _transformingState->cropPixmap();
+            _transformingState->cropItem();
 
         _transformingState->setMode(StateMode::ScrollMap);
         changeColorModeOff = true;
@@ -286,8 +316,8 @@ void LayerInstrumentalForm::setMode(bool on_off)
     ui->persentSlider->setValue(0);
     setOpacityValue(0);
 
-    // must hidden in polygon edit mode !
-    if(_transformingState->getTransformingItemType() != TransformingItem::PolygonItem)
+    // must hidden in polygon or svg edit mode !
+    if(_transformingState->getTransformingItemType() == TransformingItem::PixmapItem)
         ui->persentFrame->setVisible(ui->transform->isChecked());
 
     ui->colorFrame->setVisible( ui->changeColor->isChecked() );
@@ -324,7 +354,7 @@ void LayerInstrumentalForm::apply()
     }
     else if(ui->crop->isChecked())
     {
-        _transformingState->cropPixmap();
+        _transformingState->cropItem();
     }
     else if(ui->changeColor->isChecked())
     {
@@ -524,7 +554,7 @@ void LayerInstrumentalForm::save()
 
     case TransformingItem::PixmapItem : {
 
-        RasterSaveDatad data;
+        TransformingItemSaveDatad data;
 
         UndoAct currentParams = _transformingState->getCurrentParams();
         data.filePath = currentParams.filePath;
@@ -535,11 +565,22 @@ void LayerInstrumentalForm::save()
 
         _transformingState->getCurrentVertex(data.vertex, data.pixmapWidth, data.pixmapHeight);
 
-        emit signalRasterSaved(data);
+        emit signalTransformingItemSaved(data);
 
     }break;
 
     case TransformingItem::SvgItem : {
+
+        TransformingItemSaveDatad data;
+
+        UndoAct currentParams = _transformingState->getCurrentParams();
+        data.filePath = currentParams.filePath;
+        data.scenePos = currentParams.scenePos;
+        data.scaleW = currentParams.scaleW;
+        data.scaleH = currentParams.scaleH;
+        data.rotate = currentParams.rotation;
+
+        emit signalTransformingItemSaved(data);
 
     }break;
     }
@@ -597,7 +638,45 @@ void LayerInstrumentalForm::pressSetColor()
     }
 }
 
+void LayerInstrumentalForm::inscribeSizeToGeoViewport(const QSize &srcSize, QPointF &pos, double &originalScale)
+{
+    visualize_system::ViewInterface * viewInterface = visualize_system::VisualizerManager::instance()->getViewInterface(_visualizerId);
+    if(viewInterface->getVisualizerType() == visualize_system::Visualizer2D)
+    {
+        QRectF viewportSceneRect = viewInterface->getViewportSceneRect();
+        double v_W = viewportSceneRect.width() / 5.;
+        double v_H = viewportSceneRect.height() / 5.;
+        viewportSceneRect = QRectF( viewportSceneRect.x() + v_W * 2.,
+                                    viewportSceneRect.y() + v_H * 2.,
+                                    v_W,
+                                    v_H );
 
+        double w_inscribeByW = viewportSceneRect.width();
+        double h_inscribeByW = viewportSceneRect.width() * (double)srcSize.height() / (double)srcSize.width();
+
+        double w_inscribeByH = viewportSceneRect.height() * (double)srcSize.width() / (double)srcSize.height();
+        double h_inscribeByH = viewportSceneRect.height();
+
+        double X(0), Y(0), W(0), H(0);
+        if(h_inscribeByW <= viewportSceneRect.height())
+        {
+            X = viewportSceneRect.x();
+            Y = viewportSceneRect.y() + (viewportSceneRect.height() - h_inscribeByW)/2.;
+            W = w_inscribeByW;
+            H = h_inscribeByW;
+            originalScale = W / srcSize.width();
+        }
+        else
+        {
+            X = viewportSceneRect.x() + (viewportSceneRect.width() - w_inscribeByH)/2.;
+            Y = viewportSceneRect.y();
+            W = w_inscribeByH;
+            H = h_inscribeByH;
+            originalScale = W / srcSize.width();
+        }
+        pos = QPointF(X,Y);
+    }
+}
 
 
 

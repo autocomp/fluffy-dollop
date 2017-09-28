@@ -5,12 +5,13 @@
 #include <QObject>
 #include <QTreeWidget>
 #include <QMap>
+#include <QToolButton>
 
 class ViraTreeWidget : public QTreeWidget
 {
     Q_OBJECT
 public:
-    ViraTreeWidget(QWidget *parent = Q_NULLPTR);
+    ViraTreeWidget(QToolButton * addEntityButton, QToolButton * deleteEntityButton, QWidget *parent = Q_NULLPTR);
 
 public slots:
     void reinit();
@@ -30,6 +31,8 @@ protected slots:
     void slotEditModeFinish(QVariant var);
     void slotResaclArea(const QModelIndex &index);
     void slotSaveItemToDb(const QModelIndex &index);
+    void slotAddEntity();
+    void slotDeleteEntity();
 
 protected:
     const int ColumnCount = 5; //8;
@@ -42,6 +45,8 @@ protected:
     QMap<qulonglong, QTreeWidgetItem*> _items;
     QColor _defaultColor = QColor(Qt::white);
     QColor _noCoordColor = QColor(Qt::yellow);
+
+    QToolButton * _addEntityButton, * _deleteEntityButton;
 };
 
 #endif // VIRATREEWIDGET_H

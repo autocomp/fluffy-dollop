@@ -38,6 +38,7 @@ struct CurrentData
 
     regionbiz::BaseAreaPtr areaPtr; //! clear() not change areaPtr !
     uint64_t facilityId = 0; //! clear() not change areaPtr !
+    bool formDisabled = true; //! clear() not change areaPtr !
     State state = NoState;
     Object object = NoObject;
     uint64_t layerId = 0;
@@ -57,17 +58,21 @@ public:
 
 private slots:
     void slotItemChanged(QTreeWidgetItem *item, int column);
-    void slotAddEntity();
+
+    void createEtalonImage();
+    void slotOpenImage();
     void slotEditEntity();
+    void slotCreateSvg();
+    void slotOpenSvg();
     void slotDeleteEntity();
     void slotSelectionChanged();
     void slotBlockGUI(QVariant);
     void slotEditorFormClose();
     void slotAddLayer();
     void slotDeleteLayer();
-    void slotRasterSaved(RasterSaveDatad data);
+    void slotTransformingItemSaved(TransformingItemSaveDatad data);
     void slotFacilityPolygonOnPlanSaved(QPolygonF polygon);
-    void slotEtalotRasterSaved(RasterSaveDatad data);
+    void slotEtalotRasterSaved(TransformingItemSaveDatad data);
     void slotSvgSaved(QString filePath, QPointF scenePos);
     void slotFileLoaded(regionbiz::BaseFileKeeperPtr);
     void slotSyncMarks();

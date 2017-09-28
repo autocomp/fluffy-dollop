@@ -1,6 +1,7 @@
 #include "transformingitem.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QImage>
+#include <QSvgRenderer>
 #include <QMessageBox>
 #include <QDebug>
 
@@ -111,12 +112,137 @@ bool PolygonTransformingItem::contains(const QPointF &pos) const
 void PolygonTransformingItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
 //    painter->save();
-//    painter->setPen(Qt::NoPen);
+//    painter->setPen(Qt::red);
 //    painter->setBrush(Qt::NoBrush);
 //    painter->drawRect(boundingRect());
 //    painter->restore();
 
     QGraphicsPolygonItem::paint(painter, option, widget);
+}
+
+//-------------------------------------------------------
+
+SvgTransformingItem::SvgTransformingItem(const QString &svgFilePath, TransformingState &controller)
+    : TransformingItem(controller)
+    , QGraphicsSvgItem(svgFilePath)
+{
+}
+
+SvgTransformingItem::~SvgTransformingItem()
+{
+    if(_renderer)
+        _renderer->deleteLater();
+}
+
+TransformingItem::TransformingItemType SvgTransformingItem::getTransformingItemType() const
+{
+    return SvgItem;
+}
+
+QGraphicsItem *SvgTransformingItem::castToGraphicsItem()
+{
+    return dynamic_cast<QGraphicsItem*>(this);
+}
+
+void SvgTransformingItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    switch(_controller.mode())
+    {
+    case StateMode::TransformImage : {
+        if(event->modifiers() & Qt::ShiftModifier)
+        {
+            QGraphicsSvgItem::setFlags(0);
+            _controller.createUserHandler( mapToScene(event->pos()) );
+        }
+        else if(event->modifiers() & Qt::ControlModifier)
+        {
+            QGraphicsSvgItem::setFlags(0);
+        }
+        else
+        {
+            QGraphicsSvgItem::setFlags(QGraphicsItem::ItemIsMovable);
+        }
+        /*
+        if(event->modifiers() & Qt::ControlModifier)
+        {
+            QGraphicsSvgItem::setFlags(0);
+        }
+        else
+        {
+            QGraphicsSvgItem::setFlags(QGraphicsItem::ItemIsMovable);
+        }
+        */
+    }break;
+    default :
+        QGraphicsSvgItem::setFlags(0);
+    }
+
+    QGraphicsSvgItem::mousePressEvent(event);
+}
+
+void SvgTransformingItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    _controller.pixmapMoved();
+    QGraphicsSvgItem::mouseReleaseEvent(event);
+}
+
+QPointF SvgTransformingItem::mapToScene(const QPointF &pos) const
+{
+    return QGraphicsSvgItem::mapToScene(pos);
+}
+
+QPointF SvgTransformingItem::mapFromScene(const QPointF &pos) const
+{
+    return QGraphicsSvgItem::mapFromScene(pos);
+}
+
+void SvgTransformingItem::setTransform(const QTransform &matrix)
+{
+    QGraphicsSvgItem::setTransform(matrix);
+}
+
+void SvgTransformingItem::setPos(const QPointF &pos)
+{
+    QGraphicsSvgItem::setPos(pos);
+}
+
+void SvgTransformingItem::setCursor(const QCursor &cursor)
+{
+    QGraphicsSvgItem::setCursor(cursor);
+}
+
+void SvgTransformingItem::setFlags(QGraphicsItem::GraphicsItemFlags flags)
+{
+    QGraphicsSvgItem::setFlags(flags);
+}
+
+void SvgTransformingItem::setZValue(qreal z)
+{
+    QGraphicsSvgItem::setZValue(z);
+}
+
+bool SvgTransformingItem::contains(const QPointF &pos) const
+{
+    return QGraphicsSvgItem::contains(pos);
+}
+
+void SvgTransformingItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+    painter->setClipping(true);
+    QRegion region(boundingRect().toRect());
+    painter->setClipRegion(region);
+
+    QGraphicsSvgItem::paint(painter, option, widget);
+}
+
+void SvgTransformingItem::setRenderer(const QByteArray &contents)
+{
+    QSvgRenderer * renderer = new QSvgRenderer(contents);
+    setSharedRenderer(renderer);
+    update();
+
+    if(_renderer)
+        _renderer->deleteLater();
 }
 
 //-------------------------------------------------------

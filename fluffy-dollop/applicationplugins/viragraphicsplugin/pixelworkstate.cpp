@@ -116,6 +116,10 @@ void PixelWorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int 
                                       qMetaTypeId< bool >(),
                                       QString("visualize_system") );
 
+    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::ResetPixelVisualizer, this, SLOT(slotResetPixelVisualizer(QVariant)),
+                                      qMetaTypeId< bool >(),
+                                      QString("visualize_system") );
+
     auto mngr = RegionBizManager::instance();
     mngr->subscribeOnCurrentChange(this, SLOT(slotSelectionItemsChanged(uint64_t,uint64_t)));
     mngr->subscribeCenterOn(this, SLOT(slotCenterOn(uint64_t)));
@@ -151,6 +155,11 @@ void PixelWorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int 
     connect(visMng->getViewInterface(visualizerId), SIGNAL(signalZoomChanged(int)), this, SLOT(slotZoomChanged(int)));
     slotZoomChanged(-2);
 
+    reinit();
+}
+
+void PixelWorkState::slotResetPixelVisualizer(QVariant)
+{
     reinit();
 }
 
@@ -413,14 +422,26 @@ void PixelWorkState::reinit(qulonglong facilityId)
         FacilityPtr facilityPtr = BaseArea::convert< Facility >(ptr);
         if(facilityPtr)
         {
+            QList<FloorInfo> floorInfos;
             FloorPtrs floors = facilityPtr->getChilds();
+            uint16_t maxNumber(0);
             for( FloorPtr floorPtr: floors )
             {
                 FloorInfo floorInfo;
                 floorInfo.name = floorPtr->getName();
                 floorInfo.id = floorPtr->getId();
-                _floorsMap.insert(floorPtr->getNumber(), floorInfo);
+                uint16_t number = floorPtr->getNumber();
+                if(maxNumber < number)
+                    maxNumber = number;
+                if(_floorsMap.contains(number))
+                    floorInfos.append(floorInfo);
+                else
+                    _floorsMap.insert(floorPtr->getNumber(), floorInfo);
             }
+
+            foreach(FloorInfo floorInfo, floorInfos)
+                _floorsMap.insert(++maxNumber, floorInfo);
+
             if(_floorsMap.isEmpty() == false)
                 setFloor(_floorsMap.begin().value().id);
         }

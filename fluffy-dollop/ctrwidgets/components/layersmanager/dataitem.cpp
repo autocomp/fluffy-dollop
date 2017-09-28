@@ -1,8 +1,9 @@
 #include "dataitem.h"
 
-#include <QGraphicsSvgItem>
+#include <QSvgRenderer>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsPolygonItem>
+#include <QPainter>
 
 using namespace layers_manager_form;
 
@@ -104,6 +105,21 @@ QString DataItem::getPath()
     return _path;
 }
 
+double DataItem::getScW()
+{
+    return _scW;
+}
+
+double DataItem::getScH()
+{
+    return _scH;
+}
+
+double DataItem::getRotate()
+{
+    return _rotate;
+}
+
 ///-----------------------------------------------
 
 RasterItem::RasterItem(QTreeWidgetItem *parentItem, uint64_t entityId, QString path, ItemTypes itemType)
@@ -155,21 +171,6 @@ QGraphicsPixmapItem *RasterItem::getRaster()
     return _pixmapItem;
 }
 
-double RasterItem::getScW()
-{
-    return _scW;
-}
-
-double RasterItem::getScH()
-{
-    return _scH;
-}
-
-double RasterItem::getRotate()
-{
-    return _rotate;
-}
-
 ///-----------------------------------------------
 
 SvgItem::SvgItem(QTreeWidgetItem * parentItem, uint64_t entityId, QString path)
@@ -183,9 +184,14 @@ SvgItem::~SvgItem()
         delete _svg;
 }
 
-void SvgItem::setSvg(QGraphicsSvgItem * svg, QString name)
+void SvgItem::setSvg(QGraphicsSvgItem * svg, QString svgFilePath, double scW, double scH, double rotate, QString name)
 {
     _svg = svg;
+    _svgFilePath = svgFilePath;
+    _scW = scW;
+    _scH = scH;
+    _rotate = rotate;
+
     if(name.isEmpty())
         setText(0, QString::fromUtf8("данные"));
     else
@@ -210,12 +216,20 @@ QGraphicsSvgItem * SvgItem::getSvg()
     return _svg;
 }
 
+QString SvgItem::getSvgFilePath()
+{
+    return _svgFilePath;
+}
+
 ///-----------------------------------------------
 
-FacilityPolygonItem::FacilityPolygonItem(QTreeWidgetItem * parentItem, uint64_t entityId, const QPolygonF &polygon)
+FacilityPolygonItem::FacilityPolygonItem(QTreeWidgetItem * parentItem, uint64_t entityId, const QPolygonF &facilityCoordsOnMapScene, const QTransform &transformer)
     : DataItem(parentItem, entityId, QString(), (int)ItemTypes::FacilityPolygonOnPlan)
+    , _transformer(transformer)
 {
-    _polygonItem = new QGraphicsPolygonItem(polygon);
+    _bRectOnMapScene = facilityCoordsOnMapScene.boundingRect();
+    QPolygonF facilityCoordsOnFloorScene = _transformer.map(facilityCoordsOnMapScene);
+    _polygonItem = new QGraphicsPolygonItem(facilityCoordsOnFloorScene);
     setText(0, QString::fromUtf8("контур здания"));
 }
 
@@ -224,9 +238,12 @@ FacilityPolygonItem::~FacilityPolygonItem()
     delete _polygonItem;
 }
 
-void FacilityPolygonItem::setPolygon(const QPolygonF &polygon)
+void FacilityPolygonItem::reinit(const QPolygonF &facilityCoordsOnMapScene, const QTransform &transformer)
 {
-    _polygonItem->setPolygon(polygon);
+    _transformer = transformer;
+    _bRectOnMapScene = facilityCoordsOnMapScene.boundingRect();
+    QPolygonF facilityCoordsOnFloorScene = _transformer.map(facilityCoordsOnMapScene);
+    _polygonItem->setPolygon(facilityCoordsOnFloorScene);
 }
 
 QGraphicsPolygonItem * FacilityPolygonItem::getPolygonItem()
@@ -234,11 +251,31 @@ QGraphicsPolygonItem * FacilityPolygonItem::getPolygonItem()
     return _polygonItem;
 }
 
+QTransform FacilityPolygonItem::getTransformer()
+{
+    return _transformer;
+}
 
+QRectF FacilityPolygonItem::getBrectOnMapScene()
+{
+    return _bRectOnMapScene;
+}
 
+///-----------------------------------------------
 
+GraphicsSvgItem::GraphicsSvgItem(const QString &filePath)
+    : QGraphicsSvgItem(filePath)
+{
+}
 
+void GraphicsSvgItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+    painter->setClipping(true);
+    QRegion region(boundingRect().toRect());
+    painter->setClipRegion(region);
 
+    QGraphicsSvgItem::paint(painter, option, widget);
+}
 
 
 

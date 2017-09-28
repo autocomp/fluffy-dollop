@@ -53,6 +53,8 @@ enum class BusTags
     ToolButtonInPluginChecked,
     //! параметр - bool
     SetRoomVisibleOnFloor,
+
+    ResetPixelVisualizer
 };
 }
 

@@ -172,6 +172,7 @@ void WorkState::reinit()
                 for( FacilityPtr facilityPtr: facilities )
                 {
                     AreaGraphicsItem * areaGraphicsItem = new AreaGraphicsItem(facilityPtr->getCoords());
+                    areaGraphicsItem->setProperty("locationId", locationId);
                     connect(areaGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
                     facInitData.id = facilityPtr->getId();
                     areaGraphicsItem->init(facInitData);

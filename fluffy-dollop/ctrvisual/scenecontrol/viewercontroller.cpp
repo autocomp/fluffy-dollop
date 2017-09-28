@@ -2698,7 +2698,7 @@ void ViewerController::mousePressEvent(QMouseEvent* e)
         }
     }
 
-    qDebug() << "ViewerController::mousePressEvent, pos:" << e->pos() << "isAccepted:" << e->isAccepted();
+    qDebug() << "ViewerController::mousePressEvent, pos:" << e->pos() << ", scenePos:" << scenePos<< ", isAccepted:" << e->isAccepted();
     QGraphicsView::mousePressEvent(e);
     m_sceneControlle->mousePressEventInView(e,scenePos);
 }

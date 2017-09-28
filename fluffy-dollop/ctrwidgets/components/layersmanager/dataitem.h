@@ -3,10 +3,11 @@
 
 #include "layermanagertypes.h"
 #include <QTreeWidgetItem>
+#include <QGraphicsSvgItem>
 
-class QGraphicsSvgItem;
 class QGraphicsPixmapItem;
 class QGraphicsPolygonItem;
+class QSvgRenderer;
 
 namespace layers_manager_form
 {
@@ -33,10 +34,14 @@ public:
     virtual ~DataItem() {}
     uint64_t getEntityId();
     QString getPath();
+    double getScW();
+    double getScH();
+    double getRotate();
 
 protected:
     const uint64_t _entityId;
     QString _path;
+    double _scW = 1, _scH = 1, _rotate = 1;
 };
 
 class RasterItem : public DataItem
@@ -47,12 +52,8 @@ public:
     void setRaster(QGraphicsPixmapItem * item, double scW, double scH, double rotate, QString name = QString());
     void reinit(QString path);
     QGraphicsPixmapItem * getRaster();
-    double getScW();
-    double getScH();
-    double getRotate();
 
 private:
-    double _scW = 1, _scH = 1, _rotate = 1;
     QGraphicsPixmapItem * _pixmapItem = nullptr;
 };
 
@@ -61,24 +62,37 @@ class SvgItem : public DataItem
 public:
     SvgItem(QTreeWidgetItem * parentItem, uint64_t entityId, QString path);
     ~SvgItem();
-    void setSvg(QGraphicsSvgItem * svg, QString name = QString());
+    void setSvg(QGraphicsSvgItem * svg, QString svgFilePath, double scW, double scH, double rotate, QString name = QString());
     void reinit(QString path);
     QGraphicsSvgItem * getSvg();
+    QString getSvgFilePath();
 
 private:
     QGraphicsSvgItem * _svg = nullptr;
+    QString _svgFilePath;
 };
 
 class FacilityPolygonItem : public DataItem
 {
 public:
-    FacilityPolygonItem(QTreeWidgetItem * parentItem, uint64_t entityId, const QPolygonF &polygon);
+    FacilityPolygonItem(QTreeWidgetItem * parentItem, uint64_t entityId, const QPolygonF &facilityCoordsOnMapScene, const QTransform &transformer);
     ~FacilityPolygonItem();
-    void setPolygon(const QPolygonF &polygon);
+    void reinit(const QPolygonF &facilityCoordsOnMapScene, const QTransform &transformer);
     QGraphicsPolygonItem * getPolygonItem();
+    QTransform getTransformer();
+    QRectF getBrectOnMapScene();
 
 private:
     QGraphicsPolygonItem * _polygonItem = nullptr;
+    QRectF _bRectOnMapScene;
+    QTransform _transformer;
+};
+
+class GraphicsSvgItem : public QGraphicsSvgItem
+{
+public:
+    GraphicsSvgItem(const QString &filePath);
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR);
 };
 
 }

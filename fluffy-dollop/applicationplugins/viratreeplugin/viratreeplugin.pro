@@ -17,7 +17,8 @@ LIBS += -L$${INSTALL_PATH_LIB} \
         -lctrvisual \
         -lctrwidgets \
         -lregionbiz \
-        -lembeddedwidgets
+        -lembeddedwidgets \
+        -lpoppler-qt5 \
 
 HEADERS += \
     viratreeplugin.h \

@@ -19,9 +19,14 @@
 
 using namespace regionbiz;
 
-ViraTreeWidget::ViraTreeWidget(QWidget *parent)
+ViraTreeWidget::ViraTreeWidget(QToolButton *addEntityButton, QToolButton *deleteEntityButton, QWidget *parent)
     : QTreeWidget(parent)
+    , _addEntityButton(addEntityButton)
+    , _deleteEntityButton(deleteEntityButton)
 {
+    connect(addEntityButton, SIGNAL(clicked()), this, SLOT(slotAddEntity()));
+    connect(deleteEntityButton, SIGNAL(clicked()), this, SLOT(slotDeleteEntity()));
+
     CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::BlockGUI, this, SLOT(slotBlockGUI(QVariant)),
                                       qMetaTypeId< bool >(),
                                       QString("visualize_system") );
@@ -101,6 +106,7 @@ void ViraTreeWidget::reinit()
     for( RegionPtr regionPtr: regions )
     {
         QTreeWidgetItem * regionItem = new QTreeWidgetItem(this);
+        regionItem->setFlags(regionItem->flags() | Qt::ItemIsEditable);
         QString name = regionPtr->getName();
         if(name.isEmpty())
             name = regionPtr->getDescription();
@@ -122,6 +128,7 @@ void ViraTreeWidget::reinit()
             if(locationPtr)
             {
                 QTreeWidgetItem * locationItem = new QTreeWidgetItem(regionItem);
+                locationItem->setFlags(locationItem->flags() | Qt::ItemIsEditable);
                 name = locationPtr->getName();
                 if(name.isEmpty())
                     name = locationPtr->getDescription();
@@ -558,6 +565,8 @@ void ViraTreeWidget::slotSaveItemToDb(const QModelIndex &index)
     const qulonglong id(item->data((int)ColumnTitle::NAME, ID).toULongLong());
     BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(id);
     if( ! ptr) return;
+
+    ptr->setName(item->text((int)ColumnTitle::NAME));
     switch(item->data((int)ColumnTitle::NAME, TYPE).toInt())
     {
     case (int)ItemType::ItemTypeRoom :
@@ -766,6 +775,7 @@ void ViraTreeWidget::slotAddObject(uint64_t id)
     }
 
     QTreeWidgetItem * item = (parentItem ? new QTreeWidgetItem(parentItem) : new QTreeWidgetItem(this));
+    item->setFlags(item->flags() | Qt::ItemIsEditable);
     const qulonglong _id(id);
     item->setText((int)ColumnTitle::NAME, name);
     item->setText((int)ColumnTitle::ID, QString::number(_id));
@@ -778,8 +788,8 @@ void ViraTreeWidget::slotAddObject(uint64_t id)
     }
     _items.insert(_id, item);
 
-    clearSelection();
-    RegionBizManager::instance()->setCurrentEntity(id);
+//    clearSelection();
+//    RegionBizManager::instance()->setCurrentEntity(id);
     scrollToItem(item);
 }
 
@@ -844,6 +854,10 @@ void ViraTreeWidget::slotItemDoubleClicked(QTreeWidgetItem * item, int)
 
 void ViraTreeWidget::slotObjectSelectionChanged(uint64_t prev_id, uint64_t curr_id)
 {
+    _addEntityButton->setToolTip(QString::fromUtf8("Добавить регион"));
+    _deleteEntityButton->setDisabled(true);
+    _deleteEntityButton->setToolTip("");
+
     disconnect(this, SIGNAL(itemSelectionChanged()), this, SLOT(slotItemSelectionChanged()));
     clearSelection();
     if(curr_id > 0)
@@ -853,10 +867,50 @@ void ViraTreeWidget::slotObjectSelectionChanged(uint64_t prev_id, uint64_t curr_
         {
             it.value()->setSelected(true);
             scrollToItem(it.value());
+
+            _addEntityButton->setDisabled(false);
+            _deleteEntityButton->setDisabled(false);
+            QString addButtonText, deleteButtonText;
+            BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(curr_id);
+            if(ptr)
+            {
+                QString name = ptr->getName();
+                if(name.isEmpty())
+                    name = ptr->getDescription();
+
+                switch(ptr->getType())
+                {
+                case BaseArea::AT_REGION : {
+                    addButtonText = QString::fromUtf8("Добавить локацию в регион \"") + name + QString("\"");
+                    deleteButtonText = QString::fromUtf8("Удалить регион \"") + name + QString("\"");
+                }break;
+                case BaseArea::AT_LOCATION : {
+                    addButtonText = QString::fromUtf8("Добавить здание в локацию \"") + name + QString("\"");
+                    deleteButtonText = QString::fromUtf8("Удалить локацию \"") + name + QString("\"");
+                }break;
+                case BaseArea::AT_FACILITY : {
+                    addButtonText = QString::fromUtf8("Добавить этаж в здание \"") + name + QString("\"");
+                    deleteButtonText = QString::fromUtf8("Удалить здание \"") + name + QString("\"");
+                }break;
+                case BaseArea::AT_FLOOR : {
+                    addButtonText = QString::fromUtf8("Добавить комнату в этаж \"") + name + QString("\"");
+                    deleteButtonText = QString::fromUtf8("Удалить этаж \"") + name + QString("\"");
+                }break;
+                case BaseArea::AT_ROOM : {
+                    _addEntityButton->setDisabled(true);
+                    deleteButtonText = QString::fromUtf8("Удалить комнату \"") + name + QString("\"");
+                }break;
+                }
+            }
+            _addEntityButton->setToolTip(addButtonText);
+            _deleteEntityButton->setToolTip(deleteButtonText);
         }
         else
+        {
             clearSelection();
+        }
     }
+
     connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(slotItemSelectionChanged()));
 }
 
@@ -869,117 +923,208 @@ void ViraTreeWidget::mousePressEvent(QMouseEvent *event)
 {
     QTreeWidget::mousePressEvent(event);
 
-    bool layerEditMode(false);
-    QVariant layerEditModeVar = CtrConfig::getValueByName("application_settings.editMode");
-    if(layerEditModeVar.isValid())
-        layerEditMode = layerEditModeVar.toBool();
-    else
-        CtrConfig::setValueByName("application_settings.editMode", false);
+//    bool layerEditMode(false);
+//    QVariant layerEditModeVar = CtrConfig::getValueByName("application_settings.editMode");
+//    if(layerEditModeVar.isValid())
+//        layerEditMode = layerEditModeVar.toBool();
+//    else
+//        CtrConfig::setValueByName("application_settings.editMode", false);
 
-    if(event->buttons()&Qt::RightButton && layerEditMode)
-    {
-        uint64_t id = RegionBizManager::instance()->getCurrentEntity();
-        BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(id);
-        if(ptr)
-        {
-            QMenu menu(this);
-            QAction * addRegionAction(nullptr);
-            QAction * addSubAction(nullptr);
-            QAction * delAction(nullptr);
-            QString name = ptr->getName();
-            if(name.isEmpty())
-                name = ptr->getDescription();
-            switch(ptr->getType())
-            {
-            case BaseArea::AT_REGION : {
-                addRegionAction = menu.addAction(QString::fromUtf8("Добавить новый регион"));
-                menu.addSeparator();
-                addSubAction = menu.addAction(QString::fromUtf8("Добавить локацию в регион \"") + name + QString("\""));
-                delAction = menu.addAction(QString::fromUtf8("Удалить регион \"") + name + QString("\""));
-            }break;
-            case BaseArea::AT_LOCATION : {
-                addSubAction = menu.addAction(QString::fromUtf8("Добавить здание в локацию \"") + name + QString("\""));
-                delAction = menu.addAction(QString::fromUtf8("Удалить локацию \"") + name + QString("\""));
-            }break;
-            case BaseArea::AT_FACILITY : {
-                addSubAction = menu.addAction(QString::fromUtf8("Добавить этаж в здание \"") + name + QString("\""));
-                delAction = menu.addAction(QString::fromUtf8("Удалить здание \"") + name + QString("\""));
-            }break;
-            case BaseArea::AT_FLOOR : {
-                addSubAction = menu.addAction(QString::fromUtf8("Добавить комнату в этаж \"") + name + QString("\""));
-                delAction = menu.addAction(QString::fromUtf8("Удалить этаж \"") + name + QString("\""));
-            }break;
-            case BaseArea::AT_ROOM : {
-                delAction = menu.addAction(QString::fromUtf8("Удалить комнату \"") + name + QString("\""));
-            }break;
-            }
-            QAction * res = menu.exec(QCursor::pos());
-            if(res)
-            {
-                if(res == addRegionAction || res == addSubAction)
-                {
-                    BaseArea::AreaType type;
-                    QString addWindowTitle;
-                    if(res == addRegionAction)
-                    {
-                        type = BaseArea::AT_REGION;
-                        addWindowTitle = QString::fromUtf8("Добавить регион");
-                    }
-                    else
-                        switch(ptr->getType())
-                        {
-                        case BaseArea::AT_REGION :
-                            type = BaseArea::AT_LOCATION;
-                            addWindowTitle = QString::fromUtf8("Добавить локацию");
-                            break;
-                        case BaseArea::AT_LOCATION :
-                            type = BaseArea::AT_FACILITY;
-                            addWindowTitle = QString::fromUtf8("Добавить здание");
-                            break;
-                        case BaseArea::AT_FACILITY :
-                            type = BaseArea::AT_FLOOR;
-                            addWindowTitle = QString::fromUtf8("Добавить этаж");
-                            break;
-                        case BaseArea::AT_FLOOR :
-                            type = BaseArea::AT_ROOM;
-                            addWindowTitle = QString::fromUtf8("Добавить комнату");
-                            break;
-                        case BaseArea::AT_ROOM : return;
-                        }
+//    if(event->buttons()&Qt::RightButton && layerEditMode)
+//    {
+//        uint64_t id = RegionBizManager::instance()->getCurrentEntity();
+//        BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(id);
+//        if(ptr)
+//        {
+//            QMenu menu(this);
+//            QAction * addRegionAction(nullptr);
+//            QAction * addSubAction(nullptr);
+//            QAction * delAction(nullptr);
+//            QString name = ptr->getName();
+//            if(name.isEmpty())
+//                name = ptr->getDescription();
+//            switch(ptr->getType())
+//            {
+//            case BaseArea::AT_REGION : {
+//                addRegionAction = menu.addAction(QString::fromUtf8("Добавить новый регион"));
+//                menu.addSeparator();
+//                addSubAction = menu.addAction(QString::fromUtf8("Добавить локацию в регион \"") + name + QString("\""));
+//                delAction = menu.addAction(QString::fromUtf8("Удалить регион \"") + name + QString("\""));
+//            }break;
+//            case BaseArea::AT_LOCATION : {
+//                addSubAction = menu.addAction(QString::fromUtf8("Добавить здание в локацию \"") + name + QString("\""));
+//                delAction = menu.addAction(QString::fromUtf8("Удалить локацию \"") + name + QString("\""));
+//            }break;
+//            case BaseArea::AT_FACILITY : {
+//                addSubAction = menu.addAction(QString::fromUtf8("Добавить этаж в здание \"") + name + QString("\""));
+//                delAction = menu.addAction(QString::fromUtf8("Удалить здание \"") + name + QString("\""));
+//            }break;
+//            case BaseArea::AT_FLOOR : {
+//                addSubAction = menu.addAction(QString::fromUtf8("Добавить комнату в этаж \"") + name + QString("\""));
+//                delAction = menu.addAction(QString::fromUtf8("Удалить этаж \"") + name + QString("\""));
+//            }break;
+//            case BaseArea::AT_ROOM : {
+//                delAction = menu.addAction(QString::fromUtf8("Удалить комнату \"") + name + QString("\""));
+//            }break;
+//            }
+//            QAction * res = menu.exec(QCursor::pos());
+//            if(res)
+//            {
+//                if(res == addRegionAction || res == addSubAction)
+//                {
+//                    BaseArea::AreaType type;
+//                    QString addWindowTitle;
+//                    if(res == addRegionAction)
+//                    {
+//                        type = BaseArea::AT_REGION;
+//                        addWindowTitle = QString::fromUtf8("Добавить регион");
+//                    }
+//                    else
+//                        switch(ptr->getType())
+//                        {
+//                        case BaseArea::AT_REGION :
+//                            type = BaseArea::AT_LOCATION;
+//                            addWindowTitle = QString::fromUtf8("Добавить локацию");
+//                            break;
+//                        case BaseArea::AT_LOCATION :
+//                            type = BaseArea::AT_FACILITY;
+//                            addWindowTitle = QString::fromUtf8("Добавить здание");
+//                            break;
+//                        case BaseArea::AT_FACILITY :
+//                            type = BaseArea::AT_FLOOR;
+//                            addWindowTitle = QString::fromUtf8("Добавить этаж");
+//                            break;
+//                        case BaseArea::AT_FLOOR :
+//                            type = BaseArea::AT_ROOM;
+//                            addWindowTitle = QString::fromUtf8("Добавить комнату");
+//                            break;
+//                        case BaseArea::AT_ROOM : return;
+//                        }
 
-                    AddBaseAreaForm addBaseAreaForm(type, id);
-                    ew::EmbeddedWidgetStruct struc;
-                    ew::EmbeddedHeaderStruct headStr;
-                    headStr.hasCloseButton = true;
-                    headStr.windowTitle = addWindowTitle;
-                    headStr.headerPixmap = QString(":/img/icon_edit_image.png");
-                    struc.widgetTag = "AddBaseAreaForm";
-                    struc.minSize = QSize(100,100);
-                    struc.maxSize = QSize(500,500);
-                    //struc.size = QSize(400,25);
-                    struc.header = headStr;
-                    struc.iface = &addBaseAreaForm;
-                    struc.topOnHint = true;
-                    struc.isModal = true;
-                    ewApp()->createWidget(struc);
+//                    AddBaseAreaForm addBaseAreaForm(type, id);
+//                    ew::EmbeddedWidgetStruct struc;
+//                    ew::EmbeddedHeaderStruct headStr;
+//                    headStr.hasCloseButton = true;
+//                    headStr.windowTitle = addWindowTitle;
+//                    headStr.headerPixmap = QString(":/img/icon_pencil.png");
+//                    struc.widgetTag = "AddBaseAreaForm";
+//                    struc.minSize = QSize(100,100);
+//                    struc.maxSize = QSize(500,500);
+//                    //struc.size = QSize(400,25);
+//                    struc.header = headStr;
+//                    struc.iface = &addBaseAreaForm;
+//                    struc.topOnHint = true;
+//                    struc.isModal = true;
+//                    ewApp()->createWidget(struc);
 
-                    ewApp()->removeWidget(addBaseAreaForm.id());
-                }
-                else if(res == delAction)
-                {
-                    if(QMessageBox::Yes == QMessageBox::question(this, QString::fromUtf8("Внимание"), delAction->text() + QString(" ?"), QMessageBox::Yes, QMessageBox::No))
-                    {
-                        bool res = RegionBizManager::instance()->deleteArea(ptr);
-                        qDebug() << "deleteArea, id:" << id << ", res:" << res;
-                        clearSelection();
-                    }
-                }
-            }
-        }
-    }
+//                    ewApp()->removeWidget(addBaseAreaForm.id());
+//                }
+//                else if(res == delAction)
+//                {
+//                    if(QMessageBox::Yes == QMessageBox::question(this, QString::fromUtf8("Внимание"), delAction->text() + QString(" ?"), QMessageBox::Yes, QMessageBox::No))
+//                    {
+//                        bool res = RegionBizManager::instance()->deleteArea(ptr);
+//                        qDebug() << "deleteArea, id:" << id << ", res:" << res;
+//                        clearSelection();
+//                    }
+//                }
+//            }
+//        }
+//    }
 }
 
+void ViraTreeWidget::slotAddEntity()
+{
+    BaseArea::AreaType type;
+    QString addWindowTitle;
+    uint64_t id = RegionBizManager::instance()->getCurrentEntity();
+    if(id == 0)
+    {
+        addWindowTitle = QString::fromUtf8("Добавить регион");
+        type = BaseArea::AT_REGION;
+    }
 
+    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(id);
+    if(ptr)
+    {
+        switch(ptr->getType())
+        {
+        case BaseArea::AT_REGION :
+            type = BaseArea::AT_LOCATION;
+            addWindowTitle = QString::fromUtf8("Добавить локацию");
+            break;
+        case BaseArea::AT_LOCATION :
+            type = BaseArea::AT_FACILITY;
+            addWindowTitle = QString::fromUtf8("Добавить здание");
+            break;
+        case BaseArea::AT_FACILITY :
+            type = BaseArea::AT_FLOOR;
+            addWindowTitle = QString::fromUtf8("Добавить этаж");
+            break;
+        case BaseArea::AT_FLOOR :
+            type = BaseArea::AT_ROOM;
+            addWindowTitle = QString::fromUtf8("Добавить комнату");
+            break;
+        case BaseArea::AT_ROOM : return;
+        }
+    }
+
+    AddBaseAreaForm addBaseAreaForm(type, id);
+    ew::EmbeddedWidgetStruct struc;
+    ew::EmbeddedHeaderStruct headStr;
+    headStr.hasCloseButton = true;
+    headStr.windowTitle = addWindowTitle;
+    headStr.headerPixmap = QString(":/img/icon_pencil.png");
+    struc.widgetTag = "AddBaseAreaForm";
+    struc.minSize = QSize(100,100);
+    struc.maxSize = QSize(1500,900);
+    struc.size = QSize(700,250);
+    struc.header = headStr;
+    struc.iface = &addBaseAreaForm;
+    struc.topOnHint = true;
+    struc.isModal = true;
+    ewApp()->createWidget(struc);
+
+    ewApp()->removeWidget(addBaseAreaForm.id());
+}
+
+void ViraTreeWidget::slotDeleteEntity()
+{
+    uint64_t id = RegionBizManager::instance()->getCurrentEntity();
+    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(id);
+    if( ! ptr)
+        return;
+
+    QString text;
+    QString name = ptr->getName();
+    if(name.isEmpty())
+        name = ptr->getDescription();
+    switch(ptr->getType())
+    {
+    case BaseArea::AT_REGION : {
+        text = QString::fromUtf8("Удалить регион \"") + name + QString("\" ?");
+    }break;
+    case BaseArea::AT_LOCATION : {
+        text = QString::fromUtf8("Удалить локацию \"") + name + QString("\" ?");
+    }break;
+    case BaseArea::AT_FACILITY : {
+        text = QString::fromUtf8("Удалить здание \"") + name + QString("\" ?");
+    }break;
+    case BaseArea::AT_FLOOR : {
+        text = QString::fromUtf8("Удалить этаж \"") + name + QString("\" ?");
+    }break;
+    case BaseArea::AT_ROOM : {
+        text = QString::fromUtf8("Удалить комнату \"") + name + QString("\" ?");
+    }break;
+    }
+
+    if(QMessageBox::Yes == QMessageBox::question(this, QString::fromUtf8("Внимание"), text, QMessageBox::Yes, QMessageBox::No))
+    {
+        bool res = RegionBizManager::instance()->deleteArea(ptr);
+        qDebug() << "deleteArea, id:" << id << ", res:" << res;
+        clearSelection();
+    }
+}
 
 
 

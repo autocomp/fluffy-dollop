@@ -5,6 +5,7 @@
 #include <QGraphicsLineItem>
 #include <QPixmap>
 #include <QStack>
+#include "commontypes.h"
 
 namespace transform_state
 {
@@ -57,9 +58,14 @@ class TransformingState : public ScrollBaseState
 {
     Q_OBJECT
 public:
-    TransformingState(const QPixmap & pixmap, QPointF pixmapScenePos, int zValue, double originalScale = -1);
-    TransformingState(const QPixmap & pixmap, QPointF pixmapScenePos, double scW, double scH, double rotation, int zValue);
-    TransformingState(const QPolygonF & polygon, int zValue);
+    TransformingState(const QPixmap & pixmap, QPointF scenePos, int zValue, double originalScale = -1);
+    TransformingState(const QPixmap & pixmap, QPointF scenePos, double scW, double scH, double rotation, int zValue);
+
+    TransformingState(const QPolygonF & polygon, const QRectF &bRectOnMapScene, const QTransform &transformer, int zValue);
+
+    TransformingState(const QString &svgFilePath, QPointF scenePos, int zValue, double originalScale = -1);
+    TransformingState(const QString &svgFilePath, QPointF scenePos, double scW, double scH, double rotation, int zValue);
+
     ~TransformingState();
     virtual void init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom, const double *scale, double frameCoef, uint visualizerId);
     virtual bool wheelEvent(QWheelEvent* e, QPointF scenePos);
@@ -80,8 +86,8 @@ public:
      */
     void changeImageColor(QColor inColor, QColor outColor, int sensitivity = 1);
     int getTransformingItemType() const;
-    void setModeMoveAndRotateOnly();
-    bool isModeMoveAndRotateOnly();
+    void setGlobalMode(GlobalMode mode);
+    GlobalMode getGlobalMode();
     void setMode(StateMode stateMode);
     StateMode mode();
     void setTransparentBackgroundForPixmapItem(bool on_off);
@@ -90,7 +96,7 @@ public:
     QPolygonF getPixmapCorners();
     bool changed();
     QRectF getCropArea();
-    bool cropPixmap();
+    bool cropItem();
     void clearAreaOnImage();
     void setAreaOnImagefinish();
     void undoAction();
@@ -119,11 +125,12 @@ protected:
     LineItem* createAreaLineItem(QPointF p1, QPointF p2);
 
     const int _transformingItemType;
-    bool _modeMoveAndRotateOnly=false;
-    StateMode _stateMode=StateMode::TransformImage;
+    GlobalMode _globalMode=GlobalMode::AllAction;
+    StateMode _stateMode=StateMode::ScrollMap; //TransformImage;
     QPixmap _pixmap;
     QPolygonF _polygon;
-    QPointF _pixmapScenePos;
+    QString _svgFilePath;
+    QPointF _scenePos;
     const int _zValue;
     bool _blockWheelEvent=false;
     TransformingItem * _transformingItem=nullptr;
@@ -138,12 +145,14 @@ protected:
     QPointF _lastScenePos, _userHandlePos;
     HandleType _currentHandleType = HandleType::Invalid;
     QList<HandleItem*> _handleItems;
-    double _originalScale=-1, _scW=-1, _scH=-1, _rotation=0, _scWmax, _scHmax, _originW, _originH, _userHandleLenght, _userHandleSCW, _userHandleSCH;
+    double _originalScale=-1, _scW=-1, _scH=-1, _rotation=0, _scWmax, _scHmax, _originW=1, _originH=1, _userHandleLenght, _userHandleSCW, _userHandleSCH;
     QRectF _cropArea;
     FogItem * _fogItem=nullptr;
     QList<LineItem*> _areaLineItems;
     QPolygonF _areaOnImage;
     QStack<UndoAct> _undoStack;
+    QRectF _bRectOnMapScene;
+    QTransform _transformer;
 };
 
 }

@@ -32,5 +32,13 @@
         <file>img/icon_ellipse_mode.png</file>
         <file>img/icon_annotation_mode.png</file>
         <file>img/icon_textstyle.png</file>
+        <file>img/icon_create_svg.png</file>
+        <file>img/icon_edit_svg.png</file>
+        <file>img/icon_open_image.png</file>
+        <file>img/icon_open_svg.png</file>
+        <file>img/compas.png</file>
+        <file>img/icon_pencil.png</file>
+        <file>img/icon_create_image.png</file>
+        <file>img/icon_create_layer.png</file>
     </qresource>
 </RCC>

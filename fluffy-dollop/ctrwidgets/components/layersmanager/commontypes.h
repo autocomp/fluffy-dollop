@@ -13,4 +13,15 @@ enum PixelVisualizerButtons
 
 }
 
+namespace transform_state
+{
+enum class GlobalMode
+{
+    AllAction,
+    MoveAndRotateOnly,
+    MoveRotateAndCropOnly,
+};
+
+}
+
 #endif // COMMONTYPES_H

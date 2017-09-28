@@ -24,11 +24,15 @@ signals:
 private slots:
     void slotApply();
     void slotClose();
+    void slotLoadPdf();
+    void slotFloorOrRoomCountChanged(int);
 
 private:
     Ui::AddBaseAreaForm *ui;
     const regionbiz::BaseArea::AreaType _type;
     const uint64_t _id;
+    QString _name, _pdfFileName;
+
 };
 
 #endif // ADDBASEAREAFORM_H

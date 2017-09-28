@@ -288,8 +288,16 @@ QWidget *LineEditDelegate::createEditor(QWidget *parent, const QStyleOptionViewI
     if(index.column() == (int)ColumnTitle::CALC_RENT)
         return nullptr;
 
-    if(itemType != (int)ItemType::ItemTypeRoom && (index.column() == (int)ColumnTitle::NAME || index.column() == (int)ColumnTitle::RENTER || index.column() == (int)ColumnTitle::COMMENT))
-        return nullptr;
+    if(index.column() == (int)ColumnTitle::NAME)
+    {
+        // OK
+    }
+    else
+    {
+        if( itemType != (int)ItemType::ItemTypeRoom &&
+                (index.column() == (int)ColumnTitle::RENTER || index.column() == (int)ColumnTitle::COMMENT) )
+            return nullptr; // huyOK
+    }
 
     QLineEdit *editor = new QLineEdit(parent);
     return editor;

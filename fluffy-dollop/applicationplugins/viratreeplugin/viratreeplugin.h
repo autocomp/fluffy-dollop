@@ -4,7 +4,6 @@
 #include <ctrcore/plugin/embifacenotifier.h>
 
 class QStackedWidget;
-class ViraTreeWidget;
 
 class ViraTreePlugin: public CtrAppVisualizerPlugin
 {
@@ -18,10 +17,11 @@ public:
     virtual void init(uint visualizerId, quint64 visualizerWindowId);
 
 private slots:
+    void slotAddEntity();
+    void slotDeleteEntity();
 
 private:
-    ViraTreeWidget * _viraTreeWidget;
-
+    QWidget * _wdg = nullptr;
 };
 
 

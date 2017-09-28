@@ -4,6 +4,8 @@
 #include "transformingstate.h"
 #include <QGraphicsPixmapItem>
 #include <QGraphicsPolygonItem>
+#include <QGraphicsSvgItem>
+#include <QSvgRenderer>
 #include <QTransform>
 
 namespace transform_state
@@ -62,6 +64,28 @@ protected:
 
 };
 
+class SvgTransformingItem : public TransformingItem, public QGraphicsSvgItem
+{
+public:
+    SvgTransformingItem(const QString &svgFilePath, TransformingState & controller);
+    ~SvgTransformingItem();
+    virtual TransformingItemType getTransformingItemType() const;
+    virtual QGraphicsItem * castToGraphicsItem();
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent * event);
+    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent * event);
+    virtual QPointF mapToScene(const QPointF &pos) const;
+    virtual QPointF mapFromScene(const QPointF &pos) const;
+    virtual void setTransform(const QTransform &matrix);
+    virtual void setPos(const QPointF &pos);
+    virtual void setCursor(const QCursor &cursor);
+    virtual void setFlags(QGraphicsItem::GraphicsItemFlags flags);
+    virtual void setZValue(qreal z);
+    virtual bool contains(const QPointF &pos) const;
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    void setRenderer(const QByteArray &contents);
+protected:
+    QSvgRenderer * _renderer = nullptr;
+};
 
 class PixmapTransformingItem : public TransformingItem, public QGraphicsPixmapItem
 {
