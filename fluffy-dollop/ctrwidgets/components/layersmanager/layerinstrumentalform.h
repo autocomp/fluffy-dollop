@@ -32,8 +32,8 @@ class LayerInstrumentalForm : public QWidget
     Q_OBJECT
     
 public:
-    LayerInstrumentalForm(uint visualizerId, const QPixmap &pixmap, int zValue);
-    LayerInstrumentalForm(uint visualizerId, const QPixmap &pixmap, QPointF scenePos, double scaleX, double scaleY, double rotate, int zValue);
+    LayerInstrumentalForm(uint visualizerId, const QPixmap &pixmap, const QString &rasterFileBaseName, int zValue);
+    LayerInstrumentalForm(uint visualizerId, const QPixmap &pixmap, const QString &rasterFileBaseName, QPointF scenePos, double scaleX, double scaleY, double rotate, int zValue);
 
     LayerInstrumentalForm(uint visualizerId, const QPolygonF &polygon, const QRectF &bRectOnMapScene, const QTransform &transformer, int zValue);
 

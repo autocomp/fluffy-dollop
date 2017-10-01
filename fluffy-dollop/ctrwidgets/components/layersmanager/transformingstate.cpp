@@ -15,18 +15,20 @@
 
 using namespace transform_state;
 
-TransformingState::TransformingState(const QPixmap & pixmap, QPointF scenePos, int zValue, double originalScale)
+TransformingState::TransformingState(const QPixmap & pixmap, const QString &rasterFileBaseName, QPointF scenePos, int zValue, double originalScale)
     : _transformingItemType(TransformingItem::PixmapItem)
     , _pixmap(pixmap)
+    , _rasterFileBaseName(rasterFileBaseName)
     , _scenePos(scenePos)
     , _originalScale(originalScale)
     , _zValue(zValue)
 {
 }
 
-TransformingState::TransformingState(const QPixmap & pixmap, QPointF scenePos, double scW, double scH, double rotation, int zValue)
+TransformingState::TransformingState(const QPixmap & pixmap, const QString &rasterFileBaseName, QPointF scenePos, double scW, double scH, double rotation, int zValue)
     : _transformingItemType(TransformingItem::PixmapItem)
     , _pixmap(pixmap)
+    , _rasterFileBaseName(rasterFileBaseName)
     , _scenePos(scenePos)
     , _scW(scW)
     , _scH(scH)
@@ -191,7 +193,11 @@ void TransformingState::init(QGraphicsScene *scene, QGraphicsView *view, const i
     pen.setCosmetic(true);
     pen.setWidth(2);
 
-    if(_transformingItemType != TransformingItem::PolygonItem)
+    if(_transformingItemType == TransformingItem::PolygonItem)
+    {
+        _stateMode = StateMode::ScrollMap;
+    }
+    else
     {
         _topLine = new LineItem(_transformingItem->castToGraphicsItem(), pen);
         _topLine->setLine(QLineF(_handleItemTopLeft->pos(), _handleItemTopRight->pos()));
@@ -242,7 +248,7 @@ void TransformingState::init(QGraphicsScene *scene, QGraphicsView *view, const i
     QString filePath;
     if(_transformingItemType == TransformingItem::PixmapItem)
     {
-        filePath = TempDirController::createTempDirForCurrentUser() + QDir::separator() + "temp.tif";
+        filePath = TempDirController::createTempDirForCurrentUser() + QDir::separator() + _rasterFileBaseName + ".tif";
         bool res = _pixmap.save(filePath, "TIF");
     }
     UndoAct undoAct;
@@ -976,7 +982,7 @@ UndoAct TransformingState::getCurrentParams()
     PixmapTransformingItem * pixmapTransformingItem = dynamic_cast<PixmapTransformingItem*>(_transformingItem);
     if(pixmapTransformingItem)
     {
-        QString filePath = TempDirController::createTempDirForCurrentUser() + QDir::separator() + "temp.tif";
+        QString filePath = TempDirController::createTempDirForCurrentUser() + QDir::separator() + _rasterFileBaseName + ".tif";
         bool res = _pixmap.save(filePath, "TIF");
         currentParams.filePath = filePath;
     }
@@ -1019,7 +1025,7 @@ void TransformingState::changeImageColor(QColor inColor, QColor outColor, int se
     if(inColor.isValid() && outColor.isValid())
         inColor.setAlpha(outColor.alpha());
 
-    QString filePath = TempDirController::createTempDirForCurrentUser() + QDir::separator() + "temp.tif";
+    QString filePath = TempDirController::createTempDirForCurrentUser() + QDir::separator() + _rasterFileBaseName + ".tif";
     bool res = _pixmap.save(filePath, "TIF");
     UndoAct undoAct;
     undoAct.filePath = filePath;

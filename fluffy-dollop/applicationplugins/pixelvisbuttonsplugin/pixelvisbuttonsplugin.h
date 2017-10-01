@@ -14,11 +14,13 @@ public:
     virtual void init(uint visualizerId, quint64 visualizerWindowId);
 
 private slots:
+    void slotCheckVisibleState();
 
 private:
     bool scaleWidgetButtonCheched = false;
     bool gridButtonCheched = false;
-
+    bool scale_widget_visibile = false;
+    bool grid_visibile = false;
 };
 
 

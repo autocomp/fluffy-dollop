@@ -8,6 +8,7 @@
 class LocationItem;
 class AreaGraphicsItem;
 class ViraGraphicsItem;
+class CompasWidget;
 class QLabel;
 
 class PixelWorkState : public ScrollBaseState
@@ -60,7 +61,8 @@ protected slots:
     void slotZoomChanged(int zoomLevel);
     void slotToolButtonInPluginChecked(QVariant var);
     void slotSetRoomVisibleOnFloor(QVariant var);
-    void slotResetPixelVisualizer(QVariant);
+    void slotResetPixelVisualizer(QVariant var);
+    void slotRotateCompasWidget(QVariant var);
 
 private:
     struct FloorInfo
@@ -81,7 +83,7 @@ private:
     bool _blockGUI = false;
     uint64_t _editObjectGeometry = 0;
     RowScale * _rowScale;
-
+    CompasWidget * _compasWidget;
 
 //    QMap<qulonglong, ViraGraphicsItem*> _items;
 //    QMap<uint64_t, LocationItem *> _locationItems;

@@ -3,6 +3,7 @@
 #include <ctrcore/bus/common_message_notifier.h>
 #include <ctrcore/bus/bustags.h>
 #include <ctrwidgets/components/layersmanager/commontypes.h>
+#include <QTimer>
 #include <QDebug>
 
 PixelVisButtonsPlugin::PixelVisButtonsPlugin()
@@ -15,7 +16,22 @@ PixelVisButtonsPlugin::~PixelVisButtonsPlugin()
 
 void PixelVisButtonsPlugin::init(uint visualizerId, quint64 visualizerWindowId)
 {
+    scale_widget_visibile = CtrConfig::getValueByName("vira_graphic_settings.scale_widget_visibile").toBool();
+    grid_visibile = CtrConfig::getValueByName("vira_graphic_settings.grid_visibile").toBool();
+
     CtrAppVisualizerPlugin::init(visualizerId, visualizerWindowId);
+
+    if(scale_widget_visibile || grid_visibile)
+        QTimer::singleShot(3000, this, SLOT(slotCheckVisibleState()));
+}
+
+void PixelVisButtonsPlugin::slotCheckVisibleState()
+{
+    if(scale_widget_visibile)
+        emit setChecked(QString("PixelVisButtonsPlugin_SCALE_WIDGET"), true);
+
+    if(grid_visibile)
+        emit setChecked(QString("PixelVisButtonsPlugin_GRID"), true);
 }
 
 QList<InitPluginData> PixelVisButtonsPlugin::getInitPluginData()
@@ -61,6 +77,8 @@ void PixelVisButtonsPlugin::checked(const QString & buttonName, bool on_off)
         QList<QVariant> list;
         list << (int)plugin_types::SCALE_WIDGET << scaleWidgetButtonCheched;
         CommonMessageNotifier::send( (uint)visualize_system::BusTags::ToolButtonInPluginChecked, list, QString("visualize_system"));
+
+        CtrConfig::setValueByName("vira_graphic_settings.scale_widget_visibile", on_off);
     }
     else if(buttonName == QString("PixelVisButtonsPlugin_GRID"))
     {
@@ -68,6 +86,8 @@ void PixelVisButtonsPlugin::checked(const QString & buttonName, bool on_off)
         QList<QVariant> list;
         list << (int)plugin_types::GRID << gridButtonCheched;
         CommonMessageNotifier::send( (uint)visualize_system::BusTags::ToolButtonInPluginChecked, list, QString("visualize_system"));
+
+        CtrConfig::setValueByName("vira_graphic_settings.grid_visibile", on_off);
     }
 }
 

@@ -58,8 +58,8 @@ class TransformingState : public ScrollBaseState
 {
     Q_OBJECT
 public:
-    TransformingState(const QPixmap & pixmap, QPointF scenePos, int zValue, double originalScale = -1);
-    TransformingState(const QPixmap & pixmap, QPointF scenePos, double scW, double scH, double rotation, int zValue);
+    TransformingState(const QPixmap & pixmap, const QString &rasterFileBaseName, QPointF scenePos, int zValue, double originalScale = -1);
+    TransformingState(const QPixmap & pixmap, const QString &rasterFileBaseName, QPointF scenePos, double scW, double scH, double rotation, int zValue);
 
     TransformingState(const QPolygonF & polygon, const QRectF &bRectOnMapScene, const QTransform &transformer, int zValue);
 
@@ -126,10 +126,11 @@ protected:
 
     const int _transformingItemType;
     GlobalMode _globalMode=GlobalMode::AllAction;
-    StateMode _stateMode=StateMode::ScrollMap; //TransformImage;
+    StateMode _stateMode=StateMode::TransformImage;
     QPixmap _pixmap;
     QPolygonF _polygon;
     QString _svgFilePath;
+    const QString _rasterFileBaseName;
     QPointF _scenePos;
     const int _zValue;
     bool _blockWheelEvent=false;

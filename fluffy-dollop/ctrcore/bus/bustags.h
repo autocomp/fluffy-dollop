@@ -54,7 +54,9 @@ enum class BusTags
     //! параметр - bool
     SetRoomVisibleOnFloor,
 
-    ResetPixelVisualizer
+    ResetPixelVisualizer,
+    //! параметр - qint64 ->  < 0 - hide, [0,360] - show and rotate.
+    RotateCompasWidgetInPixelVisualizer
 };
 }
 

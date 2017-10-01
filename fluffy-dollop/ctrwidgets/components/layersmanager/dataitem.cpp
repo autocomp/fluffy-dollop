@@ -139,13 +139,16 @@ void RasterItem::setRaster(QGraphicsPixmapItem *item, double scW, double scH, do
     _scH = scH;
     _rotate = rotate;
     _pixmapItem = item;
-    if(name.isEmpty())
+
+    if(type() == (int)ItemTypes::FacilityEtalonRaster)
+        name = QString::fromUtf8("опорное изображение");
+    else if(name.isEmpty())
     {
         name = QString::fromUtf8("изображение");
-        LayerItem * layerItem = dynamic_cast<LayerItem*>(parent());
-        if(layerItem)
-            if(layerItem->getLayerType() == LayerTypes::Etalon)
-                name = QString::fromUtf8("опорное изображение");
+//        LayerItem * layerItem = dynamic_cast<LayerItem*>(parent());
+//        if(layerItem)
+//            if(layerItem->getLayerType() == LayerTypes::Etalon)
+//                name = QString::fromUtf8("опорное изображение");
     }
     setText(0, name);
 
@@ -169,6 +172,15 @@ void RasterItem::reinit(QString path)
 QGraphicsPixmapItem *RasterItem::getRaster()
 {
     return _pixmapItem;
+}
+
+QString RasterItem::getRasterFileBaseName()
+{
+    QStringList list = text(0).split(QString("."));
+    if(list.isEmpty() == false)
+        return list.first();
+    else
+        return QString("images");
 }
 
 ///-----------------------------------------------

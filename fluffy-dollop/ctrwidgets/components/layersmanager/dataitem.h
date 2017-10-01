@@ -52,6 +52,7 @@ public:
     void setRaster(QGraphicsPixmapItem * item, double scW, double scH, double rotate, QString name = QString());
     void reinit(QString path);
     QGraphicsPixmapItem * getRaster();
+    QString getRasterFileBaseName();
 
 private:
     QGraphicsPixmapItem * _pixmapItem = nullptr;

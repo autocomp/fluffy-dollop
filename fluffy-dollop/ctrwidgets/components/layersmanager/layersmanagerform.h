@@ -58,7 +58,6 @@ public:
 
 private slots:
     void slotItemChanged(QTreeWidgetItem *item, int column);
-
     void createEtalonImage();
     void slotOpenImage();
     void slotEditEntity();
@@ -87,6 +86,7 @@ private:
     void syncMarks(bool hideAll = false);
     void redrawItems(int pixelDelta);
     LayerItem *getTopLevelItem(LayerTypes type);
+    void reinitCompasWidget();
 
     Ui::LayersManagerForm *ui;
     quint64 _embeddedWidgetId = 0;

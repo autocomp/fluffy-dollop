@@ -13,6 +13,7 @@
 #include <ctrcore/visual/visualizermanager.h>
 #include <ctrcore/visual/viewinterface.h>
 #include <ctrwidgets/components/layersmanager/commontypes.h>
+#include <ctrwidgets/components/layersmanager/compaswidget.h>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsPolygonItem>
 #include <QFileInfo>
@@ -26,6 +27,9 @@ using namespace regionbiz;
 PixelWorkState::PixelWorkState(uint pixelVisualizerId)
     : _pixelVisualizerId(pixelVisualizerId)
 {
+    _compasWidget = new CompasWidget;
+    _compasWidget->hide();
+
     _upButton = new QToolButton();
     _upButton->setIcon(QIcon(":/img/up.png"));
     _upButton->setFixedSize(32,32);
@@ -120,6 +124,10 @@ void PixelWorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int 
                                       qMetaTypeId< bool >(),
                                       QString("visualize_system") );
 
+    CommonMessageNotifier::subscribe( (uint)visualize_system::BusTags::RotateCompasWidgetInPixelVisualizer, this, SLOT(slotRotateCompasWidget(QVariant)),
+                                      qMetaTypeId< qint64 >(),
+                                      QString("visualize_system") );
+
     auto mngr = RegionBizManager::instance();
     mngr->subscribeOnCurrentChange(this, SLOT(slotSelectionItemsChanged(uint64_t,uint64_t)));
     mngr->subscribeCenterOn(this, SLOT(slotCenterOn(uint64_t)));
@@ -130,14 +138,16 @@ void PixelWorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int 
     QVBoxLayout* vLayout = new QVBoxLayout;
 
     QHBoxLayout* hLayout = new QHBoxLayout;
-    hLayout->addStretch();
+    hLayout->addWidget(_compasWidget);
+    hLayout->setAlignment(_compasWidget, Qt::AlignTop );
+    hLayout->addSpacerItem(new QSpacerItem(0,0, QSizePolicy::Expanding, QSizePolicy::Minimum)); // hLayout->addStretch();
     hLayout->addWidget(_upButton);
     hLayout->setAlignment( _upButton, Qt::AlignTop );
     hLayout->addWidget(_currentFacility);
     hLayout->setAlignment( _currentFacility, Qt::AlignTop );
     hLayout->addWidget(_downButton);
     hLayout->setAlignment( _downButton, Qt::AlignTop );
-    hLayout->addStretch();
+    hLayout->addSpacerItem(new QSpacerItem(0,0, QSizePolicy::Expanding, QSizePolicy::Minimum)); // hLayout->addStretch();
     vLayout->addLayout(hLayout);
 
     vLayout->addSpacerItem(new QSpacerItem(0,0, QSizePolicy::Expanding, QSizePolicy::Expanding));
@@ -161,6 +171,18 @@ void PixelWorkState::init(QGraphicsScene *scene, QGraphicsView *view, const int 
 void PixelWorkState::slotResetPixelVisualizer(QVariant)
 {
     reinit();
+}
+
+void PixelWorkState::slotRotateCompasWidget(QVariant var)
+{
+    qint64 angle = var.toInt();
+    if(angle >= 0)
+    {
+        _compasWidget->show();
+        _compasWidget->setAngle(angle);
+    }
+    else
+        _compasWidget->hide();
 }
 
 void PixelWorkState::reinit()
@@ -283,6 +305,8 @@ void PixelWorkState::slotDeleteObject(uint64_t id)
 void PixelWorkState::slotBlockGUI(QVariant var)
 {
     _blockGUI = var.toBool();
+    _upButton->setDisabled(_blockGUI);
+    _downButton->setDisabled(_blockGUI);
 }
 
 void PixelWorkState::slotSetMarkPosition(QVariant var)
@@ -726,9 +750,6 @@ bool PixelWorkState::markInArchive(regionbiz::MarkPtr markPtr)
 
 void PixelWorkState::slotFloorUp()
 {
-//    if(_mode != ScrollMode)
-//        return;
-
     int i(0);
     for(auto it = _floorsMap.begin(); it != _floorsMap.end(); ++it)
     {
@@ -745,9 +766,6 @@ void PixelWorkState::slotFloorUp()
 
 void PixelWorkState::slotFloorDown()
 {
-//    if(_mode != ScrollMode)
-//        return;
-
     int i(0);
     for(auto it = _floorsMap.begin(); it != _floorsMap.end(); ++it)
     {

@@ -14,13 +14,13 @@
 
 using namespace transform_state;
 
-LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPixmap &pixmap, QPointF scenePos, double scaleX, double scaleY, double rotate, int zValue)
+LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPixmap &pixmap, const QString &rasterFileBaseName, QPointF scenePos, double scaleX, double scaleY, double rotate, int zValue)
     : _visualizerId(visualizerId)
     , ui(new Ui::LayerInstrumentalForm)
 {
     init();
 
-    _transformingState = QSharedPointer<TransformingState>(new TransformingState(pixmap, scenePos, scaleX, scaleY, rotate, zValue));
+    _transformingState = QSharedPointer<TransformingState>(new TransformingState(pixmap, rasterFileBaseName, scenePos, scaleX, scaleY, rotate, zValue));
     visualize_system::StateInterface * stateInterface = visualize_system::VisualizerManager::instance()->getStateInterface(_visualizerId);
     connect(_transformingState.data(), SIGNAL(signalSendColor(QColor)), this, SLOT(setColorOnImage(QColor)));
     connect(_transformingState.data(), SIGNAL(signalAreaSetted()), this, SLOT(areaSetted()));
@@ -31,7 +31,7 @@ LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPixmap &p
     QTimer::singleShot(5,this,SLOT(makeAdjustForm()));
 }
 
-LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPixmap &pixmap, int zValue)
+LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPixmap &pixmap, const QString &rasterFileBaseName, int zValue)
     : _visualizerId(visualizerId)
     , ui(new Ui::LayerInstrumentalForm)
 {
@@ -41,7 +41,7 @@ LayerInstrumentalForm::LayerInstrumentalForm(uint visualizerId, const QPixmap &p
     double originalScale(-1);
     inscribeSizeToGeoViewport(pixmap.size(), pos, originalScale);
 
-    _transformingState = QSharedPointer<TransformingState>(new TransformingState(pixmap, pos, zValue, originalScale));
+    _transformingState = QSharedPointer<TransformingState>(new TransformingState(pixmap, rasterFileBaseName, pos, zValue, originalScale));
     visualize_system::StateInterface * stateInterface = visualize_system::VisualizerManager::instance()->getStateInterface(_visualizerId);
     connect(_transformingState.data(), SIGNAL(signalSendColor(QColor)), this, SLOT(setColorOnImage(QColor)));
     connect(_transformingState.data(), SIGNAL(signalAreaSetted()), this, SLOT(areaSetted()));
