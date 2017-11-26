@@ -6,6 +6,8 @@
 CompasWidget::CompasWidget()
 {
     setAngle(0);
+    setAttribute(Qt::WA_TranslucentBackground);
+    setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
 }
 
 void CompasWidget::setAngle(int angle)
