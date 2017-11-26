@@ -6,6 +6,7 @@ SUBDIRS = \
     viratreeplugin \
     virainfoplugin \
     pixelvisbuttonsplugin \
+    floorgraphmakerplugin \
 #    pdfimportplugin \
 #    inputlocationplugin \
 #    imagectrlplugin \
