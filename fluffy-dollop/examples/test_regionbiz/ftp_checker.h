@@ -53,27 +53,35 @@ private Q_SLOTS:
         if( files.empty() )
         {
             BaseFileKeeperPtr file =
-                    mngr->addFile( "images/photo.jpg", BaseFileKeeper::FT_PLAN, region->getId() );
+                    mngr->addFile( "images/photo.jpg", BaseFileKeeper::FT_IMAGE, region->getId() );
             file->setName( "Test" );
 
+            BaseFileKeeperPtr file2 =
+                    mngr->addFile( "images/photo.jpg", BaseFileKeeper::FT_IMAGE, region->getId() );
+            file->setName( "Test2" );
+
+            BaseFileKeeperPtr file3 =
+                    mngr->addFile( "images/photo.jpg", BaseFileKeeper::FT_IMAGE, region->getId() );
+            file->setName( "Test3" );
+
+
             std::cerr << "State of file: " << file->getFileState() << std::endl;
-            file->commit();
+            std::cerr << "Commit: " << file->commit() << std::endl;
+
             return;
         }
 
         BaseFileKeeperPtr file = files.at( 0 );
-        auto path = file->getId();
         auto state = file->getFileState();
         std::cerr << "State of file after: " << state << std::endl;
 
         if( state == BaseFileKeeper::FS_UNSYNC )
             file->syncFile();
-        else if ( state == BaseFileKeeper::FS_SYNC )
+        else if ( state == BaseFileKeeper::FS_SYNC
+                  || state == BaseFileKeeper::FS_UPLOAD )
         {
             QFilePtr file_ptr = file->getLocalFile();
-            QFileInfo info( *(file_ptr.get()) );
-            QString path = info.absoluteFilePath();
-            bool open = file_ptr->parent();
+            file_ptr->open( QFile::ReadOnly );
             QByteArray data = file_ptr->readAll();
             std::cerr << "Synced file: " << data.data() << std::endl;
 

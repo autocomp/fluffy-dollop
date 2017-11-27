@@ -9,6 +9,7 @@
 #include <regionbiz/rb_entity_filter.h>
 #include <regionbiz/rb_files_translator.h>
 #include <regionbiz/rb_transform_matrix.h>
+#include <regionbiz/rb_metadata_custom.h>
 
 #include "test_reciver.h"
 #include "ftp_checker.h"
@@ -401,7 +402,7 @@ void init()
 
     //! init
     auto mngr = RegionBizManager::instance();
-    QString str = "config/regionbiz_inet.json";
+    QString str = "config/regionbiz.json";
     bool inited = mngr->init( str );
 }
 
@@ -571,7 +572,7 @@ void checkEtalonFiles()
     FacilityPtr facil = mngr->getBaseArea( 3 )->convert< Facility >();
 
     // get files
-    auto files = facil->getFilesByType( BaseFileKeeper::FT_PLAN );
+    auto files = facil->getFilesByType( BaseFileKeeper::FT_PLAN_RASTER );
     qDebug() << "Have files:" << files.size();
 
     // set free
@@ -582,8 +583,8 @@ void checkEtalonFiles()
     qDebug() << "Invalid set:" << facil->setEtalonPlan( nullptr );
 
     // create and check
-    mngr->addFile( "images/photo.jpg", BaseFileKeeper::FT_PLAN, facil->getId() );
-    files = facil->getFilesByType( BaseFileKeeper::FT_PLAN );
+    mngr->addFile( "images/photo.jpg", BaseFileKeeper::FT_PLAN_RASTER, facil->getId() );
+    files = facil->getFilesByType( BaseFileKeeper::FT_PLAN_RASTER );
     qDebug() << "Have files after create:" << files.size();
 
     qDebug() << "Set valid:" << facil->setEtalonPlan( files[0] );
@@ -597,6 +598,58 @@ void checkEtalonFiles()
     facil->resetEtalonFile();
     mngr->deleteFile( files[0] );
     facil->commit();
+}
+
+void checkCustomMetadata()
+{
+    using namespace regionbiz;
+
+    auto mngr = RegionBizManager::instance();
+    QString path = "config/regionbiz.json";
+    mngr->init( path );
+
+    uint64_t id = mngr->addArea< Room >( 0 )->getId();
+    qDebug() << "Id" << id;
+
+    bool res1 = mngr->addMetadata( id, "string", "test", "value" );
+    bool res2 = mngr->addMetadata( id, "string", "test", "test_val" );
+
+    mngr->addUserConstraint( BaseArea::AT_ROOM, "test", "val.*" );
+
+    bool res3 = mngr->addMetadata( id, "string", "test", "value" );
+    bool res4 = mngr->addMetadata( id, "string", "test", "test_val" );
+
+    mngr->addUserConstraint( BaseArea::AT_ROOM, "test2", ".*val.*" );
+    mngr->addUserConstraint( BaseArea::AT_ROOM, "test3", "1:5" );
+
+    bool res5 = mngr->addMetadata( id, "double", "test3", 5 );
+    bool res6 = mngr->addMetadata( id, "int", "test3", 5 );
+
+    qDebug() << "All res: " << res1 << res2 << res3 << res4 << res5 << res6;
+
+    auto cons = mngr->getConstraintsOfEntity( 1, Constraint::CT_USER );
+    for( Constraint con: cons )
+        qDebug() << " Con user:" << con.getMetaName() << con.getConstraint();
+
+    auto cons2 = mngr->getConstraintsOfEntity( 1, Constraint::CT_SYSTEM );
+    for( Constraint con: cons2 )
+        qDebug() << " Con sys:" << con.getMetaName() << con.getConstraint();
+
+    auto cons3 = mngr->getConstraintsOfEntity( 1, Constraint::CT_FREE );
+    for( Constraint con: cons3 )
+        qDebug() << " Con free:" << con.getMetaName() << con.getConstraint();
+
+    qDebug() << "Conn:" << mngr->commitArea( id );
+
+    uint64_t id2 = mngr->addArea< Facility >( id )->getId();
+    uint64_t id3 = mngr->addArea< Room >( id )->getId();
+    uint64_t id4 = mngr->addArea< Room >( id )->getId();
+    mngr->addMetadata( id2, "double", "test_sum", 6 );
+    mngr->addMetadata( id3, "double", "test_sum", 7 );
+    mngr->addMetadata( id4, "double", "test_sum", 15 );
+    mngr->addMetadata( id, "average", "test_sum" );
+    auto ent = mngr->getBaseEntity( id );
+    qDebug() << "Val sum:" << ent->getMetadata( "test_sum" )->getValueAsString();
 }
 
 int main( int argc, char** argv )
@@ -616,13 +669,13 @@ int main( int argc, char** argv )
     //checkCommitAndDelete();
 
     //! init
-    init();
+    //init();
 
     //! select managment
     //selectManagment();
 
     //! check ftp
-    // checkFtp();
+    //checkFtp();
 
     //! check marks coords
     // checkMarksCoords();
@@ -637,10 +690,13 @@ int main( int argc, char** argv )
     //checkLayers();
 
     //! check transform
-    checkTransform();
+    // checkTransform();
 
     //! check etalon files
-    checkEtalonFiles();
+    // checkEtalonFiles();
+
+    //! check custom metadata
+    checkCustomMetadata();
 
     return app.exec();
 }
