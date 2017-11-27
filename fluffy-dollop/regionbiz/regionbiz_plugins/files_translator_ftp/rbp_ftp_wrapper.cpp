@@ -450,7 +450,8 @@ QString FtpWrapper::getFileCategoryByType(BaseFileKeeper::FileType type)
 {
     switch( type )
     {
-    case BaseFileKeeper::FT_PLAN:
+    case BaseFileKeeper::FT_PLAN_RASTER:
+    case BaseFileKeeper::FT_PLAN_VECTOR:
         return "plans";
     case BaseFileKeeper::FT_IMAGE:
         return "images";
