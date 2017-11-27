@@ -343,7 +343,7 @@ bool ThreadSql::deleteMark(uint64_t id)
 
     // files
     QString delete_files = "DELETE FROM files "
-                           "WHERE id = " + QString::number( id );
+                           "WHERE entity_id = " + QString::number( id );
     tryQuery( delete_files );
 
     // unlock base
