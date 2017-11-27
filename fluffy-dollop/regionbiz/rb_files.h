@@ -28,7 +28,8 @@ public:
     enum FileType
     {
         FT_NONE,
-        FT_PLAN,
+        FT_PLAN_VECTOR,
+        FT_PLAN_RASTER,
         FT_IMAGE,
         FT_DOCUMENT
     };
@@ -102,7 +103,7 @@ public:
 
 //---------------------------------------------------------
 
-class PlanFileKeeper: public BaseFileKeeper
+class PlanVectorFileKeeper: public BaseFileKeeper
 {
 public:
     struct PlanParams
@@ -115,15 +116,25 @@ public:
         double opacity = 1;
     };
 
-    PlanFileKeeper(QString path , uint64_t entity_id);
-    FileType getType() override;
+    PlanVectorFileKeeper(QString path , uint64_t entity_id);
+    virtual FileType getType() override;
     PlanParams getPlanParams();
     void setPlanParams( PlanParams params );
 
 private:
     PlanParams _params;
 };
-typedef std::shared_ptr< PlanFileKeeper > PlanFileKeeperPtr;
+typedef std::shared_ptr< PlanVectorFileKeeper > PlanVectorFileKeeperPtr;
+
+//------------------------------------------------------
+
+class PlanRasterFileKeeper: public PlanVectorFileKeeper
+{
+public:
+    PlanRasterFileKeeper(QString path , uint64_t entity_id);
+    FileType getType() override;
+};
+typedef std::shared_ptr< PlanRasterFileKeeper > PlanRasterFileKeeperPtr;
 
 //----------------------------------------------------------
 

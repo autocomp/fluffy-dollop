@@ -5,6 +5,7 @@
 #include <QDateTime>
 #include <QString>
 #include <vector>
+#include <QStringList>
 
 namespace regionbiz {
 

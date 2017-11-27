@@ -424,7 +424,11 @@ BaseFileKeeperPtr Facility::getEtalonPlan()
         return nullptr;
 
     QString id_file = getMetadata( ETALON_PLAN )->getValueAsString();
-    auto plans = getFilesByType( BaseFileKeeper::FT_PLAN );
+    auto plans = getFilesByType( BaseFileKeeper::FT_PLAN_VECTOR );
+    for( BaseFileKeeperPtr file: plans )
+        if( id_file == file->getId() )
+            return file;
+    plans = getFilesByType( BaseFileKeeper::FT_PLAN_RASTER );
     for( BaseFileKeeperPtr file: plans )
         if( id_file == file->getId() )
             return file;
@@ -436,7 +440,8 @@ bool Facility::setEtalonPlan( BaseFileKeeperPtr file )
 {
     if( !file
             || file->getEntityId() != _id
-            || file->getType() != BaseFileKeeper::FT_PLAN )
+            || ( file->getType() != BaseFileKeeper::FT_PLAN_RASTER
+                 && file->getType() != BaseFileKeeper::FT_PLAN_VECTOR ))
         return false;
 
     bool has = isMetadataPresent( ETALON_PLAN );

@@ -33,6 +33,28 @@ public:
     // get entity
     BaseEntityPtr getBaseEntity( uint64_t id );
 
+    // constraints
+    bool isEntityConstraintsCorrect( uint64_t id );
+    bool isEntityConstraintsCorrect( BaseEntityPtr entity );
+    Constraints getConstraintsOfEntity( uint64_t id );
+    Constraints getConstraintsOfEntity( BaseEntityPtr entity );
+    Constraints getConstraintsOfEntity( uint64_t id, Constraint::ConstraintType type );
+    Constraints getConstraintsOfEntity( BaseEntityPtr entity, Constraint::ConstraintType type );
+    template< typename Type >
+    bool addUserConstraint( Type type, QString name, QString cons )
+    {
+        if( ConstraintsManager::isConstraintPresent( type, name ))
+        {
+            Constraint cons = ConstraintsManager::getConstraint( type, name );
+            if( cons.getType() != Constraint::CT_USER )
+                return false;
+        }
+
+        bool set = ConstraintsManager
+                ::addConstraint( type, { Constraint::CT_USER, name, cons } );
+        return set;
+    }
+
     // locations
     // getters
     BaseAreaPtr getBaseArea( uint64_t id );
@@ -92,7 +114,7 @@ public:
     BaseMetadataPtr getMetadata( uint64_t id, QString name );
     MetadataByName getMetadataMap( uint64_t id );
     bool setMetadataValue(uint64_t id, QString name , QVariant val);
-    bool  addMetadata( uint64_t id, QString type,
+    bool addMetadata( uint64_t id, QString type,
                       QString name, QVariant val = QVariant() );
     bool addMetadata( BaseMetadataPtr data );
     bool deleteMetadata( uint64_t id, QString name );
@@ -268,10 +290,12 @@ private:
     QVariantMap loadJsonConfig( QString &file_path );
     bool processPlugins(QVariantMap settings);
     bool processTranslators( QVariantMap settings );
+    void initConstraintsManager(QVariantMap settings );
     bool loadPlugins( QString plugins_path, bool load_all,
                       QStringList plugins = QStringList() );
     void loadDataByTranslator();
     void clearCurrentData(bool clear_entitys = true );
+
 
     template< typename LocType >
     std::vector< std::shared_ptr< LocType >>

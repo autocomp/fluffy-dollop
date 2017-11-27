@@ -10,7 +10,14 @@ namespace regionbiz {
 class Constraint
 {
 public:
-    Constraint( QString name, QString str );
+    enum ConstraintType
+    {
+        CT_FREE,
+        CT_SYSTEM,
+        CT_USER
+    };
+
+    Constraint( ConstraintType type, QString name, QString str );
     Constraint();
 
     void setMetaName( QString name );
@@ -18,13 +25,16 @@ public:
     void setConstraint( QString constr );
     QString getConstraint();
     QVariantList getConstraintAsList();
+    ConstraintType getType();
 
     static QString separator();
 
 private:
     QString _meta_name = "";
     QString _constrait = "";
+    ConstraintType _type;
 };
+typedef std::vector< Constraint > Constraints;
 
 //-----------------------------------
 
@@ -37,13 +47,26 @@ public:
      * - rent - for rent
      * - file - by file
      */
-    static void init( QString aim );
+    static void init(QString aim , QString file);
 
     template< typename Type >
-    static void addConstraint( Type type, Constraint constr )
+    static bool addConstraint( Type type, Constraint constr )
     {
-        auto contaier = ConstraintsManager::containerInstance< Type >();
+        auto& contaier = ConstraintsManager::containerInstance< Type >();
+        for( Constraint& cons: contaier[ type ] )
+            if( cons.getMetaName() == constr.getMetaName() )
+            {
+                if( cons.getType() == constr.getType() )
+                {
+                    cons = constr;
+                    return true;
+                }
+                else
+                    return false;
+            }
+
         contaier[ type ].push_back( constr );
+        return true;
     }
 
     template< typename Type >
@@ -58,6 +81,52 @@ public:
         return res;
     }
 
+    template< typename Type >
+    static std::vector< Constraint > getConstraints( Type type,
+                                                     Constraint::ConstraintType cons_type )
+    {
+        std::vector<Constraint> res;
+        std::vector<Constraint> all;
+
+        auto contaier = ConstraintsManager::containerInstance< Type >();
+        if( contaier.find( type ) != contaier.end() )
+            all = contaier[ type ];
+
+        for( Constraint cons: all )
+            if( cons.getType() == cons_type )
+                res.push_back( cons );
+
+        return res;
+    }
+
+    template< typename Type >
+    static bool isConstraintPresent( Type type, QString name )
+    {
+        auto contaier = ConstraintsManager::containerInstance< Type >();
+        if( contaier.find( type ) != contaier.end() )
+            return false;
+
+        for( Constraint& cons: contaier[ type ] )
+            if( cons.getMetaName() == name )
+                return true;
+
+        return false;
+    }
+
+    template< typename Type >
+    static Constraint getConstraint( Type type, QString name )
+    {
+        auto contaier = ConstraintsManager::containerInstance< Type >();
+        if( contaier.find( type ) != contaier.end() )
+            return Constraint( Constraint::CT_FREE, "", "" );
+
+        for( Constraint& cons: contaier[ type ] )
+            if( cons.getMetaName() == name )
+                return cons;
+
+        return Constraint( Constraint::CT_FREE, "", "" );
+    }
+
 private:
     template< typename Type >
     static std::map< Type, std::vector< Constraint >>& containerInstance()
@@ -65,6 +134,10 @@ private:
         static std::map< Type, std::vector< Constraint >> contaier;
         return contaier;
     }
+
+    static void loadConstraintsFromFile( QString file_path );
+    static void loadConstraintsFromMap( QVariantMap map );
+    static Constraint::ConstraintType getTypeByString( QString type );
 };
 
 }

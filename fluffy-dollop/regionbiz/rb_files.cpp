@@ -190,8 +190,10 @@ BaseFileKeeperPtr FileKeeperFabric::createFile(QString path, uint64_t entity_id,
 {
     switch( type )
     {
-    case BaseFileKeeper::FT_PLAN:
-        return BaseFileKeeperPtr( new PlanFileKeeper( path, entity_id ));
+    case BaseFileKeeper::FT_PLAN_VECTOR:
+        return BaseFileKeeperPtr( new PlanVectorFileKeeper( path, entity_id ));
+    case BaseFileKeeper::FT_PLAN_RASTER:
+        return BaseFileKeeperPtr( new PlanRasterFileKeeper( path, entity_id ));
     case BaseFileKeeper::FT_DOCUMENT:
         return BaseFileKeeperPtr( new DocumentFileKeeper( path, entity_id ));
     case BaseFileKeeper::FT_IMAGE:
@@ -205,23 +207,34 @@ BaseFileKeeperPtr FileKeeperFabric::createFile(QString path, uint64_t entity_id,
 
 //----------------------------------------------------
 
-PlanFileKeeper::PlanFileKeeper(QString path, uint64_t entity_id ):
+PlanVectorFileKeeper::PlanVectorFileKeeper(QString path, uint64_t entity_id ):
     BaseFileKeeper( path, entity_id )
 {}
 
-BaseFileKeeper::FileType PlanFileKeeper::getType()
+BaseFileKeeper::FileType PlanVectorFileKeeper::getType()
 {
-    return FT_PLAN;
+    return FT_PLAN_VECTOR;
 }
 
-PlanFileKeeper::PlanParams PlanFileKeeper::getPlanParams()
+PlanVectorFileKeeper::PlanParams PlanVectorFileKeeper::getPlanParams()
 {
     return _params;
 }
 
-void PlanFileKeeper::setPlanParams(PlanParams params)
+void PlanVectorFileKeeper::setPlanParams(PlanParams params)
 {
     _params = params;
+}
+
+//-----------------------------------------------------
+
+PlanRasterFileKeeper::PlanRasterFileKeeper(QString path, uint64_t entity_id):
+    PlanVectorFileKeeper( path, entity_id )
+{}
+
+BaseFileKeeper::FileType PlanRasterFileKeeper::getType()
+{
+    return FT_PLAN_RASTER;
 }
 
 //------------------------------------------------------

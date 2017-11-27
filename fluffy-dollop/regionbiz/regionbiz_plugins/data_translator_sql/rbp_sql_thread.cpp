@@ -672,11 +672,11 @@ bool ThreadSql::commitFiles(BaseEntityPtr entity)
             angles, xs, ys, opacitys;
     for( auto file: entity->getFiles() )
     {
-        PlanFileKeeperPtr plan = BaseFileKeeper::convert< PlanFileKeeper >( file );
+        PlanVectorFileKeeperPtr plan = BaseFileKeeper::convert< PlanVectorFileKeeper >( file );
         if( !plan )
             continue;
 
-        PlanFileKeeper::PlanParams params = plan->getPlanParams();
+        PlanVectorFileKeeper::PlanParams params = plan->getPlanParams();
         plan_paths.push_back( file->getPath() );
         scales_w.push_back( params.scale_w );
         scales_h.push_back( params.scale_h );
@@ -758,8 +758,11 @@ QString ThreadSql::getStringFileType(BaseFileKeeper::FileType type)
     QString type_str;
     switch( type )
     {
-    case BaseFileKeeper::FT_PLAN:
-        type_str = "plan";
+    case BaseFileKeeper::FT_PLAN_RASTER:
+        type_str = "plan_raster";
+        break;
+    case BaseFileKeeper::FT_PLAN_VECTOR:
+        type_str = "plan_vector";
         break;
     case BaseFileKeeper::FT_DOCUMENT:
         type_str = "document";

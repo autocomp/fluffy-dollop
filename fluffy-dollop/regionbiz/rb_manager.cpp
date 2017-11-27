@@ -12,6 +12,7 @@
 #include <QDir>
 
 #include "rb_entity_filter.h"
+#include "rb_meta_constraints.h"
 
 #ifdef STACKWALKER
 #include "StackWalker/StackWalker.h"
@@ -44,6 +45,9 @@ bool RegionBizManager::init(QString &config_path)
     // translators
     bool load_translators = processTranslators( settings );
 
+    // init constraints manager
+    initConstraintsManager( settings );
+
     return load_plugins && load_translators;
 }
 
@@ -53,6 +57,125 @@ BaseEntityPtr RegionBizManager::getBaseEntity(uint64_t id)
     if( EntityFilter::isFiltered( entity ))
         return entity;
     return nullptr;
+}
+
+bool RegionBizManager::isEntityConstraintsCorrect(uint64_t id)
+{
+    auto entity = getBaseEntity( id );
+    if( entity )
+        return isEntityConstraintsCorrect( entity );
+    return false;
+}
+
+bool RegionBizManager::isEntityConstraintsCorrect( BaseEntityPtr entity )
+{
+    if( !entity )
+        return false;
+
+    #define CHECK_CONSTRAINTS( type_geted ) \
+    auto type = type_geted; \
+    auto contraints = ConstraintsManager::getConstraints( type, Constraint::CT_SYSTEM ); \
+    for( Constraint& cons: contraints ) \
+    { \
+        if( !entity->isMetadataPresent( cons.getMetaName() )) \
+            return false; \
+    }
+
+    CHECK_CONSTRAINTS( entity->getEntityType() );
+
+    switch( type ) {
+    case BaseEntity::ET_AREA:
+    {
+        CHECK_CONSTRAINTS( entity->convert< BaseArea >()->getType() );
+        break;
+    }
+
+    case BaseEntity::ET_MARK:
+    {
+        CHECK_CONSTRAINTS( entity->convert< Mark >()->getMarkType() );
+        break;
+    }
+
+    case BaseEntity::ET_GROUP:
+    case BaseEntity::ET_RELATION:
+    {
+        // WARNING don't specific check constraints of group and relation
+        break;
+    }
+
+    }
+
+    #undef CHECK_CONSTRAINTS
+
+    return true;
+}
+
+Constraints RegionBizManager::getConstraintsOfEntity(uint64_t id)
+{
+    auto entity = getBaseEntity( id );
+    if( entity )
+        return getConstraintsOfEntity( entity );
+    return Constraints();
+}
+
+Constraints RegionBizManager::getConstraintsOfEntity( BaseEntityPtr entity )
+{
+    Constraints constraints;
+    if( !entity )
+        return constraints;
+
+    auto type = entity->getEntityType();
+    constraints = ConstraintsManager::getConstraints( type );
+
+    switch( type ) {
+    case BaseEntity::ET_AREA:
+    {
+        auto type = entity->convert< BaseArea >()->getType();
+        auto cons_specific = ConstraintsManager::getConstraints( type );
+        constraints.insert( constraints.end(), cons_specific.begin(), cons_specific.end() );
+        break;
+    }
+
+    case BaseEntity::ET_MARK:
+    {
+        auto type = entity->convert< Mark >()->getMarkType();
+        auto cons_specific = ConstraintsManager::getConstraints( type );
+        constraints.insert( constraints.end(), cons_specific.begin(), cons_specific.end() );
+        break;
+    }
+
+    case BaseEntity::ET_GROUP:
+    case BaseEntity::ET_RELATION:
+    {
+        // WARNING don't specific append constraints of group and relation
+        break;
+    }
+
+    }
+
+    return constraints;
+}
+
+Constraints RegionBizManager::getConstraintsOfEntity( uint64_t id, Constraint::ConstraintType type )
+{
+    auto entity = getBaseEntity( id );
+    if( entity )
+        return getConstraintsOfEntity( entity, type );
+    return Constraints();
+}
+
+Constraints RegionBizManager::getConstraintsOfEntity( BaseEntityPtr entity, Constraint::ConstraintType type )
+{
+    Constraints constraints;
+    if( !entity )
+        return constraints;
+
+    auto all_cons = getConstraintsOfEntity( entity );
+    for( Constraint& cons: all_cons )
+        if( cons.getType() == type )
+            constraints.push_back( cons );
+
+    return constraints;
 }
 
 BaseAreaPtr RegionBizManager::getBaseArea( uint64_t id )
@@ -201,6 +324,13 @@ bool RegionBizManager::deleteArea(uint64_t id)
 
 bool RegionBizManager::commitArea( BaseAreaPtr area )
 {
+    if( !isEntityConstraintsCorrect( area ))
+    {
+        std::cerr << "Incorrect Constraints for area: "
+                  << area->getId() << std::endl;
+        return false;
+    }
+
     bool com = _data_translator->commitArea( area );
     if( com )
     {
@@ -313,8 +443,12 @@ bool RegionBizManager::addMetadata( uint64_t id, QString type,
                                     QString name, QVariant val )
 {
     BaseMetadataPtr data = MetadataFabric::createMetadata( type, id );
+    if( !data )
+        return false;
+
     data->setName( name );
-    data->setValueByVariant( val );
+    if( !data->setValueByVariant( val ))
+        return false;
 
     return addMetadata( data );
 }
@@ -323,13 +457,27 @@ bool RegionBizManager::addMetadata( BaseMetadataPtr data )
 {
     if( !isMetadataPresent( data->getParentId(), data->getName() ))
     {
-       BaseMetadata::addForEntityByName( data );
-       return true;
+        if( !data->checkConstraits() )
+            return false;
+
+        BaseMetadata::addForEntityByName( data );
+        return true;
     }
     else
     {
-        setMetadataValue( data->getParentId(), data->getName(), data->getValueAsString() );
-        return true;
+        QString type = getMetadata( data->getParentId(), data->getName() )->getType();
+        if( data->getType() != type )
+        {
+            std::cerr << "Can't set Metadata \""
+                      << data->getName().toUtf8().data()
+                      << "\" value with other type" << std::endl;
+            return false;
+        }
+
+        bool set = setMetadataValue( data->getParentId(),
+                                     data->getName(),
+                                     data->getValueAsString() );
+        return set;
     }
 
     return false;
@@ -442,6 +590,13 @@ bool RegionBizManager::commitMark(uint64_t id)
 
 bool RegionBizManager::commitMark(MarkPtr mark)
 {
+    if( !isEntityConstraintsCorrect( mark ))
+    {
+        std::cerr << "Incorrect Constraints for mark: "
+                  << mark->getId() << std::endl;
+        return false;
+    }
+
     bool comm = _data_translator->commitMark( mark );
     if( comm )
     {
@@ -520,8 +675,12 @@ bool RegionBizManager::commitGroup(uint64_t id)
 
 bool RegionBizManager::commitGroup( GroupEntityPtr group )
 {
-    if( !group )
+    if( !isEntityConstraintsCorrect( group ))
+    {
+        std::cerr << "Incorrect Constraints for group: "
+                  << group->getId() << std::endl;
         return false;
+    }
 
     bool free_changes( true );
     std::vector< uint64_t > groups_on_commit =
@@ -1012,7 +1171,7 @@ bool RegionBizManager::processPlugins( QVariantMap settings )
                 QString plugins_load = plugins_settings[ "plugins_load" ].toString();
                 if( "all" == plugins_load )
                 {
-                    load_list = false;
+                    //load_list = false;
 
                     bool load_all( true );
                     return loadPlugins( path, load_all );
@@ -1233,6 +1392,16 @@ void RegionBizManager::clearCurrentData( bool clear_entitys )
         BaseEntity::getEntitys().clear();
         BaseEntity::_mutex.unlock();
     }
+}
+
+void RegionBizManager::initConstraintsManager( QVariantMap settings )
+{
+    if( !settings.contains( "constraints_aim" ))
+        return;
+
+    QString aim = settings[ "constraints_aim" ].toString();
+    QString file = settings[ "constraints_file" ].toString();
+    ConstraintsManager::init( aim, file );
 }
 
 template<typename LocType>

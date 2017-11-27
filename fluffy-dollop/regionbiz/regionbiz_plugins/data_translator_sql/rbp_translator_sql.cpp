@@ -614,7 +614,7 @@ BaseFileKeeperPtrs SqlTranslator::loadFiles()
     // boost speed
     query.setForwardOnly( true );
 
-    std::map< QString, PlanFileKeeper::PlanParams > plan_params;
+    std::map< QString, PlanVectorFileKeeper::PlanParams > plan_params;
     QString select_plans = "SELECT path, scale_w, scale_h, angle, x, y, opacity FROM plans";
     bool res_plans = query.exec( select_plans );
     if( res_plans )
@@ -623,7 +623,7 @@ BaseFileKeeperPtrs SqlTranslator::loadFiles()
         {
             QString path = query.value( 0 ).toString();
 
-            PlanFileKeeper::PlanParams params;
+            PlanVectorFileKeeper::PlanParams params;
             params.scale_w = query.value( 1 ).toDouble();
             params.scale_h = query.value( 2 ).toDouble();
             params.rotate = query.value( 3 ).toDouble();
@@ -650,9 +650,10 @@ BaseFileKeeperPtrs SqlTranslator::loadFiles()
             BaseFileKeeperPtr file_ptr = FileKeeperFabric::createFile( path, parent_id, type );
             file_ptr->setName( name );
 
-            if( BaseFileKeeper::FT_PLAN == type )
+            if( BaseFileKeeper::FT_PLAN_RASTER == type
+                    || BaseFileKeeper::FT_PLAN_VECTOR == type)
             {
-                auto plan = BaseFileKeeper::convert< PlanFileKeeper >( file_ptr );
+                auto plan = BaseFileKeeper::convert< PlanVectorFileKeeper >( file_ptr );
                 if( !res_plans
                         || !plan )
                     continue;
@@ -686,9 +687,15 @@ QString SqlTranslator::getStringFileType(BaseFileKeeper::FileType type)
     QString type_str;
     switch( type )
     {
-    case BaseFileKeeper::FT_PLAN:
+    case BaseFileKeeper::FT_PLAN_VECTOR:
     {
-        type_str = "plan";
+        type_str = "plan_vector";
+        break;
+    }
+
+    case BaseFileKeeper::FT_PLAN_RASTER:
+    {
+        type_str = "plan_raster";
         break;
     }
 
@@ -712,8 +719,10 @@ QString SqlTranslator::getStringFileType(BaseFileKeeper::FileType type)
 
 BaseFileKeeper::FileType SqlTranslator::getFileTypeByString(QString type)
 {
-    if( "plan" == type )
-        return BaseFileKeeper::FT_PLAN;
+    if( "plan_vector" == type )
+        return BaseFileKeeper::FT_PLAN_VECTOR;
+    if( "plan_raster" == type )
+        return BaseFileKeeper::FT_PLAN_RASTER;
     if( "document" == type )
         return BaseFileKeeper::FT_DOCUMENT;
     if( "image" == type )

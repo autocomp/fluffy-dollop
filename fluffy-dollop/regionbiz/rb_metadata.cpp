@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "rb_manager.h"
+#include "rb_metadata_custom.h"
 
 using namespace regionbiz;
 
@@ -113,15 +114,15 @@ std::vector< Constraint > BaseMetadata::getConstraints()
 
 void BaseMetadata::printIncorrectConstraint(Constraint cons)
 {
-    std::cerr << "Incorrect constrait of " << getName().toUtf8().data()
-              << " metadata of type " << getType().toUtf8().data()
-              << ": " << cons.getConstraint().toUtf8().data() << std::endl;
+    std::cerr << "Incorrect constrait of \"" << getName().toUtf8().data()
+              << "\" metadata of type \"" << getType().toUtf8().data()
+              << "\": " << cons.getConstraint().toUtf8().data() << std::endl;
 }
 
 void BaseMetadata::printWrongCheckConstraints()
 {
-    std::cerr << "Incorrect check constrait of " << getName().toUtf8().data()
-              << " metadata of type " << getType().toUtf8().data() << std::endl;
+    std::cerr << "Incorrect check constrait of \"" << getName().toUtf8().data()
+              << "\" metadata of type \"" << getType().toUtf8().data() << "\"" << std::endl;
 }
 
 BaseMetadataPtr BaseMetadata::getItself()
@@ -202,6 +203,9 @@ bool DoubleMetadata::checkConstraitsByVariant(QVariant new_value)
     auto constraits = getConstraints();
     for( Constraint cons: constraits )
     {
+        if( cons.getMetaName() != getName() )
+            continue;
+
         auto min_max = cons.getConstraintAsList();
         if( min_max.size() != 2 )
         {
@@ -209,13 +213,15 @@ bool DoubleMetadata::checkConstraitsByVariant(QVariant new_value)
             continue;
         }
 
-        if( min_max[ 0 ].isValid() )
+        if( min_max[ 0 ].isValid()
+                && !min_max[ 0 ].toString().isEmpty()  )
         {
             double min = min_max[ 0 ].toDouble();
             if( new_value.toDouble() < min )
                 return false;
         }
-        if( min_max[ 1 ].isValid() )
+        if( min_max[ 1 ].isValid()
+                && !min_max[ 1 ].toString().isEmpty() )
         {
             double max = min_max[ 1 ].toDouble();
             if( new_value.toDouble() > max )
@@ -247,6 +253,9 @@ bool StringMetadata::checkConstraitsByVariant(QVariant new_value)
     auto constraits = getConstraints();
     for( Constraint cons: constraits )
     {
+        if( cons.getMetaName() != getName() )
+            continue;
+
         QString reg_exp = cons.getConstraint();
         QRegExp re( reg_exp );
         if( !re.exactMatch( new_value.toString() ))
@@ -318,6 +327,9 @@ bool IntegerMetadata::checkConstraitsByVariant(QVariant new_value)
     auto constraits = getConstraints();
     for( Constraint cons: constraits )
     {
+        if( cons.getMetaName() != getName() )
+            continue;
+
         auto min_max = cons.getConstraintAsList();
         if( min_max.size() != 2 )
         {
@@ -325,13 +337,15 @@ bool IntegerMetadata::checkConstraitsByVariant(QVariant new_value)
             continue;
         }
 
-        if( min_max[ 0 ].isValid() )
+        if( min_max[ 0 ].isValid()
+                && !min_max[ 0 ].toString().isEmpty()  )
         {
             int min = min_max[ 0 ].toInt();
             if( new_value.toInt() < min )
                 return false;
         }
-        if( min_max[ 1 ].isValid() )
+        if( min_max[ 1 ].isValid()
+                && !min_max[ 1 ].toString().isEmpty()  )
         {
             int max = min_max[ 1 ].toInt();
             if( new_value.toInt() > max )
@@ -359,7 +373,7 @@ QVariant IntegerMetadata::getValueAsVariant()
 
 bool IntegerMetadata::setValueByVariant(QVariant val)
 {
-    setValue( val.toInt() );
+    return setValue( val.toInt() );
 }
 
 int IntegerMetadata::getValue()
@@ -385,15 +399,25 @@ bool IntegerMetadata::setValue(int val)
 BaseMetadataPtr MetadataFabric::createMetadata( QString type,
                                                 uint64_t parent_id )
 {
-    if( "double" == type )
-        return DoubleMetadataPtr( new DoubleMetadata( parent_id ));
-    if( "int" == type )
-        return IntegerMetadataPtr( new IntegerMetadata( parent_id ));
-    if( "string" == type )
-        return StringMetadataPtr( new StringMetadata( parent_id ));
+    #define CHECK_AND_CREATE( type_name, metatype ) \
+    if( type_name == type ) \
+        return metatype ## Ptr( new metatype( parent_id ))
+
+    CHECK_AND_CREATE( "double", DoubleMetadata );
+    CHECK_AND_CREATE( "string", StringMetadata );
+    CHECK_AND_CREATE( "int", IntegerMetadata );
+
+    CHECK_AND_CREATE( "max", MetadataMax );
+    CHECK_AND_CREATE( "min", MetadataMin );
+    CHECK_AND_CREATE( "sum", MetadataSum );
+    CHECK_AND_CREATE( "average", MetadataAverage );
+
+    #undef CHECK_AND_CREATE
 
     return nullptr;
 }
+
+//--------------------------------------------------
 
 EmptyMetadata::EmptyMetadata():
     BaseMetadata( 0 )
