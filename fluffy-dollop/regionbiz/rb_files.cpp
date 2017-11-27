@@ -207,8 +207,24 @@ BaseFileKeeperPtr FileKeeperFabric::createFile(QString path, uint64_t entity_id,
 
 //----------------------------------------------------
 
-PlanVectorFileKeeper::PlanVectorFileKeeper(QString path, uint64_t entity_id ):
+PlanFileKeeper::PlanFileKeeper(QString path, uint64_t entity_id ):
     BaseFileKeeper( path, entity_id )
+{}
+
+PlanFileKeeper::PlanParams PlanFileKeeper::getPlanParams()
+{
+    return _params;
+}
+
+void PlanFileKeeper::setPlanParams(PlanParams params)
+{
+    _params = params;
+}
+
+//----------------------------------------------------
+
+PlanVectorFileKeeper::PlanVectorFileKeeper(QString path, uint64_t entity_id):
+    PlanFileKeeper( path, entity_id )
 {}
 
 BaseFileKeeper::FileType PlanVectorFileKeeper::getType()
@@ -216,20 +232,10 @@ BaseFileKeeper::FileType PlanVectorFileKeeper::getType()
     return FT_PLAN_VECTOR;
 }
 
-PlanVectorFileKeeper::PlanParams PlanVectorFileKeeper::getPlanParams()
-{
-    return _params;
-}
-
-void PlanVectorFileKeeper::setPlanParams(PlanParams params)
-{
-    _params = params;
-}
-
 //-----------------------------------------------------
 
 PlanRasterFileKeeper::PlanRasterFileKeeper(QString path, uint64_t entity_id):
-    PlanVectorFileKeeper( path, entity_id )
+    PlanFileKeeper( path, entity_id )
 {}
 
 BaseFileKeeper::FileType PlanRasterFileKeeper::getType()

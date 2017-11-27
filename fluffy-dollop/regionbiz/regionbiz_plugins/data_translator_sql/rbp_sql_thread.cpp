@@ -672,11 +672,11 @@ bool ThreadSql::commitFiles(BaseEntityPtr entity)
             angles, xs, ys, opacitys;
     for( auto file: entity->getFiles() )
     {
-        PlanVectorFileKeeperPtr plan = BaseFileKeeper::convert< PlanVectorFileKeeper >( file );
+        PlanFileKeeperPtr plan = BaseFileKeeper::convert< PlanFileKeeper >( file );
         if( !plan )
             continue;
 
-        PlanVectorFileKeeper::PlanParams params = plan->getPlanParams();
+        PlanFileKeeper::PlanParams params = plan->getPlanParams();
         plan_paths.push_back( file->getPath() );
         scales_w.push_back( params.scale_w );
         scales_h.push_back( params.scale_h );

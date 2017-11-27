@@ -614,7 +614,7 @@ BaseFileKeeperPtrs SqlTranslator::loadFiles()
     // boost speed
     query.setForwardOnly( true );
 
-    std::map< QString, PlanVectorFileKeeper::PlanParams > plan_params;
+    std::map< QString, PlanFileKeeper::PlanParams > plan_params;
     QString select_plans = "SELECT path, scale_w, scale_h, angle, x, y, opacity FROM plans";
     bool res_plans = query.exec( select_plans );
     if( res_plans )
@@ -623,7 +623,7 @@ BaseFileKeeperPtrs SqlTranslator::loadFiles()
         {
             QString path = query.value( 0 ).toString();
 
-            PlanVectorFileKeeper::PlanParams params;
+            PlanFileKeeper::PlanParams params;
             params.scale_w = query.value( 1 ).toDouble();
             params.scale_h = query.value( 2 ).toDouble();
             params.rotate = query.value( 3 ).toDouble();
@@ -653,7 +653,7 @@ BaseFileKeeperPtrs SqlTranslator::loadFiles()
             if( BaseFileKeeper::FT_PLAN_RASTER == type
                     || BaseFileKeeper::FT_PLAN_VECTOR == type)
             {
-                auto plan = BaseFileKeeper::convert< PlanVectorFileKeeper >( file_ptr );
+                auto plan = BaseFileKeeper::convert< PlanFileKeeper >( file_ptr );
                 if( !res_plans
                         || !plan )
                     continue;

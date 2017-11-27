@@ -103,7 +103,7 @@ public:
 
 //---------------------------------------------------------
 
-class PlanVectorFileKeeper: public BaseFileKeeper
+class PlanFileKeeper: public BaseFileKeeper
 {
 public:
     struct PlanParams
@@ -116,19 +116,29 @@ public:
         double opacity = 1;
     };
 
-    PlanVectorFileKeeper(QString path , uint64_t entity_id);
-    virtual FileType getType() override;
+    PlanFileKeeper(QString path , uint64_t entity_id);
+    virtual FileType getType() = 0;
     PlanParams getPlanParams();
     void setPlanParams( PlanParams params );
 
 private:
     PlanParams _params;
 };
+typedef std::shared_ptr< PlanFileKeeper > PlanFileKeeperPtr;
+
+//------------------------------------------------------
+
+class PlanVectorFileKeeper: public PlanFileKeeper
+{
+public:
+    PlanVectorFileKeeper(QString path , uint64_t entity_id);
+    FileType getType() override;
+};
 typedef std::shared_ptr< PlanVectorFileKeeper > PlanVectorFileKeeperPtr;
 
 //------------------------------------------------------
 
-class PlanRasterFileKeeper: public PlanVectorFileKeeper
+class PlanRasterFileKeeper: public PlanFileKeeper
 {
 public:
     PlanRasterFileKeeper(QString path , uint64_t entity_id);
