@@ -25,7 +25,10 @@ public:
         ET_AREA,
         ET_MARK,
         ET_GROUP,
-        ET_RELATION
+        ET_RELATION,
+        ET_GRAPH,
+        ET_GRAPH_NODE,
+        ET_GRAPH_EDGE
     };
 
     // main

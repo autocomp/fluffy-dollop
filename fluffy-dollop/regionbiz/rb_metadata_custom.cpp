@@ -95,6 +95,10 @@ QVariant MetadataSum::getValueAsVariant()
 
         case BaseEntity::ET_MARK:
         case BaseEntity::ET_RELATION:
+
+        case BaseEntity::ET_GRAPH:
+        case BaseEntity::ET_GRAPH_EDGE:
+        case BaseEntity::ET_GRAPH_NODE:
         {
             break;
         }
@@ -165,6 +169,10 @@ QVariant MetadataMin::getValueAsVariant()
 
         case BaseEntity::ET_MARK:
         case BaseEntity::ET_RELATION:
+
+        case BaseEntity::ET_GRAPH:
+        case BaseEntity::ET_GRAPH_EDGE:
+        case BaseEntity::ET_GRAPH_NODE:
         {
             break;
         }
@@ -235,6 +243,10 @@ QVariant MetadataMax::getValueAsVariant()
 
         case BaseEntity::ET_MARK:
         case BaseEntity::ET_RELATION:
+
+        case BaseEntity::ET_GRAPH:
+        case BaseEntity::ET_GRAPH_EDGE:
+        case BaseEntity::ET_GRAPH_NODE:
         {
             break;
         }
@@ -301,6 +313,10 @@ QVariant MetadataAverage::getValueAsVariant()
 
         case BaseEntity::ET_MARK:
         case BaseEntity::ET_RELATION:
+
+        case BaseEntity::ET_GRAPH:
+        case BaseEntity::ET_GRAPH_EDGE:
+        case BaseEntity::ET_GRAPH_NODE:
         {
             break;
         }

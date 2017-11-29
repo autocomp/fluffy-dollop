@@ -84,8 +84,13 @@ std::vector< Constraint > BaseMetadata::getConstraints()
     if( ! entity )
         return empty;
 
+    #define CASE_GET_CONSTRAINTS( type ) \
+    case type: \
+        return ConstraintsManager::getConstraints( type )
+
     switch( entity->getEntityType() )
     {
+
     case BaseEntity::ET_AREA:
     {
         auto area = entity->convert< BaseArea >();
@@ -98,14 +103,11 @@ std::vector< Constraint > BaseMetadata::getConstraints()
         return ConstraintsManager::getConstraints( mark->getMarkType() );
     }
 
-    case BaseEntity::ET_GROUP:
-        return ConstraintsManager::getConstraints( BaseEntity::ET_GROUP );
-
-    case BaseEntity::ET_RELATION:
-    {
-        // TODO Constrait get for type of relation
-        static_assert( true, "Not realised constrait for Relation" );
-    }
+    CASE_GET_CONSTRAINTS( BaseEntity::ET_GROUP );
+    CASE_GET_CONSTRAINTS( BaseEntity::ET_RELATION );
+    CASE_GET_CONSTRAINTS( BaseEntity::ET_GRAPH );
+    CASE_GET_CONSTRAINTS( BaseEntity::ET_GRAPH_EDGE );
+    CASE_GET_CONSTRAINTS( BaseEntity::ET_GRAPH_NODE );
 
     }
 

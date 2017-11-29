@@ -3,6 +3,7 @@
 
 #include <queue>
 #include <QThread>
+#include <QSqlQuery>
 
 #include <regionbiz/rb_locations.h>
 #include <regionbiz/rb_layers.h>
@@ -25,7 +26,9 @@ public:
         C_DELETE_GROUP,
         C_COMMIT_LAYERS,
         C_DELETE_LAYER,
-        C_COMMIT_TRANSFORM_MATRIX
+        C_COMMIT_TRANSFORM_MATRIX,
+        C_COMMIT_GRAPH,
+        C_DELETE_GRAPH
     };
 
     ThreadSql();
@@ -58,6 +61,10 @@ private:
     bool commitLayers();
     bool deleteLayer( uint64_t id );
     bool commitTransformMatrix( uint64_t facility_id );
+    bool commitGraph( GraphEntityPtr graph );
+    bool deleteGraph( uint64_t id );
+    bool commitNode( QSqlQuery &query, GraphNodePtr node );
+    bool commitEdge( QSqlQuery &query, GraphEdgePtr edge );
 
     // commit small elements
     template< typename EntType >

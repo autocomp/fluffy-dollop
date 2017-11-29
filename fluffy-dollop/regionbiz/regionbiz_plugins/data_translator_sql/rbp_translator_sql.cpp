@@ -77,6 +77,11 @@ void SqlTranslator::loadFunctions()
     _load_transform_matrix = std::bind( &SqlTranslator::loadTransformMatrixes, this );
     _commit_transform_matrix = std::bind( &SqlTranslator::commitTransformMatrix, this,
                                           std::placeholders::_1 );
+
+    // graph
+    _load_graphs = std::bind( &SqlTranslator::loadGraphs, this );
+    _commit_graph = std::bind( &SqlTranslator::commitGraph, this, std::placeholders::_1 );
+    _delete_graph = std::bind( &SqlTranslator::deleteGraph, this, std::placeholders::_1 );
 }
 
 std::vector< RegionPtr > SqlTranslator::loadRegions()
@@ -514,10 +519,163 @@ TransformById SqlTranslator::loadTransformMatrixes()
     return matrixes;
 }
 
+GraphEntityPtrs SqlTranslator::loadGraphs()
+{
+    GraphEntityPtrs graphs;
+
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    // lock
+    db.transaction();
+
+    QSqlQuery query( db );
+
+    // select graphs
+    std::map< uint64_t, GraphEntityPtr > graphs_by_id;
+    QString select = "SELECT e.id, e.parent_id, e.name, e.description "
+                     "FROM entitys as e JOIN graphs as g ON (e.id = g.id) "
+                     "WHERE g.type = 'graph'";
+    bool res = query.exec( select );
+    if( res )
+        for( query.first(); query.isValid(); query.next() )
+        {
+            uint64_t id = query.value( 0 ).toLongLong();
+            uint64_t parent_id = query.value( 1 ).toLongLong();
+            QString name = query.value( 2 ).toString();
+            QString descr = query.value( 3 ).toString();
+
+            GraphEntityPtr graph = BaseEntity::createWithId< GraphEntity >( id );
+            if( !graph )
+                continue;
+
+            setParentForGraph( graph, parent_id );
+            graph->setName( name );
+            graph->setDesription( descr );
+
+            graphs.push_back( graph );
+            graphs_by_id[id] = graph;
+        }
+
+    // select nodes
+    std::map< uint64_t, QPolygonF > coords;
+    QString select_coords = "SELECT c.id, c.x, c.y, c.number FROM graphs as g "
+                            "JOIN coords as c "
+                            "ON g.id = c.id "
+                            "WHERE g.type = 'node'"
+                            "ORDER by c.id, c.number ";
+    // boost speed of query
+    query.setForwardOnly( true );
+    res = query.exec( select_coords );
+    if( res )
+    {
+        for( query.first(); query.isValid(); query.next() )
+        {
+            uint64_t id = query.value( 0 ).toLongLong();
+            double x = query.value( 1 ).toDouble();
+            double y = query.value( 2 ).toDouble();
+
+            coords[ id ].push_back( QPointF( x, y ));
+        }
+    }
+
+    std::map< uint64_t, GraphNodePtr > nodes_by_id;
+    select = "SELECT e.id, e.parent_id, e.name, e.description "
+             "FROM entitys as e JOIN graphs as g ON (e.id = g.id) "
+             "WHERE g.type = 'node'";
+    res = query.exec( select );
+    if( res )
+        for( query.first(); query.isValid(); query.next() )
+        {
+            uint64_t id = query.value( 0 ).toLongLong();
+            uint64_t parent_id = query.value( 1 ).toLongLong();
+            QString name = query.value( 2 ).toString();
+            QString descr = query.value( 3 ).toString();
+
+            GraphNodePtr node = BaseEntity::createWithId< GraphNode >( id );
+            if( !node )
+                continue;
+
+            node->setName( name );
+            node->setDesription( descr );
+            node->setCoord( coords[ id ].front() );
+            GraphEntityPtr graph = graphs_by_id[parent_id];
+            if( graph )
+                appendNodeForGraph( graph, node );
+
+            nodes_by_id[ id ] = node;
+        }
+
+    std::map< uint64_t, std::pair< uint64_t, uint64_t >> edges_ids;
+    select = "SELECT id, first_node, second_node FROM graph_edges";
+    res = query.exec( select );
+    if( res )
+        for( query.first(); query.isValid(); query.next() )
+        {
+            uint64_t id = query.value( 0 ).toLongLong();
+            uint64_t id_first = query.value( 1 ).toLongLong();
+            uint64_t id_second = query.value( 2 ).toLongLong();
+
+            edges_ids[ id ] = std::make_pair( id_first, id_second );
+        }
+
+    // select nodes
+    select = "SELECT e.id, e.parent_id, e.name, e.description "
+             "FROM entitys as e JOIN graphs as g ON (e.id = g.id) "
+             "WHERE g.type = 'edge'";
+    res = query.exec( select );
+    if( res )
+        for( query.first(); query.isValid(); query.next() )
+        {
+            uint64_t id = query.value( 0 ).toLongLong();
+            uint64_t parent_id = query.value( 1 ).toLongLong();
+            QString name = query.value( 2 ).toString();
+            QString descr = query.value( 3 ).toString();
+
+            if( edges_ids.find( id ) == edges_ids.end() )
+            {
+                using namespace std;
+
+                cerr << "Edge " << id << " don't has Nodes" << endl;
+                continue;
+            }
+
+            GraphEdgePtr edge = BaseEntity::createWithId< GraphEdge >( id );
+            if( !edge )
+                continue;
+
+            auto pair = edges_ids[ id ];
+            edge->setFirstPoint( nodes_by_id[ pair.first ] );
+            edge->setSecondPoint( nodes_by_id[ pair.second ] );
+            edge->setName( name );
+            edge->setDesription( descr );
+
+            GraphEntityPtr graph = graphs_by_id[parent_id];
+            if( graph )
+                appendEdgeForGraph( graph, edge );
+        }
+
+    // unlock
+    db.commit();
+    return graphs;
+}
+
 bool SqlTranslator::commitTransformMatrix( FacilityPtr facility )
 {
     // WARNING test multithread commit
     _thread_sql.appendCommand( ThreadSql::C_COMMIT_TRANSFORM_MATRIX, facility->getId() );
+    return true;
+}
+
+bool SqlTranslator::commitGraph(GraphEntityPtr graph)
+{
+    // WARNING test multithread commit
+    _thread_sql.appendCommand( ThreadSql::C_COMMIT_GRAPH, graph->getId() );
+    return true;
+}
+
+bool SqlTranslator::deleteGraph(GraphEntityPtr graph)
+{
+    // WARNING test multithread commit
+    _thread_sql.appendCommand( ThreadSql::C_DELETE_GRAPH, graph->getId() );
     return true;
 }
 

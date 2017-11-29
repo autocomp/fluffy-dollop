@@ -13,6 +13,7 @@
 #include "rb_group.h"
 #include "rb_layers.h"
 #include "rb_transform_matrix.h"
+#include "rb_graph.h"
 
 #define FIND_IF( cont, func ) std::find_if( cont.begin(), cont.end(), func );
 
@@ -282,6 +283,19 @@ public:
     void subscribeOnAddEntity( QObject* obj,
                                const char *slot,
                                bool queue = false );
+
+    // graph
+    GraphEntityPtr getGraph( uint64_t id );
+    bool isAreaHasGraph( uint64_t area_id );
+    bool isAreaHasGraph( BaseAreaPtr area );
+    GraphEntityPtr getGraphOfArea( uint64_t area_id );
+    GraphEntityPtr getGraphOfArea( BaseAreaPtr area );
+    GraphEntityPtr addGraph( uint64_t area_id );
+    GraphEntityPtr addGraph( BaseAreaPtr area );
+    bool commitGraph( GraphEntityPtr graph );
+    bool commitGraph( uint64_t graph_id );
+    bool deleteGraph( uint64_t graph_id );
+    bool deleteGraph( GraphEntityPtr graph );
 
 private:
     RegionBizManager();

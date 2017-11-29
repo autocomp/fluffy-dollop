@@ -78,6 +78,36 @@ bool BaseArea::leaveGroup()
     return true;
 }
 
+GraphEntityPtr BaseArea::getGraph()
+{
+    auto mngr = RegionBizManager::instance();
+    return mngr->getGraphOfArea( getId() );
+}
+
+bool BaseArea::hasGraph()
+{
+    auto mngr = RegionBizManager::instance();
+    return mngr->isAreaHasGraph( getId() );
+}
+
+GraphEntityPtr BaseArea::addGraph()
+{
+    auto mngr = RegionBizManager::instance();
+    return mngr->addGraph( getId() );
+}
+
+bool BaseArea::commitGraph()
+{
+    auto mngr = RegionBizManager::instance();
+    return mngr->commitGraph( getId() );
+}
+
+bool BaseArea::deleteGraph()
+{
+    auto mngr = RegionBizManager::instance();
+    return mngr->deleteGraph( getGraph()->getId() );
+}
+
 MarksHolderPtr BaseArea::convertToMarksHolder()
 {
     auto holder = convert< MarksHolder>();

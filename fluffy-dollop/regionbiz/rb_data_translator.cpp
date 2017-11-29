@@ -305,6 +305,49 @@ bool BaseDataTranslator::commitTransformMatrix(FacilityPtr facility)
         return false;
 }
 
+GraphEntityPtrs BaseDataTranslator::loadGraphs()
+{
+    if( _load_graphs )
+    {
+        auto graph_vec = _load_graphs();
+        for( GraphEntityPtr graph: graph_vec )
+        {
+            // TODO check type of object
+            auto mngr = RegionBizManager::instance();
+        }
+        return graph_vec;
+    }
+    else
+        return GraphEntityPtrs();
+}
+
+bool BaseDataTranslator::commitGraph( GraphEntityPtr graph )
+{
+    if( !graph )
+        return false;
+
+    if( _commit_graph )
+        return _commit_graph( graph );
+    else
+        return false;
+}
+
+bool BaseDataTranslator::deleteGraph(GraphEntityPtr graph)
+{
+    if( _delete_graph )
+    {
+        bool del = _delete_graph( graph );
+        if( del )
+        {
+            BaseMetadata::removeForEntity( graph->getId() );
+            BaseEntity::deleteEntity( graph );
+        }
+        return del;
+    }
+    else
+        return false;
+}
+
 void BaseDataTranslator::setParentForBaseLocation( BaseAreaPtr loc, uint64_t parent_id )
 {
     loc->setParent( parent_id );
@@ -323,6 +366,21 @@ void BaseDataTranslator::appendNewLayerFromBase(uint64_t id, QString name)
 void BaseDataTranslator::freeChangedGroups()
 {
     GroupWatcher::freeChanged();
+}
+
+void BaseDataTranslator::setParentForGraph(GraphEntityPtr graph, uint64_t id_parent)
+{
+    graph->setParentId( id_parent );
+}
+
+void BaseDataTranslator::appendNodeForGraph(GraphEntityPtr graph, GraphNodePtr node)
+{
+    graph->appendNode( node );
+}
+
+void BaseDataTranslator::appendEdgeForGraph(GraphEntityPtr graph, GraphEdgePtr edge)
+{
+    graph->appendEdge( edge );
 }
 
 //-------------------------------------------------

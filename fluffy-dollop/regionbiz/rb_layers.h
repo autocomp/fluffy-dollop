@@ -5,6 +5,7 @@
 #include <set>
 #include <mutex>
 #include <QString>
+#include <QImage>
 
 #include "rb_files.h"
 #include "rb_marks.h"
@@ -28,6 +29,8 @@ public:
     QString getName();
     void setName( QString name );
     uint getNumber();
+    void setIcon( QImage icon );
+    QImage getIcon();
 
     // metadata
     std::vector< QString > getMetadataNames();
@@ -83,6 +86,8 @@ private:
     std::set< QString > _files;
     std::set< QString > _metadata;
     std::set< uint64_t > _marks;
+
+    QImage _icon = QImage();
 };
 
 //------------------------------------------

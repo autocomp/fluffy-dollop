@@ -71,6 +71,11 @@ private:
     TransformById loadTransformMatrixes();
     bool commitTransformMatrix( FacilityPtr facility );
 
+    // graph
+    GraphEntityPtrs loadGraphs();
+    bool commitGraph( GraphEntityPtr graph );
+    bool deleteGraph( GraphEntityPtr graph );
+
     // support functions
     template< typename LocTypePtr >
     bool loadCoordinate( std::vector< LocTypePtr >& vector );

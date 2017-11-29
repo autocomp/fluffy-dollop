@@ -69,15 +69,25 @@ bool RegionBizManager::isEntityConstraintsCorrect(uint64_t id)
 
 bool RegionBizManager::isEntityConstraintsCorrect( BaseEntityPtr entity )
 {
+    using namespace std;
+
     if( !entity )
         return false;
 
     #define CHECK_CONSTRAINTS( type_geted ) \
     auto type = type_geted; \
+    /* check system metadata */ \
     auto contraints = ConstraintsManager::getConstraints( type, Constraint::CT_SYSTEM ); \
     for( Constraint& cons: contraints ) \
     { \
         if( !entity->isMetadataPresent( cons.getMetaName() )) \
+            return false; \
+    } \
+    /* check current metadata vlues */ \
+    for( auto pair: entity->getMetadataMap() ) \
+    { \
+        BaseMetadataPtr data = pair.second; \
+        if( !data->checkConstraits() ) \
             return false; \
     }
 
@@ -96,8 +106,16 @@ bool RegionBizManager::isEntityConstraintsCorrect( BaseEntityPtr entity )
         break;
     }
 
+    case BaseEntity::ET_GRAPH:
+    {
+        // TODO constraints check for graph
+        break;
+    }
+
     case BaseEntity::ET_GROUP:
     case BaseEntity::ET_RELATION:
+    case BaseEntity::ET_GRAPH_EDGE:
+    case BaseEntity::ET_GRAPH_NODE:
     {
         // WARNING don't specific check constraints of group and relation
         break;
@@ -146,6 +164,10 @@ Constraints RegionBizManager::getConstraintsOfEntity( BaseEntityPtr entity )
 
     case BaseEntity::ET_GROUP:
     case BaseEntity::ET_RELATION:
+
+    case BaseEntity::ET_GRAPH:
+    case BaseEntity::ET_GRAPH_EDGE:
+    case BaseEntity::ET_GRAPH_NODE:
     {
         // WARNING don't specific append constraints of group and relation
         break;
@@ -430,10 +452,11 @@ bool RegionBizManager::setMetadataValue( uint64_t id, QString name, QVariant val
     {
         BaseMetadata::getMutex().lock();
         BaseMetadataPtr data = BaseMetadata::getMetadatas()[id][name];
+
+        bool ok = data->setValueByVariant( val );
         BaseMetadata::getMutex().unlock();
 
-        data->setValueByVariant( val );
-        return true;
+        return ok;
     }
 
     return false;
@@ -917,7 +940,7 @@ BaseFileKeeperPtrs RegionBizManager::getFilesByEntity(BaseEntityPtr ptr)
     return getFilesByEntity( ptr->getId() );
 }
 
-BaseFileKeeperPtrs RegionBizManager::getFilesByEntity(uint64_t id, BaseFileKeeper::FileType type)
+BaseFileKeeperPtrs RegionBizManager::getFilesByEntity( uint64_t id, BaseFileKeeper::FileType type )
 {
     BaseFileKeeperPtrs files_res;
 
@@ -1111,6 +1134,155 @@ void RegionBizManager::subscribeOnAddEntity(QObject *obj, const char *slot, bool
 {
     QObject::connect( &_change_watcher, SIGNAL( addBaseEntity( uint64_t )),
                       obj, slot, ( queue ? Qt::QueuedConnection : Qt::DirectConnection ));
+}
+
+GraphEntityPtr RegionBizManager::getGraph(uint64_t id)
+{
+    auto entity = BaseEntity::getEntity( id );
+    GraphEntityPtr graph = BaseEntity::convert< GraphEntity >( entity );
+    return graph;
+}
+
+bool RegionBizManager::isAreaHasGraph(uint64_t area_id)
+{
+    auto area = getBaseArea( area_id );
+    return isAreaHasGraph( area );
+}
+
+bool RegionBizManager::isAreaHasGraph(BaseAreaPtr area)
+{
+    bool has = (bool) getGraphOfArea( area );
+    return has;
+}
+
+GraphEntityPtr RegionBizManager::getGraphOfArea(uint64_t area_id )
+{
+    auto area = getBaseArea( area_id );
+    return getGraphOfArea( area );
+}
+
+GraphEntityPtr RegionBizManager::getGraphOfArea( BaseAreaPtr area )
+{
+    if( !area )
+        return nullptr;
+
+    GraphEntityPtr graph;
+
+    BaseEntity::_mutex.unlock();
+    for( auto& pair: BaseEntity::getEntitys() )
+    {
+        BaseEntityPtr ent_ch = pair.second;
+        if( !ent_ch )
+            continue;
+
+        GraphEntityPtr graph_ch = BaseEntity::convert< GraphEntity >( ent_ch );
+        if( !graph_ch )
+            continue;
+
+        if( area->getId() == graph_ch->getParentId() )
+        {
+            graph = graph_ch;
+            break;
+        }
+    }
+    BaseEntity::_mutex.unlock();
+
+    return graph;
+}
+
+GraphEntityPtr RegionBizManager::addGraph( uint64_t area_id )
+{
+    using namespace std;
+
+    auto parent = getBaseArea( area_id );
+    if( !parent )
+    {
+        cerr << "Can't find Graph parent " << area_id << endl;
+        return nullptr;
+    }
+
+    if( parent->hasGraph() )
+    {
+        cerr << "Graph parent " << area_id
+             << " already has graph" << endl;
+        return nullptr;
+    }
+
+    uint64_t id = BaseEntity::getMaxId() + 1;
+    GraphEntityPtr graph = BaseEntity::createWithId< GraphEntity >( id );
+
+    if( graph )
+    {
+        graph->setParentId( area_id );
+        Q_EMIT _change_watcher.addBaseEntity( graph->getId() );
+    }
+    return graph;
+}
+
+GraphEntityPtr RegionBizManager::addGraph(BaseAreaPtr area)
+{
+    if( !area )
+        return nullptr;
+    return addGraph( area->getId() );
+}
+
+bool RegionBizManager::commitGraph(GraphEntityPtr graph)
+{
+    if( graph )
+    {
+        if( !isEntityConstraintsCorrect( graph ))
+        {
+            std::cerr << "Incorrect Constraints for graph: "
+                      << graph->getId() << std::endl;
+            return false;
+        }
+
+        bool comm = _data_translator->commitGraph( graph );
+        if( comm )
+        {
+            // emit signal
+            _change_watcher.changeEntity( graph->getId() );
+        }
+    }
+    else
+        return false;
+
+    return true;
+}
+
+bool RegionBizManager::commitGraph( uint64_t graph_id )
+{
+    auto ent = getBaseEntity( graph_id );
+    if( ent && BaseEntity::ET_GRAPH == ent->getEntityType() )
+    {
+        bool res = commitGraph( ent->convert< GraphEntity >() );
+        return res;
+    }
+    return false;
+}
+
+bool RegionBizManager::deleteGraph(uint64_t graph_id)
+{
+    auto ent = getBaseEntity( graph_id );
+    if( ent && BaseEntity::ET_GRAPH == ent->getEntityType() )
+    {
+        bool res = deleteGraph( ent->convert< GraphEntity >() );
+        return res;
+    }
+    return false;
+}
+
+bool RegionBizManager::deleteGraph( GraphEntityPtr graph )
+{
+    if( !graph )
+        return false;
+
+    // emit signal
+    _change_watcher.deleteEntity( graph->getId() );
+
+    // delete
+    bool del = _data_translator->deleteGraph( graph );
+    return del;
 }
 
 RegionBizManager::RegionBizManager()
@@ -1376,6 +1548,9 @@ void RegionBizManager::loadDataByTranslator()
 
     // transform
     _data_translator->loadTransformMatrixes();
+
+    // graphs
+    _data_translator->loadGraphs();
 }
 
 void RegionBizManager::clearCurrentData( bool clear_entitys )

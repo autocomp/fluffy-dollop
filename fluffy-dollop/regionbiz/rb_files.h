@@ -27,7 +27,7 @@ class BaseFileKeeper
 public:
     enum FileType
     {
-        FT_NONE,
+        FT_NONE = 0,
         FT_PLAN_VECTOR,
         FT_PLAN_RASTER,
         FT_IMAGE,
@@ -36,7 +36,7 @@ public:
 
     enum FileState
     {
-        FS_SYNC,
+        FS_SYNC = 0,
         FS_UNSYNC,
         FS_INVALID,
         FS_UPLOAD

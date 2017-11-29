@@ -10,6 +10,7 @@
 #include "rb_biz_relations.h"
 #include "rb_base_entity.h"
 #include "rb_marks.h"
+#include "rb_graph.h"
 
 namespace regionbiz {
 
@@ -63,6 +64,13 @@ public:
     GroupEntityPtr getGroup();
     bool moveToGroup( GroupEntityPtr group );
     bool leaveGroup();
+
+    // graph
+    GraphEntityPtr getGraph();
+    bool hasGraph();
+    GraphEntityPtr addGraph();
+    bool commitGraph();
+    bool deleteGraph();
 
     // converts
     MarksHolderPtr convertToMarksHolder();

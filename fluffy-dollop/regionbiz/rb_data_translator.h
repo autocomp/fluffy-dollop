@@ -15,6 +15,7 @@
 #include "rb_group.h"
 #include "rb_layers.h"
 #include "rb_transform_matrix.h"
+#include "rb_graph.h"
 
 namespace regionbiz {
 
@@ -76,11 +77,19 @@ public:
     TransformById loadTransformMatrixes();
     bool commitTransformMatrix( FacilityPtr facility );
 
+    // graph
+    GraphEntityPtrs loadGraphs();
+    bool commitGraph(GraphEntityPtr graph);
+    bool deleteGraph( GraphEntityPtr graph );
+
 protected:
     void setParentForBaseLocation( BaseAreaPtr loc, uint64_t parent_id );
     void setAreaForBaseRalation( BaseBizRelationPtr relation, uint64_t id );
     void appendNewLayerFromBase( uint64_t id, QString name );
     void freeChangedGroups();
+    void setParentForGraph( GraphEntityPtr graph, uint64_t id_parent );
+    void appendNodeForGraph( GraphEntityPtr graph, GraphNodePtr node );
+    void appendEdgeForGraph( GraphEntityPtr graph, GraphEdgePtr edge );
 
     // locations
     std::function< std::vector< RegionPtr >( void ) > _load_regions;
@@ -88,6 +97,7 @@ protected:
     std::function< std::vector< FacilityPtr >( void ) > _load_facilitys;
     std::function< std::vector< FloorPtr >( void ) > _load_floors;
     std::function< std::vector< RoomPtr >( void ) > _load_rooms;
+    std::function< GraphEntityPtrs( void ) > _load_graphs;
 
     // delete location
     std::function< bool( BaseAreaPtr ) > _delete_area;
@@ -123,6 +133,10 @@ protected:
     // transform matrixes
     std::function< TransformById() > _load_transform_matrix;
     std::function< bool( FacilityPtr ) > _commit_transform_matrix;
+
+    // graph
+    std::function< bool( GraphEntityPtr ) > _commit_graph;
+    std::function< bool( GraphEntityPtr ) > _delete_graph;
 
 private:
     /**

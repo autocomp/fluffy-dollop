@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include "rb_manager.h"
+#include "rb_meta_constraints.h"
 
 using namespace regionbiz;
 
@@ -24,6 +25,16 @@ void Layer::setName(QString name)
 uint Layer::getNumber()
 {
     return _number;
+}
+
+QImage Layer::getIcon()
+{
+    return _icon;
+}
+
+void Layer::setIcon( QImage icon )
+{
+    _icon = icon;
 }
 
 std::vector< QString > Layer::getMetadataNames()

@@ -1,7 +1,6 @@
 #include "rbp_sql_thread.h"
 
 #include <iostream>
-#include <QSqlQuery>
 #include <QSqlDatabase>
 #include <QDebug>
 #include <QSqlError>
@@ -126,6 +125,17 @@ void ThreadSql::processQueueOfCommand()
 
         case C_COMMIT_TRANSFORM_MATRIX:
             no_error = commitTransformMatrix( id );
+            break;
+
+        case C_COMMIT_GRAPH:
+        {
+            auto graph = mngr->getGraph( id );
+            no_error = commitGraph( graph );
+            break;
+        }
+
+        case C_DELETE_GRAPH:
+            no_error = deleteGraph( id );
             break;
 
         }
@@ -599,6 +609,203 @@ bool ThreadSql::commitTransformMatrix( uint64_t facility_id )
 
     // unlock
     db.commit();
+    return true;
+}
+
+bool ThreadSql::commitGraph(GraphEntityPtr graph)
+{
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    // lock
+    db.transaction();
+    QSqlQuery query( db );
+
+    // check exist
+    QString select = "SELECT id, parent_id, name, description FROM entitys "
+                     " WHERE id = " + QString::number( graph->getId() );
+    query.setForwardOnly( true );
+    query.exec( select );
+    bool has_graph = query.first();
+
+    QString insert_update;
+    if( has_graph )
+    {
+        // update
+        insert_update = "UPDATE entitys "
+                        "SET id = ?, parent_id = ?, name = ?, description = ? "
+                        "WHERE id = " + QString::number( graph->getId() ) + ";";
+    }
+    else
+    {
+        // insert
+        insert_update = "INSERT INTO entitys (id, parent_id, name, description) "
+                        "VALUES (?, ?, ?, ?);";
+    }
+
+    query.prepare( insert_update );
+    query.addBindValue( (qulonglong) graph->getId() );
+    query.addBindValue( (qulonglong) graph->getParentId() );
+    query.addBindValue( graph->getName() );
+    query.addBindValue( graph->getDescription() );
+
+    tryQuery()
+
+    if( !has_graph )
+    {
+        // find a type
+        QString insert_graph = "INSERT INTO graphs (id, type)"
+                               "VALUES (?, ?);";
+        query.prepare( insert_graph );
+        query.addBindValue( (qulonglong) graph->getId() );
+        query.addBindValue( "graph" );
+        tryQuery()
+    }
+
+    // delete points and edges
+    QString id_str = QString::number( graph->getId() );
+    QString delete_nodes = "DELETE FROM entitys WHERE id IN "
+                           "( SELECT id FROM entitys WHERE parent_id = " + id_str + ")";
+    tryQuery( delete_nodes );
+
+    // commit points
+    for( GraphNodePtr node: graph->getNodes() )
+    {
+        if( !commitNode( query, node ))
+        {
+            db.rollback();
+            return false;
+        }
+    }
+
+    // commit edges
+    for( GraphEdgePtr edge: graph->getEdges() )
+    {
+        if( !commitEdge( query, edge ))
+        {
+            db.rollback();
+            return false;
+        }
+    }
+
+    // commit metadata
+    if( !commitMetadate( graph ))
+    {
+        db.rollback();
+        return false;
+    }
+
+    db.commit();
+    return true;
+}
+
+bool ThreadSql::deleteGraph(uint64_t id)
+{
+    QSqlDatabase db = QSqlDatabase::database( getBaseName() );
+    // lock
+    db.transaction();
+    QSqlQuery query( db );
+
+    // delete points
+    QString id_str = QString::number( id );
+    QString delete_query = "DELETE FROM entitys WHERE id IN "
+                           "( SELECT id FROM entitys WHERE parent_id = " + id_str + ")";
+    tryQuery( delete_query );
+
+    delete_query = "DELETE FROM graphs WHERE id = " + id_str + ";";
+    tryQuery( delete_query );
+
+    delete_query = "DELETE FROM entitys WHERE id = " + id_str + ";";
+    tryQuery( delete_query );
+
+    db.commit();
+    return true;
+}
+
+bool ThreadSql::commitNode( QSqlQuery& query, GraphNodePtr node )
+{
+    // insert into entity table
+    QString insert_update = "INSERT INTO entitys (id, parent_id, name, description) "
+                            "VALUES (?, ?, ?, ?);";
+
+    query.prepare( insert_update );
+    query.addBindValue( (qulonglong) node->getId() );
+    query.addBindValue( (qulonglong) node->getParentGraph()->getId() );
+    query.addBindValue( node->getName() );
+    query.addBindValue( node->getDescription() );
+    if( !query.exec())
+    {
+        qDebug() << query.lastError();
+        return false;
+    }
+
+    // insert into graph table
+    QString insert_node = "INSERT INTO graphs (id, type)"
+                          "VALUES (?, ?)";
+    query.prepare( insert_node );
+    query.addBindValue( (qulonglong) node->getId() );
+    query.addBindValue( "node" );
+    if( !query.exec())
+    {
+        qDebug() << query.lastError();
+        return false;
+    }
+
+    // commit metadata
+    if( !commitMetadate( node ))
+        return false;
+
+    // commit coordinates
+    if( !commitCoordinates( node ))
+        return false;
+
+    return true;
+}
+
+bool ThreadSql::commitEdge(QSqlQuery &query, GraphEdgePtr edge)
+{
+    // insert into entity table
+    QString insert_update = "INSERT INTO entitys (id, parent_id, name, description) "
+                            "VALUES (?, ?, ?, ?);";
+
+    query.prepare( insert_update );
+    query.addBindValue( (qulonglong) edge->getId() );
+    query.addBindValue( (qulonglong) edge->getParentGraph()->getId() );
+    query.addBindValue( edge->getName() );
+    query.addBindValue( edge->getDescription() );
+    if( !query.exec())
+    {
+        qDebug() << query.lastError();
+        return false;
+    }
+
+    // insert into graph table
+    QString insert_node = "INSERT INTO graphs (id, type)"
+                          "VALUES (?, ?)";
+    query.prepare( insert_node );
+    query.addBindValue( (qulonglong) edge->getId() );
+    query.addBindValue( "edge" );
+    if( !query.exec())
+    {
+        qDebug() << query.lastError();
+        return false;
+    }
+
+    // insert into graph table
+    insert_node = "INSERT INTO graph_edges (id, first_node, second_node)"
+                  "VALUES (?, ?, ?)";
+    query.prepare( insert_node );
+    query.addBindValue( (qulonglong) edge->getId() );
+    query.addBindValue( (qulonglong) edge->getFirstPoint()->getId() );
+    query.addBindValue( (qulonglong) edge->getSecondPoint()->getId() );
+    if( !query.exec())
+    {
+        qDebug() << query.lastError();
+        return false;
+    }
+
+    // commit metadata
+    if( !commitMetadate( edge ))
+        return false;
+
     return true;
 }
 
