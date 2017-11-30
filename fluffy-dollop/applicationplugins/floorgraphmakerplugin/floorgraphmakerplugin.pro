@@ -24,7 +24,8 @@ HEADERS += \
     instrumentalform.h \
     floorgraphmakerstate.h \
     floorgraphelement.h \
-    elementpropertyform.h
+    elementpropertyform.h \
+    floorgraphtypes.h
 
 SOURCES += \
     floorgraphmakerplugin.cpp \

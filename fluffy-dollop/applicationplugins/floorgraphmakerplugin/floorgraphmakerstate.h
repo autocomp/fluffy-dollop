@@ -5,13 +5,16 @@
 #include <QTimer>
 #include <ctrvisual/state/scrollbasestate.h>
 #include <ctrwidgets/components/layersmanager/lineitem.h>
+#include "floorgraphtypes.h"
 #include "floorgraphelement.h"
-#include "elementpropertyform.h"
+//#include "elementpropertyform.h"
 
 namespace floor_graph_maker
 {
 
-enum class Mode {ScrollMode, SetNodeOrEdgeElement, SetCamera, SetPlaceHolder};
+enum class Mode {ScrollMode, SetNodeOrEdgeElement};
+
+class InstrumentalForm;
 
 class ElementHolder
 {
@@ -26,7 +29,7 @@ class FloorGraphMakerState : public ScrollBaseState, public ElementHolder
 {
     Q_OBJECT
 public:
-    explicit FloorGraphMakerState();
+    explicit FloorGraphMakerState(uint64_t floorId);
     ~FloorGraphMakerState();
 
     virtual void init(QGraphicsScene *scene, QGraphicsView *view, const int *zoom, const double *scale, double frameCoef, uint visualizerId);
@@ -43,17 +46,22 @@ public:
     virtual void elementDoubleClicked(FloorGraphElement * element);
     void setMode(Mode mode);
     void save();
+    void edgeStateChanged(EdgeProperty property);
 
 signals:
 
 private slots:
     void slotRemoveElement(uint);
     void showElementPropertyForm();
-    void slotEdgeTypeChanged(uint id, floor_graph_maker::EdgeElement::EdgeType type);
-    void slotWallWidthChanged(uint edgeId, double val);
+    void slotSetEdgeProperty(uint edgeId, EdgeProperty property);
+//    void slotElementFormClose();
+    void slotEdgeStateChanged(uint elementId, EdgeProperty property);
+    void slotRemoveElementFromForm(uint elementId);
 
 private:
+    const uint64_t _floorId;
     Mode _mode = Mode::ScrollMode;
+    EdgeProperty _edgeDefaultProperty;
 
     NodeElement * _lastNodeElement = nullptr;
     transform_state::LineItem * _tempEdgeElement = nullptr;
@@ -63,8 +71,9 @@ private:
     QPointF _lastMousePos;
 
     FloorGraphElement * _elementHovered = nullptr;
-    ElementPropertyForm * _elementPropertyForm = nullptr;
-    QTimer _timer;
+    InstrumentalForm * _elementPropertyForm = nullptr;
+//    QTimer _timer;
+    QPen _pen;
 
 };
 

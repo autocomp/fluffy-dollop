@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>img/floorgraphmaker.png</file>
+        <file>img/floorgraphstate.png</file>
     </qresource>
 </RCC>

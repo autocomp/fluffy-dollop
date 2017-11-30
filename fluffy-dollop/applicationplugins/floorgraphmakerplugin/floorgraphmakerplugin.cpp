@@ -4,8 +4,12 @@
 #include <ctrcore/bus/common_message_notifier.h>
 #include <ctrcore/bus/bustags.h>
 #include <ctrwidgets/components/layersmanager/commontypes.h>
+#include <regionbiz/rb_manager.h>
+#include <regionbiz/rb_locations.h>
 #include <QTimer>
 #include <QDebug>
+
+using namespace regionbiz;
 
 FloorGraphMakerPlugin::FloorGraphMakerPlugin()
 {
@@ -41,8 +45,8 @@ QList<InitPluginData> FloorGraphMakerPlugin::getInitPluginData()
     InitPluginData initPluginData;
     initPluginData.buttonName = QString("FloorGraphMakerPlugin");
     initPluginData.translateButtonName = QString::fromUtf8("разметка этажа");
-    initPluginData.iconForButtonOn = QIcon("://img/floorgraphmaker.png");
-    initPluginData.iconForButtonOff = QIcon("://img/floorgraphmaker.png");
+    initPluginData.iconForButtonOn = QIcon("://img/floorgraphstate.png");
+    initPluginData.iconForButtonOff = QIcon("://img/floorgraphstate.png");
     initPluginData.tooltip = QString::fromUtf8("разметка этажа");
     initPluginData.isCheckable = true;
     list.append(initPluginData);
@@ -64,28 +68,46 @@ void FloorGraphMakerPlugin::checked(const QString & buttonName, bool on_off)
         _cheched = on_off;
         if(_cheched)
         {
-            _form = new floor_graph_maker::InstrumentalForm(getVisualizerId());
-            QString tag("FloorGraphMakerForm");
-            quint64 widgetId = ewApp()->restoreWidget(tag, _form);
-            if(0 == widgetId)
+            uint64_t floorId(0);
+            uint64_t id = regionbiz::RegionBizManager::instance()->getCurrentEntity();
+            BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(id);
+            while(ptr)
             {
-                ew::EmbeddedWidgetStruct struc;
-                ew::EmbeddedHeaderStruct headStr;
-                headStr.hasCloseButton = true;
-                headStr.windowTitle = QString::fromUtf8("разметка этажа");
-                headStr.headerPixmap = QString(":/img/icon_edit_svg.png");
-                struc.widgetTag = tag;
-//                struc.minSize = QSize(300,25);
-                struc.maxSize = QSize(500,200);
-//                struc.size = QSize(400,25);
-                struc.header = headStr;
-                struc.iface = _form;
-                struc.topOnHint = true;
-                struc.isModal = false;
-                widgetId = ewApp()->createWidget(struc); //, viewInterface->getVisualizerWindowId());
+                if(ptr->getType() == BaseArea::AT_FLOOR)
+                {
+                    floorId = ptr->getId();
+                    break;
+                }
+                ptr = ptr->getParent();
             }
-            connect(_form, SIGNAL(signalClosed()), this, SLOT(slotInstrumentalFormClose()));
-            ewApp()->setVisible(_form->id(), true);
+
+            if(floorId)
+            {
+                _form = new floor_graph_maker::InstrumentalForm(getVisualizerId(), floorId);
+                QString tag("FloorGraphMakerForm");
+                quint64 widgetId = ewApp()->restoreWidget(tag, _form);
+                if(0 == widgetId)
+                {
+                    ew::EmbeddedWidgetStruct struc;
+                    ew::EmbeddedHeaderStruct headStr;
+                    headStr.hasCloseButton = true;
+                    headStr.windowTitle = QString::fromUtf8("разметка этажа");
+                    headStr.headerPixmap = QString(":/img/floorgraphstate.png");
+                    struc.widgetTag = tag;
+                    //                struc.minSize = QSize(300,25);
+                    struc.maxSize = QSize(500,200);
+                    //                struc.size = QSize(400,25);
+                    struc.header = headStr;
+                    struc.iface = _form;
+                    struc.topOnHint = true;
+                    struc.isModal = false;
+                    widgetId = ewApp()->createWidget(struc); //, viewInterface->getVisualizerWindowId());
+                }
+                connect(_form, SIGNAL(signalClosed()), this, SLOT(slotInstrumentalFormClose()));
+                ewApp()->setVisible(_form->id(), true);
+            }
+            else
+                QTimer::singleShot(10, this, SLOT(slotInstrumentalFormClose()));
         }
         else
         {
@@ -102,9 +124,9 @@ void FloorGraphMakerPlugin::slotInstrumentalFormClose()
         ewApp()->removeWidget(_form->id());
         _form->deleteLater();
         _form = nullptr;
-
-        emit setChecked(QString("FloorGraphMakerPlugin"), false);
     }
+
+    emit setChecked(QString("FloorGraphMakerPlugin"), false);
 }
 
 

@@ -6,9 +6,9 @@
 
 ElementPropertyForm::ElementPropertyForm(floor_graph_maker::FloorGraphElement *element)
     : _elementId(element->id())
-    , _timer(this)
+//    , _timer(this)
 {
-    setWindowOpacity(0);
+//    setWindowOpacity(0);
     setWindowFlags(Qt::Widget | Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint | Qt::Popup); // Qt::ToolTip
 
     QVBoxLayout *vLayout = new QVBoxLayout(this);
@@ -31,8 +31,8 @@ ElementPropertyForm::ElementPropertyForm(floor_graph_maker::FloorGraphElement *e
     connect(_deleteButton, SIGNAL(pressed()), this, SLOT(slotDeleteElement()));
     hLayout->addWidget(_deleteButton);
 
-    connect(&_timer, SIGNAL(timeout()), this, SLOT(slotCheckOpacity()));
-    _timer.start(100);
+//    connect(&_timer, SIGNAL(timeout()), this, SLOT(slotCheckOpacity()));
+//    _timer.start(100);
 
     floor_graph_maker::NodeElement * nodeElement = dynamic_cast<floor_graph_maker::NodeElement *>(element);
     if(nodeElement)
@@ -59,40 +59,119 @@ ElementPropertyForm::ElementPropertyForm(floor_graph_maker::FloorGraphElement *e
         _windowRB = new QRadioButton(QString::fromUtf8("окно"), this);
         subVLayout->addWidget(_windowRB);
 
-        QHBoxLayout *subHLayout = new QHBoxLayout(this);
-        subHLayout->setMargin(3);
-        subHLayout->setSpacing(3);
-        subVLayout->addLayout(subHLayout);
-
-        _wallWidthTL = new QLabel(QString::fromUtf8("Толщина стены (м)"), this);
-        subHLayout->addWidget(_wallWidthTL);
-
-        subHLayout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-
-        _wallWidth = new QDoubleSpinBox(this);
-        _wallWidth->setMinimum(0.1);
-        _wallWidth->setMaximum(3);
-        _wallWidth->setSingleStep(0.1);
-        _wallWidth->setDecimals(1);
-        _wallWidth->setValue(edgeElement->getWallWidth());
-        subHLayout->addWidget(_wallWidth);
-
-        switch(edgeElement->getEdgeType())
         {
-        case floor_graph_maker::EdgeElement::WALL :
-            _wallRB->setChecked(true);
-            break;
-        case floor_graph_maker::EdgeElement::DOOR :
-            _wallWidthTL->setDisabled(true);
-            _wallWidth->setDisabled(true);
-            _doorRB->setChecked(true);
-            break;
-        case floor_graph_maker::EdgeElement::WINDOW :
-            _wallWidthTL->setDisabled(true);
-            _wallWidth->setDisabled(true);
-            _windowRB->setChecked(true);
-            break;
+            QHBoxLayout *hLayout1 = new QHBoxLayout(this);
+            hLayout1->setMargin(3);
+            hLayout1->setSpacing(3);
+            subVLayout->addLayout(hLayout1);
+
+            _wallWidthTL = new QLabel(QString::fromUtf8("Толщина"), this);
+            hLayout1->addWidget(_wallWidthTL);
+
+            hLayout1->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+
+            _wallWidth = new QDoubleSpinBox(this);
+            _wallWidth->setMinimum(0.1);
+            _wallWidth->setMaximum(5);
+            _wallWidth->setSingleStep(0.1);
+            _wallWidth->setDecimals(1);
+            _wallWidth->setValue(edgeElement->getEdgeProperty().wallWidth);
+            hLayout1->addWidget(_wallWidth);
         }
+        {
+            QHBoxLayout *hLayout1 = new QHBoxLayout(this);
+            hLayout1->setMargin(3);
+            hLayout1->setSpacing(3);
+            subVLayout->addLayout(hLayout1);
+
+            _wallHeightTL = new QLabel(QString::fromUtf8("Высота"), this);
+            hLayout1->addWidget(_wallHeightTL);
+
+            hLayout1->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+
+            _wallHeight = new QDoubleSpinBox(this);
+            _wallHeight->setMinimum(1);
+            _wallHeight->setMaximum(1000);
+            _wallHeight->setSingleStep(0.1);
+            _wallHeight->setDecimals(1);
+            _wallHeight->setValue(edgeElement->getEdgeProperty().wallHeight);
+            hLayout1->addWidget(_wallHeight);
+        }
+        {
+            QHBoxLayout *hLayout1 = new QHBoxLayout(this);
+            hLayout1->setMargin(3);
+            hLayout1->setSpacing(3);
+            subVLayout->addLayout(hLayout1);
+
+            _windowHeightUnderFloorTL = new QLabel(QString::fromUtf8("Высота от пола"), this);
+            hLayout1->addWidget(_windowHeightUnderFloorTL);
+
+            hLayout1->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+
+            _windowHeightUnderFloor = new QDoubleSpinBox(this);
+            _windowHeightUnderFloor->setMinimum(0);
+            _windowHeightUnderFloor->setMaximum(1000);
+            _windowHeightUnderFloor->setSingleStep(0.1);
+            _windowHeightUnderFloor->setDecimals(1);
+            _windowHeightUnderFloor->setValue(edgeElement->getEdgeProperty().windowHeightUnderFloor);
+            hLayout1->addWidget(_windowHeightUnderFloor);
+        }
+        {
+            QHBoxLayout *hLayout1 = new QHBoxLayout(this);
+            hLayout1->setMargin(3);
+            hLayout1->setSpacing(3);
+            subVLayout->addLayout(hLayout1);
+
+            _windowHeightUnderFloorTL = new QLabel(QString::fromUtf8("Высота от пола"), this);
+            hLayout1->addWidget(_windowHeightUnderFloorTL);
+
+            hLayout1->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+
+            _windowHeightUnderFloor = new QDoubleSpinBox(this);
+            _windowHeightUnderFloor->setMinimum(0);
+            _windowHeightUnderFloor->setMaximum(1000);
+            _windowHeightUnderFloor->setSingleStep(0.1);
+            _windowHeightUnderFloor->setDecimals(1);
+            _windowHeightUnderFloor->setValue(edgeElement->getEdgeProperty().windowHeightUnderFloor);
+            hLayout1->addWidget(_windowHeightUnderFloor);
+        }
+        {
+            QHBoxLayout *hLayout1 = new QHBoxLayout(this);
+            hLayout1->setMargin(3);
+            hLayout1->setSpacing(3);
+            subVLayout->addLayout(hLayout1);
+
+            _windowHeightTL = new QLabel(QString::fromUtf8("Высота"), this);
+            hLayout1->addWidget(_windowHeightTL);
+
+            hLayout1->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+
+            _windowHeight = new QDoubleSpinBox(this);
+            _windowHeight->setMinimum(0.1);
+            _windowHeight->setMaximum(1000);
+            _windowHeight->setSingleStep(0.1);
+            _windowHeight->setDecimals(1);
+            _windowHeight->setValue(edgeElement->getEdgeProperty().windowHeight);
+            hLayout1->addWidget(_windowHeight);
+        }
+
+
+//        switch(edgeElement->getEdgeType())
+//        {
+//        case floor_graph_maker::EdgeElement::WALL :
+//            _wallRB->setChecked(true);
+//            break;
+//        case floor_graph_maker::EdgeElement::DOOR :
+//            _wallWidthTL->setDisabled(true);
+//            _wallWidth->setDisabled(true);
+//            _doorRB->setChecked(true);
+//            break;
+//        case floor_graph_maker::EdgeElement::WINDOW :
+//            _wallWidthTL->setDisabled(true);
+//            _wallWidth->setDisabled(true);
+//            _windowRB->setChecked(true);
+//            break;
+//        }
 
         connect(_wallWidth, SIGNAL(valueChanged(double)), this, SLOT(slotWallWidthChanged(double)));
         connect(_wallRB, SIGNAL(clicked(bool)), this, SLOT(slotEdgeTypeChanged(bool)));
@@ -106,35 +185,39 @@ ElementPropertyForm::~ElementPropertyForm()
 //    delete ui;
 }
 
-floor_graph_maker::EdgeElement::EdgeType ElementPropertyForm::getChoiceType()
+floor_graph_maker::EdgeProperty ElementPropertyForm::getChoiceType()
 {
-    if(_doorRB->isChecked())
-    {
-        _wallWidthTL->setDisabled(true);
-        _wallWidth->setDisabled(true);
-        return floor_graph_maker::EdgeElement::DOOR;
-    }
+    floor_graph_maker::EdgeProperty property;
 
-    if(_windowRB->isChecked())
-    {
-        _wallWidthTL->setDisabled(true);
-        _wallWidth->setDisabled(true);
-        return floor_graph_maker::EdgeElement::WINDOW;
-    }
+//    if(_doorRB->isChecked())
+//    {
+//        _wallWidthTL->setDisabled(true);
+//        _wallWidth->setDisabled(true);
+//        return floor_graph_maker::EdgeElement::DOOR;
+//    }
 
-    _wallWidthTL->setDisabled(false);
-    _wallWidth->setDisabled(false);
-    return floor_graph_maker::EdgeElement::WALL;
+//    if(_windowRB->isChecked())
+//    {
+//        _wallWidthTL->setDisabled(true);
+//        _wallWidth->setDisabled(true);
+//        return floor_graph_maker::EdgeElement::WINDOW;
+//    }
+
+//    _wallWidthTL->setDisabled(false);
+//    _wallWidth->setDisabled(false);
+//    return floor_graph_maker::EdgeElement::WALL;
+
+    return property;
 }
 
-void ElementPropertyForm::slotCheckOpacity()
-{
-    _opacity += 0.1;
-    if(_opacity < 0.95)
-        setWindowOpacity(_opacity);
-    else
-        _timer.stop();
-}
+//void ElementPropertyForm::slotCheckOpacity()
+//{
+//    _opacity += 0.1;
+//    if(_opacity < 0.95)
+//        setWindowOpacity(_opacity);
+//    else
+//        _timer.stop();
+//}
 
 void ElementPropertyForm::slotDeleteElement()
 {
@@ -143,13 +226,13 @@ void ElementPropertyForm::slotDeleteElement()
 
 void ElementPropertyForm::slotEdgeTypeChanged(bool on_off)
 {
-    if(on_off)
-        emit signalEdgeTypeChanged(_elementId, getChoiceType());
+//    if(on_off)
+//        emit signalEdgeTypeChanged(_elementId, getChoiceType());
 }
 
 void ElementPropertyForm::slotWallWidthChanged(double val)
 {
-    emit signalWallWidthChanged(_elementId, val);
+//    emit signalWallWidthChanged(_elementId, val);
 }
 
 

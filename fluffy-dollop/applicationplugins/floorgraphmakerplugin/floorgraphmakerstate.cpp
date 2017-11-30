@@ -1,15 +1,25 @@
 #include "floorgraphmakerstate.h"
+#include "instrumentalform.h"
 #include <libembeddedwidgets/embeddedapp.h>
+#include <regionbiz/rb_manager.h>
+#include <regionbiz/rb_graph.h>
+#include <regionbiz/rb_locations.h>
 #include <QTimer>
 #include <QCursor>
 #include <QDebug>
 
 using namespace floor_graph_maker;
+using namespace regionbiz;
 
-FloorGraphMakerState::FloorGraphMakerState()
-    : _timer(this)
+FloorGraphMakerState::FloorGraphMakerState(uint64_t floorId)
+    : _floorId(floorId)
+//    : _timer(this)
 {
-    connect(&_timer, SIGNAL(timeout()), this, SLOT(showElementPropertyForm()));
+//    connect(&_timer, SIGNAL(timeout()), this, SLOT(showElementPropertyForm()));
+
+    _pen.setColor(Qt::blue);
+    _pen.setWidth(4);
+    _pen.setCosmetic(true);
 }
 
 FloorGraphMakerState::~FloorGraphMakerState()
@@ -25,6 +35,55 @@ void FloorGraphMakerState::init(QGraphicsScene *scene, QGraphicsView *view, cons
 {
     ScrollBaseState::init(scene, view, zoom, scale, frameCoef, visualizerId);
     setActiveForScene(true);
+
+
+    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(_floorId);
+    if(! ptr)
+        return;
+
+    GraphEntityPtr graphPtr = ptr->getGraph();
+    if( ! graphPtr)
+        return;
+
+    QMap<uint64_t, NodeElement*> nodeElements;
+    foreach(GraphNodePtr graphNodePtr, graphPtr->getNodes())
+    {
+        NodeElement * nodeElement = new NodeElement(++_tempElementCounter, this);
+        nodeElement->setPos(graphNodePtr->getCoord());
+        nodeElement->setZValue(1000);
+        nodeElement->setActive(true);
+        nodeElement->setFlag(QGraphicsItem::ItemIsMovable, true);
+        nodeElement->setCursor(QCursor(Qt::SizeAllCursor));
+        _scene->addItem(nodeElement);
+        _graphElements.insert(nodeElement->id(), nodeElement);
+
+        nodeElements.insert(graphNodePtr->getId(), nodeElement);
+    }
+    foreach(GraphEdgePtr graphEdgePtr, graphPtr->getEdges())
+    {
+        GraphNodePtr graphNodePtr1 = graphEdgePtr->getFirstPoint();
+        NodeElement * nodeElement1 = nullptr;
+        auto it1 = nodeElements.find(graphNodePtr1->getId());
+        if(it1 != nodeElements.end())
+            nodeElement1 = it1.value();
+
+        GraphNodePtr graphNodePtr2 = graphEdgePtr->getSecondPoint();
+        NodeElement * nodeElement2 = nullptr;
+        auto it2 = nodeElements.find(graphNodePtr2->getId());
+        if(it2 != nodeElements.end())
+            nodeElement2 = it2.value();
+
+        if(nodeElement1 && nodeElement2)
+        {
+            EdgeElement * edgeElement = new EdgeElement(++_tempElementCounter, this, _scene, nodeElement1, nodeElement2);
+            edgeElement->setZValue(500);
+            edgeElement->setActive(true);
+            edgeElement->setFlag(QGraphicsItem::ItemIsMovable, true);
+            edgeElement->setCursor(QCursor(Qt::SizeAllCursor));
+            edgeElement->setEdgeProperty(_edgeDefaultProperty);
+            _graphElements.insert(edgeElement->id(), edgeElement);
+        }
+    }
 }
 
 bool FloorGraphMakerState::wheelEvent(QWheelEvent *e, QPointF scenePos)
@@ -62,10 +121,6 @@ bool FloorGraphMakerState::mouseMoveEvent(QMouseEvent *e, QPointF scenePos)
         _view->setCursor(Qt::ArrowCursor);
     }break;
 
-    case Mode::SetCamera :
-    case Mode::SetPlaceHolder :
-        return true;
-
     case Mode::ScrollMode :
         return ScrollBaseState::mouseMoveEvent(e, scenePos);
     }
@@ -76,6 +131,7 @@ bool FloorGraphMakerState::mouseMoveEvent(QMouseEvent *e, QPointF scenePos)
 bool FloorGraphMakerState::mousePressEvent(QMouseEvent *e, QPointF scenePos)
 {
     if(e->button() == Qt::LeftButton)
+    {
         switch(_mode)
         {
         case Mode::SetNodeOrEdgeElement : {
@@ -98,8 +154,7 @@ bool FloorGraphMakerState::mousePressEvent(QMouseEvent *e, QPointF scenePos)
                     NodeElement * nodeElement2 = edgeUnderCurNode->getNode2();
                     nodeElement2->remove(edgeUnderCurNode->id());
                     double zLevel = edgeUnderCurNode->zValue();
-                    EdgeElement::EdgeType type = edgeUnderCurNode->getEdgeType();
-                    double wallWidth = edgeUnderCurNode->getWallWidth();
+                    EdgeProperty edgeProperty = edgeUnderCurNode->getEdgeProperty();
                     _graphElements.remove(edgeUnderCurNode->id());
                     delete edgeUnderCurNode;
                     _elementHovered = nullptr;
@@ -107,14 +162,12 @@ bool FloorGraphMakerState::mousePressEvent(QMouseEvent *e, QPointF scenePos)
                     EdgeElement * edgeElement1 = new EdgeElement(++_tempElementCounter, this, _scene, nodeElement1, nodeElement);
                     _graphElements.insert(edgeElement1->id(), edgeElement1);
                     edgeElement1->setZValue(zLevel);
-                    edgeElement1->setEdgeType(type);
-                    edgeElement1->setWallWidth(wallWidth);
+                    edgeElement1->setEdgeProperty(edgeProperty);
 
                     EdgeElement * edgeElement2 = new EdgeElement(++_tempElementCounter, this, _scene, nodeElement2, nodeElement);
                     _graphElements.insert(edgeElement2->id(), edgeElement2);
                     edgeElement2->setZValue(zLevel);
-                    edgeElement2->setEdgeType(type);
-                    edgeElement2->setWallWidth(wallWidth);
+                    edgeElement2->setEdgeProperty(edgeProperty);
                 }
             }
             nodeElement->setZValue(++_tempElementCounter + 1000);
@@ -138,42 +191,25 @@ bool FloorGraphMakerState::mousePressEvent(QMouseEvent *e, QPointF scenePos)
             }
             else
             {
-                QPen pen(Qt::blue);
-                pen.setWidth(4);
-                pen.setCosmetic(true);
-                _tempEdgeElement = new transform_state::LineItem(_scene, pen);
+                _tempEdgeElement = new transform_state::LineItem(_scene, _pen);
                 _tempEdgeElement->setZValue(_tempElementCounter + 999);
             }
 
         }break;
 
-        case Mode::SetCamera : {
-
-
-        }break;
-
-        case Mode::SetPlaceHolder : {
-
-
-        }break;
-
-//        case Mode::SetDoorElement : {
-//            EdgeElement * edgeUnderCurNode = dynamic_cast<EdgeElement*>(_elementHovered);
-//            if(edgeUnderCurNode)
-//                edgeUnderCurNode->setEdgeType(EdgeElement::DOOR);
-//            return ScrollBaseState::mousePressEvent(e, scenePos);
-//        }break;
-
-//        case Mode::SetWindowElement : {
-//            EdgeElement * edgeUnderCurNode = dynamic_cast<EdgeElement*>(_elementHovered);
-//            if(edgeUnderCurNode)
-//                edgeUnderCurNode->setEdgeType(EdgeElement::WINDOW);
-//            return ScrollBaseState::mousePressEvent(e, scenePos);
-//        }break;
-
         case Mode::ScrollMode :
             return ScrollBaseState::mousePressEvent(e, scenePos);
         }
+    }
+    else if(e->button() == Qt::RightButton)
+    {
+        switch(_mode)
+        {
+        case Mode::ScrollMode : {
+            showElementPropertyForm();
+        }break;
+        }
+    }
 
     return true;
 }
@@ -182,10 +218,6 @@ bool FloorGraphMakerState::mouseReleaseEvent(QMouseEvent *e, QPointF scenePos)
 {
     switch(_mode)
     {
-    case Mode::SetCamera :
-    case Mode::SetPlaceHolder :
-        break;
-
     case Mode::ScrollMode :
         return ScrollBaseState::mouseReleaseEvent(e, scenePos);
     }
@@ -212,9 +244,9 @@ bool FloorGraphMakerState::mouseDoubleClickEvent(QMouseEvent *e, QPointF scenePo
         }
     }return false;
 
-    case Mode::ScrollMode : {
-        showElementPropertyForm();
-    }return false;
+//    case Mode::ScrollMode : {
+//        showElementPropertyForm();
+//    }return false;
     }
 
     return true;
@@ -264,13 +296,13 @@ void FloorGraphMakerState::statePoppedFromStack()
 void FloorGraphMakerState::elementHovered(FloorGraphElement * element)
 {
     _elementHovered = element;
-    _timer.stop();
+//    _timer.stop();
 
-    if(_mode == Mode::ScrollMode) // || _mode == Mode::SetNodeOrEdgeElement)
-    {
-        if(_elementHovered)
-            _timer.start(1000);
-    }
+//    if(_mode == Mode::ScrollMode) // || _mode == Mode::SetNodeOrEdgeElement)
+//    {
+//        if(_elementHovered)
+//            _timer.start(1000);
+//    }
 }
 
 void FloorGraphMakerState::elementDoubleClicked(FloorGraphElement *element)
@@ -335,28 +367,6 @@ void FloorGraphMakerState::slotRemoveElement(uint id)
     }
 }
 
-void FloorGraphMakerState::slotEdgeTypeChanged(uint id, floor_graph_maker::EdgeElement::EdgeType type)
-{
-    auto it = _graphElements.find(id);
-    if(it != _graphElements.end())
-    {
-        EdgeElement * edgeElement = dynamic_cast<EdgeElement*>(it.value());
-        if(edgeElement)
-            edgeElement->setEdgeType(type);
-    }
-}
-
-void FloorGraphMakerState::slotWallWidthChanged(uint edgeId, double val)
-{
-    auto it = _graphElements.find(edgeId);
-    if(it != _graphElements.end())
-    {
-        EdgeElement * edgeElement = dynamic_cast<EdgeElement*>(it.value());
-        if(edgeElement)
-            edgeElement->setWallWidth(val);
-    }
-}
-
 void FloorGraphMakerState::setMode(floor_graph_maker::Mode mode)
 {
     switch(_mode)
@@ -411,7 +421,80 @@ void FloorGraphMakerState::setMode(floor_graph_maker::Mode mode)
 
 void FloorGraphMakerState::save()
 {
+    BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(_floorId);
+    if(! ptr)
+        return;
 
+    if(ptr->hasGraph())
+        ptr->deleteGraph();
+
+    GraphEntityPtr graphPtr = RegionBizManager::instance()->addGraph(ptr);
+
+    QMap<uint, GraphNodePtr> nodeElements;
+    for(auto it = _graphElements.begin(); it != _graphElements.end(); ++it)
+    {
+        NodeElement * node = dynamic_cast<NodeElement*>(it.value());
+        if(node)
+        {
+            GraphNodePtr graphNodePtr = graphPtr->addNode(node->pos());
+            nodeElements.insert(node->id(), graphNodePtr);
+        }
+    }
+    for(auto it = _graphElements.begin(); it != _graphElements.end(); ++it)
+    {
+        EdgeElement * edge = dynamic_cast<EdgeElement*>(it.value());
+        if(edge)
+        {
+            GraphNodePtr graphNodePtr1;
+            auto it1 = nodeElements.find(edge->getNode1()->id());
+            if(it1 != nodeElements.end())
+                graphNodePtr1 = it1.value();
+
+            GraphNodePtr graphNodePtr2;
+            auto it2 = nodeElements.find(edge->getNode2()->id());
+            if(it2 != nodeElements.end())
+                graphNodePtr2 = it2.value();
+
+            if(graphNodePtr1 && graphNodePtr2)
+            {
+                GraphEdgePtr graphEdgePtr = graphPtr->addEdge(graphNodePtr1, graphNodePtr2);
+            }
+        }
+    }
+
+    graphPtr->commit();
+    ptr->commitGraph();
+    ptr->commit();
+}
+
+void FloorGraphMakerState::edgeStateChanged(EdgeProperty property)
+{
+    _edgeDefaultProperty = property;
+    switch (_edgeDefaultProperty.type)
+    {
+    case EdgeType::Wall:
+        _pen.setColor(Qt::blue);
+        break;
+    case EdgeType::Door:
+        _pen.setColor(Qt::green);
+        break;
+    case EdgeType::Window:
+        _pen.setColor(Qt::yellow);
+        break;
+    }
+    if(_tempEdgeElement)
+        _tempEdgeElement->setPen(_pen);
+}
+
+void FloorGraphMakerState::slotSetEdgeProperty(uint edgeId, EdgeProperty property)
+{
+    auto it = _graphElements.find(edgeId);
+    if(it != _graphElements.end())
+    {
+        EdgeElement * edgeElement = dynamic_cast<EdgeElement*>(it.value());
+        if(edgeElement)
+            edgeElement->setEdgeProperty(property);
+    }
 }
 
 void FloorGraphMakerState::showElementPropertyForm()
@@ -419,20 +502,98 @@ void FloorGraphMakerState::showElementPropertyForm()
 //    _timer.stop();
     if(_elementHovered)
     {
-        if(_elementPropertyForm)
-            delete _elementPropertyForm;
+        ElementType type = ElementType::Node;
+        EdgeElement * edge = dynamic_cast<EdgeElement*>(_elementHovered);
+        if(edge)
+            type = ElementType::Edge;
 
-        _elementPropertyForm = new ElementPropertyForm(_elementHovered);
-        _elementPropertyForm->setStyleSheet(ewApp()->getMainStylesheet());
-        connect(_elementPropertyForm, SIGNAL(signalRemoveElement(uint)), this, SLOT(slotRemoveElement(uint)));
-        connect(_elementPropertyForm, SIGNAL(signalEdgeTypeChanged(uint,floor_graph_maker::EdgeElement::EdgeType)),
-                this, SLOT(slotEdgeTypeChanged(uint,floor_graph_maker::EdgeElement::EdgeType)));
-        connect(_elementPropertyForm, SIGNAL(signalWallWidthChanged(uint,double)), this, SLOT(slotWallWidthChanged(uint,double)));
+        _elementPropertyForm = new floor_graph_maker::InstrumentalForm(_elementHovered->id(), type);
+        if(edge)
+            _elementPropertyForm->setCurrentProperty(edge->getEdgeProperty());
+//        connect(elementPropertyForm, SIGNAL(signalClosed()), this, SLOT(slotElementFormClose()));
+        connect(_elementPropertyForm, SIGNAL(signalRemoveElement(uint)), this, SLOT(slotRemoveElementFromForm(uint)));
+        connect(_elementPropertyForm, SIGNAL(signalEdgeStateChanged(uint,EdgeProperty)), this, SLOT(slotEdgeStateChanged(uint,EdgeProperty)));
 
-        _elementPropertyForm->move(QCursor::pos());
-        _elementPropertyForm->show();
+        ew::EmbeddedWidgetStruct struc;
+        ew::EmbeddedHeaderStruct headStr;
+        headStr.hasCloseButton = true;
+        //headStr.windowTitle = QString::fromUtf8("свойства элемента");
+        headStr.headerPixmap = QString(":/img/floorgraphstate.png");
+        struc.widgetTag = QString("FloorGraphMakerElementForm");
+        //                struc.minSize = QSize(300,25);
+        struc.maxSize = QSize(500,200);
+        //                struc.size = QSize(400,25);
+        struc.header = headStr;
+        struc.iface = _elementPropertyForm;
+        struc.topOnHint = true;
+        struc.isModal = true;
+//        struc.addHided = true;
+        ewApp()->createWidget(struc); //, viewInterface->getVisualizerWindowId());
+//        ewApp()->setVisible(elementPropertyForm->id(), true);
+
+        ewApp()->removeWidget(_elementPropertyForm->id());
+        _elementPropertyForm->deleteLater();
+        _elementPropertyForm = nullptr;
+
+//        _elementPropertyForm = new ElementPropertyForm(_elementHovered);
+//        _elementPropertyForm->setStyleSheet(ewApp()->getMainStylesheet());
+//        connect(_elementPropertyForm, SIGNAL(signalRemoveElement(uint)), this, SLOT(slotRemoveElement(uint)));
+//        connect(_elementPropertyForm, SIGNAL(signalSetEdgeProperty(uint,EdgeProperty)), this, SLOT(slotSetEdgeProperty(uint,EdgeProperty)));
+//        _elementPropertyForm->move(QCursor::pos());
+//        _elementPropertyForm->show();
     }
 }
+
+//void FloorGraphMakerState::slotElementFormClose()
+//{
+//    ewApp()->removeWidget(_elementPropertyForm->id());
+//    _elementPropertyForm->deleteLater();
+//    _elementPropertyForm = nullptr;
+//}
+
+void FloorGraphMakerState::slotEdgeStateChanged(uint elementId, EdgeProperty property)
+{
+    auto it = _graphElements.find(elementId);
+    if(it != _graphElements.end())
+    {
+        EdgeElement * edgeElement = dynamic_cast<EdgeElement*>(it.value());
+        if(edgeElement)
+            edgeElement->setEdgeProperty(property);
+    }
+}
+
+void FloorGraphMakerState::slotRemoveElementFromForm(uint elementId)
+{
+    slotRemoveElement(elementId);
+
+//    disconnect(_elementPropertyForm, SIGNAL(signalClosed()), this, SLOT(slotElementFormClose()));
+    ewApp()->setVisible(_elementPropertyForm->id(), false);
+//    ewApp()->removeWidget(_elementPropertyForm->id());
+//    _elementPropertyForm->deleteLater();
+//    _elementPropertyForm = nullptr;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

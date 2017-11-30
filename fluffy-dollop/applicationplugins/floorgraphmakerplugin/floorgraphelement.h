@@ -3,6 +3,7 @@
 
 #include <QGraphicsPixmapItem>
 #include <ctrwidgets/components/layersmanager/lineitem.h>
+#include "floorgraphtypes.h"
 #include <QMap>
 #include <QPen>
 
@@ -53,17 +54,13 @@ private:
 class EdgeElement : public FloorGraphElement, public transform_state::LineItem
 {
 public:
-    enum  EdgeType {WALL, DOOR, WINDOW};
-
     EdgeElement(uint id, ElementHolder * elementHolder, QGraphicsScene * scene, NodeElement * node1, NodeElement * node2);
     ~EdgeElement();
     virtual void setActive(bool on_off);
     NodeElement * getNode1();
     NodeElement * getNode2();
-    void setEdgeType(EdgeType type);
-    EdgeType getEdgeType();
-    double getWallWidth() const;
-    void setWallWidth(double wallWidth);
+    EdgeProperty getEdgeProperty() const;
+    void setEdgeProperty(const EdgeProperty &edgeProperty);
 
     void mousePressEvent(QGraphicsSceneMouseEvent * event);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent * event);
@@ -76,8 +73,7 @@ protected:
 private:
     NodeElement * _node1, * _node2;
     QPen _pen, _hoverPen;
-    EdgeType _edgeType = WALL;
-    double _wallWidth = 0.1;
+    EdgeProperty _edgeProperty;
 };
 
 

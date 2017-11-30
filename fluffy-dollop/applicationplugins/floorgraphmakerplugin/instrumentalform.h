@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <libembeddedwidgets/embeddedapp.h>
+#include "floorgraphtypes.h"
 
 namespace Ui {
 class InstrumentalForm;
@@ -17,29 +18,36 @@ class InstrumentalForm : public QWidget, public ew::EmbeddedSubIFace
     Q_OBJECT
 
 public:
-    explicit InstrumentalForm(uint visualizerId);
+    InstrumentalForm(uint visualizerId, uint64_t floorId);
+    InstrumentalForm(uint elementId, ElementType elementType);
     ~InstrumentalForm();
-
     QWidget *getWidget();
     void closed(bool *acceptFlag);
+    void setCurrentElementType(ElementType elementType);
+    void setCurrentProperty(EdgeProperty property);
 
 signals:
     void signalClosed();
+    void signalEdgeStateChanged(uint elementId, EdgeProperty property);
+    void signalRemoveElement(uint elementId);
 
 private slots:
     void slotSetNodeOrEdge(bool on_off);
-    void slotSetCamera(bool on_off);
-    void slotSetPlaceHolder(bool on_off);
     void slotSave();
     void slotRemoveElement();
     void slotMakeAdjustForm();
+    void slotEdgeTypeChanged(bool on_off);
+    void doubleValueChanged(double);
+    void intValueChanged(int);
 
 private:
+    void connectInit();
+    void sendCurrentProperty();
+
     Ui::InstrumentalForm *ui;
     QSharedPointer<floor_graph_maker::FloorGraphMakerState> _floorGraphMakerState;
-    uint _visualizerId;
+    uint _elementId = 0;
 
-    void uncheckedButtons(QObject * button);
 
 };
 

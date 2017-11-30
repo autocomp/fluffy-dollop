@@ -133,7 +133,7 @@ EdgeElement::EdgeElement(uint id, ElementHolder * elementHolder, QGraphicsScene 
 
     setLine(QLineF(_node1->pos(), _node2->pos()));
 
-    setEdgeType(WALL);
+    setEdgeProperty(_edgeProperty);
 }
 
 EdgeElement::~EdgeElement()
@@ -163,40 +163,6 @@ NodeElement *EdgeElement::getNode1()
 NodeElement *EdgeElement::getNode2()
 {
     return _node2;
-}
-
-void EdgeElement::setEdgeType(EdgeElement::EdgeType type)
-{
-    _edgeType = type;
-
-    QPen pen;
-    pen.setCosmetic(true);
-    switch(_edgeType)
-    {
-    case WALL :
-        pen.setWidth(4);
-        pen.setColor(Qt::blue);
-        break;
-    case DOOR :
-        pen.setWidth(4);
-        pen.setColor(Qt::green);
-        break;
-    case WINDOW :
-        pen.setWidth(4);
-        pen.setColor(Qt::yellow);
-        break;
-    }
-
-    _pen = pen;
-    setPen(_pen);
-
-    _hoverPen = _pen;
-    _hoverPen.setColor(Qt::red);
-}
-
-EdgeElement::EdgeType EdgeElement::getEdgeType()
-{
-    return _edgeType;
 }
 
 void EdgeElement::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -230,12 +196,46 @@ void EdgeElement::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
     QGraphicsLineItem::hoverLeaveEvent(event);
 }
 
-double EdgeElement::getWallWidth() const
+EdgeProperty EdgeElement::getEdgeProperty() const
 {
-    return _wallWidth;
+    return _edgeProperty;
 }
 
-void EdgeElement::setWallWidth(double wallWidth)
+void EdgeElement::setEdgeProperty(const EdgeProperty &edgeProperty)
 {
-    _wallWidth = wallWidth;
+    _edgeProperty = edgeProperty;
+
+    QPen pen;
+    pen.setWidth(4);
+    pen.setCosmetic(true);
+    switch(_edgeProperty.type)
+    {
+    case EdgeType::Wall :
+        pen.setColor(Qt::blue);
+        break;
+    case EdgeType::Door :
+        pen.setColor(Qt::green);
+        break;
+    case EdgeType::Window :
+        pen.setColor(Qt::yellow);
+        break;
+    }
+    _pen = pen;
+    setPen(_pen);
+
+    _hoverPen = _pen;
+    _hoverPen.setColor(Qt::red);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
