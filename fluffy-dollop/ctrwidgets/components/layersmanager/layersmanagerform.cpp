@@ -27,6 +27,7 @@
 #include <ctrcore/visual/geographicutils.h>
 #include <QDomDocument>
 #include <QDebug>
+#include <regionbiz/rb_files.h>
 
 using namespace regionbiz;
 using namespace layers_manager_form;
@@ -234,8 +235,8 @@ void LayersManagerForm::reset(bool showEtalonNode)
 
 void LayersManagerForm::slotFileLoaded(regionbiz::BaseFileKeeperPtr baseFileKeeperPtr)
 {
-    PlanFileKeeperPtr planFileKeeperPtr = BaseFileKeeper::convert<PlanFileKeeper>(baseFileKeeperPtr);
-    if(planFileKeeperPtr)
+    PlanFileKeeperPtr planPtr = BaseFileKeeper::convert<PlanFileKeeper>(baseFileKeeperPtr);
+    if(planPtr)
     {
         auto it = _loadingItems.find(baseFileKeeperPtr->getPath());
         if(it == _loadingItems.end())
@@ -245,7 +246,7 @@ void LayersManagerForm::slotFileLoaded(regionbiz::BaseFileKeeperPtr baseFileKeep
         SvgItem * svgTreeWidgetItem = dynamic_cast<SvgItem*>(it.value());
         _loadingItems.erase(it);
 
-        QFilePtr file_ptr = planFileKeeperPtr->getLocalFile();
+        QFilePtr file_ptr = planPtr->getLocalFile();
         QFileInfo info( *(file_ptr.get()) );
         QString filePath = info.absoluteFilePath();
 
@@ -264,7 +265,7 @@ void LayersManagerForm::slotFileLoaded(regionbiz::BaseFileKeeperPtr baseFileKeep
             {
                 QGraphicsPixmapItem * pixmapRasterItem = new QGraphicsPixmapItem(pm);
                 pixmapRasterItem->setTransformationMode(Qt::SmoothTransformation);
-                PlanFileKeeper::PlanParams planParams = planFileKeeperPtr->getPlanParams();
+                PlanFileKeeper::PlanParams planParams = planPtr->getPlanParams();
 
                 int zValue(90);
                 QPointF scenePos(planParams.x, planParams.y);
@@ -302,7 +303,7 @@ void LayersManagerForm::slotFileLoaded(regionbiz::BaseFileKeeperPtr baseFileKeep
                 _scene->addItem(pixmapRasterItem);
 
                 disconnect(ui->treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(slotItemChanged(QTreeWidgetItem*,int)));
-                rasterTreeWidgetItem->setRaster(pixmapRasterItem, planParams.scale_w, planParams.scale_h, planParams.rotate, planFileKeeperPtr->getName());
+                rasterTreeWidgetItem->setRaster(pixmapRasterItem, planParams.scale_w, planParams.scale_h, planParams.rotate, planPtr->getName());
                 //rasterTreeWidgetItem->setText(0, planFileKeeperPtr->getName());
                 connect(ui->treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(slotItemChanged(QTreeWidgetItem*,int)));
 
@@ -317,7 +318,7 @@ void LayersManagerForm::slotFileLoaded(regionbiz::BaseFileKeeperPtr baseFileKeep
         if(svgTreeWidgetItem)
         {
             QGraphicsSvgItem * svgItem = new GraphicsSvgItem(filePath);
-            PlanFileKeeper::PlanParams planParams = planFileKeeperPtr->getPlanParams();
+            PlanFileKeeper::PlanParams planParams = planPtr->getPlanParams();
             svgItem->setPos(QPointF(planParams.x, planParams.y));
             svgItem->setTransform(QTransform().rotate(planParams.rotate).scale(planParams.scale_w,planParams.scale_h));
 
@@ -329,7 +330,7 @@ void LayersManagerForm::slotFileLoaded(regionbiz::BaseFileKeeperPtr baseFileKeep
             _scene->addItem(svgItem);
 
             disconnect(ui->treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(slotItemChanged(QTreeWidgetItem*,int)));
-            svgTreeWidgetItem->setSvg(svgItem, filePath, planParams.scale_w, planParams.scale_h, planParams.rotate, planFileKeeperPtr->getName());
+            svgTreeWidgetItem->setSvg(svgItem, filePath, planParams.scale_w, planParams.scale_h, planParams.rotate, planPtr->getName());
             //svgTreeWidgetItem->setText(0, planFileKeeperPtr->getName());
             connect(ui->treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(slotItemChanged(QTreeWidgetItem*,int)));
 
@@ -427,28 +428,28 @@ void LayersManagerForm::reload(BaseAreaPtr ptr, bool isGeoScene)
             BaseFileKeeperPtr currEtalonFile = facility->getEtalonPlan();
             if(currEtalonFile)
             {
-                PlanFileKeeperPtr planFileKeeperPtr = BaseFileKeeper::convert<PlanFileKeeper>(currEtalonFile);
-                if(planFileKeeperPtr)
+                PlanFileKeeperPtr planPtr = BaseFileKeeper::convert<PlanFileKeeper>(currEtalonFile);
+                if(planPtr)
                 {
-                    etalonFilePath = planFileKeeperPtr->getPath();
+                    etalonFilePath = planPtr->getPath();
 
                     LayerItem * etalonNode = getTopLevelItem(LayerTypes::Etalon);
                     RasterItem * rasterItem = new RasterItem(etalonNode, currEtalonFile->getEntityId(), etalonFilePath, ItemTypes::FacilityEtalonRaster);
 
-                    BaseFileKeeper::FileState fileState = planFileKeeperPtr->getFileState();
+                    BaseFileKeeper::FileState fileState = planPtr->getFileState();
                     switch(fileState)
                     {
                     case BaseFileKeeper::FS_UNSYNC : {
                         qDebug() << "reload, etalon file state : FS_UNSYNC";
                          rasterItem->setText(0, "FS_UNSYNC");
                         _loadingItems.insert(etalonFilePath, rasterItem);
-                        planFileKeeperPtr->syncFile();
+                        planPtr->syncFile();
                     }break;
                     case BaseFileKeeper::FS_UPLOAD :
                     case BaseFileKeeper::FS_SYNC : {
                         qDebug() << "reload, etalon file state : FS_SYNC";
                         _loadingItems.insert(etalonFilePath, rasterItem);
-                        slotFileLoaded(planFileKeeperPtr);
+                        slotFileLoaded(planPtr);
                     }break;
                     case BaseFileKeeper::FS_INVALID : {
                         qDebug() << "reload, etalon file state : FS_INVALID";
@@ -463,8 +464,7 @@ void LayersManagerForm::reload(BaseAreaPtr ptr, bool isGeoScene)
     }
 
 //-------------------------------------------
-
-    BaseFileKeeperPtrs baseFileKeeperPtrs = ptr->getFilesByType(BaseFileKeeper::FT_PLAN);
+    BaseFileKeeperPtrs baseFileKeeperPtrs = getRasterAndVectorFiles(ptr);
     qDebug() << "LayersManagerForm::reload, baseFileKeeperPtrs.size :" << baseFileKeeperPtrs.size();
     foreach (BaseFileKeeperPtr baseFileKeeperPtr, baseFileKeeperPtrs)
     {
@@ -1046,8 +1046,8 @@ void LayersManagerForm::createEtalonImage()
         auto facility = BaseArea::convert<Facility>(_currentData.areaPtr->getParent());
         if(res && facility)
         {
-            BaseFileKeeperPtr basePlan = RegionBizManager::instance()->addFile(filePath, BaseFileKeeper::FT_PLAN, facility->getId());
-            PlanFileKeeperPtr plan = BaseFileKeeper::convert<PlanFileKeeper>(basePlan);
+            BaseFileKeeperPtr basePlan = RegionBizManager::instance()->addFile(filePath, BaseFileKeeper::FT_PLAN_RASTER, facility->getId());
+            PlanRasterFileKeeperPtr plan = BaseFileKeeper::convert<PlanRasterFileKeeper>(basePlan);
             if( ! plan)
                 return;
 
@@ -1303,16 +1303,19 @@ void LayersManagerForm::slotTransformingItemSaved(TransformingItemSaveDatad data
     if(it == _layers.end())
         return;
 
+    BaseFileKeeper::FileType fileType;
     QTreeWidgetItem * parentNode(nullptr); // Rasters OR Vectors
     for(int a(0); a<it.value()->childCount(); ++a)
     {
         if(_currentData.object == CurrentData::Raster && it.value()->child(a)->type() == (int)ItemTypes::Rasters)
         {
+            fileType = BaseFileKeeper::FT_PLAN_RASTER;
             parentNode = it.value()->child(a);
             break;
         }
         if(_currentData.object == CurrentData::Vector && it.value()->child(a)->type() == (int)ItemTypes::Vectors)
         {
+            fileType = BaseFileKeeper::FT_PLAN_VECTOR;
             parentNode = it.value()->child(a);
             break;
         }
@@ -1320,7 +1323,7 @@ void LayersManagerForm::slotTransformingItemSaved(TransformingItemSaveDatad data
     if( ! parentNode)
         return;
 
-    BaseFileKeeperPtr basePlan = RegionBizManager::instance()->addFile(data.filePath, BaseFileKeeper::FT_PLAN, _currentData.areaPtr->getId());
+    BaseFileKeeperPtr basePlan = RegionBizManager::instance()->addFile(data.filePath, fileType, _currentData.areaPtr->getId());
     PlanFileKeeperPtr plan = BaseFileKeeper::convert<PlanFileKeeper>(basePlan);
     if( ! plan)
         return;
@@ -1358,7 +1361,7 @@ void LayersManagerForm::slotTransformingItemSaved(TransformingItemSaveDatad data
     }
     else if(_currentData.state == CurrentData::Edit)
     {
-        BaseFileKeeperPtrs baseFileKeeperPtrs = _currentData.areaPtr->getFilesByType(BaseFileKeeper::FT_PLAN);
+        BaseFileKeeperPtrs baseFileKeeperPtrs = getRasterAndVectorFiles(_currentData.areaPtr);
         foreach (BaseFileKeeperPtr baseFileKeeperPtr, baseFileKeeperPtrs)
             if(baseFileKeeperPtr->getPath() == _currentData.planPath)
             {
@@ -1433,7 +1436,7 @@ void LayersManagerForm::slotFacilityPolygonOnPlanSaved(QPolygonF polygon)
         if(QTransform::quadToQuad(pol_1, polygon, transform))
         {
             facility->setTransform(transform);
-            facility->commit();
+            facility->commitTransformMatrix();
 
             LayerItem * etalonNode = getTopLevelItem(LayerTypes::Etalon);
             if(etalonNode)
@@ -1457,7 +1460,7 @@ void LayersManagerForm::slotFacilityPolygonOnPlanSaved(QPolygonF polygon)
 
 void LayersManagerForm::slotEtalotRasterSaved(TransformingItemSaveDatad data)
 {
-    BaseFileKeeperPtr basePlan = RegionBizManager::instance()->addFile(data.filePath, BaseFileKeeper::FT_PLAN, _currentData.areaPtr->getId());
+    BaseFileKeeperPtr basePlan = RegionBizManager::instance()->addFile(data.filePath, BaseFileKeeper::FT_PLAN_RASTER, _currentData.areaPtr->getId());
     PlanFileKeeperPtr plan = BaseFileKeeper::convert<PlanFileKeeper>(basePlan);
     if( ! plan)
         return;
@@ -1559,7 +1562,7 @@ void LayersManagerForm::slotSvgSaved(QString filePath, QPointF scenePos)
     if( ! vectorsNode)
         return;
 
-    BaseFileKeeperPtr basePlan = RegionBizManager::instance()->addFile(filePath, BaseFileKeeper::FT_PLAN, _currentData.areaPtr->getId());
+    BaseFileKeeperPtr basePlan = RegionBizManager::instance()->addFile(filePath, BaseFileKeeper::FT_PLAN_VECTOR, _currentData.areaPtr->getId());
     PlanFileKeeperPtr plan = BaseFileKeeper::convert<PlanFileKeeper>(basePlan);
     if( ! plan)
         return;
@@ -1817,7 +1820,7 @@ void LayersManagerForm::slotDeleteEntity()
     } //! without BREAK specially !!!
     case (int)ItemTypes::Raster :
     case (int)ItemTypes::Vector : {
-        BaseFileKeeperPtrs baseFileKeeperPtrs = ptr->getFilesByType(BaseFileKeeper::FT_PLAN);
+        BaseFileKeeperPtrs baseFileKeeperPtrs = getRasterAndVectorFiles(ptr);
         foreach(BaseFileKeeperPtr baseFileKeeperPtr, baseFileKeeperPtrs)
             if(baseFileKeeperPtr->getPath() == dataItem->getPath())
             {
@@ -2193,6 +2196,14 @@ void LayersManagerForm::reinitCompasWidget()
 
     qint64 angle = GeographicUtils::angle(p1, p2);
     CommonMessageNotifier::send( (uint)visualize_system::BusTags::RotateCompasWidgetInPixelVisualizer, angle, QString("visualize_system"));
+}
+
+regionbiz::BaseFileKeeperPtrs LayersManagerForm::getRasterAndVectorFiles(regionbiz::BaseAreaPtr ptr)
+{
+    BaseFileKeeperPtrs baseFileKeeperPtrs = ptr->getFilesByType(BaseFileKeeper::FT_PLAN_RASTER);
+    BaseFileKeeperPtrs tempPtrs = ptr->getFilesByType(BaseFileKeeper::FT_PLAN_VECTOR);
+    baseFileKeeperPtrs.insert(baseFileKeeperPtrs.end(), tempPtrs.begin(), tempPtrs.end());
+    return baseFileKeeperPtrs;
 }
 
 

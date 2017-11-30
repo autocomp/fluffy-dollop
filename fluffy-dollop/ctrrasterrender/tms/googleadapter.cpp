@@ -4,7 +4,7 @@
 GoogleAdapter::GoogleAdapter(const QUrl &url)
     : TmsBaseAdapter(url)
 {
-    setMaxZoomLevel(17);
+    setMaxZoomLevel(18);
 }
 
 QUrl GoogleAdapter::query(int x, int y, int z) const
@@ -19,9 +19,9 @@ QUrl GoogleAdapter::query(int x, int y, int z) const
 
     //qDebug() << "LocalTmsAdapter, IN : X :" << _x << ", Y :" << _y << ", Z :" << _z << ", OUT X :" << x << ", Y :" << y << ", Z :" << z;
 
-    if(z > 17)
-        z = 0;
-    else
+//    if(z > 17)
+//        z = 0;
+//    else
         z = 17-z;
 
     int a[3] = {z, x, y};

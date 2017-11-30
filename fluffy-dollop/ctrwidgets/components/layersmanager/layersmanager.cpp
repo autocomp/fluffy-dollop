@@ -27,7 +27,7 @@ void LayersManager::init()
 
     _layersButton = new QPushButton();
     _layersButton->setCheckable(true);
-    _layersButton->setChecked(true);
+    _layersButton->setChecked(false);
     _layersButton->setMinimumSize( 40, 40 );
     _layersButton->setMaximumSize( 40, 40 );
     _layersButton->setIcon( QIcon( ":/img/icon_layers.png" ));
@@ -62,8 +62,28 @@ void LayersManager::init()
         widgetId = ewApp()->createWidget(struc);
     }
     _layersManagerForm->setEmbeddedWidgetId(widgetId);
+
     reset();
+
+    QTimer::singleShot(1, this, SLOT(syncButtonChecked()));
 }
+
+
+void LayersManager::syncButtonChecked()
+{
+    QVariant layersManagerFormVisibleVar = CtrConfig::getValueByName("application_settings.layersManagerFormVisible_bool");
+    if(layersManagerFormVisibleVar.isValid() && layersManagerFormVisibleVar.toBool() == true)
+    {
+        ewApp()->setVisible(_iface->id(), true);
+        _layersButton->blockSignals(true);
+        _layersButton->setChecked(false);
+        _layersButton->blockSignals(false);
+    }
+    else
+        ewApp()->setVisible(_iface->id(), false);
+}
+
+
 
 void LayersManager::setVisible(bool on_off)
 {
@@ -71,12 +91,14 @@ void LayersManager::setVisible(bool on_off)
         return;
 
     ewApp()->setVisible(_iface->id(), on_off);
+    CtrConfig::setValueByName("application_settings.layersManagerFormVisible_bool", on_off);
 }
 
 void LayersManager::slotCloseWindow()
 {
     _layersButton->blockSignals(true);
     _layersButton->setChecked(false);
+    CtrConfig::setValueByName("application_settings.layersManagerFormVisible_bool", false);
     _layersButton->blockSignals(false);
 }
 

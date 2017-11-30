@@ -87,6 +87,7 @@ private:
     void redrawItems(int pixelDelta);
     LayerItem *getTopLevelItem(LayerTypes type);
     void reinitCompasWidget();
+    regionbiz::BaseFileKeeperPtrs getRasterAndVectorFiles(regionbiz::BaseAreaPtr ptr);
 
     Ui::LayersManagerForm *ui;
     quint64 _embeddedWidgetId = 0;

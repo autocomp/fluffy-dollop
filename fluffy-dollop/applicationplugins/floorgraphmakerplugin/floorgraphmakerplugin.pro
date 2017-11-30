@@ -22,12 +22,16 @@ LIBS += -L$${INSTALL_PATH_LIB} \
 HEADERS += \
     floorgraphmakerplugin.h \
     instrumentalform.h \
-    floorgraphmakerstate.h
+    floorgraphmakerstate.h \
+    floorgraphelement.h \
+    elementpropertyform.h
 
 SOURCES += \
     floorgraphmakerplugin.cpp \
     instrumentalform.cpp \
-    floorgraphmakerstate.cpp
+    floorgraphmakerstate.cpp \
+    floorgraphelement.cpp \
+    elementpropertyform.cpp
 
 RESOURCES += \
     res.qrc

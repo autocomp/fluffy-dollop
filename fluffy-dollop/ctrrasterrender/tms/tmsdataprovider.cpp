@@ -66,6 +66,9 @@ int TMSDataProvider::tile(image_types::TImage& dest, int x, int y, int z, uint s
 
 
     const QString url(query(x,y,z).toString());
+
+    qDebug() << "TMSDataProvider::tile, url:" << url << ", maxZoomLevel:" << maxZoomLevel();
+
     const int taskId(UniqueIdFactory::instance()->getListener());
     auto it(m_taskFromSourece.find(sourceId));
     if(it != m_taskFromSourece.end())

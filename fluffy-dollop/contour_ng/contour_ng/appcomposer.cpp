@@ -94,14 +94,12 @@ AppComposer::~AppComposer()
 
 void AppComposer::init()
 {
-    m_applicationName = QString::fromUtf8("Vira");
+    m_applicationName = QString::fromUtf8("Контур"); // Vira");
 
     /* создаем главное окно приложения*/
 
     QMenuBar* mn= createMenuBar();
     QWidget *bottombar = createBottomBar();
-
-
 
     mainWindowId = ewApp()->restoreMainWidget("MainWindow",mn,bottombar);
     if(0 == mainWindowId)

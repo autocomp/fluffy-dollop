@@ -25,6 +25,7 @@ private slots:
     void slotCloseWindow();
     void slotObjectSelectionChanged(uint64_t,uint64_t);
     void init();
+    void syncButtonChecked();
 
 private:
     void reset();

@@ -221,7 +221,7 @@ void AddBaseAreaForm::slotApply()
                         bool res = image.save(filePath, "TIF");
                         if(res)
                         {
-                            BaseFileKeeperPtr basePlan = RegionBizManager::instance()->addFile(filePath, BaseFileKeeper::FT_PLAN, createdPtr->getId());
+                            BaseFileKeeperPtr basePlan = RegionBizManager::instance()->addFile(filePath, BaseFileKeeper::FT_PLAN_RASTER, createdPtr->getId());
                             PlanFileKeeperPtr plan = BaseFileKeeper::convert<PlanFileKeeper>(basePlan);
                             if(plan)
                             {

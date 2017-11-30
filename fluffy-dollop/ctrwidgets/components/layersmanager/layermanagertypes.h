@@ -15,6 +15,7 @@ enum class LayerTypes
 
 enum class ItemTypes
 {
+    Invalide = 0,
     Layer = 1,
     Rasters, // [0..N] Raster
     Raster,

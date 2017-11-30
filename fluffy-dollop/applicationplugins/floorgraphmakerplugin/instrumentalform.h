@@ -27,10 +27,11 @@ signals:
     void signalClosed();
 
 private slots:
-    void slotSetNode(bool on_off);
-    void slotSetEdge(bool on_off);
-    void slotSetDoor(bool on_off);
-    void slotSetWindow(bool on_off);
+    void slotSetNodeOrEdge(bool on_off);
+    void slotSetCamera(bool on_off);
+    void slotSetPlaceHolder(bool on_off);
+    void slotSave();
+    void slotRemoveElement();
     void slotMakeAdjustForm();
 
 private:

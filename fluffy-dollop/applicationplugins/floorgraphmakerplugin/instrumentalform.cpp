@@ -18,17 +18,20 @@ InstrumentalForm::InstrumentalForm(uint visualizerId)
 {
     ui->setupUi(this);
 
-    // ui->nodeButton->setIcon(QIcon(":/img/.png"));
-    connect(ui->nodeButton, SIGNAL(clicked(bool)), this, SLOT(slotSetNode(bool)));
+    ui->nodeOrEdgeButton->setIcon(QIcon(":/img/.png"));
+    connect(ui->nodeOrEdgeButton, SIGNAL(clicked(bool)), this, SLOT(slotSetNodeOrEdge(bool)));
 
-    // ui-edgeButton>->setIcon(QIcon(":/img/.png"));
-    connect(ui->edgeButton, SIGNAL(clicked(bool)), this, SLOT(slotSetEdge(bool)));
+    ui->cameraButton->setIcon(QIcon(":/img/.png"));
+    connect(ui->cameraButton, SIGNAL(clicked(bool)), this, SLOT(slotSetCamera(bool)));
 
-    // ui->doorButton->setIcon(QIcon(":/img/.png"));
-    connect(ui->doorButton, SIGNAL(clicked(bool)), this, SLOT(slotSetDoor(bool)));
+    ui->placeholderButton->setIcon(QIcon(":/img/.png"));
+    connect(ui->placeholderButton, SIGNAL(clicked(bool)), this, SLOT(slotSetPlaceHolder(bool)));
 
-    // ui->windowButton->setIcon(QIcon(":/img/.png"));
-    connect(ui->windowButton, SIGNAL(clicked(bool)), this, SLOT(slotSetWindow(bool)));
+    ui->saveButton->setIcon(QIcon(":/img/.png"));
+    connect(ui->saveButton, SIGNAL(pressed()), this, SLOT(slotSave()));
+
+    ui->removeButton->setIcon(QIcon(":/img/.png"));
+    connect(ui->removeButton, SIGNAL(pressed()), this, SLOT(slotRemoveElement()));
 
     _floorGraphMakerState = QSharedPointer<floor_graph_maker::FloorGraphMakerState>(new floor_graph_maker::FloorGraphMakerState());
     visualize_system::StateInterface * stateInterface = visualize_system::VisualizerManager::instance()->getStateInterface(_visualizerId);
@@ -64,32 +67,42 @@ void InstrumentalForm::closed(bool *acceptFlag)
     }
 }
 
-void InstrumentalForm::slotSetNode(bool on_off)
+void InstrumentalForm::slotSetNodeOrEdge(bool on_off)
 {
     uncheckedButtons(sender());
     if(on_off)
-        _floorGraphMakerState->setMode(Mode::Node);
+    {
+        ui->removeWidget->hide();
+        ui->edgeWidget->hide();
+        _floorGraphMakerState->setMode(Mode::SetNodeOrEdgeElement);
+    }
 }
 
-void InstrumentalForm::slotSetEdge(bool on_off)
+void InstrumentalForm::slotSetCamera(bool on_off)
 {
     uncheckedButtons(sender());
     if(on_off)
-        _floorGraphMakerState->setMode(Mode::Edge);
+    {
+        ui->removeWidget->hide();
+        ui->edgeWidget->hide();
+        _floorGraphMakerState->setMode(Mode::SetCamera);
+    }
 }
 
-void InstrumentalForm::slotSetDoor(bool on_off)
+void InstrumentalForm::slotSetPlaceHolder(bool on_off)
 {
     uncheckedButtons(sender());
     if(on_off)
-        _floorGraphMakerState->setMode(Mode::Door);
+    {
+        ui->removeWidget->hide();
+        ui->edgeWidget->hide();
+        _floorGraphMakerState->setMode(Mode::SetPlaceHolder);
+    }
 }
 
-void InstrumentalForm::slotSetWindow(bool on_off)
+void InstrumentalForm::slotSave()
 {
-    uncheckedButtons(sender());
-    if(on_off)
-        _floorGraphMakerState->setMode(Mode::Window);
+    _floorGraphMakerState->save();
 }
 
 void InstrumentalForm::slotMakeAdjustForm()
@@ -107,16 +120,18 @@ void InstrumentalForm::slotMakeAdjustForm()
 
 void InstrumentalForm::uncheckedButtons(QObject * button)
 {
-    if(button != ui->nodeButton && ui->nodeButton->isChecked())
-        ui->nodeButton->setChecked(false);
-    if(button != ui->edgeButton && ui->edgeButton->isChecked())
-        ui->edgeButton->setChecked(false);
-    if(button != ui->doorButton && ui->doorButton->isChecked())
-        ui->doorButton->setChecked(false);
-    if(button != ui->windowButton && ui->windowButton->isChecked())
-        ui->windowButton->setChecked(false);
+    if(button != ui->nodeOrEdgeButton && ui->nodeOrEdgeButton->isChecked())
+        ui->nodeOrEdgeButton->setChecked(false);
 
-    _floorGraphMakerState->setMode(Mode::Scroll);
+    if(button != ui->cameraButton && ui->cameraButton->isChecked())
+        ui->cameraButton->setChecked(false);
+
+    if(button != ui->placeholderButton && ui->placeholderButton->isChecked())
+        ui->placeholderButton->setChecked(false);
+
+    _floorGraphMakerState->setMode(Mode::ScrollMode);
+
+    ui->edgeWidget->show();
 }
 
 

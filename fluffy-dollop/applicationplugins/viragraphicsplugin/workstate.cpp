@@ -286,7 +286,9 @@ void WorkState::reinit()
                     insertItemToLayer(mark->getLayer(), mark->getId());
                 }
 
-                int zLevel = getPrefferZoomForSceneRect(locationPtr->getCoords().boundingRect());
+                int zLevel = 10; //! <--- КОСТЫЛЁК :) !
+                if(locationPtr->getCoords().isEmpty() == false)
+                    zLevel = getPrefferZoomForSceneRect(locationPtr->getCoords().boundingRect());
                 LocationItem * locationItem = new LocationItem(locationPtr->getId(), zLevel, graphicsItems, _scene);
                 locationItem->setPos(locationPtr->getCoords().boundingRect().center());
                 connect(locationItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
