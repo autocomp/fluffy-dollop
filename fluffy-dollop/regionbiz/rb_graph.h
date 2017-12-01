@@ -9,6 +9,14 @@
 
 namespace regionbiz {
 
+// cam attrs
+/**
+ * attrs of cam:
+ * height (double)
+ */
+
+//-------------------------
+
 class GraphEntity;
 typedef std::shared_ptr< GraphEntity > GraphEntityPtr;
 
@@ -16,6 +24,10 @@ class GraphEdge;
 typedef std::shared_ptr< GraphEdge > GraphEdgePtr;
 typedef std::vector< GraphEdgePtr > GraphEdgePtrs;
 
+/**
+ * @brief The GraphNode class
+ * no attrs
+ */
 class GraphNode: public BaseEntity
 {
     friend class GraphEntity;
@@ -44,6 +56,14 @@ typedef std::vector< GraphNodePtr > GraphNodePtrs;
 //----------------------
 
 typedef std::pair< GraphNodePtr, GraphNodePtr > TwoGraphNodePtr;
+
+/**
+ * @brief GraphEdge
+ * attrs:
+ * type (enum): wall, door, window
+ * height (double)
+ * state (enum): locked, unlocked
+ */
 class GraphEdge: public BaseEntity
 {
     friend class GraphEntity;
@@ -75,6 +95,10 @@ private:
 
 typedef std::set< GraphEntityPtr > GraphEntityPtrSet;
 
+/**
+ * @brief The GraphEntity class
+ * no attrs
+ */
 class GraphEntity: public BaseEntity
 {
     friend class BaseEntity;
