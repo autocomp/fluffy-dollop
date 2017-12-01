@@ -137,6 +137,37 @@ private:
 typedef std::shared_ptr< StringMetadata > StringMetadataPtr;
 typedef std::vector< StringMetadataPtr > StringMetadataPtrs;
 
+//-----------------------------------------
+
+class EnumMetadata: public BaseMetadata
+{
+public:
+    EnumMetadata( uint64_t parent_id );
+
+    // type
+    QString getType() override;
+
+    // constraits
+    bool checkConstraits() override;
+    bool checkConstraitsByVariant( QVariant new_value ) override;
+
+    // value
+    QString getValueAsString() override;
+    bool setValueByString( QString val ) override;
+    QVariant getValueAsVariant() override;
+    bool setValueByVariant( QVariant val );
+
+    QString getValue();
+    bool setValue( QString val );
+    int getNumberOfValue();
+
+private:
+    QString _value;
+};
+typedef std::shared_ptr< StringMetadata > StringMetadataPtr;
+typedef std::vector< StringMetadataPtr > StringMetadataPtrs;
+
+
 //--------------------------------------------------
 
 class IntegerMetadata: public BaseMetadata

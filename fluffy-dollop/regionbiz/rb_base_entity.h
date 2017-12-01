@@ -57,6 +57,10 @@ public:
     bool addMetadata( BaseMetadataPtr data );
     bool deleteMetadata( QString name );
 
+    // constraints
+    Constraints getConstraints();
+    Constraints getConstraints( Constraint::ConstraintType type );
+
     // files
     BaseFileKeeperPtrs getFiles();
     BaseFileKeeperPtrs getFilesByType( BaseFileKeeper::FileType type );

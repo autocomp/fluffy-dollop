@@ -10,10 +10,18 @@
 
 using namespace regionbiz;
 
-Constraint::Constraint( ConstraintType type, QString name, QString str ):
+Constraint::Constraint( Constraint::ConstraintType type,
+                        QString name,
+                        QString meta_type,
+                        QString str,
+                        QString showed_name,
+                        QVariant default_val ):
     _meta_name( name ),
     _constrait( str ),
-    _type( type )
+    _type( type ),
+    _meta_type( meta_type ),
+    _meta_showed_name( showed_name ),
+    _default_value( default_val )
 {}
 
 Constraint::Constraint()
@@ -27,6 +35,36 @@ void Constraint::setMetaName(QString name)
 QString Constraint::getMetaName()
 {
     return _meta_name;
+}
+
+void Constraint::setMetaType(QString type)
+{
+    _meta_type = type;
+}
+
+QString Constraint::getMetaType()
+{
+    return _meta_type;
+}
+
+void Constraint::setShowedName(QString name)
+{
+    _meta_showed_name = name;
+}
+
+QString Constraint::getShowedName()
+{
+    return _meta_showed_name;
+}
+
+void Constraint::setDefaultValue(QVariant val)
+{
+    _default_value = val;
+}
+
+QVariant Constraint::getDefaultValue()
+{
+    return _default_value;
 }
 
 void Constraint::setConstraint(QString constr)
@@ -64,13 +102,13 @@ QString Constraint::separator()
 void ConstraintsManager::init( QString aim, QString file )
 {
     // metadata that always need
-    Constraint cons( Constraint::CT_SYSTEM, "number", "0:" );
+    Constraint cons( Constraint::CT_SYSTEM, "number", "int", "0:" );
     addConstraint( BaseArea::AT_FLOOR, cons );
 
     // for rent
     if( aim == "rent" )
     {
-        Constraint cons( Constraint::CT_SYSTEM, "area", "0:" );
+        Constraint cons( Constraint::CT_SYSTEM, "area", "double", "0:" );
         addConstraint( BaseArea::AT_ROOM, cons );
     }
     else if( aim == "file" )
@@ -104,7 +142,8 @@ void ConstraintsManager::loadConstraintsFromFile( QString file_path )
     QJsonParseError err;
     QJsonDocument json_doc = QJsonDocument::fromJson( file_in.toUtf8(), &err );
     if( err.error != QJsonParseError::NoError )
-        std::cerr << err.errorString().toUtf8().data();
+        std::cerr << "Error on parce constraints: "
+                  << err.errorString().toUtf8().data();
 
     // return result
     QVariantMap map = json_doc.toVariant().toMap();
@@ -120,16 +159,31 @@ void ConstraintsManager::loadConstraintsFromMap( QVariantMap map )
         if( !cons_map.contains( "type" )
                 || !cons_map.contains( "entity_type" )
                 || !cons_map.contains( "name" )
+                || !cons_map.contains( "meta_type" )
                 || !cons_map.contains( "constraint" ))
+        {
+            using namespace std;
+            cerr << "Error on load constraint" << endl;
             continue;
+        }
 
         QString entity_type = cons_map[ "entity_type" ].toString();
         QString type_str = cons_map[ "type" ].toString();
         Constraint::ConstraintType type = getTypeByString( type_str );
         QString name = cons_map[ "name" ].toString();
         QString cons_str = cons_map[ "constraint" ].toString();
+        QString meta_type = cons_map[ "meta_type" ].toString();
+        QString showed = cons_map[ "showed_name" ].toString();
+        QVariant default_val = cons_map[ "default" ];
 
-        Constraint cons( type, name, cons_str );
+        // make
+        Constraint cons( type, name, meta_type, cons_str );
+        if( !showed.isEmpty() )
+            cons.setShowedName( showed );
+        if( default_val.isValid() )
+            cons.setDefaultValue( default_val );
+
+        // add to vectors
         if( "group" == entity_type )
             addConstraint( BaseEntity::ET_GROUP, cons );
         else if( "region" == entity_type )
@@ -148,6 +202,12 @@ void ConstraintsManager::loadConstraintsFromMap( QVariantMap map )
             addConstraint( Mark::MT_PHOTO, cons );
         else if( "photo_3d" == entity_type )
             addConstraint( Mark::MT_PHOTO_3D, cons );
+        else if( "graph" == entity_type )
+            addConstraint( BaseEntity::ET_GRAPH, cons );
+        else if( "graph_node" == entity_type )
+            addConstraint( BaseEntity::ET_GRAPH_NODE, cons );
+        else if( "graph_edge" == entity_type )
+            addConstraint( BaseEntity::ET_GRAPH_EDGE, cons );
 
         // TODO other type of entity, when read constraints from file
     }

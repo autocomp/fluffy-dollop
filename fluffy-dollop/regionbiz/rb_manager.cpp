@@ -81,9 +81,18 @@ bool RegionBizManager::isEntityConstraintsCorrect( BaseEntityPtr entity )
     for( Constraint& cons: contraints ) \
     { \
         if( !entity->isMetadataPresent( cons.getMetaName() )) \
-            return false; \
+        { \
+            if( cons.getDefaultValue().isValid() ) \
+            { \
+                entity->addMetadata( cons.getMetaType(), \
+                                     cons.getMetaName(), \
+                                     cons.getDefaultValue() ); \
+            } \
+            else \
+                return false; \
+        } \
     } \
-    /* check current metadata vlues */ \
+    /* check current metadata values */ \
     for( auto pair: entity->getMetadataMap() ) \
     { \
         BaseMetadataPtr data = pair.second; \
@@ -1230,7 +1239,15 @@ bool RegionBizManager::commitGraph(GraphEntityPtr graph)
 {
     if( graph )
     {
-        if( !isEntityConstraintsCorrect( graph ))
+        bool correct = isEntityConstraintsCorrect( graph );
+        if( correct )
+            for( auto node: graph->getNodes() )
+                correct &= isEntityConstraintsCorrect( node );
+        if( correct )
+            for( auto edge: graph->getEdges() )
+                correct &= isEntityConstraintsCorrect( edge );
+
+        if( !correct )
         {
             std::cerr << "Incorrect Constraints for graph: "
                       << graph->getId() << std::endl;
@@ -1571,11 +1588,15 @@ void RegionBizManager::clearCurrentData( bool clear_entitys )
 
 void RegionBizManager::initConstraintsManager( QVariantMap settings )
 {
-    if( !settings.contains( "constraints_aim" ))
+    if( !settings.contains( "constraints" ))
         return;
 
-    QString aim = settings[ "constraints_aim" ].toString();
-    QString file = settings[ "constraints_file" ].toString();
+    QVariantMap cons_settings = settings[ "constraints" ].toMap();
+    if( !cons_settings.contains( "constraints_aim" ))
+        return;
+
+    QString aim = cons_settings[ "constraints_aim" ].toString();
+    QString file = cons_settings[ "constraints_file" ].toString();
     ConstraintsManager::init( aim, file );
 }
 

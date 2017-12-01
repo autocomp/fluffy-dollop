@@ -139,6 +139,18 @@ bool BaseEntity::deleteMetadata(QString name)
     return mngr->deleteMetadata( _id, name );
 }
 
+Constraints BaseEntity::getConstraints()
+{
+    auto mngr = RegionBizManager::instance();
+    return mngr->getConstraintsOfEntity( getId() );
+}
+
+Constraints BaseEntity::getConstraints( Constraint::ConstraintType type )
+{
+    auto mngr = RegionBizManager::instance();
+    return mngr->getConstraintsOfEntity( getId(), type );
+}
+
 BaseFileKeeperPtrs BaseEntity::getFiles()
 {
     auto mngr = RegionBizManager::instance();

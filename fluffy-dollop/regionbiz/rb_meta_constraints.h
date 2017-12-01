@@ -17,11 +17,20 @@ public:
         CT_USER
     };
 
-    Constraint( ConstraintType type, QString name, QString str );
+    Constraint( ConstraintType type, QString name,
+                QString meta_type, QString str,
+                QString showed_name = "", QVariant default_val = QVariant() );
     Constraint();
 
     void setMetaName( QString name );
     QString getMetaName();
+    void setMetaType( QString type );
+    QString getMetaType();
+    void setShowedName( QString name );
+    QString getShowedName();
+    void setDefaultValue( QVariant val );
+    QVariant getDefaultValue();
+
     void setConstraint( QString constr );
     QString getConstraint();
     QVariantList getConstraintAsList();
@@ -32,6 +41,9 @@ public:
 private:
     QString _meta_name = "";
     QString _constrait = "";
+    QString _meta_type = "";
+    QString _meta_showed_name = "";
+    QVariant _default_value = QVariant();
     ConstraintType _type;
 };
 typedef std::vector< Constraint > Constraints;
@@ -56,7 +68,8 @@ public:
         for( Constraint& cons: contaier[ type ] )
             if( cons.getMetaName() == constr.getMetaName() )
             {
-                if( cons.getType() == constr.getType() )
+                if( cons.getType() == constr.getType()
+                        && cons.getMetaType() == constr.getMetaType() )
                 {
                     cons = constr;
                     return true;
@@ -118,13 +131,13 @@ public:
     {
         auto contaier = ConstraintsManager::containerInstance< Type >();
         if( contaier.find( type ) != contaier.end() )
-            return Constraint( Constraint::CT_FREE, "", "" );
+            return Constraint( Constraint::CT_FREE, "", "", "" );
 
         for( Constraint& cons: contaier[ type ] )
             if( cons.getMetaName() == name )
                 return cons;
 
-        return Constraint( Constraint::CT_FREE, "", "" );
+        return Constraint( Constraint::CT_FREE, "", "", "" );
     }
 
 private:

@@ -42,7 +42,9 @@ public:
     Constraints getConstraintsOfEntity( uint64_t id, Constraint::ConstraintType type );
     Constraints getConstraintsOfEntity( BaseEntityPtr entity, Constraint::ConstraintType type );
     template< typename Type >
-    bool addUserConstraint( Type type, QString name, QString cons )
+    bool addUserConstraint( Type type, QString name,
+                            QString meta_type, QString cons_str,
+                            QString showed_name = "", QVariant default_val = QVariant() )
     {
         if( ConstraintsManager::isConstraintPresent( type, name ))
         {
@@ -51,8 +53,9 @@ public:
                 return false;
         }
 
-        bool set = ConstraintsManager
-                ::addConstraint( type, { Constraint::CT_USER, name, cons } );
+        Constraint cons = { Constraint::CT_USER, name, meta_type, cons_str,
+                          showed_name, default_val };
+        bool set = ConstraintsManager::addConstraint( type, cons );
         return set;
     }
 

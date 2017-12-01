@@ -305,6 +305,107 @@ bool StringMetadata::setValue(QString val)
     return true;
 }
 
+//---------------------------------------
+
+EnumMetadata::EnumMetadata( uint64_t parent_id ):
+    BaseMetadata( parent_id )
+{}
+
+QString EnumMetadata::getType()
+{
+    return "enum";
+}
+
+bool EnumMetadata::checkConstraits()
+{
+    return checkConstraitsByVariant( _value );
+}
+
+bool EnumMetadata::checkConstraitsByVariant( QVariant new_value )
+{
+    auto constraits = getConstraints();
+    for( Constraint cons: constraits )
+    {
+        if( cons.getMetaName() != getName() )
+            continue;
+
+        if( cons.getMetaType() != getType() )
+        {
+            using namespace std;
+            cerr << getName().toUtf8().data()
+                 << " metadata has wrong type" << endl;
+            return false;
+        }
+
+        QVariantList variants = cons.getConstraintAsList();
+        for( QVariant variant : variants )
+            if( variant.toString() == new_value.toString() )
+                return true;
+    }
+
+    return false;
+}
+
+QString EnumMetadata::getValueAsString()
+{
+    return _value;
+}
+
+bool EnumMetadata::setValueByString( QString val )
+{
+    return setValue( val );
+}
+
+QVariant EnumMetadata::getValueAsVariant()
+{
+    return _value;
+}
+
+bool EnumMetadata::setValueByVariant(QVariant val)
+{
+    return setValue( val.toString() );
+}
+
+QString EnumMetadata::getValue()
+{
+    return _value;
+}
+
+bool EnumMetadata::setValue(QString val)
+{
+    if( !checkConstraitsByVariant( val ))
+    {
+        printWrongCheckConstraints();
+        return false;
+    }
+
+    _value = val;
+
+    return true;
+}
+
+int EnumMetadata::getNumberOfValue()
+{
+    auto constraits = getConstraints();
+    for( Constraint cons: constraits )
+    {
+        if( cons.getMetaName() != getName() )
+            continue;
+
+        if( cons.getMetaType() != getType() )
+            // if wrong type
+            return -1;
+
+        QVariantList variants = cons.getConstraintAsList();
+        for( uint i = 0; i < variants.size(); ++i )
+            if( variants[ i ].toString() == _value )
+                return i;
+    }
+
+    // if not found
+    return -1;
+}
+
 //----------------------------------------------
 
 IntegerMetadata::IntegerMetadata(uint64_t parent_id):
