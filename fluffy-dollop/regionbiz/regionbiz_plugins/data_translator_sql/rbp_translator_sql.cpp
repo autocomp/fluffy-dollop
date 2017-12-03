@@ -897,6 +897,12 @@ MarkPtr SqlTranslator::getMarkByTypeString(QString type, uint64_t id)
         return BaseEntity::createWithId< PhotoMark >( id );
     if( "photo_3d" == type )
         return BaseEntity::createWithId< Photo3dMark >( id );
+    if( "place_holder" == type )
+        return BaseEntity::createWithId< PlaceHolderMark >( id );
+    if( "lift" == type )
+        return BaseEntity::createWithId< LiftMark >( id );
+    if( "stairs" == type )
+        return BaseEntity::createWithId< StairsMark >( id );
 
     return nullptr;
 }

@@ -994,6 +994,12 @@ QString ThreadSql::getMarkType(Mark::MarkType type)
         return "photo";
     case Mark::MT_PHOTO_3D:
         return "photo3d";
+    case Mark::MT_PLACEHOLDER:
+        return "place_holder";
+    case Mark::MT_LIFT:
+        return "lift";
+    case Mark::MT_STAIRS:
+        return "stairs";
     case Mark::MT_INVALID:
         static_assert( true, "Get inbalid type of Mark" );
     }
