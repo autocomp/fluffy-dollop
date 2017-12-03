@@ -402,7 +402,8 @@ void init()
 
     //! init
     auto mngr = RegionBizManager::instance();
-    QString str = "config/regionbiz.json";
+    //QString str = "config/regionbiz.json";
+    QString str = "config/regionbiz_inet.json";
     bool inited = mngr->init( str );
 }
 
@@ -605,37 +606,36 @@ void checkCustomMetadata()
     using namespace regionbiz;
 
     auto mngr = RegionBizManager::instance();
-    QString path = "config/regionbiz.json";
-    mngr->init( path );
 
-    uint64_t id = mngr->addArea< Room >( 0 )->getId();
+    auto room = mngr->addArea< Room >( 0 );
+    uint64_t id = room->getId();
     qDebug() << "Id" << id;
 
     bool res1 = mngr->addMetadata( id, "string", "test", "value" );
     bool res2 = mngr->addMetadata( id, "string", "test", "test_val" );
 
-    mngr->addUserConstraint( BaseArea::AT_ROOM, "test", "val.*" );
+    mngr->addUserConstraint( BaseArea::AT_ROOM, "test", "string", "val.*" );
 
     bool res3 = mngr->addMetadata( id, "string", "test", "value" );
     bool res4 = mngr->addMetadata( id, "string", "test", "test_val" );
 
-    mngr->addUserConstraint( BaseArea::AT_ROOM, "test2", ".*val.*" );
-    mngr->addUserConstraint( BaseArea::AT_ROOM, "test3", "1:5" );
+    mngr->addUserConstraint( BaseArea::AT_ROOM, "test2", "string", ".*val.*" );
+    mngr->addUserConstraint( BaseArea::AT_ROOM, "test3", "int", "1:5" );
 
     bool res5 = mngr->addMetadata( id, "double", "test3", 5 );
     bool res6 = mngr->addMetadata( id, "int", "test3", 5 );
 
     qDebug() << "All res: " << res1 << res2 << res3 << res4 << res5 << res6;
 
-    auto cons = mngr->getConstraintsOfEntity( 1, Constraint::CT_USER );
+    auto cons = mngr->getConstraintsOfEntity( id, Constraint::CT_USER );
     for( Constraint con: cons )
         qDebug() << " Con user:" << con.getMetaName() << con.getConstraint();
 
-    auto cons2 = mngr->getConstraintsOfEntity( 1, Constraint::CT_SYSTEM );
+    auto cons2 = mngr->getConstraintsOfEntity( id, Constraint::CT_SYSTEM );
     for( Constraint con: cons2 )
         qDebug() << " Con sys:" << con.getMetaName() << con.getConstraint();
 
-    auto cons3 = mngr->getConstraintsOfEntity( 1, Constraint::CT_FREE );
+    auto cons3 = room->getConstraints( Constraint::CT_FREE );
     for( Constraint con: cons3 )
         qDebug() << " Con free:" << con.getMetaName() << con.getConstraint();
 
@@ -650,6 +650,116 @@ void checkCustomMetadata()
     mngr->addMetadata( id, "average", "test_sum" );
     auto ent = mngr->getBaseEntity( id );
     qDebug() << "Val sum:" << ent->getMetadata( "test_sum" )->getValueAsString();
+}
+
+void checkGraph()
+{
+    using namespace regionbiz;
+    auto mngr = RegionBizManager::instance();
+
+    qDebug() << "Start processing";
+
+    auto area = mngr->getBaseArea( 1 );
+    if( area->hasGraph() )
+    {
+        auto graph = area->getGraph();
+        qDebug() << "Size:" << graph->getEdges().size()
+                 << graph->getNodes().size();
+        qDebug() << "Meta" << graph->getMetadata( "test" )->getValueAsString()
+                 << graph->getEdges().front()->getMetadata( "test2" )->getValueAsString()
+                 << graph->getNodes().front()->getMetadata( "test3" )->getValueAsString();
+        qDebug() << "Def meta:"
+                 << graph->getNodes().front()->getMetadata( "height" )->getValueAsString();
+        qDebug() << "Del:" << area->deleteGraph();
+    }
+    else
+    {
+        auto graph = mngr->addGraph( 1 );
+        qDebug() << "Meta0:" << graph->addMetadata( "string", "test", "other" );
+        GraphNodePtr for_del;
+        for( uint i = 0; i < 3; ++i )
+        {
+            auto first_node = graph->addNode( QPointF( 1, 1 ));
+            qDebug() << "Meta1:" << first_node->addMetadata( "int", "test3", 66 );
+            qDebug() << "Meta1 has:" << first_node->isMetadataPresent("test3");
+            auto second_node = graph->addNode( QPointF( 2, 3 ));
+
+            auto edge = graph->addEdge( first_node, second_node );
+            qDebug() << "Meta2:" << edge->addMetadata( "string", "test2", "SOME" );
+            for_del = first_node;
+        }
+
+        graph->removeNode( for_del );
+        qDebug() << "Comm:" << graph->commit();
+    }
+
+    int argc = 0;
+    QApplication app( argc, 0 );
+    app.exec();
+}
+
+void checkLiftAndStairs()
+{
+    using namespace std;
+    using namespace regionbiz;
+    auto mngr = RegionBizManager::instance();
+
+    qDebug() << "Start processing";
+
+    // make mark
+    RegionPtr reg = mngr->getRegions().front();
+    FacilityPtr facil = reg->getChilds( Region::RCF_ALL_FACILITYS ).front()->
+            convert< Facility >();
+    MarkPtr mark_lift = facil->addMark( Mark::MT_LIFT, QPointF( 10, 10 ));
+
+    // append floors
+    LiftMarkPtr lift = mark_lift->convert< LiftMark >();
+    lift->addFloorNumber( 1 );
+    lift->addFloorNumber( 2 );
+    lift->addFloorNumber( 4 );
+
+    // print
+    cout << "List of floors" << endl;
+    auto vec = lift->getFloorNumbers();
+    for( int i: vec )
+        cout << " Floor: " << i << endl;
+
+    // remove
+    lift->removeFloorNumber( 3 );
+    lift->removeFloorNumber( 4 );
+
+    // print
+    cout << "List of floors after remove" << endl;
+    vec = lift->getFloorNumbers();
+    for( int i: vec )
+        cout << " Floor: " << i << endl;
+    cout << endl;
+
+    // get floor
+    FloorPtr floor = facil->getChilds().front();
+
+    // get lift by floor
+    auto lifts = floor->getParent()->convertToMarksHolder()
+            ->getMarks( Mark::MT_LIFT );
+    if( lifts.size() )
+    {
+        LiftMarkPtr lift = lifts.front()->convert< LiftMark >();
+
+        // print
+        cout << "List of floors after remove" << endl;
+        auto vec = lift->getFloorNumbers();
+        for( int i: vec )
+            cout << " Floor: " << i << endl;
+
+        cout << "Floor 1: " << lift->isPresentOnFloor( 1 ) << endl;
+        cout << "Floor 3: " << lift->isPresentOnFloor( 3 ) << endl;
+
+        cout << "Coords: "
+             << lift->getCenter().x() << "x"
+             << lift->getCenter().y() << endl;
+
+        cout << "Del: " << mngr->deleteMark( lift ) < endl;
+    }
 }
 
 int main( int argc, char** argv )
@@ -669,7 +779,7 @@ int main( int argc, char** argv )
     //checkCommitAndDelete();
 
     //! init
-    //init();
+    init();
 
     //! select managment
     //selectManagment();
@@ -696,7 +806,13 @@ int main( int argc, char** argv )
     // checkEtalonFiles();
 
     //! check custom metadata
-    checkCustomMetadata();
+    //checkCustomMetadata();
+
+    //! check GraphEntity
+    //checkGraph();
+
+    //! check list and stairs
+    checkLiftAndStairs();
 
     return app.exec();
 }
