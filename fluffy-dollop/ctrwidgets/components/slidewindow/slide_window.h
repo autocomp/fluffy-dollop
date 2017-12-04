@@ -8,6 +8,7 @@
 
 class SlideWindow: public QWidget
 {
+    Q_OBJECT
 public:
     enum SlideType
     {
@@ -34,6 +35,7 @@ public:
     void setRadius( uint radius );
     void setViewProportionsl( double prop );
     void setDuration( uint dur );
+    void setDelayHide( uint delay );
 
     // widgets
     void addWidget( QWidget* wdgt );
@@ -41,9 +43,12 @@ public:
 protected:
     bool event(QEvent* e);
 
+private Q_SLOTS:
+    void hideSlide();
+
 private:
     void showSlide();
-    void hideSlide();
+    void startHideSlide();
     void onResizeWidget();
     QString cornerRadiusByType();
 
@@ -51,11 +56,13 @@ private:
     uint _radius = 10;
     double _prop = 0.5;
     uint _duration = 100;
+    uint _hide_delay = 2000;
     QPropertyAnimation* _animation = nullptr;
     bool _showed_slide = false;
     QSize _big_size;
     QSize _small_size;
     QWidget* _holder = nullptr;
+    QTimer* _timer_hide = nullptr;
 };
 
 #endif // SLIDE_WINDOW_H

@@ -1,5 +1,8 @@
 #include "slide_window.h"
 
+#include <QTimer>
+#include <QDebug>
+
 SlideWindow::SlideWindow()
 {
     // params of animation and style
@@ -24,6 +27,8 @@ void SlideWindow::initGeometry()
     setType( SlideWindow::ST_RIGHT );
     setDuration( 150 );
     setViewProportionsl( 0.1 );
+    setDelayHide( 2000 );
+
     show();
 }
 
@@ -83,6 +88,11 @@ void SlideWindow::setDuration(uint dur)
     _duration = dur;
 }
 
+void SlideWindow::setDelayHide(uint delay)
+{
+    _hide_delay = delay;
+}
+
 void SlideWindow::updateGeometry()
 {
     if( _showed_slide )
@@ -101,7 +111,7 @@ bool SlideWindow::event( QEvent* e )
     if( e->type() == QEvent::Enter )
         showSlide();
     else if( e->type() == QEvent::Leave )
-        hideSlide();
+        startHideSlide();
     else if( e->type() == QEvent::Paint )
         onResizeWidget();
 
@@ -110,8 +120,20 @@ bool SlideWindow::event( QEvent* e )
 
 void SlideWindow::showSlide()
 {
+    if( _timer_hide )
+    {
+        //qDebug() << "DELETE";
+
+        _timer_hide->stop();
+        QObject::disconnect( _timer_hide, SIGNAL(timeout()),
+                             this, SLOT(hideSlide()));
+        delete _timer_hide;
+        _timer_hide = nullptr;
+    }
+
     if( !_showed_slide )
     {
+        //qDebug() << "SHOW";
         _animation->stop();
         _animation->setDuration( _duration );
         _animation->setStartValue( _small_size );
@@ -122,10 +144,26 @@ void SlideWindow::showSlide()
     }
 }
 
+void SlideWindow::startHideSlide()
+{
+    if( !_timer_hide )
+    {
+       // qDebug() << "START HIDE";
+
+        _timer_hide = new QTimer( this );
+        QObject::connect( _timer_hide, SIGNAL(timeout()),
+                          this, SLOT( hideSlide() ));
+        _timer_hide->setSingleShot( true );
+        _timer_hide->start( _hide_delay );
+    }
+}
+
 void SlideWindow::hideSlide()
 {
     if( _showed_slide )
     {
+        //qDebug() << "HIDE";
+
         _animation->stop();
         _animation->setDuration( _duration );
         _animation->setStartValue( _big_size );
