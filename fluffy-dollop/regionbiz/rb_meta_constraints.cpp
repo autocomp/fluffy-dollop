@@ -105,6 +105,10 @@ void ConstraintsManager::init( QString aim, QString file )
     Constraint cons( Constraint::CT_SYSTEM, "number", "int", "0:" );
     addConstraint( BaseArea::AT_FLOOR, cons );
 
+    Constraint cons_lift_stairs( Constraint::CT_SYSTEM, "", "string", "^(\\d+:)*\\d+$" );
+    addConstraint( Mark::MT_STAIRS, cons_lift_stairs );
+    addConstraint( Mark::MT_LIFT, cons_lift_stairs );
+
     // for rent
     if( aim == "rent" )
     {

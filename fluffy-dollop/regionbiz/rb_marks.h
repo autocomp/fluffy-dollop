@@ -11,6 +11,10 @@ namespace regionbiz {
 class Layer;
 typedef std::shared_ptr< Layer > LayerPtr;
 
+class Room;
+typedef std::shared_ptr< Room > RoomPtr;
+typedef std::vector< RoomPtr > RoomPtrs;
+
 class Mark: public BaseEntity
 {
 public:
@@ -114,10 +118,18 @@ public:
     VerticalWay( uint64_t id );
     virtual MarkType getMarkType() override = 0;
 
-    bool addFloorNumber( int number );
-    bool removeFloorNumber( int number );
-    bool isPresentOnFloor( int number );
-    std::vector< int > getFloorNumbers();
+    // force - remove other room from same floor
+    bool addRoom( RoomPtr room, bool force = false );
+    bool addRoom( uint64_t id, bool force = false );
+    bool removeRoom( RoomPtr room );
+    bool removeRoom( uint64_t id );
+    bool isPresentOnRoom( RoomPtr room );
+    bool isPresentOnRoom( uint64_t id );
+    std::vector< uint64_t > getRoomIds();
+    RoomPtrs getRooms();
+
+private:
+    bool checkRoomInsideFloor( uint64_t id, bool force );
 };
 
 //-----------------------------------------

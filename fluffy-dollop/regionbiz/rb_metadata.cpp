@@ -397,7 +397,7 @@ int EnumMetadata::getNumberOfValue()
             return -1;
 
         QVariantList variants = cons.getConstraintAsList();
-        for( uint i = 0; i < variants.size(); ++i )
+        for( int i = 0; i < variants.size(); ++i )
             if( variants[ i ].toString() == _value )
                 return i;
     }

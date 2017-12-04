@@ -1,6 +1,7 @@
 #include "rb_marks.h"
 
 #include "rb_manager.h"
+#include "rb_locations.h"
 
 using namespace regionbiz;
 
@@ -158,8 +159,18 @@ VerticalWay::VerticalWay(uint64_t id):
     Mark( id )
 {}
 
-bool VerticalWay::addFloorNumber( int number )
+bool VerticalWay::addRoom(RoomPtr room, bool force)
 {
+    if( room )
+        return addRoom( room->getId(), force );
+    return false;
+}
+
+bool VerticalWay::addRoom(uint64_t id , bool force)
+{
+    if( !checkRoomInsideFloor( id, force ))
+        return false;
+
     if( !isMetadataPresent( FLOOR_SET ))
         addMetadata( "string", FLOOR_SET, "" );
 
@@ -167,15 +178,22 @@ bool VerticalWay::addFloorNumber( int number )
     QStringList floors_list = floors.split( FLOOR_SEPARATOR,
                                             QString::SkipEmptyParts );
     for( QString str: floors_list )
-        if( str.toInt() == number )
+        if( str.toULongLong() == id )
             return true;
 
-    floors_list.push_back( QString::number( number ));
+    floors_list.push_back( QString::number( id ));
     QString val = floors_list.join( FLOOR_SEPARATOR );
     return setMetadataValue( FLOOR_SET, val );
 }
 
-bool VerticalWay::removeFloorNumber(int number)
+bool VerticalWay::removeRoom(RoomPtr room)
+{
+    if( room )
+        return removeRoom( room->getId() );
+    return false;
+}
+
+bool VerticalWay::removeRoom(uint64_t id)
 {
     if( !isMetadataPresent( FLOOR_SET ))
         addMetadata( "string", FLOOR_SET, "" );
@@ -183,8 +201,8 @@ bool VerticalWay::removeFloorNumber(int number)
     QString floors = getMetadataValue( FLOOR_SET ).toString();
     QStringList floors_list = floors.split( FLOOR_SEPARATOR,
                                             QString::SkipEmptyParts );
-    for( uint i = 0; i < floors_list.size(); ++i )
-        if( floors_list[ i ].toInt() == number )
+    for( int i = 0; i < floors_list.size(); ++i )
+        if( floors_list[ i ].toULongLong() == id )
         {
             floors_list.removeAt( i );
             QString val = floors_list.join( FLOOR_SEPARATOR );
@@ -194,7 +212,14 @@ bool VerticalWay::removeFloorNumber(int number)
     return true;
 }
 
-bool VerticalWay::isPresentOnFloor(int number)
+bool VerticalWay::isPresentOnRoom(RoomPtr room)
+{
+    if( room )
+        return isPresentOnRoom( room->getId() );
+    return false;
+}
+
+bool VerticalWay::isPresentOnRoom(uint64_t id)
 {
     if( !isMetadataPresent( FLOOR_SET ))
         addMetadata( "string", FLOOR_SET, "" );
@@ -203,13 +228,13 @@ bool VerticalWay::isPresentOnFloor(int number)
     QStringList floors_list = floors.split( FLOOR_SEPARATOR,
                                             QString::SkipEmptyParts );
     for( QString str: floors_list )
-        if( str.toInt() == number )
+        if( str.toULongLong() == id )
             return true;
 
     return false;
 }
 
-std::vector<int> VerticalWay::getFloorNumbers()
+std::vector<uint64_t> VerticalWay::getRoomIds()
 {
     if( !isMetadataPresent( FLOOR_SET ))
         addMetadata( "string", FLOOR_SET, "" );
@@ -217,11 +242,56 @@ std::vector<int> VerticalWay::getFloorNumbers()
     QString floors = getMetadataValue( FLOOR_SET ).toString();
     QStringList floors_list = floors.split( FLOOR_SEPARATOR,
                                             QString::SkipEmptyParts );
-    std::vector<int> numbers;
+    std::vector<uint64_t> numbers;
     for( QString str: floors_list )
-        numbers.push_back( str.toInt() );
+        numbers.push_back( str.toULongLong() );
 
     return numbers;
+}
+
+RoomPtrs VerticalWay::getRooms()
+{
+    RoomPtrs res;
+
+    auto mngr = RegionBizManager::instance();
+    for( uint64_t id: getRoomIds() )
+    {
+        auto room = mngr->getBaseArea( id, BaseArea::AT_ROOM );
+        if( room )
+            res.push_back( room->convert< Room >() );
+    }
+
+    return res;
+}
+
+bool VerticalWay::checkRoomInsideFloor(uint64_t id, bool force)
+{
+    auto mngr = RegionBizManager::instance();
+    auto room = mngr->getBaseArea( id, BaseArea::AT_ROOM );
+    if( !room )
+        return false;
+
+    auto parent_floor = room->getParent( BaseArea::AT_FLOOR );
+    if( parent_floor )
+    {
+        auto other_rooms = getRooms();
+        for( RoomPtr other_room : other_rooms )
+            if( other_room->getParentId() == parent_floor->getId()
+                    && other_room->getId() != id )
+            {
+                if( force )
+                {
+                    removeRoom( other_room );
+                    break;
+                }
+                else
+                    return false;
+            }
+    }
+    else
+        return false;
+
+    return true;
 }
 
 #undef FLOOR_SEPARATOR

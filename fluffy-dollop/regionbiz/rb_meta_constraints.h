@@ -44,7 +44,7 @@ private:
     QString _meta_type = "";
     QString _meta_showed_name = "";
     QVariant _default_value = QVariant();
-    ConstraintType _type;
+    ConstraintType _type = CT_FREE;
 };
 typedef std::vector< Constraint > Constraints;
 
