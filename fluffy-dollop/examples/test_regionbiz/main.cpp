@@ -711,32 +711,33 @@ void checkLiftAndStairs()
     FacilityPtr facil = reg->getChilds( Region::RCF_ALL_FACILITYS ).front()->
             convert< Facility >();
     MarkPtr mark_lift = facil->addMark( Mark::MT_LIFT, QPointF( 10, 10 ));
+    FloorPtr floor = facil->getChilds().front()->convert< Floor >();
 
     // append floors
     LiftMarkPtr lift = mark_lift->convert< LiftMark >();
-    lift->addFloorNumber( 1 );
-    lift->addFloorNumber( 2 );
-    lift->addFloorNumber( 4 );
+    RoomPtr room1 = floor->getChilds()[ 0 ]->convert< Room >();
+    RoomPtr room2 = floor->getChilds()[ 1 ]->convert< Room >();
+
+    cout << "Add 2: " << lift->addRoom( room2 ) << endl;
+    cout << "Add 2.2: " << lift->addRoom( room2 ) << endl;
+    cout << "Add 1: " << lift->addRoom( room1 ) << endl;
 
     // print
     cout << "List of floors" << endl;
-    auto vec = lift->getFloorNumbers();
-    for( int i: vec )
-        cout << " Floor: " << i << endl;
+    auto vec = lift->getRoomIds();
+    for( uint64_t id: vec )
+        cout << " Room: " << id << endl;
 
     // remove
-    lift->removeFloorNumber( 3 );
-    lift->removeFloorNumber( 4 );
+    cout << "Rem 2: " << lift->removeRoom( room2 );
+    cout << "Add 1: " << lift->addRoom( room1 ) << endl;
 
     // print
-    cout << "List of floors after remove" << endl;
-    vec = lift->getFloorNumbers();
-    for( int i: vec )
-        cout << " Floor: " << i << endl;
+    cout << "List of rooms after remove" << endl;
+    vec = lift->getRoomIds();
+    for( uint64_t id: vec )
+        cout << " Room: " << id << endl;
     cout << endl;
-
-    // get floor
-    FloorPtr floor = facil->getChilds().front();
 
     // get lift by floor
     auto lifts = floor->getParent()->convertToMarksHolder()
@@ -746,19 +747,19 @@ void checkLiftAndStairs()
         LiftMarkPtr lift = lifts.front()->convert< LiftMark >();
 
         // print
-        cout << "List of floors after remove" << endl;
-        auto vec = lift->getFloorNumbers();
-        for( int i: vec )
-            cout << " Floor: " << i << endl;
+        cout << "List of rooms after all" << endl;
+        auto vec = lift->getRoomIds();
+        for( uint64_t id: vec )
+            cout << " Room: " << id << endl;
 
-        cout << "Floor 1: " << lift->isPresentOnFloor( 1 ) << endl;
-        cout << "Floor 3: " << lift->isPresentOnFloor( 3 ) << endl;
+        cout << "Room 1: " << lift->isPresentOnRoom( room1->getId() ) << endl;
+        cout << "Room 2: " << lift->isPresentOnRoom( room2->getId() ) << endl;
 
         cout << "Coords: "
              << lift->getCenter().x() << "x"
              << lift->getCenter().y() << endl;
 
-        cout << "Del: " << mngr->deleteMark( lift ) < endl;
+        cout << "Del: " << mngr->deleteMark( lift ) << endl;
     }
 }
 
