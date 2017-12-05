@@ -4,6 +4,7 @@
 #include <QPointF>
 #include <QPolygonF>
 #include <QWidget>
+#include <unistd.h>
 
 #include <regionbiz/rb_manager.h>
 #include <regionbiz/rb_entity_filter.h>
@@ -68,6 +69,7 @@ void loadXlsx()
     }
     qDebug() << "All commited";
 }
+
 void bigExample()
 {
     using namespace regionbiz;
@@ -445,7 +447,7 @@ void checkGroups()
 
     auto mngr = RegionBizManager::instance();
     // create
-    auto group = mngr->addGroup();
+    auto group = mngr->addGroup( GroupEntity::GT_AREAS );
     qDebug() << "Size of group" << group->getElements().size();
 
     // add elements
@@ -707,60 +709,63 @@ void checkLiftAndStairs()
     qDebug() << "Start processing";
 
     // make mark
-    RegionPtr reg = mngr->getRegions().front();
+    RegionPtr reg = mngr->getBaseArea( 1 )->convert< Region >();
     FacilityPtr facil = reg->getChilds( Region::RCF_ALL_FACILITYS ).front()->
             convert< Facility >();
-    MarkPtr mark_lift = facil->addMark( Mark::MT_LIFT, QPointF( 10, 10 ));
     FloorPtr floor = facil->getChilds().front()->convert< Floor >();
+    cout << "Floor: " << floor->getId() << endl;
 
-    // append floors
-    LiftMarkPtr lift = mark_lift->convert< LiftMark >();
-    RoomPtr room1 = floor->getChilds()[ 0 ]->convert< Room >();
-    RoomPtr room2 = floor->getChilds()[ 1 ]->convert< Room >();
+    // append elevator and stairs
+    mngr->addRoom( Room::RT_ELEVATOR, floor->getId() );
+    mngr->addRoom( Room::RT_STAIRS, floor->getId() );
+    mngr->addRoom( Room::RT_COMMON, floor->getId() );
+    RoomPtr room1 = floor->getChilds( Room::RT_ELEVATOR )[ 0 ]->convert< Room >();
+    RoomPtr room2 = floor->getChilds( Room::RT_STAIRS )[ 0 ]->convert< Room >();
+    RoomPtr room3 = floor->getChilds( Room::RT_COMMON )[ 0 ]->convert< Room >();
 
-    cout << "Add 2: " << lift->addRoom( room2 ) << endl;
-    cout << "Add 2.2: " << lift->addRoom( room2 ) << endl;
-    cout << "Add 1: " << lift->addRoom( room1 ) << endl;
+    cout << "Room 1: " << room1->getRoomType() << endl;
+    cout << "Room 2: " << room2->getRoomType() << endl;
+    cout << "Room 3: " << room3->getRoomType() << endl;
 
-    // print
-    cout << "List of floors" << endl;
-    auto vec = lift->getRoomIds();
-    for( uint64_t id: vec )
-        cout << " Room: " << id << endl;
+    // make groups
+    GroupEntityPtr group_elev = mngr->addGroup( GroupEntity::GT_ELEVATOR );
+    cout << "Add elev to elev: " << group_elev->addElement( room1 ) << endl;
+    cout << "Add stairs to elev: " << group_elev->addElement( room2 ) << endl;
 
-    // remove
-    cout << "Rem 2: " << lift->removeRoom( room2 );
-    cout << "Add 1: " << lift->addRoom( room1 ) << endl;
+    GroupEntityPtr group_st = mngr->addGroup( GroupEntity::GT_STAIRS );
+    cout << "Add elev to stairs: " << group_st->addElement( room1 ) << endl;
+    cout << "Add stairs to stairs: " << group_st->addElement( room2 ) << endl;
 
-    // print
-    cout << "List of rooms after remove" << endl;
-    vec = lift->getRoomIds();
-    for( uint64_t id: vec )
-        cout << " Room: " << id << endl;
-    cout << endl;
+    GroupEntityPtr group_areas = mngr->addGroup( GroupEntity::GT_AREAS );
+    cout << "Add elev to areas: " << group_areas->addElement( room1 ) << endl;
+    cout << "Add stairs to areas: " << group_areas->addElement( room2 ) << endl;
 
-    // get lift by floor
-    auto lifts = floor->getParent()->convertToMarksHolder()
-            ->getMarks( Mark::MT_LIFT );
-    if( lifts.size() )
-    {
-        LiftMarkPtr lift = lifts.front()->convert< LiftMark >();
+    // get rooms of one elevator
+    auto groups_elev = facil->getGroupsOfRoom( GroupEntity::GT_STAIRS );
+    cout << "Elev count: " << groups_elev.size() << endl;
 
-        // print
-        cout << "List of rooms after all" << endl;
-        auto vec = lift->getRoomIds();
-        for( uint64_t id: vec )
-            cout << " Room: " << id << endl;
+    // check constraints group
+    cout << "Set elev 2: " << group_elev->addMetadata( "double", "width", 2 ) << endl;
+    cout << "Set elev 100: " << group_elev->addMetadata( "double", "width", 100 ) << endl;
 
-        cout << "Room 1: " << lift->isPresentOnRoom( room1->getId() ) << endl;
-        cout << "Room 2: " << lift->isPresentOnRoom( room2->getId() ) << endl;
+    cout << "Set stairs 2: " << group_st->addMetadata( "double", "width", 2 ) << endl;
+    cout << "Set stairs 100: " << group_st->addMetadata( "double", "width", 100 ) << endl;
 
-        cout << "Coords: "
-             << lift->getCenter().x() << "x"
-             << lift->getCenter().y() << endl;
+    // check constraints group
+    cout << "Set elev 2: " << room1->addMetadata( "double", "width", 2 ) << endl;
+    cout << "Set elev 100: " << room1->addMetadata( "double", "width", 100 ) << endl;
 
-        cout << "Del: " << mngr->deleteMark( lift ) << endl;
-    }
+    cout << "Set stairs 2: " << room2->addMetadata( "double", "width", 2 ) << endl;
+    cout << "Set stairs 100: " << room2->addMetadata( "double", "width", 100 ) << endl;
+
+    cout << "Set common 2: " << room3->addMetadata( "double", "width", 2 ) << endl;
+    cout << "Set common 100: " << room3->addMetadata( "double", "width", 100 ) << endl;
+    cout << "Set common 300: " << room3->addMetadata( "double", "width", 300 ) << endl;
+
+    // check delete and commit
+    cout << "Comm: " << room2->commit() << endl;
+    sleep( 5 );
+    cout << "Del: " << mngr->deleteArea( room2 ) << endl;
 }
 
 int main( int argc, char** argv )
