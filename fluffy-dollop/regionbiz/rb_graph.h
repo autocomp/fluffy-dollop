@@ -37,6 +37,7 @@ public:
     bool commit() override;
 
     GraphEntityPtr getParentGraph();
+    uint64_t getParentId();
     GraphEdgePtrs getEdges();
 
     QPointF getCoord();
@@ -73,6 +74,7 @@ public:
     bool commit() override;
 
     GraphEntityPtr getParentGraph();
+    uint64_t getParentId();
 
     GraphNodePtr getFirstPoint();
     GraphNodePtr getSecondPoint();

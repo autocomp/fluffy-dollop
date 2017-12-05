@@ -106,6 +106,11 @@ bool RegionBizManager::isEntityConstraintsCorrect( BaseEntityPtr entity )
     case BaseEntity::ET_AREA:
     {
         CHECK_CONSTRAINTS( entity->convert< BaseArea >()->getType() );
+        BaseAreaPtr area = entity->convert< BaseArea >();
+        if( area->getType() == BaseArea::AT_ROOM )
+        {
+            CHECK_CONSTRAINTS( area->convert< Room >()->getRoomType() );
+        }
         break;
     }
 
@@ -117,11 +122,18 @@ bool RegionBizManager::isEntityConstraintsCorrect( BaseEntityPtr entity )
 
     case BaseEntity::ET_GRAPH:
     {
-        // TODO constraints check for graph
+        // NOTE don't constraints check for graph childs
+        //auto nodes = entity->convert< GraphEntity >()->getNodes();
+        //auto edges = entity->convert< GraphEntity >()->getEdges();
         break;
     }
 
     case BaseEntity::ET_GROUP:
+    {
+        CHECK_CONSTRAINTS( entity->convert< GroupEntity >()->getGroupType() );
+        break;
+    }
+
     case BaseEntity::ET_RELATION:
     case BaseEntity::ET_GRAPH_EDGE:
     case BaseEntity::ET_GRAPH_NODE:
@@ -157,9 +169,17 @@ Constraints RegionBizManager::getConstraintsOfEntity( BaseEntityPtr entity )
     switch( type ) {
     case BaseEntity::ET_AREA:
     {
-        auto type = entity->convert< BaseArea >()->getType();
+        BaseAreaPtr area = entity->convert< BaseArea >();
+        auto type = area->getType();
         auto cons_specific = ConstraintsManager::getConstraints( type );
         constraints.insert( constraints.end(), cons_specific.begin(), cons_specific.end() );
+
+        if( area->getType() == BaseArea::AT_ROOM )
+        {
+            auto type = area->convert< Room >()->getRoomType();
+            auto cons_specific = ConstraintsManager::getConstraints( type );
+            constraints.insert( constraints.end(), cons_specific.begin(), cons_specific.end() );
+        }
         break;
     }
 
@@ -172,6 +192,13 @@ Constraints RegionBizManager::getConstraintsOfEntity( BaseEntityPtr entity )
     }
 
     case BaseEntity::ET_GROUP:
+    {
+        auto type = entity->convert< GroupEntity >()->getGroupType();
+        auto cons_specific = ConstraintsManager::getConstraints( type );
+        constraints.insert( constraints.end(), cons_specific.begin(), cons_specific.end() );
+        break;
+    }
+
     case BaseEntity::ET_RELATION:
 
     case BaseEntity::ET_GRAPH:
@@ -234,24 +261,7 @@ BaseAreaPtrs RegionBizManager::getAreaChildsByParent( uint64_t id )
     BaseAreaPtrs childs;
 
     BaseEntity::_mutex.lock();
-    for( auto pair: BaseEntity::getEntitys() )
-    {
-        BaseEntityPtr ent_ch = pair.second;
-        if( !ent_ch )
-            continue;
-
-        BaseAreaPtr area_ch = BaseEntity::convert< BaseArea >( ent_ch );
-        if( !area_ch )
-            continue;
-
-        if( id == area_ch->getParentId() )
-        {
-            // WARNING filtered child
-            bool filtered = EntityFilter::isFiltered( ent_ch );
-            if( filtered )
-                childs.push_back( area_ch );
-        }
-    }
+    childs = getBaseAreasByParent< BaseArea >( id );
     BaseEntity::_mutex.unlock();
 
     return childs;
@@ -318,6 +328,27 @@ BaseAreaPtr RegionBizManager::addArea( BaseArea::AreaType type,
 
     BaseAreaPtr add_area = addArea( type, parent->getId() );
     return add_area;
+}
+
+RoomPtr RegionBizManager::addRoom(Room::RoomType type, uint64_t parent_id)
+{
+    auto room = addArea< Room >( parent_id );
+    if( !room )
+        return false;
+
+    auto room_conv = room->convert< Room >();
+    bool seted = room_conv->setRoomType( type );
+    if( !seted )
+        return nullptr;
+
+    return room_conv;
+}
+
+RoomPtr RegionBizManager::addRoom(Room::RoomType type, BaseAreaPtr parent)
+{
+    if( !parent )
+        return nullptr;
+    return addRoom( type, parent->getId() );
 }
 
 bool RegionBizManager::deleteArea(BaseAreaPtr area)
@@ -394,12 +425,12 @@ BaseBizRelationPtrs RegionBizManager::getBizRelationByArea( uint64_t id,
     BaseBizRelationPtrs relations;
 
     auto relations_ptrs =
-            BaseEntity::getEntitysByType< BaseBizRelation >( BaseEntity::ET_RELATION );
+            BaseEntity::getEntitysByTypeAndParent< BaseBizRelation >(
+                BaseEntity::ET_RELATION, id  );
 
     for( BaseBizRelationPtr rel: relations_ptrs )
     {
-        if( type == rel->getType()
-                && id == rel->getAreaId() )
+        if( type == rel->getType() )
         {
             relations.push_back( rel );
         }
@@ -537,17 +568,14 @@ MarkPtr RegionBizManager::getMark( uint64_t id )
 
 MarkPtrs RegionBizManager::getMarksByParent( uint64_t id )
 {
-    std::function< bool( MarkPtr ) > check_id =
-            [ id ]( MarkPtr mark ){ return id == mark->getParentId(); };
-
     // get marks from entitys
-    auto marks_ptrs = BaseEntity::getEntitysByType< Mark >( BaseEntity::ET_MARK );
+    auto marks_ptrs = BaseEntity::getEntitysByTypeAndParent< Mark >(
+                BaseEntity::ET_MARK, id );
 
     MarkPtrs marks;
     for( MarkPtr mark: marks_ptrs )
     {
-        if( check_id( mark ))
-            marks.push_back( mark );
+        marks.push_back( mark );
     }
 
     return marks;
@@ -600,7 +628,7 @@ MarkPtr RegionBizManager::addMark( uint64_t parent_id,
 
     // add by type
     uint64_t id = BaseEntity::getMaxId() + 1;
-    mark = MarkFabric::createByType( type, id );
+    mark = MarkFabric::createByType( type, id, parent_id );
     if( mark )
     {
         mark->setCoords( coords );
@@ -674,6 +702,49 @@ GroupEntityPtrs RegionBizManager::getGroups()
     return group_ptrs;
 }
 
+GroupEntityPtrs RegionBizManager::getGroups(GroupEntity::GroupType type)
+{
+    auto groups = getGroups();
+    GroupEntityPtrs res;
+    for( GroupEntityPtr gr: groups )
+        if( type == gr->getGroupType() )
+            res.push_back( gr );
+
+    return res;
+}
+
+GroupEntityPtrs RegionBizManager::getGroupsOfRoomByFacility(
+        FacilityPtr facility )
+{
+    GroupEntityPtrs res;
+    for( GroupEntityPtr group: getGroups() )
+    {
+        if( group->isValid() && !group->isEmpty()
+                && group->getType() == BaseArea::AT_ROOM )
+        {
+            for( BaseAreaPtr area: group->getElements() )
+                if( area->getParent()->getParentId()
+                        == facility->getId() )
+                {
+                    res.push_back( group );
+                    break;
+                }
+        }
+    }
+    return res;
+}
+
+GroupEntityPtrs RegionBizManager::getGroupsOfRoomByFacility(
+        FacilityPtr facility, GroupEntity::GroupType type )
+{
+    GroupEntityPtrs res;
+    for( GroupEntityPtr gr: getGroupsOfRoomByFacility( facility ))
+        if( type == gr->getGroupType() )
+            res.push_back( gr );
+
+    return res;
+}
+
 // TODO think how doing fast search
 GroupEntityPtr RegionBizManager::getGroupOfEntity(uint64_t id)
 {
@@ -685,11 +756,15 @@ GroupEntityPtr RegionBizManager::getGroupOfEntity(uint64_t id)
     return nullptr;
 }
 
-GroupEntityPtr RegionBizManager::addGroup()
+GroupEntityPtr RegionBizManager::addGroup( GroupEntity::GroupType type )
 {
     uint64_t id = BaseEntity::getMaxId() + 1;
     GroupEntityPtr group = BaseEntity::createWithId< GroupEntity >( id );
+    if( !group )
+        return nullptr;
+
     group->setChanged();
+    group->setGroupType( type );
 
     // emit signal
     _change_watcher.addBaseEntity( group->getId() );
@@ -1218,7 +1293,7 @@ GraphEntityPtr RegionBizManager::addGraph( uint64_t area_id )
     }
 
     uint64_t id = BaseEntity::getMaxId() + 1;
-    GraphEntityPtr graph = BaseEntity::createWithId< GraphEntity >( id );
+    GraphEntityPtr graph = BaseEntity::createWithId< GraphEntity >( id, area_id );
 
     if( graph )
     {
@@ -1582,6 +1657,7 @@ void RegionBizManager::clearCurrentData( bool clear_entitys )
     {
         BaseEntity::_mutex.lock();
         BaseEntity::getEntitys().clear();
+        BaseEntity::getChildsOfParent().clear();
         BaseEntity::_mutex.unlock();
     }
 }
@@ -1618,20 +1694,44 @@ RegionBizManager::getBaseAreasByParent( uint64_t parent_id )
     std::function< bool( BaseAreaPtr ) > check_filter =
             []( BaseAreaPtr bl ){ return EntityFilter::isFiltered( bl ); };
 
-    // get areas
-    BaseAreaPtrs areas = BaseEntity::getEntitysByType< BaseArea >( BaseEntity::ET_AREA );
-
-    // check all areas
+    // result
     std::vector< std::shared_ptr< LocType >> loc_childs;
-    for( BaseAreaPtr ptr: areas )
-    {
-        std::shared_ptr< LocType > loc_ptr = BaseArea::convert< LocType >( ptr );
-        if( !loc_ptr )
-            continue;
 
-        if( check_parent_id( ptr )
-                && check_filter( ptr ))
-            loc_childs.push_back( loc_ptr );
+    // for objects with parent
+    if( parent_id )
+    {
+        // get areas by parent
+        BaseAreaPtrs areas = BaseEntity::getEntitysByTypeAndParent< BaseArea >(
+                    BaseEntity::ET_AREA, parent_id );
+
+        // check all areas
+        for( BaseAreaPtr ptr: areas )
+        {
+            std::shared_ptr< LocType > loc_ptr = BaseArea::convert< LocType >( ptr );
+            if( !loc_ptr )
+                continue;
+
+            if( check_filter( ptr ))
+                loc_childs.push_back( loc_ptr );
+        }
+    }
+    // for other objects
+    else
+    {
+        // get areas
+        BaseAreaPtrs areas = BaseEntity::getEntitysByType< BaseArea >( BaseEntity::ET_AREA );
+
+        // check all areas
+        for( BaseAreaPtr ptr: areas )
+        {
+            std::shared_ptr< LocType > loc_ptr = BaseArea::convert< LocType >( ptr );
+            if( !loc_ptr )
+                continue;
+
+            if( check_parent_id( ptr )
+                    && check_filter( ptr ))
+                loc_childs.push_back( loc_ptr );
+        }
     }
 
     return loc_childs;

@@ -36,6 +36,11 @@ GraphEntityPtr GraphNode::getParentGraph()
     return _parent_graph;
 }
 
+uint64_t GraphNode::getParentId()
+{
+    return _parent_graph->getId();
+}
+
 GraphEdgePtrs GraphNode::getEdges()
 {
     auto itself = BaseEntity::convert< GraphNode >( getItself() );
@@ -64,6 +69,11 @@ bool GraphEdge::commit()
 GraphEntityPtr GraphEdge::getParentGraph()
 {
     return _parent_graph;
+}
+
+uint64_t GraphEdge::getParentId()
+{
+    return _parent_graph->getId();
 }
 
 GraphNodePtr GraphEdge::getFirstPoint()
@@ -146,7 +156,8 @@ GraphNodePtr GraphEntity::addNode()
 
 GraphNodePtr GraphEntity::addNode( QPointF coord )
 {
-    GraphNodePtr node = BaseEntity::createWithId< GraphNode >( getMaxId() + 1 );
+    GraphNodePtr node = BaseEntity::createWithId< GraphNode >(
+                getMaxId() + 1, getId() );
     if( node )
     {
         node->setCoord( coord );
@@ -166,7 +177,7 @@ void GraphEntity::removeNode( GraphNodePtr node )
                 || second->getId() == node->getId() )
         {
             // remove edge
-            BaseEntity::deleteEntity( (*it) );
+            BaseEntity::deleteEntity( (*it), (*it)->getParentId() );
             _edges.erase( it );
         }
         else
@@ -178,7 +189,7 @@ void GraphEntity::removeNode( GraphNodePtr node )
         if( (*it)->getId() == node->getId() )
         {
             // delete node graph from system
-            BaseEntity::deleteEntity( (*it) );
+            BaseEntity::deleteEntity( (*it), (*it)->getParentId() );
             _nodes.erase( it );
             break;
         }
@@ -210,7 +221,8 @@ GraphEdgePtrs GraphEntity::getEdgesByNode(GraphNodePtr node)
 GraphEdgePtr GraphEntity::addEdge( GraphNodePtr first_node,
                                    GraphNodePtr second_node )
 {
-    GraphEdgePtr edge = BaseEntity::createWithId< GraphEdge >( getMaxId() + 1 );
+    GraphEdgePtr edge = BaseEntity::createWithId< GraphEdge >(
+                getMaxId() + 1, getId() );
     if( edge )
     {
         edge->setFirstPoint( first_node );
@@ -230,7 +242,7 @@ void GraphEntity::removeEdge(GraphEdgePtr edge)
         if( (*it)->getId() == edge->getId() )
         {
             // delete from system
-            BaseEntity::deleteEntity( (*it) );
+            BaseEntity::deleteEntity( (*it), (*it)->getParentId() );
             _edges.erase( it );
             return;
         }

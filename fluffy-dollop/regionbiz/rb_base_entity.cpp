@@ -47,6 +47,12 @@ std::unordered_map<uint64_t, BaseEntityPtr> &BaseEntity::getEntitys()
     return entitys;
 }
 
+std::map<uint64_t, BaseEntityPtrSet>& BaseEntity::getChildsOfParent()
+{
+    static std::map< uint64_t, BaseEntityPtrSet > childs_by_parent;
+    return childs_by_parent;
+}
+
 QString BaseEntity::getDescription()
 {
     return _description;
@@ -163,15 +169,30 @@ BaseFileKeeperPtrs BaseEntity::getFilesByType(BaseFileKeeper::FileType type)
     return mngr->getFilesByEntity( _id, type );
 }
 
-bool BaseEntity::deleteEntity(BaseEntityPtr ent)
+bool BaseEntity::deleteEntity(BaseEntityPtr ent, uint64_t parent_id)
 {
-    return deleteEntity( ent->getId() );
+    if( !ent )
+        return false;
+    return deleteEntity( ent->getId(), parent_id );
 }
 
-bool BaseEntity::deleteEntity(uint64_t id)
+bool BaseEntity::deleteEntity(uint64_t id, uint64_t parent_id)
 {
     _mutex.lock();
     bool del = getEntitys().erase( id );
+    if( parent_id )
+    {
+        if( getChildsOfParent().find( parent_id ) != getChildsOfParent().end() )
+        {
+            auto entity = getEntity( id );
+            if( entity )
+            {
+                #define SET getChildsOfParent()[ parent_id ]
+                SET.erase( entity );
+                #undef SET
+            }
+        }
+    }
     _mutex.unlock();
 
     return del;

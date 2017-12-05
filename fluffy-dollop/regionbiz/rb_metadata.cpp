@@ -77,41 +77,10 @@ std::recursive_mutex& BaseMetadata::getMutex()
 
 std::vector< Constraint > BaseMetadata::getConstraints()
 {
-    auto empty = std::vector< Constraint >();
-
     auto mngr = RegionBizManager::instance();
     auto entity = mngr->getBaseEntity( _parent_id );
-    if( ! entity )
-        return empty;
-
-    #define CASE_GET_CONSTRAINTS( type ) \
-    case type: \
-        return ConstraintsManager::getConstraints( type )
-
-    switch( entity->getEntityType() )
-    {
-
-    case BaseEntity::ET_AREA:
-    {
-        auto area = entity->convert< BaseArea >();
-        return ConstraintsManager::getConstraints( area->getType() );
-    }
-
-    case BaseEntity::ET_MARK:
-    {
-        auto mark = entity->convert< Mark >();
-        return ConstraintsManager::getConstraints( mark->getMarkType() );
-    }
-
-    CASE_GET_CONSTRAINTS( BaseEntity::ET_GROUP );
-    CASE_GET_CONSTRAINTS( BaseEntity::ET_RELATION );
-    CASE_GET_CONSTRAINTS( BaseEntity::ET_GRAPH );
-    CASE_GET_CONSTRAINTS( BaseEntity::ET_GRAPH_EDGE );
-    CASE_GET_CONSTRAINTS( BaseEntity::ET_GRAPH_NODE );
-
-    }
-
-    return empty;
+    auto cons = mngr->getConstraintsOfEntity( entity );
+    return cons;
 }
 
 void BaseMetadata::printIncorrectConstraint(Constraint cons)

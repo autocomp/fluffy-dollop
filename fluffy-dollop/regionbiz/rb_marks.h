@@ -24,9 +24,7 @@ public:
         MT_DEFECT,
         MT_PHOTO,
         MT_PHOTO_3D,
-        MT_PLACEHOLDER,
-        MT_LIFT,
-        MT_STAIRS
+        MT_PLACEHOLDER
     };
 
     // base comunication
@@ -63,7 +61,7 @@ typedef std::vector< MarkPtr > MarkPtrs;
 class MarkFabric
 {
 public:
-    static MarkPtr createByType(Mark::MarkType type , uint64_t id);
+    static MarkPtr createByType(Mark::MarkType type , uint64_t id, uint64_t parent_id);
 };
 
 //---------------------------------------
@@ -109,50 +107,6 @@ public:
 };
 typedef std::shared_ptr< PlaceHolderMark > PlaceHolderMarkPtr;
 typedef std::vector< PlaceHolderMarkPtr > PlaceHolderMarkPtrs;
-
-//------------------------------------------
-
-class VerticalWay: public Mark
-{
-public:
-    VerticalWay( uint64_t id );
-    virtual MarkType getMarkType() override = 0;
-
-    // force - remove other room from same floor
-    bool addRoom( RoomPtr room, bool force = false );
-    bool addRoom( uint64_t id, bool force = false );
-    bool removeRoom( RoomPtr room );
-    bool removeRoom( uint64_t id );
-    bool isPresentOnRoom( RoomPtr room );
-    bool isPresentOnRoom( uint64_t id );
-    std::vector< uint64_t > getRoomIds();
-    RoomPtrs getRooms();
-
-private:
-    bool checkRoomInsideFloor( uint64_t id, bool force );
-};
-
-//-----------------------------------------
-
-class LiftMark: public VerticalWay
-{
-public:
-    LiftMark( uint64_t id );
-    MarkType getMarkType() override;
-};
-typedef std::shared_ptr< LiftMark > LiftMarkPtr;
-typedef std::vector< LiftMarkPtr > LiftMarkPtrs;
-
-//--------------------------------------------
-
-class StairsMark: public VerticalWay
-{
-public:
-    StairsMark( uint64_t id );
-    MarkType getMarkType() override;
-};
-typedef std::shared_ptr< StairsMark > StairsMarkPtr;
-typedef std::vector< StairsMarkPtr > StairsMarkPtrs;
 
 }
 

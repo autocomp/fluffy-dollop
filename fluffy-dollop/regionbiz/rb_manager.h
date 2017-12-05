@@ -79,7 +79,8 @@ public:
     BaseAreaPtr addArea( uint64_t parent_id )
     {
         // TODO check parent type
-        BaseAreaPtr area = BaseEntity::createWithId< Type >( BaseEntity::getMaxId() + 1 );
+        BaseAreaPtr area = BaseEntity::createWithId< Type >(
+                    BaseEntity::getMaxId() + 1, parent_id);
         if( area )
         {
             area->setParent( parent_id );
@@ -100,6 +101,10 @@ public:
         BaseAreaPtr add_area = addArea< Type >( parent->getId() );
         return add_area;
     }
+
+    // specific room
+    RoomPtr addRoom( Room::RoomType type, uint64_t parent_id );
+    RoomPtr addRoom( Room::RoomType type, BaseAreaPtr parent );
 
     // commit
     bool commitArea( BaseAreaPtr area );
@@ -142,8 +147,11 @@ public:
     // groups
     GroupEntityPtr getGroup( uint64_t id );
     GroupEntityPtrs getGroups();
+    GroupEntityPtrs getGroups( GroupEntity::GroupType type );
+    GroupEntityPtrs getGroupsOfRoomByFacility( FacilityPtr facility );
+    GroupEntityPtrs getGroupsOfRoomByFacility( FacilityPtr facility, GroupEntity::GroupType type );
     GroupEntityPtr getGroupOfEntity( uint64_t id );
-    GroupEntityPtr addGroup();
+    GroupEntityPtr addGroup( GroupEntity::GroupType type );
     bool commitGroup( uint64_t id );
     bool commitGroup( GroupEntityPtr group );
     bool commitGroupsChanged();

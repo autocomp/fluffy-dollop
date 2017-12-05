@@ -260,7 +260,7 @@ MarkPtrs SqlTranslator::loadMarks()
             QString descr = query.value( 3 ).toString();
             QString type = query.value( 4 ).toString();
 
-            MarkPtr mark = getMarkByTypeString( type, id );
+            MarkPtr mark = getMarkByTypeString( type, id, parent_id );
             if( !mark )
                 continue;
 
@@ -543,7 +543,7 @@ GraphEntityPtrs SqlTranslator::loadGraphs()
             QString name = query.value( 2 ).toString();
             QString descr = query.value( 3 ).toString();
 
-            GraphEntityPtr graph = BaseEntity::createWithId< GraphEntity >( id );
+            GraphEntityPtr graph = BaseEntity::createWithId< GraphEntity >( id, parent_id );
             if( !graph )
                 continue;
 
@@ -590,14 +590,18 @@ GraphEntityPtrs SqlTranslator::loadGraphs()
             QString name = query.value( 2 ).toString();
             QString descr = query.value( 3 ).toString();
 
-            GraphNodePtr node = BaseEntity::createWithId< GraphNode >( id );
+            GraphEntityPtr graph = graphs_by_id[parent_id];
+            GraphNodePtr node;
+            if( graph )
+                node = BaseEntity::createWithId< GraphNode >( id, graph->getId() );
+            else
+                node = BaseEntity::createWithId< GraphNode >( id );
             if( !node )
                 continue;
 
             node->setName( name );
             node->setDesription( descr );
             node->setCoord( coords[ id ].front() );
-            GraphEntityPtr graph = graphs_by_id[parent_id];
             if( graph )
                 appendNodeForGraph( graph, node );
 
@@ -638,7 +642,12 @@ GraphEntityPtrs SqlTranslator::loadGraphs()
                 continue;
             }
 
-            GraphEdgePtr edge = BaseEntity::createWithId< GraphEdge >( id );
+            GraphEntityPtr graph = graphs_by_id[parent_id];
+            GraphEdgePtr edge;
+            if( graph )
+                edge = BaseEntity::createWithId< GraphEdge >( id, graph->getId() );
+            else
+                edge = BaseEntity::createWithId< GraphEdge >( id );
             if( !edge )
                 continue;
 
@@ -648,7 +657,6 @@ GraphEntityPtrs SqlTranslator::loadGraphs()
             edge->setName( name );
             edge->setDesription( descr );
 
-            GraphEntityPtr graph = graphs_by_id[parent_id];
             if( graph )
                 appendEdgeForGraph( graph, edge );
         }
@@ -709,7 +717,7 @@ std::vector< std::shared_ptr< LocType >> SqlTranslator::loadBaseAreas( QString t
             QString name = query.value( "name" ).toString();
             QString descr = query.value( "description" ).toString();
 
-            LocTypePtr area_ptr = BaseEntity::createWithId< LocType >( id );
+            LocTypePtr area_ptr = BaseEntity::createWithId< LocType >( id, parent_id );
             if( !area_ptr )
                 continue;
 
@@ -889,20 +897,16 @@ BaseFileKeeper::FileType SqlTranslator::getFileTypeByString(QString type)
     return BaseFileKeeper::FT_NONE;
 }
 
-MarkPtr SqlTranslator::getMarkByTypeString(QString type, uint64_t id)
+MarkPtr SqlTranslator::getMarkByTypeString(QString type, uint64_t id, uint64_t parent_id)
 {
     if( "defect" == type )
-        return BaseEntity::createWithId< DefectMark >( id );
+        return BaseEntity::createWithId< DefectMark >( id, parent_id );
     if( "photo" == type )
-        return BaseEntity::createWithId< PhotoMark >( id );
+        return BaseEntity::createWithId< PhotoMark >( id, parent_id );
     if( "photo_3d" == type )
-        return BaseEntity::createWithId< Photo3dMark >( id );
+        return BaseEntity::createWithId< Photo3dMark >( id, parent_id );
     if( "place_holder" == type )
-        return BaseEntity::createWithId< PlaceHolderMark >( id );
-    if( "lift" == type )
-        return BaseEntity::createWithId< LiftMark >( id );
-    if( "stairs" == type )
-        return BaseEntity::createWithId< StairsMark >( id );
+        return BaseEntity::createWithId< PlaceHolderMark >( id, parent_id );
 
     return nullptr;
 }

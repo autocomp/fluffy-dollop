@@ -7,6 +7,7 @@
 #include "rb_base_entity.h"
 #include "rb_locations.h"
 #include "rb_marks.h"
+#include "rb_group.h"
 
 using namespace regionbiz;
 
@@ -18,10 +19,10 @@ Constraint::Constraint( Constraint::ConstraintType type,
                         QVariant default_val ):
     _meta_name( name ),
     _constrait( str ),
-    _type( type ),
     _meta_type( meta_type ),
     _meta_showed_name( showed_name ),
-    _default_value( default_val )
+    _default_value( default_val ),
+    _type( type )
 {}
 
 Constraint::Constraint()
@@ -104,10 +105,6 @@ void ConstraintsManager::init( QString aim, QString file )
     // metadata that always need
     Constraint cons( Constraint::CT_SYSTEM, "number", "int", "0:" );
     addConstraint( BaseArea::AT_FLOOR, cons );
-
-    Constraint cons_lift_stairs( Constraint::CT_SYSTEM, "", "string", "^(\\d+:)*\\d+$" );
-    addConstraint( Mark::MT_STAIRS, cons_lift_stairs );
-    addConstraint( Mark::MT_LIFT, cons_lift_stairs );
 
     // for rent
     if( aim == "rent" )
@@ -212,6 +209,18 @@ void ConstraintsManager::loadConstraintsFromMap( QVariantMap map )
             addConstraint( BaseEntity::ET_GRAPH_NODE, cons );
         else if( "graph_edge" == entity_type )
             addConstraint( BaseEntity::ET_GRAPH_EDGE, cons );
+        else if( "room_common" == entity_type )
+            addConstraint( Room::RT_COMMON, cons );
+        else if( "room_elevator" == entity_type )
+            addConstraint( Room::RT_ELEVATOR, cons );
+        else if( "room_stairs" == entity_type )
+            addConstraint( Room::RT_STAIRS, cons );
+        else if( "group_areas" == entity_type )
+            addConstraint( GroupEntity::GT_AREAS, cons );
+        else if( "group_elevator" == entity_type )
+            addConstraint( GroupEntity::GT_ELEVATOR, cons );
+        else if( "group_stairs" == entity_type )
+            addConstraint( GroupEntity::GT_STAIRS, cons );
 
         // TODO other type of entity, when read constraints from file
     }
@@ -230,6 +239,3 @@ Constraint::ConstraintType ConstraintsManager::getTypeByString( QString type )
               << type.toUtf8().data() << std::endl;
     return Constraint::CT_FREE;
 }
-
-
-

@@ -85,7 +85,7 @@ private:
     bool loadPayments( RentPtr rent );
     QString getStringFileType( BaseFileKeeper::FileType type );
     BaseFileKeeper::FileType getFileTypeByString( QString type );
-    MarkPtr getMarkByTypeString(QString type , uint64_t id);
+    MarkPtr getMarkByTypeString(QString type , uint64_t id, uint64_t parent_id);
 
     // sql thread for long db operations
     QThread* _self_thread = nullptr;

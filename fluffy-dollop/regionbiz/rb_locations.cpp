@@ -411,6 +411,21 @@ std::vector<FloorPtr> Facility::getChilds()
     return floors;
 }
 
+GroupEntityPtrs Facility::getGroupsOfRoom()
+{
+    auto mngr = RegionBizManager::instance();
+    return mngr->getGroupsOfRoomByFacility(
+                getItself()->convert< Facility >() );
+}
+
+GroupEntityPtrs Facility::getGroupsOfRoom( uint type )
+{
+    auto mngr = RegionBizManager::instance();
+    return mngr->getGroupsOfRoomByFacility(
+                getItself()->convert< Facility >(),
+                (GroupEntity::GroupType) type );
+}
+
 bool Facility::isHaveTransform()
 {
     auto mngr = RegionBizManager::instance();
@@ -516,6 +531,16 @@ void Floor::setNumber(uint16_t number)
         addMetadata( "int", "number", number );
 }
 
+std::vector<RoomPtr> Floor::getChilds( Room::RoomType type )
+{
+    RoomPtrs res;
+    for( RoomPtr room: getChilds() )
+        if( room->getRoomType() == type )
+            res.push_back( room );
+
+    return res;
+}
+
 RoomPtrs Floor::getChilds()
 {
     auto mngr = RegionBizManager::instance();
@@ -533,6 +558,45 @@ Room::Room(uint64_t id):
 BaseArea::AreaType Room::getType()
 {
     return AT_ROOM;
+}
+
+Room::RoomType Room::getRoomType()
+{
+    // by default - this is commonrooms
+    if( !isMetadataPresent( ROOM_TYPE_METADATA ))
+        return RT_COMMON;
+
+    QString type = getMetadata( ROOM_TYPE_METADATA )->getValueAsString();
+    if( "common" == type )
+        return RT_COMMON;
+    if( "stairs" == type )
+        return RT_STAIRS;
+    if( "elevator" == type )
+        return RT_ELEVATOR;
+
+    // default
+    return RT_COMMON;
+}
+
+bool Room::setRoomType(Room::RoomType type)
+{
+    QString type_str;
+    switch( type )
+    {
+    case RT_COMMON:
+        type_str = "common";
+        break;
+    case RT_STAIRS:
+        type_str = "stairs";
+        break;
+    case RT_ELEVATOR:
+        type_str = "elevator";
+        break;
+    }
+
+    if( type_str.isEmpty() )
+        return false;
+    return addMetadata( "string", ROOM_TYPE_METADATA, type_str );
 }
 
 //-----------------------------

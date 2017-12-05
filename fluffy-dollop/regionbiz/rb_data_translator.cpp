@@ -108,7 +108,7 @@ bool BaseDataTranslator::deleteArea(BaseAreaPtr area)
         {
             // remove from model system
             BaseMetadata::removeForEntity( area->getId() );
-            BaseEntity::deleteEntity( area );
+            BaseEntity::deleteEntity( area, area->getParentId() );
         }
         return del;
     }
@@ -184,7 +184,7 @@ bool BaseDataTranslator::deleteMark( MarkPtr mark )
         if( del )
         {
             BaseMetadata::removeForEntity( mark->getId() );
-            BaseEntity::deleteEntity( mark );
+            BaseEntity::deleteEntity( mark, mark->getParentId() );
         }
         return del;
     }
@@ -340,7 +340,7 @@ bool BaseDataTranslator::deleteGraph(GraphEntityPtr graph)
         if( del )
         {
             BaseMetadata::removeForEntity( graph->getId() );
-            BaseEntity::deleteEntity( graph );
+            BaseEntity::deleteEntity( graph, graph->getParentId() );
         }
         return del;
     }

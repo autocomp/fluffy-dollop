@@ -6,6 +6,8 @@
 #include "rb_base_entity.h"
 #include "rb_locations.h"
 
+#define GROUP_TYPE_METADATA "group_type_metadata"
+
 namespace regionbiz {
 
 class GroupEntity;
@@ -15,9 +17,18 @@ class GroupEntity: public BaseEntity
 {
     friend class RegionBizManager;
 public:
+    enum GroupType
+    {
+        GT_AREAS,
+        GT_STAIRS,
+        GT_ELEVATOR
+    };
+
     GroupEntity( uint64_t id );
     EntityType getEntityType();
     bool commit() override;
+
+    GroupType getGroupType();
 
     BaseAreaPtrs getElements();
     std::vector< uint64_t > getElementsIds();
@@ -41,6 +52,9 @@ public:
 private:
     BaseArea::AreaType getType();
     void setChanged();
+    bool setGroupType( GroupType type );
+    bool addElementToAreaGroup( BaseAreaPtr element );
+    bool addElementToStairsOrElevator( BaseAreaPtr element );
 
     std::set< uint64_t > _ids;
     BaseArea::AreaType _type = BaseArea::AT_ROOM;

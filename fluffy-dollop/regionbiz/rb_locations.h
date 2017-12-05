@@ -12,6 +12,8 @@
 #include "rb_marks.h"
 #include "rb_graph.h"
 
+#define ROOM_TYPE_METADATA "room_type_metadata"
+
 namespace regionbiz {
 
 class BaseArea;
@@ -21,6 +23,7 @@ typedef std::vector< BaseAreaPtr > BaseAreaPtrs;
 class RegionBizManager;
 class GroupEntity;
 typedef std::shared_ptr< GroupEntity > GroupEntityPtr;
+typedef std::vector< GroupEntityPtr > GroupEntityPtrs;
 
 class MarksHolder;
 typedef std::shared_ptr< MarksHolder > MarksHolderPtr;
@@ -218,6 +221,10 @@ public:
 
     // getters
     std::vector< FloorPtr > getChilds();
+    GroupEntityPtrs getGroupsOfRoom();
+    // WARNING uint because dependency triangle
+    GroupEntityPtrs getGroupsOfRoom(
+            /*GroupEntity::GroupType*/uint type );
 
     // transform matrixes
     bool isHaveTransform();
@@ -236,8 +243,31 @@ typedef std::vector< FacilityPtr > FacilityPtrs;
 
 //----------------------------------------------
 
-class Room;
+class Room: public BizRelationKepper,
+        public MarksHolder,
+        public LocalTransformKeeper
+{
+    friend class RegionBizManager;
+public:
+    enum RoomType
+    {
+        RT_COMMON,
+        RT_STAIRS,
+        RT_ELEVATOR
+    };
+
+    Room( uint64_t id );
+    virtual ~Room(){}
+    AreaType getType() override;
+    RoomType getRoomType();
+
+private:
+    bool setRoomType( RoomType type );
+};
+typedef std::vector< RoomPtr > RoomPtrs;
 typedef std::shared_ptr< Room > RoomPtr;
+
+//--------------------------------
 
 class Floor: public BizRelationKepper,
         public MarksHolder,
@@ -248,30 +278,16 @@ public:
     virtual ~Floor(){}
     AreaType getType() override;
 
-
     uint16_t getNumber();
     void setNumber( uint16_t number );
 
     // getters
     std::vector< RoomPtr > getChilds();
-
-private:
+    std::vector< RoomPtr > getChilds( Room::RoomType type );
 };
 typedef std::vector< FloorPtr > FloorPtrs;
 
 //-----------------------------------------------
-
-class Room: public BizRelationKepper,
-        public MarksHolder,
-        public LocalTransformKeeper
-{
-public:
-    Room( uint64_t id );
-    virtual ~Room(){}
-    AreaType getType() override;
-};
-typedef std::vector< RoomPtr > RoomPtrs;
-
 //----------------------------------------------
 
 }

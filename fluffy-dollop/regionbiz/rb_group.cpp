@@ -63,30 +63,23 @@ bool GroupEntity::addElements(std::vector<uint64_t> ids)
         auto element = mngr->getBaseArea( id );
         if( element )
         {
-            // check type (if empty - set type)
-            if( isEmpty() )
+            GroupType group_type = getGroupType();
+            switch ( group_type ) {
+            case GT_AREAS:
             {
-                _type = element->getType();
-                // check previous group
-                if( element->getGroup() )
-                    element->leaveGroup();
-                _ids.insert( id );
-            }
-            else
-            {
-                if( _type == element->getType() )
-                {
-                    // check previous group
-                    if( element->getGroup() )
-                        element->leaveGroup();
-                    _ids.insert( id );
-                }
-                else
-                {
-                    std::cerr << "New element " << id << " of group " <<
-                                 getId() << "has wrong type" << std::endl;
+                if( !addElementToAreaGroup( element ))
                     return false;
-                }
+                break;
+            }
+
+            case GT_ELEVATOR:
+            case GT_STAIRS:
+            {
+                if( !addElementToStairsOrElevator( element ))
+                    return false;
+                break;
+            }
+
             }
         }
         else
@@ -175,6 +168,15 @@ void GroupEntity::disband()
 
 GroupEntityPtr GroupEntity::combine( GroupEntityPtr other_group )
 {
+    using namespace std;
+
+    // if other type of group - return this group
+    if( other_group->getGroupType() != getGroupType() )
+    {
+        cerr << "Try combine groups of different type" << endl;
+        return RegionBizManager::instance()->getGroup( getId() );
+    }
+
     // if other group deleted - just return this group
     if( !other_group->isValid() )
         return RegionBizManager::instance()->getGroup( getId() );
@@ -194,9 +196,128 @@ bool GroupEntity::commit()
     return mngr->commitGroup( getId() );
 }
 
+GroupEntity::GroupType GroupEntity::getGroupType()
+{
+    // by default - this is group of rooms
+    if( !isMetadataPresent( GROUP_TYPE_METADATA ))
+        return GT_AREAS;
+
+    QString type = getMetadata( GROUP_TYPE_METADATA )->getValueAsString();
+    if( "areas" == type )
+        return GT_AREAS;
+    if( "stairs" == type )
+        return GT_STAIRS;
+    if( "elevator" == type )
+        return GT_ELEVATOR;
+
+    // default
+    return GT_AREAS;
+}
+
 void GroupEntity::setChanged()
 {
     GroupWatcher::appendGroup( getId() );
+}
+
+bool GroupEntity::setGroupType(GroupEntity::GroupType type)
+{
+    QString type_str;
+    switch( type )
+    {
+    case GT_AREAS:
+        type_str = "areas";
+        break;
+    case GT_STAIRS:
+        type_str = "stairs";
+        break;
+    case GT_ELEVATOR:
+        type_str = "elevator";
+        break;
+    }
+
+    if( type_str.isEmpty() )
+        return false;
+    return addMetadata( "string", GROUP_TYPE_METADATA, type_str );
+}
+
+bool GroupEntity::addElementToAreaGroup(BaseAreaPtr element)
+{
+    if( element->getType() == BaseArea::AT_ROOM
+            && element->convert< Room >()->getRoomType() != Room::RT_COMMON )
+    {
+        std::cerr << "New element " << element->getId() << " of group " <<
+                     getId() << " don't a common room" << std::endl;
+        return false;
+    }
+
+    // check type (if empty - set type)
+    if( isEmpty() )
+    {
+        _type = element->getType();
+        // check previous group
+        if( element->getGroup() )
+            element->leaveGroup();
+        _ids.insert( element->getId() );
+    }
+    else
+    {
+        if( _type == element->getType() )
+        {            
+            // check previous group
+            if( element->getGroup() )
+                element->leaveGroup();
+            _ids.insert( element->getId() );
+        }
+        else
+        {
+            std::cerr << "New element " << element->getId() << " of group " <<
+                         getId() << "has wrong type" << std::endl;
+            return false;
+        }
+    }
+    return true;
+}
+
+bool GroupEntity::addElementToStairsOrElevator(BaseAreaPtr element)
+{
+    using namespace std;
+
+    if( BaseArea::AT_ROOM != element->getType() )
+    {
+        cerr << "Wrong type of Area element for Vertiacal group: "
+             << element->getId() << endl;
+        return false;
+    }
+
+    GroupType type = getGroupType();
+    Room::RoomType room_type = element->convert< Room >()->getRoomType();
+    if(( type == GT_STAIRS && room_type == Room::RT_STAIRS )
+            || ( type == GT_ELEVATOR && room_type == Room::RT_ELEVATOR ))
+    {
+        // check rooms on same floor
+        uint64_t parent_element = element->getParentId();
+        for( BaseAreaPtr elem: getElements() )
+            if( elem->getParentId() == parent_element
+                    && elem->getId() != element->getId() )
+            {
+                cerr << "Other element of group present on same floor for: "
+                     << element->getId() << endl;
+                return false;
+            }
+
+        // check previous group
+        if( element->getGroup() )
+            element->leaveGroup();
+        _ids.insert( element->getId() );
+    }
+    else
+    {
+        cerr << "Wrong type of Room element for Vertiacal group: "
+             << element->getId() << endl;
+        return false;
+    }
+
+    return true;
 }
 
 bool GroupEntity::isValid()
