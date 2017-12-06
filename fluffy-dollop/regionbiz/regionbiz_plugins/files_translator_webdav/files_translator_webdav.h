@@ -40,6 +40,7 @@ private:
     BaseFileKeeperPtr addFile( QString local_path, QString inner_path,
                                BaseFileKeeper::FileType type , uint64_t entity_id);
     void deleteFile( BaseFileKeeperPtr file );
+    BaseFileKeeperPtrs getFilesOnProcess();
 
     void initConnects();
 

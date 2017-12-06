@@ -28,3 +28,8 @@ void UploadManager::clear()
 {
     _ids.clear();
 }
+
+std::vector<QString> UploadManager::getFilesIds()
+{
+    return _ids;
+}

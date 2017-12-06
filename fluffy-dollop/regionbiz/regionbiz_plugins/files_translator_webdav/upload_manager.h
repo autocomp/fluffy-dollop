@@ -11,6 +11,7 @@ public:
     bool isFileOnUpload( QString id );
     void eraseFile( QString id );
     void clear();
+    std::vector< QString > getFilesIds();
 
 private:
     std::vector< QString > _ids;

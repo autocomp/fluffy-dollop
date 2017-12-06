@@ -76,6 +76,22 @@ bool BaseFilesTranslator::deleteFile(BaseFileKeeperPtr file)
     return false;
 }
 
+BaseFileKeeperPtrs BaseFilesTranslator::getFilesOnProcess()
+{
+    if( _get_files_on_process )
+    {
+        auto files = _get_files_on_process();
+        return files;
+    }
+    return BaseFileKeeperPtrs();
+}
+
+bool BaseFilesTranslator::isHasFilesOnProcess()
+{
+    bool has = getFilesOnProcess().size();
+    return has;
+}
+
 void BaseFilesTranslator::subscribeFileSynced( QObject *obj, const char *slot )
 {
     QObject::connect( &_file_syncer, SIGNAL( fileSynced( BaseFileKeeperPtr )),

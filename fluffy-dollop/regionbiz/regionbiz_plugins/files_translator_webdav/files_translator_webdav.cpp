@@ -22,6 +22,7 @@ void FilesTranslatorWebDav::loadFunctions()
                            std::placeholders::_3, std::placeholders::_4 );
     _delete_file = std::bind( &FilesTranslatorWebDav::deleteFile, this,
                               std::placeholders::_1 );
+    _get_files_on_process = std::bind( &FilesTranslatorWebDav::getFilesOnProcess, this );
 }
 
 bool FilesTranslatorWebDav::initBySettings(QVariantMap settings)
@@ -190,6 +191,22 @@ void FilesTranslatorWebDav::deleteFile(BaseFileKeeperPtr file)
     _webdav->addOperation( { OT_DELETE, id, "" } );
 
     onDeleteFile( file );
+}
+
+BaseFileKeeperPtrs FilesTranslatorWebDav::getFilesOnProcess()
+{
+    auto mngr = RegionBizManager::instance();
+    BaseFileKeeperPtrs res;
+
+    auto files = _upload_manager.getFilesIds();
+    for( QString file_id: files )
+    {
+        auto file = mngr->getFileByPath( file_id );
+        if( file )
+            res.push_back( file );
+    }
+
+    return res;
 }
 
 void FilesTranslatorWebDav::initConnects()

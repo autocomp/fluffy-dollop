@@ -39,6 +39,8 @@ public:
     BaseFileKeeper::FileState syncFile( BaseFileKeeperPtr file );
     BaseFileKeeperPtr addFile(QString file_path , BaseFileKeeper::FileType type, uint64_t entity_id);
     bool deleteFile( BaseFileKeeperPtr file );
+    BaseFileKeeperPtrs getFilesOnProcess();
+    bool isHasFilesOnProcess();
 
     void subscribeFileSynced( QObject* obj,
                               const char *slot );
@@ -59,6 +61,7 @@ protected:
                                       BaseFileKeeper::FileType type,
                                       uint64_t entity_id ) > _add_file;
     std::function< void( BaseFileKeeperPtr ) > _delete_file;
+    std::function< BaseFileKeeperPtrs() > _get_files_on_process;
 
 private:
     FileSyncer _file_syncer;

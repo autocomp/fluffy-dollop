@@ -1057,6 +1057,16 @@ BaseFileKeeperPtr RegionBizManager::addFile( QString file_path,
     return file;
 }
 
+BaseFileKeeperPtrs RegionBizManager::getFilesOnProcess()
+{
+    return _files_translator->getFilesOnProcess();
+}
+
+bool RegionBizManager::isHasFilesOnProcess()
+{
+    return _files_translator->isHasFilesOnProcess();
+}
+
 QFilePtr RegionBizManager::getLocalFile(BaseFileKeeperPtr file)
 {
     QFilePtr qfile = _files_translator->getFile( file );

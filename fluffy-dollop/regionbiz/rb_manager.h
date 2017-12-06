@@ -219,6 +219,8 @@ public:
     BaseFileKeeperPtr addFile( QString file_path ,
                                BaseFileKeeper::FileType type,
                                uint64_t entity_id );
+    BaseFileKeeperPtrs getFilesOnProcess();
+    bool isHasFilesOnProcess();
 
     // through file tranlator
     QFilePtr getLocalFile( BaseFileKeeperPtr file );
