@@ -768,6 +768,31 @@ void checkLiftAndStairs()
     cout << "Del: " << mngr->deleteArea( room2 ) << endl;
 }
 
+void checkFileProcessing()
+{
+    using namespace std;
+    using namespace regionbiz;
+    auto mngr = RegionBizManager::instance();
+
+    cout << "Has on start: " << mngr->isHasFilesOnProcess()
+         << ", size: " << mngr->getFilesOnProcess().size()
+         << endl;
+
+    auto file1 = mngr->addFile( "./images/photo.jpg", BaseFileKeeper::FT_IMAGE, 1 );
+    auto file2 = mngr->addFile( "./images/photo.jpg", BaseFileKeeper::FT_IMAGE, 1 );
+
+    cout << "Has on add: " << mngr->isHasFilesOnProcess()
+         << ", size: " << mngr->getFilesOnProcess().size()
+         << endl;
+
+    mngr->deleteFile( file1 );
+    mngr->deleteFile( file2 );
+
+    cout << "Has on delete: " << mngr->isHasFilesOnProcess()
+         << ", size: " << mngr->getFilesOnProcess().size()
+         << endl;
+}
+
 int main( int argc, char** argv )
 {
     QApplication app( argc, argv );
@@ -818,7 +843,10 @@ int main( int argc, char** argv )
     //checkGraph();
 
     //! check list and stairs
-    checkLiftAndStairs();
+    //checkLiftAndStairs();
+
+    //! check state of processing
+    checkFileProcessing();
 
     return app.exec();
 }
