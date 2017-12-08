@@ -12,7 +12,8 @@ DESTDIR  = $${INSTALL_PATH_BIN}
 
 # src
 SOURCES  += \
-    main.cpp
+    main.cpp \
+    test_graph.cpp
 
 # include
 INCLUDEPATH += $${INSTALL_PATH_INCLUDE}
@@ -24,4 +25,5 @@ LIBS += -L$${INSTALL_PATH_LIB} \
 HEADERS += \
     test_reciver.h \
     ftp_checker.h \
-    test_layer_reciver.h
+    test_layer_reciver.h \
+    test_graph.h

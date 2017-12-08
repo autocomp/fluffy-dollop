@@ -793,6 +793,31 @@ void checkFileProcessing()
          << endl;
 }
 
+#include "test_graph.h"
+void checkGraphWrap()
+{
+    using namespace regionbiz;
+
+    TestGraph* test_graph = new TestGraph();
+    auto mngr = RegionBizManager::instance();
+
+    // create graph
+    auto area = mngr->getBaseArea( 6 );
+    GraphEntityPtr graph = area->addGraph();
+    auto node1 = graph->addNode( QPointF( 10, 10 ));
+    auto node2 = graph->addNode( QPointF( 20, 60 ));
+    graph->addEdge( node1, node2 );
+
+    // create elevator
+    auto group = mngr->addGroup( GroupEntity::GT_ELEVATOR );
+    auto room1 = mngr->addRoom( Room::RT_ELEVATOR, area->getId() );
+    room1->setCoords( QPolygonF( {{ 10, 20 }} ));
+    group->addElement( room1 );
+
+    // change current
+    mngr->setCurrentEntity( 6 );
+}
+
 int main( int argc, char** argv )
 {
     QApplication app( argc, argv );
@@ -846,7 +871,10 @@ int main( int argc, char** argv )
     //checkLiftAndStairs();
 
     //! check state of processing
-    checkFileProcessing();
+    //checkFileProcessing();
+
+    //! Check Graph wrapper
+    checkGraphWrap();
 
     return app.exec();
 }
