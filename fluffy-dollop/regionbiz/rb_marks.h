@@ -20,7 +20,7 @@ class Mark: public BaseEntity
 public:
     enum MarkType
     {
-        MT_INVALID,
+        MT_INVALID = 0,
         MT_DEFECT,
         MT_PHOTO,
         MT_PHOTO_3D,

@@ -130,6 +130,8 @@ void ThreadSql::processQueueOfCommand()
         case C_COMMIT_GRAPH:
         {
             auto graph = mngr->getGraph( id );
+            if( !graph )
+                return;
             no_error = commitGraph( graph );
             break;
         }

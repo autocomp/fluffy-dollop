@@ -310,9 +310,12 @@ bool EnumMetadata::checkConstraitsByVariant( QVariant new_value )
         for( QVariant variant : variants )
             if( variant.toString() == new_value.toString() )
                 return true;
+
+        // don't find variant of enum inside
+        return false;
     }
 
-    return false;
+    return true;
 }
 
 QString EnumMetadata::getValueAsString()
