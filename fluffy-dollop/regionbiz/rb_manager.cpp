@@ -374,8 +374,12 @@ bool RegionBizManager::deleteArea(BaseAreaPtr area)
     _change_watcher.deleteEntity( area->getId() );
 
     // delete this one
-    bool del = _data_translator->deleteArea( area );
-    return del;
+    if( _data_translator )
+    {
+        bool del = _data_translator->deleteArea( area );
+        return del;
+    }
+    return false;
 }
 
 bool RegionBizManager::deleteArea(uint64_t id)

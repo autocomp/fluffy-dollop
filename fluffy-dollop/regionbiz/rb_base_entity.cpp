@@ -179,7 +179,6 @@ bool BaseEntity::deleteEntity(BaseEntityPtr ent, uint64_t parent_id)
 bool BaseEntity::deleteEntity(uint64_t id, uint64_t parent_id)
 {
     _mutex.lock();
-    bool del = getEntitys().erase( id );
     if( parent_id )
     {
         if( getChildsOfParent().find( parent_id ) != getChildsOfParent().end() )
@@ -193,6 +192,7 @@ bool BaseEntity::deleteEntity(uint64_t id, uint64_t parent_id)
             }
         }
     }
+    bool del = getEntitys().erase( id );
     _mutex.unlock();
 
     return del;
