@@ -478,6 +478,7 @@ BaseMetadataPtr MetadataFabric::createMetadata( QString type,
     CHECK_AND_CREATE( "double", DoubleMetadata );
     CHECK_AND_CREATE( "string", StringMetadata );
     CHECK_AND_CREATE( "int", IntegerMetadata );
+    CHECK_AND_CREATE( "enum", EnumMetadata );
 
     CHECK_AND_CREATE( "max", MetadataMax );
     CHECK_AND_CREATE( "min", MetadataMin );

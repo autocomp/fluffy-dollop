@@ -164,9 +164,8 @@ public:
 private:
     QString _value;
 };
-typedef std::shared_ptr< StringMetadata > StringMetadataPtr;
-typedef std::vector< StringMetadataPtr > StringMetadataPtrs;
-
+typedef std::shared_ptr< EnumMetadata > EnumMetadataPtr;
+typedef std::vector< EnumMetadataPtr > EnumMetadataPtrs;
 
 //--------------------------------------------------
 
