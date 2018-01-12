@@ -110,6 +110,12 @@ QString GraphEdge::getType()
     return type;
 }
 
+bool GraphEdge::setType(QString type)
+{
+    bool set = addMetadata( "enum", "type", type );
+    return set;
+}
+
 GraphEdge::GraphEdge(uint64_t id):
     BaseEntity( id )
 {}

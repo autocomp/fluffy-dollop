@@ -84,6 +84,7 @@ public:
     void setSecondPoint( GraphNodePtr point );
 
     QString getType();
+    bool setType( QString type );
 
 private:
     GraphEdge( uint64_t id );
