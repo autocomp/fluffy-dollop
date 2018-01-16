@@ -6,6 +6,7 @@
 #include <regionbiz/rb_manager.h>
 #include <regionbiz/rb_locations.h>
 #include <ctrcore/plugin/embifacenotifier.h>
+#include <ctrwidgets/components/layersmanager/lineitem.h>
 #include "layerinstrumentalform.h"
 #include "layermanagertypes.h"
 
@@ -78,6 +79,9 @@ private slots:
     void slotZoomChanged(int zoomLevel);
     void slotToolButtonInPluginChecked(QVariant var);
     void slotCalcSceneRect();
+    void slotExportFloor();
+    void slotEditGraph();
+    void slotShowFloorTopoScheme(QVariant var);
 
 private:
     void syncChechState(QTreeWidgetItem *item, bool setVisible);
@@ -88,6 +92,8 @@ private:
     LayerItem *getTopLevelItem(LayerTypes type);
     void reinitCompasWidget();
     regionbiz::BaseFileKeeperPtrs getRasterAndVectorFiles(regionbiz::BaseAreaPtr ptr);
+    QPolygonF getItemsBoundingPolygon(bool visibleLayersOnly);
+    void showFloorTopoScheme(bool on_off);
 
     Ui::LayersManagerForm *ui;
     quint64 _embeddedWidgetId = 0;
@@ -103,7 +109,7 @@ private:
     SvgEditorForm * _svgEditorForm = nullptr;
     QMap<uint64_t, LayerItem*> _layers;
     QMap<QString, DataItem*> _loadingItems;
-
+    QList<transform_state::LineItem*> _floorTopoSchemeElements;
     QList<QGraphicsLineItem*> _lineItems;
     ZoomState _zoomState = ZoomState::OneMeter;
     int _pixelDelta = 1000; // tot level, kotoriy stoit v PixelWorkState::init ---> setZlevel(-2) !!!

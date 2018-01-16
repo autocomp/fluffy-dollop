@@ -16,7 +16,8 @@ AddBaseAreaForm::AddBaseAreaForm(regionbiz::BaseArea::AreaType type, uint64_t id
     , _id(id)
 {
     ui->setupUi(this);
-
+    ui->roomTypeLabel->hide();
+    ui->roomTypeWidget->hide();
     int index(0);
     switch(_type)
     {
@@ -46,6 +47,8 @@ AddBaseAreaForm::AddBaseAreaForm(regionbiz::BaseArea::AreaType type, uint64_t id
         ui->floorOrRoomNumberWith->setMaximum(10000);
         ui->loadPdfLabel->hide();
         ui->loadPdf->hide();
+        ui->roomTypeLabel->show();
+        ui->roomTypeWidget->show();
     }break;
     }
 
@@ -59,8 +62,12 @@ AddBaseAreaForm::AddBaseAreaForm(regionbiz::BaseArea::AreaType type, uint64_t id
     connect(ui->cancel, SIGNAL(clicked()), this, SLOT(slotClose()));
     connect(ui->apply, SIGNAL(clicked()), this, SLOT(slotApply()));
     connect(ui->loadPdf, SIGNAL(clicked()), this, SLOT(slotLoadPdf()));
-    bool b = connect(ui->floorOrRoomCount, SIGNAL(valueChanged(int)), this, SLOT(slotFloorOrRoomCountChanged(int)));
-    qDebug() << b;
+    connect(ui->floorOrRoomCount, SIGNAL(valueChanged(int)), this, SLOT(slotFloorOrRoomCountChanged(int)));
+    slotFloorOrRoomCountChanged(1);
+
+    connect(ui->roomRB, SIGNAL(clicked(bool)), this, SLOT(slotSetRoomType(bool)));
+    connect(ui->stairsRB, SIGNAL(clicked(bool)), this, SLOT(slotSetRoomType(bool)));
+    connect(ui->liftRB, SIGNAL(clicked(bool)), this, SLOT(slotSetRoomType(bool)));
 }
 
 AddBaseAreaForm::~AddBaseAreaForm()
@@ -116,6 +123,24 @@ void AddBaseAreaForm::slotFloorOrRoomCountChanged(int count)
     }
 }
 
+void AddBaseAreaForm::slotSetRoomType(bool on_off)
+{
+    if(on_off)
+    {
+        if(sender() == ui->roomRB)
+            _name = QString::fromUtf8("комната");
+        else if(sender() == ui->stairsRB)
+            _name = QString::fromUtf8("лестница");
+        else if(sender() == ui->liftRB)
+            _name = QString::fromUtf8("лифт");
+
+        if(ui->floorOrRoomCount->value() == 1)
+            ui->floorOrRoomName->setText(_name);
+        else
+            ui->floorOrRoomName->setText(_name + QString(" %N%"));
+    }
+}
+
 void AddBaseAreaForm::slotApply()
 {
     bool createSingleObject(true);
@@ -127,7 +152,20 @@ void AddBaseAreaForm::slotApply()
 
     if(createSingleObject)
     {
-        BaseAreaPtr createdPtr = RegionBizManager::instance()->addArea(_type, _id);
+        BaseAreaPtr createdPtr;
+        if(_type == BaseArea::AT_ROOM)
+        {
+            // если это комната - то её необходимо типизировать при создании !
+            Room::RoomType roomType = Room::RT_COMMON;
+            if(ui->stairsRB->isChecked())
+                roomType = Room::RT_STAIRS;
+            if(ui->liftRB->isChecked())
+                roomType = Room::RT_ELEVATOR;
+            createdPtr = RegionBizManager::instance()->addRoom(roomType, _id);
+        }
+        else
+            createdPtr = RegionBizManager::instance()->addArea(_type, _id);
+
         if(createdPtr)
         {
             QString description = ui->description->toPlainText();
@@ -196,7 +234,7 @@ void AddBaseAreaForm::slotApply()
             }
         }
 
-        for(int N(0); N< 2 /*ui->floorOrRoomCount->value()*/ ; ++N)
+        for(int N(0); N< ui->floorOrRoomCount->value(); ++N)
         {
             BaseAreaPtr createdPtr = RegionBizManager::instance()->addArea(_type, _id);
             if(createdPtr)
@@ -250,6 +288,7 @@ void AddBaseAreaForm::slotApply()
             }
         }
         delete doc;
+
         RegionBizManager::instance()->clearCurrent();
         CommonMessageNotifier::send( (uint)visualize_system::BusTags::SetRoomVisibleOnFloor, QVariant(), QString("visualize_system"));
     }

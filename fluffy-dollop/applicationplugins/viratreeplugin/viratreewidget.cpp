@@ -41,6 +41,7 @@ ViraTreeWidget::ViraTreeWidget(QToolButton *addEntityButton, QToolButton *delete
     for(int i(0); i<ColumnCount; ++i)
         setColumnWidth(i, 200);
 
+    setColumnWidth((int)ColumnTitle::NAME, 250);
     setColumnWidth((int)ColumnTitle::BASE_RENT, 150);
     setColumnWidth((int)ColumnTitle::STATUS, 150);
 
@@ -101,6 +102,9 @@ void ViraTreeWidget::reinit()
 {
     _items.clear();
     clear();
+
+    QTime t;
+    t.start();
 
     std::vector<RegionPtr> regions = RegionBizManager::instance()->getRegions();
     for( RegionPtr regionPtr: regions )
@@ -292,7 +296,7 @@ void ViraTreeWidget::reinit()
                         }
                         //floorItem->setExpanded(true);
                     }
-                    facilityItem->setExpanded(true);
+                    //facilityItem->setExpanded(true);
                     recalcAreaInFacility(facilityItem);
                     recalcTasksInFacility(facilityItem);
                 }
@@ -301,6 +305,8 @@ void ViraTreeWidget::reinit()
         }
         regionItem->setExpanded(true);
     }
+
+    qDebug() << "ViraTreeWidget::init :" << t.elapsed();
 }
 
 void ViraTreeWidget::checkMarks(QTreeWidgetItem * item)
@@ -1063,7 +1069,7 @@ void ViraTreeWidget::slotAddEntity()
             break;
         case BaseArea::AT_FLOOR :
             type = BaseArea::AT_ROOM;
-            addWindowTitle = QString::fromUtf8("Добавить комнату");
+            addWindowTitle = QString::fromUtf8("Добавить помещение");
             break;
         case BaseArea::AT_ROOM : return;
         }
@@ -1099,6 +1105,7 @@ void ViraTreeWidget::slotDeleteEntity()
     QString name = ptr->getName();
     if(name.isEmpty())
         name = ptr->getDescription();
+    uint64_t parentId(0);
     switch(ptr->getType())
     {
     case BaseArea::AT_REGION : {
@@ -1111,9 +1118,11 @@ void ViraTreeWidget::slotDeleteEntity()
         text = QString::fromUtf8("Удалить здание \"") + name + QString("\" ?");
     }break;
     case BaseArea::AT_FLOOR : {
+        parentId = ptr->getParentId();
         text = QString::fromUtf8("Удалить этаж \"") + name + QString("\" ?");
     }break;
     case BaseArea::AT_ROOM : {
+        parentId = ptr->getParentId();
         text = QString::fromUtf8("Удалить комнату \"") + name + QString("\" ?");
     }break;
     }
@@ -1122,7 +1131,10 @@ void ViraTreeWidget::slotDeleteEntity()
     {
         bool res = RegionBizManager::instance()->deleteArea(ptr);
         qDebug() << "deleteArea, id:" << id << ", res:" << res;
-        clearSelection();
+        if(parentId > 0)
+            RegionBizManager::instance()->setCurrentEntity(parentId);
+        else
+            clearSelection();
     }
 }
 

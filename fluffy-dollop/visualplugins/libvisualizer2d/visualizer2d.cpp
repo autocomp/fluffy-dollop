@@ -11,6 +11,7 @@
 #include <ctrcore/visual/visualizermanager.h>
 #include <ctrcore/plugin/ctrpluginloader.h>
 #include <ctrcore/ctrcore/ctrconfig.h>
+#include <ctrcore/ctrcore/shortcutcontroller.h>
 #include <dmanager/embeddedapp.h>
 #include <ctrcore/provider/sincxmlloader.h>
 #include <QHBoxLayout>
@@ -172,6 +173,9 @@ void Visualizer2d::init(uint visualizerId)
     connect(m_scene2dWidget->getCoordBar(), SIGNAL(currentCoordSystemChanged(int)), m_controller, SLOT(slotCurCoordSystChanged(int)));
     connect(m_scene2dWidget, SIGNAL(newSize(int,int)), this, SLOT(sceneWidgetSizeChanged(int,int)));
 
+    //_menu = new QMenu(m_scene2dWidget);
+    //_menu->addAction("TEST ACTION");
+    //ShortcutController::instance()->setWidget(_menu);
 
 //    m_pVectorRender = new VectorRender(VectorRender::ST_GEO_WGS84,this);
 //    m_pVectorRender->slotInitGeoCursor(" ");

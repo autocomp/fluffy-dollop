@@ -10,6 +10,7 @@
 #include <QImageReader>
 #include <regionbiz/rb_locations.h>
 #include <ctrcore/ctrcore/ctrconfig.h>
+#include <libpanini/pvQtPic.h>
 
 using namespace regionbiz;
 
@@ -19,7 +20,7 @@ MarkForm::MarkForm(QWidget *parent) :
 {
     ui->setupUi(this);
     _listWidget = new PixmapListWidget;
-    ui->galeryLayout->addWidget(_listWidget);
+    ui->galeryLayout->addWidget(_listWidget, 100);
 
     ui->cancel->setIcon(QIcon(":/img/close_button.png"));
     ui->apply->setIcon(QIcon(":/img/ok_button.png"));
@@ -35,6 +36,7 @@ MarkForm::MarkForm(QWidget *parent) :
 MarkForm::~MarkForm()
 {
     delete _listWidget;
+    delete _photo360Viewer;
     delete ui;
 }
 
@@ -70,6 +72,12 @@ void MarkForm::actulize()
     }
     ui->layerCB->setCurrentText(QString::fromUtf8("базовый"));
 
+    if(_photo360Viewer)
+    {
+        delete _photo360Viewer;
+        _photo360Viewer = nullptr;
+    }
+
     switch(_markType)
     {
     case Mark::MT_DEFECT :
@@ -86,6 +94,8 @@ void MarkForm::actulize()
         ui->toArchieve->show();
         ui->loadImageLabel->setText(QString::fromUtf8("Загрузить изображение"));
         _listWidget->show();
+        ui->descriptionLabel->show();
+        ui->description->show();
         break;
 
     case Mark::MT_PHOTO :
@@ -102,6 +112,8 @@ void MarkForm::actulize()
         ui->toArchieve->hide();
         ui->loadImageLabel->setText(QString::fromUtf8("Загрузить изображение"));
         _listWidget->show();
+        ui->descriptionLabel->hide();
+        ui->description->hide();
         break;
 
     case Mark::MT_PHOTO_3D :
@@ -117,14 +129,20 @@ void MarkForm::actulize()
         ui->category->hide();
         ui->toArchieve->hide();
         _listWidget->hide();
+        ui->descriptionLabel->hide();
+        ui->description->hide();
         ui->loadImageLabel->setText(QString::fromUtf8("Загрузить панорамное изображение"));
+
+        _photo360Viewer = new pvQtView( this );
+        ui->galeryLayout->addWidget(_photo360Viewer, 100);
+        _photo360Viewer->OpenGLOK();
         break;
     }
 }
 
 void MarkForm::showWidget(quint64 id)
 {
-    // _markType = Defect;
+    // _markType = Defect;`
     _id = id;
     _parentId = 0;
     _markArea.clear();
@@ -213,8 +231,18 @@ void MarkForm::slotLoadImage()
         {
             _foto360FilePath = filePath;
             QFileInfo fi(_foto360FilePath);
-            ui->loadImageLabel->setText(QString::fromUtf8("Панорамное изображение загружено : ") + fi.fileName());
+            ui->loadImageLabel->setText(fi.fileName());
             ui->apply->setEnabled(true);
+
+            pvQtPic* pic = new pvQtPic();
+            pic->setImageFOV( QSizeF( 90, 90 ));
+            pic->setType( pvQtPic::eqr );
+
+            QImage* img = new QImage( _foto360FilePath );
+            pic->setFaceImage( pvQtPic::PicFace(0), img );
+
+            bool ok = _photo360Viewer->showPic( pic );
+            _photo360Viewer->setTurn( 0, 0, 0, 0 );
         }
     }
     else
@@ -256,6 +284,19 @@ void MarkForm::slotLoadImage()
             _listWidget->addItem(pm);
         }
     }
+}
+
+void MarkForm::slotReload()
+{
+    pvQtPic* pic = new pvQtPic();
+    pic->setImageFOV( QSizeF( 90, 90 ));
+    pic->setType( pvQtPic::eqr );
+
+    QImage* img = new QImage( _foto360FilePath );
+    pic->setFaceImage( pvQtPic::PicFace(0), img );
+
+    bool ok = _photo360Viewer->showPic( pic );
+    _photo360Viewer->setTurn( 0, 0, 0, 0 );
 }
 
 void MarkForm::slotApply()
@@ -343,7 +384,9 @@ void MarkForm::closeAndCommit(bool moveToArchive)
         markPtr->setName( ui->markName->text());
         markPtr->setDesription( ui->description->toPlainText());
 
-        if(_markType == Mark::MT_DEFECT)
+        switch(_markType)
+        {
+        case Mark::MT_DEFECT :
         {
             markPtr->addMetadata("string", "worker", ui->responsible->text());
             QString dataStr = ui->dateEdit->date().toString("dd.MM.yyyy");
@@ -354,24 +397,17 @@ void MarkForm::closeAndCommit(bool moveToArchive)
                 markPtr->addMetadata("string", "status", QString::fromUtf8("в архиве"));
             else
                 markPtr->addMetadata("string", "status", ui->status->currentText());
-        }
-        else if(_markType == Mark::MT_PHOTO)
+        }break;
+        case Mark::MT_PHOTO :
         {
             markPtr->addMetadata("double", "foto_direction", _direction);
-        }
-        else if(_markType == Mark::MT_PHOTO_3D)
+        }break;
+        case Mark::MT_PHOTO_3D :
         {
-            QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath");
-            if(regionBizInitJson_Path.isValid())
-            {
-                QString destPath = regionBizInitJson_Path.toString();
-                QDir dir(destPath);
-                dir.mkdir(QString::number(_id));
-                QFileInfo fi(_foto360FilePath);
-                destPath = destPath + QDir::separator() + QString::number(_id) + QDir::separator() + fi.fileName();
-                bool res = QFile::copy(_foto360FilePath, destPath);
-                qDebug() << "copy foto360 from :" << _foto360FilePath << " to :" << destPath << ", res :" << res;
-            }
+            BaseFileKeeperPtr basePlan = RegionBizManager::instance()->addFile(_foto360FilePath, BaseFileKeeper::FT_IMAGE, markPtr->getId());
+            bool basePlanCommitRes = basePlan->commit();
+            qDebug() << "BasePlan commit res:" << basePlanCommitRes;
+        }break;
         }
 
         uint64_t layerId = ui->layerCB->currentData().toUInt();
@@ -408,7 +444,7 @@ void MarkForm::closeAndCommit(bool moveToArchive)
         }
 
         bool commitRes = markPtr->commit();
-        qDebug() << _id << ", commitRes:" << commitRes;
+        qDebug() << "markId:" << _id << ", commitRes:" << commitRes << ", parentId:" << _parentId;
     }
     emit signalCloseWindow();
 }

@@ -78,9 +78,45 @@ void FloorGraphMakerState::init(QGraphicsScene *scene, QGraphicsView *view, cons
             EdgeElement * edgeElement = new EdgeElement(++_tempElementCounter, this, _scene, nodeElement1, nodeElement2);
             edgeElement->setZValue(500);
             edgeElement->setActive(true);
-            edgeElement->setFlag(QGraphicsItem::ItemIsMovable, true);
+            edgeElement->setFlag(QGraphicsItem::ItemIsMovable, false);
             edgeElement->setCursor(QCursor(Qt::SizeAllCursor));
-            edgeElement->setEdgeProperty(_edgeDefaultProperty);
+
+            EdgeProperty edgeDefaultProperty = _edgeDefaultProperty;
+            if(graphEdgePtr->getType() == QString("door"))
+            {
+                edgeDefaultProperty.type = EdgeType::Door;
+
+                BaseMetadataPtr doorState = graphEdgePtr->getMetadata("doorState");
+                if(doorState)
+                {
+                    QString doorStateStr = doorState->getValueAsVariant().toString();
+                    if(doorStateStr == QString("locked"))
+                        edgeDefaultProperty.state = DoorState::Close;
+                }
+            }
+            else if(graphEdgePtr->getType() == QString("window"))
+            {
+                edgeDefaultProperty.type = EdgeType::Window;
+
+                BaseMetadataPtr windowHeight = graphEdgePtr->getMetadata("windowHeight");
+                if(windowHeight)
+                     edgeDefaultProperty.windowHeight = windowHeight->getValueAsVariant().toDouble();
+
+                BaseMetadataPtr windowHeightUnderFloor = graphEdgePtr->getMetadata("windowHeightUnderFloor");
+                if(windowHeightUnderFloor)
+                     edgeDefaultProperty.windowHeightUnderFloor = windowHeightUnderFloor->getValueAsVariant().toDouble();
+            }
+            else // WALL
+            {
+                BaseMetadataPtr wallHeight = graphEdgePtr->getMetadata("wallHeight");
+                if(wallHeight)
+                     edgeDefaultProperty.wallHeight = wallHeight->getValueAsVariant().toDouble();
+
+                BaseMetadataPtr wallWidth = graphEdgePtr->getMetadata("wallWidth");
+                if(wallWidth)
+                     edgeDefaultProperty.wallWidth = wallWidth->getValueAsVariant().toDouble();
+            }
+            edgeElement->setEdgeProperty(edgeDefaultProperty);
             _graphElements.insert(edgeElement->id(), edgeElement);
         }
     }
@@ -179,8 +215,9 @@ bool FloorGraphMakerState::mousePressEvent(QMouseEvent *e, QPointF scenePos)
                 _lastNodeElement->setActive(true);
 
                 EdgeElement * edgeElement = new EdgeElement(_tempElementCounter, this, _scene, _lastNodeElement, nodeElement);
-                _graphElements.insert(edgeElement->id(), edgeElement);
                 edgeElement->setZValue(_tempElementCounter + 100);
+                edgeElement->setEdgeProperty(_edgeDefaultProperty);
+                _graphElements.insert(edgeElement->id(), edgeElement);
             }
             _lastNodeElement = nodeElement;
 
@@ -257,21 +294,38 @@ bool FloorGraphMakerState::keyPressEvent(QKeyEvent *e)
     switch(_mode)
     {
     case Mode::SetNodeOrEdgeElement : {
-     if(e->key() == Qt::Key_Escape)
-     {
-         if(_lastNodeElement)
-         {
-             foreach(EdgeElement * _edgeElement, _lastNodeElement->getEdgeElements())
-                 _edgeElement->setActive(true);
-             _lastNodeElement->setActive(true);
-             _lastNodeElement = nullptr;
-         }
-         if(_tempEdgeElement)
-         {
-             delete _tempEdgeElement;
-             _tempEdgeElement = nullptr;
-         }
-     }
+        switch(e->key())
+        {
+        case Qt::Key_1 :
+            //if(e->modifiers() & Qt::ControlModifier)
+                emit signalPressCtr_1();
+            break;
+
+        case Qt::Key_2 :
+            //if(e->modifiers() & Qt::ControlModifier)
+                emit signalPressCtr_2();
+            break;
+
+        case Qt::Key_3 :
+            //if(e->modifiers() & Qt::ControlModifier)
+                emit signalPressCtr_3();
+            break;
+
+        case Qt::Key_Escape :
+            if(_lastNodeElement)
+            {
+                foreach(EdgeElement * _edgeElement, _lastNodeElement->getEdgeElements())
+                    _edgeElement->setActive(true);
+                _lastNodeElement->setActive(true);
+                _lastNodeElement = nullptr;
+            }
+            if(_tempEdgeElement)
+            {
+                delete _tempEdgeElement;
+                _tempEdgeElement = nullptr;
+            }
+            break;
+        }
 
     }return false;
     }
@@ -311,15 +365,13 @@ void FloorGraphMakerState::elementDoubleClicked(FloorGraphElement *element)
 
 void FloorGraphMakerState::slotRemoveElement(uint id)
 {
-    if(_elementPropertyForm)
-        _elementPropertyForm->deleteLater();
-    _elementPropertyForm = nullptr;
-
     auto it = _graphElements.find(id);
     if(it != _graphElements.end())
     {
         NodeElement * nodeElement = dynamic_cast<NodeElement*>(it.value());
+        EdgeElement * edgeElement = dynamic_cast<EdgeElement*>(it.value());
         _graphElements.erase(it);
+
         if(nodeElement)
         {
 //            if(nodeElement->getEdgeElements().size() == 2)
@@ -357,7 +409,7 @@ void FloorGraphMakerState::slotRemoveElement(uint id)
                     delete edgeElement;
                 }
         }
-        EdgeElement * edgeElement = dynamic_cast<EdgeElement*>(it.value());
+
         if(edgeElement)
         {
             edgeElement->getNode1()->remove(edgeElement->id());
@@ -458,6 +510,26 @@ void FloorGraphMakerState::save()
             if(graphNodePtr1 && graphNodePtr2)
             {
                 GraphEdgePtr graphEdgePtr = graphPtr->addEdge(graphNodePtr1, graphNodePtr2);
+                switch(edge->getEdgeProperty().type)
+                {
+                case EdgeType::Wall :
+                    graphEdgePtr->setType("wall");
+                    graphEdgePtr->addMetadata("double", "wallHeight", edge->getEdgeProperty().wallHeight);
+                    graphEdgePtr->addMetadata("double", "wallWidth", edge->getEdgeProperty().wallWidth);
+                    break;
+                case EdgeType::Door :
+                    graphEdgePtr->setType("door");
+                    if(edge->getEdgeProperty().state == DoorState::Open)
+                        graphEdgePtr->addMetadata("enum", "doorState", "unlocked");
+                    else
+                        graphEdgePtr->addMetadata("enum", "doorState", "locked");
+                    break;
+                case EdgeType::Window :
+                    graphEdgePtr->setType("window");
+                    graphEdgePtr->addMetadata("double", "windowHeight", edge->getEdgeProperty().windowHeight);
+                    graphEdgePtr->addMetadata("double", "windowHeightUnderFloor", edge->getEdgeProperty().windowHeightUnderFloor);
+                    break;
+                }
             }
         }
     }
@@ -502,38 +574,39 @@ void FloorGraphMakerState::showElementPropertyForm()
 //    _timer.stop();
     if(_elementHovered)
     {
+        QString title = QString::fromUtf8("вершина");
         ElementType type = ElementType::Node;
         EdgeElement * edge = dynamic_cast<EdgeElement*>(_elementHovered);
         if(edge)
+        {
+            title = QString::fromUtf8("грань");
             type = ElementType::Edge;
+        }
 
         _elementPropertyForm = new floor_graph_maker::InstrumentalForm(_elementHovered->id(), type);
         if(edge)
             _elementPropertyForm->setCurrentProperty(edge->getEdgeProperty());
-//        connect(elementPropertyForm, SIGNAL(signalClosed()), this, SLOT(slotElementFormClose()));
+        connect(_elementPropertyForm, SIGNAL(signalClosed()), this, SLOT(slotElementFormClose()));
         connect(_elementPropertyForm, SIGNAL(signalRemoveElement(uint)), this, SLOT(slotRemoveElementFromForm(uint)));
         connect(_elementPropertyForm, SIGNAL(signalEdgeStateChanged(uint,EdgeProperty)), this, SLOT(slotEdgeStateChanged(uint,EdgeProperty)));
 
         ew::EmbeddedWidgetStruct struc;
         ew::EmbeddedHeaderStruct headStr;
         headStr.hasCloseButton = true;
-        //headStr.windowTitle = QString::fromUtf8("свойства элемента");
-        headStr.headerPixmap = QString(":/img/floorgraphstate.png");
+        headStr.windowTitle = title;
+        //headStr.headerPixmap = QString(":/img/floorgraphstate.png");
         struc.widgetTag = QString("FloorGraphMakerElementForm");
-        //                struc.minSize = QSize(300,25);
+        // struc.minSize = QSize(300,25);
         struc.maxSize = QSize(500,200);
-        //                struc.size = QSize(400,25);
+        // struc.size = QSize(400,25);
         struc.header = headStr;
         struc.iface = _elementPropertyForm;
         struc.topOnHint = true;
         struc.isModal = true;
-//        struc.addHided = true;
-        ewApp()->createWidget(struc); //, viewInterface->getVisualizerWindowId());
-//        ewApp()->setVisible(elementPropertyForm->id(), true);
+        struc.isModalBlock = false;
+        // struc.addHided = true;
 
-        ewApp()->removeWidget(_elementPropertyForm->id());
-        _elementPropertyForm->deleteLater();
-        _elementPropertyForm = nullptr;
+        ewApp()->createWidget(struc); //, viewInterface->getVisualizerWindowId());
 
 //        _elementPropertyForm = new ElementPropertyForm(_elementHovered);
 //        _elementPropertyForm->setStyleSheet(ewApp()->getMainStylesheet());
@@ -544,12 +617,12 @@ void FloorGraphMakerState::showElementPropertyForm()
     }
 }
 
-//void FloorGraphMakerState::slotElementFormClose()
-//{
-//    ewApp()->removeWidget(_elementPropertyForm->id());
-//    _elementPropertyForm->deleteLater();
-//    _elementPropertyForm = nullptr;
-//}
+void FloorGraphMakerState::slotElementFormClose()
+{
+    ewApp()->removeWidget(_elementPropertyForm->id());
+    _elementPropertyForm->deleteLater();
+    _elementPropertyForm = nullptr;
+}
 
 void FloorGraphMakerState::slotEdgeStateChanged(uint elementId, EdgeProperty property)
 {
@@ -566,11 +639,11 @@ void FloorGraphMakerState::slotRemoveElementFromForm(uint elementId)
 {
     slotRemoveElement(elementId);
 
-//    disconnect(_elementPropertyForm, SIGNAL(signalClosed()), this, SLOT(slotElementFormClose()));
-    ewApp()->setVisible(_elementPropertyForm->id(), false);
-//    ewApp()->removeWidget(_elementPropertyForm->id());
-//    _elementPropertyForm->deleteLater();
-//    _elementPropertyForm = nullptr;
+    quint64 ID = _elementPropertyForm->id();
+    ewApp()->setVisible(ID, false);
+    ewApp()->removeWidget(ID);
+    _elementPropertyForm->deleteLater();
+    _elementPropertyForm = nullptr;
 }
 
 

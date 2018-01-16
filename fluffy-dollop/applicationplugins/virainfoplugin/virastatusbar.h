@@ -16,6 +16,7 @@ class ViraStatusBar;
 class MarkForm;
 class InfoForm;
 class Photo360Form;
+class StairOrLiftForm;
 
 class ViraStatusBar : public QWidget
 {
@@ -55,6 +56,9 @@ protected slots:
     void slotAddDefect(bool on_off);
     void slotAddFoto(bool on_off);
     void slotAddFoto360(bool on_off);
+    void slotAddPlaceholder(bool on_off);
+    void slotAddLift(bool on_off);
+    void slotAddStairs(bool on_off);
     void slotEditObjectGeometryFinish(QVariant var);
     void slotCloseMarkWindow();
     void slotObjectCenterOn(uint64_t id);
@@ -63,6 +67,7 @@ protected slots:
     void slotMarkCreated(QVariant var);
     void slotDeleteObject();
     void slotClosePhoto360Window();
+    void slotCloseStairOrLiftWindow();
 
 protected:
     void reset();
@@ -93,6 +98,8 @@ protected:
     EmbIFaceNotifier* _ifaceInfoWidget = nullptr;
     Photo360Form * _photo360Form;
     EmbIFaceNotifier* _ifacePhoto360Widget = nullptr;
+    StairOrLiftForm * _stairOrLiftForm;
+    EmbIFaceNotifier* _ifaceStairOrLiftWidget = nullptr;
 };
 
 #endif // VIRASTATUSBAR_H

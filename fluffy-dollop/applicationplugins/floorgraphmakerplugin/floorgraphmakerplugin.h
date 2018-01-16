@@ -1,6 +1,7 @@
 #ifndef FLOORGRAPHMAKERPLUGIN_H
 #define FLOORGRAPHMAKERPLUGIN_H
 #include <ctrcore/plugin/ctrappvisualizerplugin.h>
+#include <QVariant>
 
 namespace floor_graph_maker {
 class InstrumentalForm;
@@ -20,6 +21,7 @@ public:
 private slots:
     void slotCheckVisibleState();
     void slotInstrumentalFormClose();
+    void slotStartEditFloorToposcheme(QVariant var);
 
 private:
     bool _cheched = false;

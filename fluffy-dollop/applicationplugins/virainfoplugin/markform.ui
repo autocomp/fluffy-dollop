@@ -204,7 +204,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="QLabel" name="label_7">
+      <widget class="QLabel" name="descriptionLabel">
        <property name="text">
         <string>Описание</string>
        </property>

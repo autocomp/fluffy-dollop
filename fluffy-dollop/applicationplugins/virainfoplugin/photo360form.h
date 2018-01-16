@@ -2,6 +2,8 @@
 #define PHOTO360FORM_H
 
 #include <QWidget>
+#include <regionbiz/rb_manager.h>
+#include <libpanini/pvQtView.h>
 
 namespace Ui {
 class Photo360Form;
@@ -21,12 +23,14 @@ signals:
 
 private slots:
     void slotCloseWindow();
+    void slotFileLoaded(regionbiz::BaseFileKeeperPtr imagePtr);
+    void slotReload();
+    void slotProjChanged(QString);
 
 private:
     Ui::Photo360Form *ui;
-
-    // это как-бы просмотрщик панорамных фото
-    // Photo360Viewer * _photo360Viewer;
+    QString _filePath, _fileKey, _markName;
+    pvQtView* _photo360Viewer;
 };
 
-#endif // PHOTO360FORM_H
+#endif

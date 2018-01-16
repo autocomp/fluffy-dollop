@@ -132,27 +132,54 @@ void ViraGraphicsPlugin::setMarkOnPlan(qulonglong markType, QPolygonF area)
 
         switch(markType)
         {
-        case 1 :{ // defect
+        case Mark::MT_DEFECT :{
             _choiceAreaState = QSharedPointer<ChoiceAreaState>(new ChoiceAreaState(ChoiceAreaState::POINT_OR_POLYGON, QCursor(QPixmap(":/img/cursor_mark.png"), 0, 0)));
             _choiceAreaState->setBoundingArea(area);
             visualize_system::VisualizerManager::instance()->getStateInterface(_pixelVisualizerId)->setVisualizerState(_choiceAreaState);
             connect(_choiceAreaState.data(), SIGNAL(signalAreaChoiced(QPolygonF)), this, SLOT(defectStateChoiced(QPolygonF)));
             connect(_choiceAreaState.data(), SIGNAL(signalAbort()), this, SLOT(markCreatingAbort()));
         }break;
-        case 2 :{ // foto
+        case Mark::MT_PHOTO :{
             _setImageState = QSharedPointer<SetImageState>(new SetImageState());
             _setImageState->setBoundingArea(area);
             visualize_system::VisualizerManager::instance()->getStateInterface(_pixelVisualizerId)->setVisualizerState(_setImageState);
             connect(_setImageState.data(), SIGNAL(signalCreated(QPointF,double)), this, SLOT(fotoCreared(QPointF,double)));
             connect(_setImageState.data(), SIGNAL(signalAbort()), this, SLOT(markCreatingAbort()));
         }break;
-        case 3 :{ // foto360
+        case Mark::MT_PHOTO_3D :
+        {
             _choiceAreaState = QSharedPointer<ChoiceAreaState>(new ChoiceAreaState(ChoiceAreaState::POINT, QCursor(QPixmap(":/img/cursor_foto360.png"), 0, 0)));
             _choiceAreaState->setBoundingArea(area);
             visualize_system::VisualizerManager::instance()->getStateInterface(_pixelVisualizerId)->setVisualizerState(_choiceAreaState);
             connect(_choiceAreaState.data(), SIGNAL(signalAreaChoiced(QPolygonF)), this, SLOT(foto360Creared(QPolygonF)));
             connect(_choiceAreaState.data(), SIGNAL(signalAbort()), this, SLOT(markCreatingAbort()));
         }break;
+        case Mark::MT_PLACEHOLDER :
+        {
+            _choiceAreaState = QSharedPointer<ChoiceAreaState>(new ChoiceAreaState(ChoiceAreaState::POINT, QCursor(QPixmap(":/img/cursor_placeholder.png"), 0, 0)));
+            _choiceAreaState->setBoundingArea(area);
+            visualize_system::VisualizerManager::instance()->getStateInterface(_pixelVisualizerId)->setVisualizerState(_choiceAreaState);
+            connect(_choiceAreaState.data(), SIGNAL(signalAreaChoiced(QPolygonF)), this, SLOT(placeholderCreared(QPolygonF)));
+            connect(_choiceAreaState.data(), SIGNAL(signalAbort()), this, SLOT(markCreatingAbort()));
+        }break;
+        /*
+        case Mark::MT_LIFT :
+        {
+            _choiceAreaState = QSharedPointer<ChoiceAreaState>(new ChoiceAreaState(ChoiceAreaState::POINT, QCursor(QPixmap(":/img/cursor_lift.png"), 0, 0)));
+            _choiceAreaState->setBoundingArea(area);
+            visualize_system::VisualizerManager::instance()->getStateInterface(_pixelVisualizerId)->setVisualizerState(_choiceAreaState);
+            connect(_choiceAreaState.data(), SIGNAL(signalAreaChoiced(QPolygonF)), this, SLOT(liftCreared(QPolygonF)));
+            connect(_choiceAreaState.data(), SIGNAL(signalAbort()), this, SLOT(markCreatingAbort()));
+        }break;
+        case Mark::MT_STAIRS :
+        {
+            _choiceAreaState = QSharedPointer<ChoiceAreaState>(new ChoiceAreaState(ChoiceAreaState::POINT, QCursor(QPixmap(":/img/cursor_stairs_on_floor.png"), 0, 0)));
+            _choiceAreaState->setBoundingArea(area);
+            visualize_system::VisualizerManager::instance()->getStateInterface(_pixelVisualizerId)->setVisualizerState(_choiceAreaState);
+            connect(_choiceAreaState.data(), SIGNAL(signalAreaChoiced(QPolygonF)), this, SLOT(stairCreared(QPolygonF)));
+            connect(_choiceAreaState.data(), SIGNAL(signalAbort()), this, SLOT(markCreatingAbort()));
+        }break;
+        */
         }
     }
     else
@@ -180,7 +207,7 @@ void ViraGraphicsPlugin::defectStateChoiced(QPolygonF pol)
     }
     QList<QVariant>list;
 
-    QVariant type(1);
+    QVariant type( (int)Mark::MT_DEFECT );
     list.append(type);
 
     QVariant polygon;
@@ -199,7 +226,7 @@ void ViraGraphicsPlugin::fotoCreared(QPointF pos, double direction)
     }
 
     QList<QVariant>list;
-    QVariant type(2);
+    QVariant type( (int)Mark::MT_PHOTO );
     list.append(type);
     list.append(pos);
     list.append(direction);
@@ -225,20 +252,74 @@ void ViraGraphicsPlugin::markCreatingAbort()
 
 void ViraGraphicsPlugin::foto360Creared(QPolygonF pol)
 {
-    if(_setImageState)
+    if(_choiceAreaState)
     {
-        _setImageState->emit_closeState();
-        _setImageState.clear();
+        _choiceAreaState->emit_closeState();
+        _choiceAreaState.clear();
     }
 
     QList<QVariant>list;
     if(pol.isEmpty() == false)
     {
-        QVariant type(3);
+        QVariant type( (int)Mark::MT_PHOTO_3D );
         list.append(type);
         list.append(pol.first());
     }
     CommonMessageNotifier::send( (uint)visualize_system::BusTags::MarkCreated, list, QString("visualize_system"));
+}
+
+void ViraGraphicsPlugin::placeholderCreared(QPolygonF pol)
+{
+    if(_choiceAreaState)
+    {
+        _choiceAreaState->emit_closeState();
+        _choiceAreaState.clear();
+    }
+
+    QList<QVariant>list;
+    if(pol.isEmpty() == false)
+    {
+        QVariant type( (int)Mark::MT_PLACEHOLDER );
+        list.append(type);
+        list.append(pol.first());
+    }
+    CommonMessageNotifier::send( (uint)visualize_system::BusTags::MarkCreated, list, QString("visualize_system"));
+}
+
+void ViraGraphicsPlugin::stairCreared(QPolygonF pol)
+{
+//    if(_choiceAreaState)
+//    {
+//        _choiceAreaState->emit_closeState();
+//        _choiceAreaState.clear();
+//    }
+
+//    QList<QVariant>list;
+//    if(pol.isEmpty() == false)
+//    {
+//        QVariant type( (int)Mark::MT_STAIRS );
+//        list.append(type);
+//        list.append(pol.first());
+//    }
+//    CommonMessageNotifier::send( (uint)visualize_system::BusTags::MarkCreated, list, QString("visualize_system"));
+}
+
+void ViraGraphicsPlugin::liftCreared(QPolygonF pol)
+{
+//    if(_choiceAreaState)
+//    {
+//        _choiceAreaState->emit_closeState();
+//        _choiceAreaState.clear();
+//    }
+
+//    QList<QVariant>list;
+//    if(pol.isEmpty() == false)
+//    {
+//        QVariant type( (int)Mark::MT_LIFT );
+//        list.append(type);
+//        list.append(pol.first());
+//    }
+//    CommonMessageNotifier::send( (uint)visualize_system::BusTags::MarkCreated, list, QString("visualize_system"));
 }
 
 void ViraGraphicsPlugin::editAreaGeometry(bool on_off)

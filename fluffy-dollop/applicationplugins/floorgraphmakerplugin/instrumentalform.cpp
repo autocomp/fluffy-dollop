@@ -4,6 +4,7 @@
 #include <ctrcore/visual/visualizermanager.h>
 #include <ctrcore/visual/viewinterface.h>
 #include <ctrcore/visual/stateinterface.h>
+#include <ctrcore/ctrcore/shortcutcontroller.h>
 #include <QColorDialog>
 #include <QPen>
 #include <QTimer>
@@ -26,6 +27,9 @@ InstrumentalForm::InstrumentalForm(uint visualizerId, uint64_t floorId)
     connectInit();
 
     _floorGraphMakerState = QSharedPointer<floor_graph_maker::FloorGraphMakerState>(new floor_graph_maker::FloorGraphMakerState(floorId));
+    connect(_floorGraphMakerState.data(), SIGNAL(signalPressCtr_1()), this, SLOT(slotPressCtr_1()));
+    connect(_floorGraphMakerState.data(), SIGNAL(signalPressCtr_2()), this, SLOT(slotPressCtr_2()));
+    connect(_floorGraphMakerState.data(), SIGNAL(signalPressCtr_3()), this, SLOT(slotPressCtr_3()));
     visualize_system::StateInterface * stateInterface = visualize_system::VisualizerManager::instance()->getStateInterface(visualizerId);
     if(stateInterface)
         stateInterface->setVisualizerState(_floorGraphMakerState);
@@ -36,6 +40,10 @@ InstrumentalForm::InstrumentalForm(uint visualizerId, uint64_t floorId)
     ui->wallWidget->setVisible(true);
     ui->doorWidget->setVisible(false);
     ui->windowWidget->setVisible(false);
+
+//    ShortcutController::instance()->subscribeShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(slotPressCtr_1()), 0);
+//    ShortcutController::instance()->subscribeShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(slotPressCtr_2()), 0);
+//    ShortcutController::instance()->subscribeShortcut(QKeySequence(Qt::CTRL + Qt::Key_3), this, SLOT(slotPressCtr_3()), 0);
 
     // чтение параметров из конфига
 
@@ -59,6 +67,10 @@ InstrumentalForm::InstrumentalForm(uint elementId, ElementType elementType)
 
     setCurrentElementType(elementType);
 
+//    ShortcutController::instance()->subscribeShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(slotPressCtr_1()), 0);
+//    ShortcutController::instance()->subscribeShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(slotPressCtr_2()), 0);
+//    ShortcutController::instance()->subscribeShortcut(QKeySequence(Qt::CTRL + Qt::Key_3), this, SLOT(slotPressCtr_3()), 0);
+
     QTimer::singleShot(50,this,SLOT(slotMakeAdjustForm()));
 }
 
@@ -73,10 +85,25 @@ void InstrumentalForm::connectInit()
     connect(ui->windowHeight, SIGNAL(valueChanged(double)), this, SLOT(doubleValueChanged(double)));
     connect(ui->doorState, SIGNAL(currentIndexChanged(int)), this, SLOT(intValueChanged(int)));
 
+    _menu = new QMenu(this);
+    _menu->addAction("TEST ACTION");
+    _menu->show();
+    _shortcut = new QShortcut(_menu);
+    _shortcut->setKey(QKeySequence(Qt::CTRL + Qt::Key_3));
+    _shortcut->setContext(Qt::ApplicationShortcut);
+    connect(_shortcut, SIGNAL(activated()), this, SLOT(slotPressCtr_3()));
+
 }
 
 InstrumentalForm::~InstrumentalForm()
 {
+    delete _shortcut;
+    delete _menu;
+
+//    ShortcutController::instance()->unsubscribeShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), 0);
+//    ShortcutController::instance()->unsubscribeShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), 0);
+//    ShortcutController::instance()->unsubscribeShortcut(QKeySequence(Qt::CTRL + Qt::Key_3), 0);
+
     if(_floorGraphMakerState)
     {
         // запись параметров в конфига, если это главное окно плагина
@@ -199,6 +226,24 @@ void InstrumentalForm::doubleValueChanged(double)
 void InstrumentalForm::intValueChanged(int)
 {
     sendCurrentProperty();
+}
+
+void InstrumentalForm::slotPressCtr_1()
+{
+    ui->wallRB->setChecked(true);
+    slotEdgeTypeChanged(true);
+}
+
+void InstrumentalForm::slotPressCtr_2()
+{
+    ui->doorRB->setChecked(true);
+    slotEdgeTypeChanged(true);
+}
+
+void InstrumentalForm::slotPressCtr_3()
+{
+    ui->windowRB->setChecked(true);
+    slotEdgeTypeChanged(true);
 }
 
 void InstrumentalForm::sendCurrentProperty()

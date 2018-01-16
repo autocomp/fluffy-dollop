@@ -26,6 +26,7 @@ private slots:
     void slotClose();
     void slotLoadPdf();
     void slotFloorOrRoomCountChanged(int);
+    void slotSetRoomType(bool);
 
 private:
     Ui::AddBaseAreaForm *ui;

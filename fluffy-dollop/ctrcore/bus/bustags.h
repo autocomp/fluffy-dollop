@@ -56,7 +56,11 @@ enum class BusTags
 
     ResetPixelVisualizer,
     //! параметр - qint64 ->  < 0 - hide, [0,360] - show and rotate.
-    RotateCompasWidgetInPixelVisualizer
+    RotateCompasWidgetInPixelVisualizer,
+    //! , параметр - bool
+    SetVisibleFloorToposcheme,
+    //! , параметр - bool
+    StartEditFloorToposcheme,
 };
 }
 

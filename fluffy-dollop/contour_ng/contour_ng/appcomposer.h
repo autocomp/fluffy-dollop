@@ -73,6 +73,7 @@ private:
     bool addPluginToMenu(CtrAppVisualizerPlugin* plugin, QMenu* menu);
     QWidget *create2DViszualizer();
 
+    QMenuBar * m_menuBar = nullptr;
     GlobalMessageNotifier * m_pGlobNotif;
 //    ScenarioSelector *m_pScenarioSelector;
 //    ManagerVectorObjectPlugin *m_pObjTree;

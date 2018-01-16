@@ -31,6 +31,9 @@ private slots:
     void fotoCreared(QPointF pos, double direction);
     void markCreatingAbort();
     void foto360Creared(QPolygonF);
+    void placeholderCreared(QPolygonF);
+    void stairCreared(QPolygonF);
+    void liftCreared(QPolygonF);
     void editAreaGeometry(bool on_off);
     void areaGeometryEdited(QPolygonF);
     void areaGeometryEditingAbort();

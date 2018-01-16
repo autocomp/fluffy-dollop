@@ -38,7 +38,7 @@ signals:
 protected:
     void centerViewOn(QPointF pos);
     bool markInArchive(regionbiz::MarkPtr markPtr);
-    void reinit(qulonglong facilityId);
+    void reinit(qulonglong facilityId, qulonglong floorId = 0);
     void setFloor(qulonglong floorId);
     void insertItemToLayer(regionbiz::LayerPtr ptr, qulonglong itemId);
 

@@ -28,5 +28,14 @@
         <file>img/foto_selected.png</file>
         <file>img/cursor_foto.png</file>
         <file>img/cursor_foto360.png</file>
+        <file>img/cursor_stairs_on_floor.png</file>
+        <file>img/stairs_on_floor_selected.png</file>
+        <file>img/stairs_on_floor.png</file>
+        <file>img/lift_selected.png</file>
+        <file>img/cursor_lift.png</file>
+        <file>img/lift.png</file>
+        <file>img/placeholder_selected.png</file>
+        <file>img/placeholder.png</file>
+        <file>img/cursor_placeholder.png</file>
     </qresource>
 </RCC>

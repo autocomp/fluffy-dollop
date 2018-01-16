@@ -110,6 +110,9 @@ void WorkState::reinit()
     AreaInitData regionInitData, locationInitData, facInitData;
     getAreaInitData(regionInitData, locationInitData, facInitData);
 
+    QTime t;
+    t.start();
+
     auto mngr = RegionBizManager::instance();
     std::vector<RegionPtr> regions = mngr->getRegions();
     for( RegionPtr regionPtr: regions )
@@ -299,6 +302,8 @@ void WorkState::reinit()
             }
         }
     }
+
+    qDebug() << "WorkState::init :" << t.elapsed();
 }
 
 void WorkState::slotObjectChanged(uint64_t id)

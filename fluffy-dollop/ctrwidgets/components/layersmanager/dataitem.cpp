@@ -9,11 +9,15 @@ using namespace layers_manager_form;
 
 
 LayerItem::LayerItem(QTreeWidget * parent, LayerTypes layerType)
-    : QTreeWidgetItem(parent,
-                      ( layerType == LayerTypes::Base ? QStringList() << QString::fromUtf8("базовый") : QStringList() << QString::fromUtf8("опорный") )
-                      , (int)ItemTypes::Layer)
+    : QTreeWidgetItem(parent, QStringList(), (int)ItemTypes::Layer)
     , _layerType(layerType)
 {
+    switch(layerType)
+    {
+    case LayerTypes::Base : setText(0, QString::fromUtf8("базовый")); break;
+    case LayerTypes::Etalon : setText(0, QString::fromUtf8("опорный")); break;
+    case LayerTypes::TopoScheme : setText(0, QString::fromUtf8("топосхема")); break;
+    }
 }
 
 LayerItem::LayerItem(QTreeWidget * parent, QString name, uint64_t layerId)

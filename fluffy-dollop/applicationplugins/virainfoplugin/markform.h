@@ -6,6 +6,7 @@
 #include <QPixmap>
 #include "pixmaplistwidget.h"
 #include <regionbiz/rb_manager.h>
+#include <libpanini/pvQtView.h>
 
 namespace Ui {
 class MarkForm;
@@ -34,6 +35,7 @@ private slots:
     void slotLoadImage();
     void slotApply();
     void slotToArchieve();
+    void slotReload();
 
 private:
     Ui::MarkForm *ui;
@@ -44,6 +46,7 @@ private:
     PixmapListWidget * _listWidget;
     QList<QPixmap> _pixmaps;
     QString _foto360FilePath;
+    pvQtView* _photo360Viewer = nullptr;
 };
 
 

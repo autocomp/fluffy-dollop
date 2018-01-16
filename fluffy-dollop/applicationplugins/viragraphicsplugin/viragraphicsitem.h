@@ -8,7 +8,16 @@ class ViraGraphicsItem : public QObject
 {
     Q_OBJECT
 public:
-    enum ItemType {ItemType_Undefinite = 0, ItemType_Defect = 1, ItemType_Foto = 2, ItemType_Foto360 =3};
+    enum ItemType
+    {
+        ItemType_Undefinite = 0,
+        ItemType_Defect = 1,
+        ItemType_Foto = 2,
+        ItemType_Foto360 = 3,
+        ItemType_Placeholder = 4,
+        ItemType_Lift = 5,
+        ItemType_Stairs = 6
+    };
 
     ViraGraphicsItem() {}
     virtual ~ViraGraphicsItem() {}

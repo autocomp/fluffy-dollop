@@ -41,5 +41,6 @@
         <file>img/icon_create_image.png</file>
         <file>img/icon_create_layer.png</file>
         <file>img/handle_rotater_selected.png</file>
-    </qresource>
+        <file>img/icons_export.png</file>
+</qresource>
 </RCC>

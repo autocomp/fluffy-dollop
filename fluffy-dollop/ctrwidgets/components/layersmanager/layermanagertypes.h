@@ -10,6 +10,7 @@ enum class LayerTypes
 {
     Base = 1,
     Etalon,
+    TopoScheme,
     Other
 };
 

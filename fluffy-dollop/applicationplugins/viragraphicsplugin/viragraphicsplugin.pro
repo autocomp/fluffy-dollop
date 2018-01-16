@@ -41,6 +41,9 @@ HEADERS += \
     handledirectionitem.h \
     pixelworkstate.h \
     layersmenu.h \
+    liftgraphicsitem.h \
+    stairsgraphicsitem.h \
+    placeholdergraphicsitem.h
 
 SOURCES += \
 #    scenevirawidget.cpp \
@@ -61,6 +64,9 @@ SOURCES += \
     handledirectionitem.cpp \
     pixelworkstate.cpp \
     layersmenu.cpp \
+    liftgraphicsitem.cpp \
+    stairsgraphicsitem.cpp \
+    placeholdergraphicsitem.cpp
 
 RESOURCES += \
     viragraphicspluginres.qrc

@@ -60,10 +60,17 @@ typedef std::pair< GraphNodePtr, GraphNodePtr > TwoGraphNodePtr;
 
 /**
  * @brief GraphEdge
- * attrs:
+ * атрибут для всех типов грани :
  * type (enum): wall, door, window
- * height (double)
- * state (enum): locked, unlocked
+ * ----------------------------------
+ * атрибуты для "wall" :
+ * wallHeight (double), wallWidth (double)
+ * ----------------------------------
+ * атрибуты для "door" :
+ * doorState (enum): locked, unlocked
+ * ----------------------------------
+ * атрибуты для "window" :
+ * windowHeight (double), windowHeightUnderFloor (double)
  */
 class GraphEdge: public BaseEntity
 {

@@ -4,6 +4,7 @@
 #include "infoform.h"
 #include "imageviewer.h"
 #include "photo360form.h"
+#include "stairorliftform.h"
 
 #include <QDebug>
 
@@ -30,12 +31,18 @@ ViraStatusBar::ViraStatusBar( quint64 parentWidgetId, QWidget *parent ):
     ui->deleteObject->setIcon(QIcon(":/img/garbg"));
     ui->addFoto->setIcon(QIcon(":/img/foto_button"));
     ui->addFoto360->setIcon(QIcon(":/img/foto360_button"));
+    ui->addStairs->setIcon(QIcon(":/img/stairs_button"));
+    ui->addLift->setIcon(QIcon(":/img/lift_button"));
+    ui->addPlaceholder->setIcon(QIcon(":/img/placeholder_button"));
 
     connect(ui->moreInfo, SIGNAL(clicked()), this, SLOT(slotShowMoreInfo()));
     connect(ui->editObject, SIGNAL(clicked(bool)), this, SLOT(slotEditAreaGeometry(bool)));
     connect(ui->addDefect, SIGNAL(clicked(bool)), this, SLOT(slotAddDefect(bool)));
     connect(ui->addFoto, SIGNAL(clicked(bool)), this, SLOT(slotAddFoto(bool)));
     connect(ui->addFoto360, SIGNAL(clicked(bool)), this, SLOT(slotAddFoto360(bool)));
+    connect(ui->addPlaceholder, SIGNAL(clicked(bool)), this, SLOT(slotAddPlaceholder(bool)));
+    connect(ui->addStairs, SIGNAL(clicked(bool)), this, SLOT(slotAddStairs(bool)));
+    connect(ui->addLift, SIGNAL(clicked(bool)), this, SLOT(slotAddLift(bool)));
     connect(ui->deleteObject, SIGNAL(clicked()), this, SLOT(slotDeleteObject()));
     reset();
 
@@ -116,12 +123,16 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
         auto data = DataGetter::getData( curr_id );
 
         switch( ptr->getType() ) {
+        case BaseArea::AT_FLOOR:
+//            ui->addStairs->show();
+//            ui->addLift->show();
+            //! without break !!!
         case BaseArea::AT_LOCATION:
         case BaseArea::AT_FACILITY:
-        case BaseArea::AT_FLOOR:
             ui->addFoto->show();
             ui->addFoto360->show();
             ui->addDefect->show();
+            ui->addPlaceholder->show();
             //! without break !!!
         case BaseArea::AT_REGION:
         {
@@ -144,6 +155,7 @@ void ViraStatusBar::slotObjectSelectionChanged( uint64_t /*prev_id*/, uint64_t c
             showArendators( data, true );
             showTasks( data );
 
+            ui->addPlaceholder->show();
             ui->moreInfo->show();
             ui->addDefect->show();
             ui->addFoto->show();
@@ -223,7 +235,7 @@ void ViraStatusBar::slotAddDefect(bool on_off)
 {
     CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(on_off), QString("visualize_system"));
 
-    quint64 type(on_off ? 1 : 0);
+    quint64 type(on_off ? Mark::MT_DEFECT : Mark::MT_INVALID);
     CommonMessageNotifier::send( (uint)visualize_system::BusTags::SetMarkPosition, QVariant(type), QString("visualize_system"));
 
     ui->moreInfo->setDisabled(on_off);
@@ -234,7 +246,7 @@ void ViraStatusBar::slotAddFoto(bool on_off)
 {
     CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(on_off), QString("visualize_system"));
 
-    quint64 type(on_off ? 2 : 0);
+    quint64 type(on_off ? Mark::MT_PHOTO : Mark::MT_INVALID);
     CommonMessageNotifier::send( (uint)visualize_system::BusTags::SetMarkPosition, QVariant(type), QString("visualize_system"));
 
     ui->moreInfo->setDisabled(on_off);
@@ -245,11 +257,44 @@ void ViraStatusBar::slotAddFoto360(bool on_off)
 {
     CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(on_off), QString("visualize_system"));
 
-    quint64 type(on_off ? 3 : 0);
+    quint64 type(on_off ? Mark::MT_PHOTO_3D : Mark::MT_INVALID);
     CommonMessageNotifier::send( (uint)visualize_system::BusTags::SetMarkPosition, QVariant(type), QString("visualize_system"));
 
     ui->moreInfo->setDisabled(on_off);
     ui->editObject->setDisabled(on_off);
+}
+
+void ViraStatusBar::slotAddPlaceholder(bool on_off)
+{
+    CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(on_off), QString("visualize_system"));
+
+    quint64 type(on_off ? Mark::MT_PLACEHOLDER : Mark::MT_INVALID);
+    CommonMessageNotifier::send( (uint)visualize_system::BusTags::SetMarkPosition, QVariant(type), QString("visualize_system"));
+
+    ui->moreInfo->setDisabled(on_off);
+    ui->editObject->setDisabled(on_off);
+}
+
+void ViraStatusBar::slotAddLift(bool on_off)
+{
+//    CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(on_off), QString("visualize_system"));
+
+//    quint64 type(on_off ? Mark::MT_LIFT : Mark::MT_INVALID);
+//    CommonMessageNotifier::send( (uint)visualize_system::BusTags::SetMarkPosition, QVariant(type), QString("visualize_system"));
+
+//    ui->moreInfo->setDisabled(on_off);
+//    ui->editObject->setDisabled(on_off);
+}
+
+void ViraStatusBar::slotAddStairs(bool on_off)
+{
+//    CommonMessageNotifier::send( (uint)visualize_system::BusTags::BlockGUI, QVariant(on_off), QString("visualize_system"));
+
+//    quint64 type(on_off ? Mark::MT_STAIRS : Mark::MT_INVALID);
+//    CommonMessageNotifier::send( (uint)visualize_system::BusTags::SetMarkPosition, QVariant(type), QString("visualize_system"));
+
+//    ui->moreInfo->setDisabled(on_off);
+//    ui->editObject->setDisabled(on_off);
 }
 
 void ViraStatusBar::slotEditAreaGeometry(bool on_off)
@@ -320,6 +365,9 @@ void ViraStatusBar::reset()
     ui->deleteObject->hide();
     ui->addFoto->hide();
     ui->addFoto360->hide();
+    ui->addStairs->hide();
+    ui->addLift->hide();
+    ui->addPlaceholder->hide();
 }
 
 void ViraStatusBar::showTasks( AreaData data )
@@ -880,119 +928,22 @@ void ViraStatusBar::showMarkInfoWidgwt(quint64 id)
             ewApp()->setVisible(_ifacePhoto360Widget->id(), true);
         }
     }break;
-    }
+//    case Mark::MT_LIFT :
+//    case Mark::MT_STAIRS :
+//    {
 
-    /*
-    QString mark_type_str = QString::fromUtf8("дефект");
-    BaseMetadataPtr mark_type = ptr->getMetadata("mark_type");
-    if(mark_type)
-    {
-        QString _mark_type_str = mark_type->getValueAsVariant().toString();
-        if(_mark_type_str.isEmpty() == false)
-            mark_type_str = _mark_type_str;
+//    }break;
     }
-
-    if(mark_type_str == QString::fromUtf8("дефект"))
-    {
-        if( !_ifaceInfoMarkWidget )
-        {
-            _markForm = new MarkForm;
-            connect(_markForm, SIGNAL(signalCloseWindow()), this, SLOT(slotCloseMarkWindow()));
-            _markForm->showWidget(id);
-
-            _ifaceInfoMarkWidget = new EmbIFaceNotifier(_markForm);
-            QString tag = QString("ViraStatusBar_MarkInfoWidget");
-            quint64 widgetId = ewApp()->restoreWidget(tag, _ifaceInfoMarkWidget);
-            if(0 == widgetId)
-            {
-                ew::EmbeddedWidgetStruct struc;
-                ew::EmbeddedHeaderStruct headStr;
-                headStr.hasCloseButton = false;
-                headStr.hasMinMaxButton = false;
-                headStr.hasCollapseButton = false;
-                headStr.headerPixmap = ":/img/mark_button.png";
-                headStr.windowTitle = QString::fromUtf8("Информация о дефекте");
-                struc.header = headStr;
-                struc.iface = _ifaceInfoMarkWidget;
-                struc.widgetTag = tag;
-                struc.minSize = QSize(300,300);
-                struc.topOnHint = true;
-                struc.isModal = true;
-                ewApp()->createWidget(struc, _parentWidgetId);
-            }
-        }
-        else
-        {
-            _markForm->showWidget(id);
-            ewApp()->setWidgetTitle(_ifaceInfoMarkWidget->id(), QString::fromUtf8("Информация о дефекте"));
-            ewApp()->setWidgetIcon(_ifaceInfoMarkWidget->id(), ":/img/mark_button.png");
-            ewApp()->setVisible(_ifaceInfoMarkWidget->id(), true);
-        }
-    }
-    else if(mark_type_str == QString::fromUtf8("фотография"))
-    {
-        QList<QPixmap> pixmaps;
-        QVariant regionBizInitJson_Path = CtrConfig::getValueByName("application_settings.regionBizFilesPath");
-        if(regionBizInitJson_Path.isValid())
-        {
-             QString destPath = regionBizInitJson_Path.toString() + QDir::separator() + QString::number(id);
-             QDir dir(destPath);
-             QStringList list = dir.entryList(QDir::Files);
-             foreach(QString fileName,list)
-             {
-                 fileName.prepend(destPath + QDir::separator());
-                 QPixmap pm(fileName);
-                 if(pm.isNull() == false)
-                     pixmaps.append(pm);
-             }
-        }
-        if(pixmaps.isEmpty() == false)
-        {
-            ImageViewer imageViewer(pixmaps);
-            imageViewer.showImageViewer(ptr->getName());
-        }
-    }
-    else if(mark_type_str == QString::fromUtf8("панорамная фотография"))
-    {
-        if( !_ifacePhoto360Widget )
-        {
-            _photo360Form = new Photo360Form;
-            _photo360Form->showWidget(id);
-            connect(_photo360Form, SIGNAL(signalCloseWindow()), this, SLOT(slotClosePhoto360Window()));
-
-            _ifacePhoto360Widget = new EmbIFaceNotifier(_photo360Form);
-            QString tag = QString("ViraStatusBar_Photo360Widget");
-            quint64 widgetId = ewApp()->restoreWidget(tag, _ifacePhoto360Widget);
-            if(0 == widgetId)
-            {
-                ew::EmbeddedWidgetStruct struc;
-                ew::EmbeddedHeaderStruct headStr;
-                headStr.hasCloseButton = false;
-                headStr.hasMinMaxButton = false;
-                headStr.hasCollapseButton = false;
-                headStr.headerPixmap = ":/img/foto360_button.png";
-                headStr.windowTitle = QString::fromUtf8("Панорамная фотография");
-                struc.header = headStr;
-                struc.iface = _ifacePhoto360Widget;
-                struc.widgetTag = tag;
-                struc.minSize = QSize(300,300);
-                struc.topOnHint = true;
-                struc.isModal = true;
-                ewApp()->createWidget(struc, _parentWidgetId);
-            }
-        }
-        else
-        {
-            _photo360Form->showWidget(id);
-            ewApp()->setVisible(_ifacePhoto360Widget->id(), true);
-        }
-    }
-    */
 }
 
 void ViraStatusBar::slotClosePhoto360Window()
 {
     ewApp()->setVisible(_ifacePhoto360Widget->id(), false);
+}
+
+void ViraStatusBar::slotCloseStairOrLiftWindow()
+{
+    ewApp()->setVisible(_ifaceStairOrLiftWidget->id(), false);
 }
 
 void ViraStatusBar::slotMarkCreated(QVariant var)
@@ -1012,6 +963,16 @@ void ViraStatusBar::slotMarkCreated(QVariant var)
         ui->addFoto360->setChecked(false);
         slotAddFoto360(false);
     }
+    if(ui->addStairs->isChecked())
+    {
+        ui->addStairs->setChecked(false);
+        slotAddStairs(false);
+    }
+    if(ui->addLift->isChecked())
+    {
+        ui->addLift->setChecked(false);
+        slotAddLift(false);
+    }
 
     quint64 parentId = RegionBizManager::instance()->getCurrentEntity();
     if(parentId == 0)
@@ -1020,10 +981,11 @@ void ViraStatusBar::slotMarkCreated(QVariant var)
     QList<QVariant> list = var.toList();
     if(list.size() >= 2)
     {
-        QVariant type = list.at(0);
-        switch(type.toInt())
+        QVariant typeVar = list.at(0);
+        Mark::MarkType type = (Mark::MarkType)typeVar.toInt();
+        switch(type)
         {
-        case 1 : // defect
+        case Mark::MT_DEFECT :
         {
             quint64 parentId = RegionBizManager::instance()->getCurrentEntity();
             QPolygonF areaMark = list.at(1).value<QPolygonF>();
@@ -1064,15 +1026,14 @@ void ViraStatusBar::slotMarkCreated(QVariant var)
                 ewApp()->setVisible(_ifaceInfoMarkWidget->id(), true);
             }
         }break;
-        case 2 : // foto
-        case 3 : // foto360
+        case Mark::MT_PHOTO :
+        case Mark::MT_PHOTO_3D :
         {
-            Mark::MarkType markType(type.toInt() == 2 ? Mark::MT_PHOTO : Mark::MT_PHOTO_3D);
             QPointF pos = list.at(1).toPointF();
             double direction = 0;
             QString windowTitle = QString::fromUtf8("Панорамная фотография");
             QString iconPath = ":/img/foto360_button.png";
-            if(markType == Mark::MT_PHOTO)
+            if(type == Mark::MT_PHOTO)
             {
                 windowTitle = QString::fromUtf8("Фотография");
                 iconPath =
@@ -1084,7 +1045,7 @@ void ViraStatusBar::slotMarkCreated(QVariant var)
             {
                 _markForm = new MarkForm;
                 connect(_markForm, SIGNAL(signalCloseWindow()), this, SLOT(slotCloseMarkWindow()));
-                _markForm->showWidgetAndCreateMark(markType, parentId, QPolygonF()<<pos, direction);
+                _markForm->showWidgetAndCreateMark(type, parentId, QPolygonF()<<pos, direction);
 
                 _ifaceInfoMarkWidget = new EmbIFaceNotifier(_markForm);
                 QString tag = QString("ViraStatusBar_MarkInfoWidget");
@@ -1109,12 +1070,93 @@ void ViraStatusBar::slotMarkCreated(QVariant var)
             }
             else
             {
-                _markForm->showWidgetAndCreateMark(markType, parentId, QPolygonF()<<pos, direction);
+                _markForm->showWidgetAndCreateMark(type, parentId, QPolygonF()<<pos, direction);
                 ewApp()->setWidgetTitle(_ifaceInfoMarkWidget->id(), windowTitle);
                 ewApp()->setWidgetIcon(_ifaceInfoMarkWidget->id(), iconPath);
                 ewApp()->setVisible(_ifaceInfoMarkWidget->id(), true);
             }
         }break;
+        case Mark::MT_PLACEHOLDER :
+        {
+            quint64 entityId = RegionBizManager::instance()->getCurrentEntity();
+            BaseAreaPtr areaPtr = RegionBizManager::instance()->getBaseArea(entityId);
+            if(areaPtr)
+            {
+                MarkPtr markPtr;
+                auto holder = areaPtr->convert<MarksHolder>();
+                if(holder)
+                {
+                    QPointF pos = list.at(1).toPointF();
+                    markPtr = holder->addMark(regionbiz::Mark::MT_PLACEHOLDER, QPolygonF() << pos);
+                }
+                if(markPtr)
+                {
+                    bool commitRes = markPtr->commit();
+                    qDebug() << "PLACEHOLDER COMMITED : " << commitRes;
+                }
+            }
+        }break;
+//        case Mark::MT_LIFT :
+//        case Mark::MT_STAIRS :
+//        {
+//            quint64 entityId = RegionBizManager::instance()->getCurrentEntity();
+//            BaseAreaPtr facilityPtr;
+//            BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(entityId);
+//            while(ptr)
+//            {
+//                if(ptr->getType() == BaseArea::AT_FACILITY)
+//                {
+//                    facilityPtr = ptr;
+//                    break;
+//                }
+//                ptr = ptr->getParent();
+//            }
+//            if(facilityPtr)
+//            {
+//                uint64_t facilityId = facilityPtr->getId();
+//                QPointF pos = list.at(1).toPointF();
+//                //qDebug() << "parentId" << parentId << "pos size :" << areaMark.size() << ", slotMarkCreated, pol :" << areaMark;
+
+//                QString windowTitle(type == Mark::MT_LIFT ? QString::fromUtf8("Информация о лифте") : QString::fromUtf8("Информация о лестнице"));
+//                QString headerPixmap(type == Mark::MT_LIFT ? ":/img/lift_button.png" : ":/img/stairs_button.png");
+
+//                if( !_ifaceStairOrLiftWidget )
+//                {
+//                    _stairOrLiftForm = new StairOrLiftForm;
+//                    connect(_stairOrLiftForm, SIGNAL(signalCloseWindow()), this, SLOT(slotCloseStairOrLiftWindow()));
+//                    _stairOrLiftForm->createEntity(facilityId, type, pos);
+
+//                    _ifaceStairOrLiftWidget = new EmbIFaceNotifier(_stairOrLiftForm);
+//                    QString tag = QString("ViraStatusBar_StairOrLiftWidget");
+//                    quint64 widgetId = ewApp()->restoreWidget(tag, _ifaceStairOrLiftWidget);
+//                    if(0 == widgetId)
+//                    {
+//                        ew::EmbeddedWidgetStruct struc;
+//                        ew::EmbeddedHeaderStruct headStr;
+//                        headStr.hasCloseButton = false;
+//                        headStr.hasMinMaxButton = false;
+//                        headStr.hasCollapseButton = false;
+//                        headStr.headerPixmap = headerPixmap;
+//                        headStr.windowTitle = windowTitle;
+//                        struc.header = headStr;
+//                        struc.iface = _ifaceStairOrLiftWidget;
+//                        struc.widgetTag = tag;
+//                        struc.minSize = QSize(300,300);
+//                        struc.topOnHint = true;
+//                        struc.isModal = true;
+//                        ewApp()->createWidget(struc, _parentWidgetId);
+//                    }
+//                }
+//                else
+//                {
+//                    _stairOrLiftForm->createEntity(facilityId, type, pos); // _stairOrLiftForm->editEntity(facilityId, entityId);
+//                    ewApp()->setWidgetTitle(_ifaceStairOrLiftWidget->id(), windowTitle);
+//                    ewApp()->setWidgetIcon(_ifaceStairOrLiftWidget->id(), headerPixmap);
+//                    ewApp()->setVisible(_ifaceStairOrLiftWidget->id(), true);
+//                }
+//            }
+
+//        }break;
         }
     }
 }

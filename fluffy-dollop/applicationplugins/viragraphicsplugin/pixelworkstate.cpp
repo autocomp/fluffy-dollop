@@ -6,6 +6,7 @@
 #include "defectgraphicsitem.h"
 #include "fotographicsitem.h"
 #include "foto360graphicsitem.h"
+#include "placeholdergraphicsitem.h"
 #include <regionbiz/rb_entity_filter.h>
 #include <ctrcore/ctrcore/ctrconfig.h>
 #include <ctrcore/bus/common_message_notifier.h>
@@ -237,15 +238,13 @@ void PixelWorkState::slotAddObject(uint64_t id)
                 return;
             }
 
-            auto it = _itemsOnFloor.find(parentPtr->getId());
-            if(it == _itemsOnFloor.end())
-                return;
-
-
+//            auto it = _itemsOnFloor.find(parentPtr->getId());
+//            if(it == _itemsOnFloor.end())
+//                return;
 
             switch(markPtr->getMarkType())
             {
-            case Mark::MT_DEFECT : //if(mark_type_str == QString::fromUtf8("дефект"))
+            case Mark::MT_DEFECT :
             {
                 QPointF center = markPtr->getCenter();
                 DefectGraphicsItem * _defectGraphicsItem = new DefectGraphicsItem(markPtr->getId());
@@ -254,7 +253,7 @@ void PixelWorkState::slotAddObject(uint64_t id)
                 connect(_defectGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
                 _itemsOnFloor.insert(markPtr->getId(), _defectGraphicsItem);
             }break;
-            case Mark::MT_PHOTO : //else if(mark_type_str == QString::fromUtf8("фотография"))
+            case Mark::MT_PHOTO :
             {
                 QPointF center = markPtr->getCenter();
                 FotoGraphicsItem * _photoGraphicsItem = new FotoGraphicsItem(markPtr->getId());
@@ -263,7 +262,7 @@ void PixelWorkState::slotAddObject(uint64_t id)
                 connect(_photoGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
                 _itemsOnFloor.insert(markPtr->getId(), _photoGraphicsItem);
             }break;
-            case Mark::MT_PHOTO_3D : //else if(mark_type_str == QString::fromUtf8("панорамная фотография"))
+            case Mark::MT_PHOTO_3D :
             {
                 QPointF center = markPtr->getCenter();
                 Foto360GraphicsItem * _photo360GraphicsItem = new Foto360GraphicsItem(markPtr->getId());
@@ -271,6 +270,15 @@ void PixelWorkState::slotAddObject(uint64_t id)
                 _scene->addItem(_photo360GraphicsItem);
                 connect(_photo360GraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
                 _itemsOnFloor.insert(markPtr->getId(), _photo360GraphicsItem);
+            }break;
+            case Mark::MT_PLACEHOLDER :
+            {
+                QPointF center = markPtr->getCenter();
+                PlaceholderGraphicsItem * _placeholderGraphicsItem = new PlaceholderGraphicsItem(markPtr->getId());
+                _placeholderGraphicsItem->setPos(center);
+                _scene->addItem(_placeholderGraphicsItem);
+                connect(_placeholderGraphicsItem, SIGNAL(signalSelectItem(qulonglong,bool)), this, SLOT(slotSelectItem(qulonglong,bool)));
+                _itemsOnFloor.insert(markPtr->getId(), _placeholderGraphicsItem);
             }break;
             }
             insertItemToLayer(markPtr->getLayer(), markPtr->getId());
@@ -358,7 +366,7 @@ void PixelWorkState::slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_i
         BaseAreaPtr ptr = RegionBizManager::instance()->getBaseArea(curr_id);
         if(ptr)
         {
-            uint64_t facilityId(0);
+            uint64_t facilityId(0), floorId(0);
             switch(ptr->getType())
             {
             case BaseArea::AT_REGION :
@@ -371,11 +379,15 @@ void PixelWorkState::slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_i
             }break;
 
             case BaseArea::AT_FLOOR :
+                floorId = curr_id;
             case BaseArea::AT_ROOM :
             {
                 BaseAreaPtr parentPtr = ptr->getParent();
                 while(parentPtr)
                 {
+                    if(parentPtr->getType() == BaseArea::AT_FLOOR)
+                        floorId = parentPtr->getId();
+
                     if(parentPtr->getType() == BaseArea::AT_FACILITY)
                     {
                         facilityId = parentPtr->getId();
@@ -390,7 +402,7 @@ void PixelWorkState::slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_i
                 if(_currFacilityId != facilityId)
                 {
                     _currFacilityId = facilityId;
-                    reinit(facilityId);
+                    reinit(facilityId, floorId);
                     return;
                 }
         }
@@ -428,7 +440,7 @@ void PixelWorkState::slotSelectionItemsChanged(uint64_t prev_id, uint64_t curr_i
     }
 }
 
-void PixelWorkState::reinit(qulonglong facilityId)
+void PixelWorkState::reinit(qulonglong facilityId, qulonglong floorId)
 {
     foreach(QGraphicsItem * item, _itemsOnFloor)
         delete item;
@@ -467,7 +479,17 @@ void PixelWorkState::reinit(qulonglong facilityId)
                 _floorsMap.insert(++maxNumber, floorInfo);
 
             if(_floorsMap.isEmpty() == false)
+            {
+                if(floorId > 0)
+                    for(auto it = _floorsMap.begin(); it != _floorsMap.end(); ++it)
+                        if(it.value().id == floorId)
+                        {
+                            setFloor(floorId);
+                            return;
+                        }
+
                 setFloor(_floorsMap.begin().value().id);
+            }
         }
     }
 }
@@ -511,6 +533,7 @@ void PixelWorkState::setFloor(qulonglong floorId)
         }
 
         MarkPtrs marks_of_floor = floorPtr->getMarks();
+        qDebug() << "floorId:" << floorPtr->getId() << ", total marks:" << marks_of_floor.size();
         for( MarkPtr mark: marks_of_floor )
             if(markInArchive(mark) == false)
                 slotAddObject(mark->getId());
@@ -544,6 +567,7 @@ void PixelWorkState::setFloor(qulonglong floorId)
                 _itemsOnFloor.insert(room->getId(), areaGraphicsItem);
 
                 MarkPtrs marks_of_room = room->getMarks();
+                qDebug() << "roomId:" << room->getId() << ", total marks:" << marks_of_room.size();
                 for( MarkPtr mark: marks_of_room )
                     if(markInArchive(mark) == false)
                         slotAddObject(mark->getId());

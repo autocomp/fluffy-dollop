@@ -15,7 +15,7 @@ FotoGraphicsItem::FotoGraphicsItem(qulonglong id)
     : _id(id)
 {
     setPixmap(QPixmap(":/img/foto.png"));
-    setOffset(-25, -22);
+    setOffset(-pixmap().width()/2., -pixmap().height()/2.);
 
     setFlag(QGraphicsItem::ItemIsSelectable, false);
     setFlag(QGraphicsItem::ItemIsMovable, false);

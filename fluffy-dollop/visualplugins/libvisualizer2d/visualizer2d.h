@@ -17,6 +17,7 @@
 #include <QStackedWidget>
 #include <QSplitter>
 #include <QVBoxLayout>
+#include <QMenu>
 #include <ctrcore/provider/rasterdataprovider.h>
 
 class ViraVisualizer2dForm;
@@ -118,6 +119,7 @@ private:
     QPointF m_centerScenePos;
     VisualizerControlPanel *vcp = nullptr;
     ViraVisualizer2dForm * m_ViraVisualizer2dForm = nullptr;
+    QMenu * _menu = nullptr;
 
     QString getDefaultXml();
     void getTmsXmlData(const QByteArray& byteArray, QList<TmsXmlData>& tmsDataList);

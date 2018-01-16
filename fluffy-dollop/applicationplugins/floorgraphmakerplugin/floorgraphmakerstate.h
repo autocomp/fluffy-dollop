@@ -49,12 +49,15 @@ public:
     void edgeStateChanged(EdgeProperty property);
 
 signals:
+    void signalPressCtr_1();
+    void signalPressCtr_2();
+    void signalPressCtr_3();
 
 private slots:
     void slotRemoveElement(uint);
     void showElementPropertyForm();
     void slotSetEdgeProperty(uint edgeId, EdgeProperty property);
-//    void slotElementFormClose();
+    void slotElementFormClose();
     void slotEdgeStateChanged(uint elementId, EdgeProperty property);
     void slotRemoveElementFromForm(uint elementId);
 

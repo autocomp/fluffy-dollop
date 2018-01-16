@@ -18,7 +18,8 @@ LIBS += -L$${INSTALL_PATH_LIB} \
         -lctrvisual \
         -lctrwidgets \
         -lregionbiz \
-        -lembeddedwidgets
+        -lembeddedwidgets \
+        -lpanini
 
 HEADERS += \
     virainfoplugin.h \
@@ -30,7 +31,8 @@ HEADERS += \
     pixmaplistwidget.h \
     filter_form.h \
     imageviewer.h \
-    photo360form.h
+    photo360form.h \
+    stairorliftform.h
 
 SOURCES += \
     virainfoplugin.cpp \
@@ -42,7 +44,8 @@ SOURCES += \
     pixmaplistwidget.cpp \
     filter_form.cpp \
     imageviewer.cpp \
-    photo360form.cpp
+    photo360form.cpp \
+    stairorliftform.cpp
 
 RESOURCES += \
     virainfopluginres.qrc
@@ -53,7 +56,8 @@ FORMS += \
     markform.ui \
     infoform.ui \
     filter_form.ui \
-    photo360form.ui
+    photo360form.ui \
+    stairorliftform.ui
 
 
 

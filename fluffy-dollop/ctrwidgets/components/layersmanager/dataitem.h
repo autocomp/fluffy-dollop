@@ -15,7 +15,7 @@ namespace layers_manager_form
 class LayerItem : public QTreeWidgetItem
 {
 public:
-    LayerItem(QTreeWidget * parentItem, LayerTypes layerType);           //! for base & etalon layers only !!!
+    LayerItem(QTreeWidget * parentItem, LayerTypes layerType);           //! for base/etalon/toposcheme layers only !!!
     LayerItem(QTreeWidget * parentItem, QString name, uint64_t layerId);  //! for other layers !!!
     uint64_t getLayerId();
     LayerTypes getLayerType();

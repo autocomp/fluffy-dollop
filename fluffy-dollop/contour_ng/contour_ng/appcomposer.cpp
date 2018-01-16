@@ -94,14 +94,16 @@ AppComposer::~AppComposer()
 
 void AppComposer::init()
 {
-    m_applicationName = QString::fromUtf8("Контур"); // Vira");
-
+    m_applicationName = QString::fromUtf8("Контур");
     /* создаем главное окно приложения*/
 
     QMenuBar* mn= createMenuBar();
+    mn->addAction("asfasfasf");
+    mn->addAction("asfasfasf");
+    mn->addMenu(new QMenu("1234"));
     QWidget *bottombar = createBottomBar();
 
-    mainWindowId = ewApp()->restoreMainWidget("MainWindow",mn,bottombar);
+    mainWindowId = ewApp()->restoreMainWidget("MainWindow", mn, bottombar);
     if(0 == mainWindowId)
     {
         ew::EmbeddedMainWindowStruct mainStr;
@@ -302,6 +304,11 @@ void AppComposer::init()
 //            ((ScenarioMainWidget *)m_pScenarioSelector->getOpenScenarioWidget())->slotOpenContext(lastScenarioId);
 //    }
 
+    QShortcut * undoShortcut = new QShortcut(m_menuBar);
+    undoShortcut->setKey(QKeySequence(QKeySequence::Undo));
+    undoShortcut->setContext(Qt::ApplicationShortcut);
+    connect(undoShortcut, SIGNAL(activated()), undo_actions::UndoController::instance(), SLOT(undoAction()));
+
     TempDirController::checkTempDirForAllUsers();
 }
 
@@ -384,7 +391,7 @@ void AppComposer::slotSavedWidgetLoaded(QString widgetTag, QVariantMap widgetMet
 
 QMenuBar* AppComposer::createMenuBar()
 {
-    QMenuBar * m_menuBar   = new QMenuBar()  ;        // Создали меню
+      m_menuBar  = new QMenuBar()  ;        // Создали меню
 //    QMenu * m_fileMenu = new QMenu(tr("Scenario"),m_menuBar);
 //    m_pCreateAct = m_fileMenu->addAction(QIcon(":/pic/066_icons_32_create.png"), tr("Create Scenario..."),this, SLOT(slotMainMenuClicked()), QKeySequence("Ctrl+N"));
 //    m_pShowAct = m_fileMenu->addAction(QIcon(":/pic/067_icons_32_open.png"), tr("Open Scenario..."),this, SLOT(slotMainMenuClicked()), QKeySequence("Ctrl+O"));
@@ -401,10 +408,10 @@ QMenuBar* AppComposer::createMenuBar()
 //    m_p3DAct = 0;//m_viewMenu->addAction(QIcon(":/2_3d-editor.png"), tr("Open 3D"),this, SLOT(slotMainMenuClicked()));
 //    m_menuBar->addMenu(m_viewMenu);
 
-//    QMenu * quest = m_menuBar->addMenu(tr("Settings"));
-//    m_pAppSettings = quest->addAction(QIcon(":/295_settings_manager.png"), tr("Application settings"),this, SLOT(slotMainMenuClicked()));
+    QMenu * quest = m_menuBar->addMenu(QString::fromUtf8("Настройки"));
+    m_pAppSettings = quest->addAction(QIcon(":/295_settings_manager.png"), tr("Application settings"),this, SLOT(slotMainMenuClicked()));
 //    //m_pStyleDebug = quest->addAction(QIcon(":/27_open.png"), tr("Debug stylesheet"),this, SLOT(slotMainMenuClicked()));
-//    m_menuBar->addMenu(quest);
+    m_menuBar->addMenu(quest);
 
 //    QMenu * manuals = m_menuBar->addMenu(tr("Help"));
 //    m_pManuals = manuals->addAction(QIcon(":/188_users_manual.png"), tr("Help..."),this, SLOT(slotMainMenuClicked()));
@@ -428,11 +435,6 @@ QMenuBar* AppComposer::createMenuBar()
 //        (dynamic_cast<CtrAppVisualizerPlugin*>(plugin))->initPluginInterface();
 //        addPluginToMenu(dynamic_cast<CtrAppVisualizerPlugin*>(plugin), quest);
 //    }
-
-    QShortcut * undoShortcut = new QShortcut(m_menuBar);
-    undoShortcut->setKey(QKeySequence(QKeySequence::Undo));
-    undoShortcut->setContext(Qt::ApplicationShortcut);
-    connect(undoShortcut, SIGNAL(activated()), undo_actions::UndoController::instance(), SLOT(undoAction()));
 
     return m_menuBar;
 }

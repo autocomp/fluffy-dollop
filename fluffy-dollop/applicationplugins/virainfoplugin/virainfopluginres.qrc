@@ -18,5 +18,9 @@
         <file>img/image_perf_size.png</file>
         <file>img/foto360_button.png</file>
         <file>img/foto_button.png</file>
+        <file>img/stairs_button.png</file>
+        <file>img/lift_button.png</file>
+        <file>img/placeholder_button.png</file>
+        <file>img/reload.png</file>
     </qresource>
 </RCC>

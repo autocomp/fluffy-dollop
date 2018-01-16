@@ -3,6 +3,7 @@ CONFIG   += ordered debug
 
 
 SUBDIRS = \
+    libpanini \
     dmanager \
     qtxlsx  \
     qftp \
